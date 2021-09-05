@@ -4,14 +4,16 @@ from app.main.utils import date_util
 from app.main.stock import stock_kline
 
 
-def sync_day_level(code, name, time_window=60):
+def sync_day_level(code, base_time = None,time_window=60):
     """
     同步60天内的数据
     :param code:
     :return:
     """
     point = k_line_dao.get_oldest_k_line(code)
-    now = datetime.now()
+
+    if base_time is None:
+        now = datetime.now()
 
     if len(point) == 0:
         before = now - timedelta(days=time_window)
@@ -21,8 +23,13 @@ def sync_day_level(code, name, time_window=60):
     if date_util.get_days_between(now, before) <= 0:
         return None
 
+    if (before.hour >=15):
+        start = before + timedelta(days=1)
+    else:
+        start = before
+
     df = stock_kline.fetch_kline_data(code,
-                                      date_util.dt_to_str(before),
+                                      date_util.dt_to_str(start),
                                       date_util.dt_to_str(now), 'qfq')
     data = df.to_dict(orient='records')
     k_line_dao.dump_k_line(data)

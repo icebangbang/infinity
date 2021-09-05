@@ -8,6 +8,12 @@ log.info("开始获取概念列表")
 concepts = stock_concept.get_all_concept()
 log.info("总共有{}个概念".format(len(concepts)))
 
+myclient = pymongo.MongoClient("mongodb://admin:123456@101.37.24.40:20017/")
+mydb = myclient["stock"]
+stock_detail = mydb["stock_detail"]
+stock_detail.remove()
+
+
 for stock in stock_list:
     stock['concept'] = list()
 
@@ -26,12 +32,9 @@ for index,concept in enumerate(concepts):
         else:
             log.info("{}不在字典内".format(mapping['代码']))
 
-myclient = pymongo.MongoClient("mongodb://localhost:27017/")
-mydb = myclient["stock"]
-stock_detail = mydb["stock_detail"]
+
 
 # 清空
-# stock_detail.remove()
 
 x = stock_detail.insert_many(stock_dict.values())
 print(x.inserted_ids)
