@@ -2,24 +2,23 @@ from backtrader.feeds.pandafeed import PandasData
 from app.main.stock.sub_startegy import SubST
 from app.main.stock.company import Company
 import backtrader as bt
+from app.main.stock.ind.kdj import KDJ
+import logging
 
 
 class KdjGolden(SubST):
     """
     kdj金叉策略
     """
+    ind_name = "kdj_golden"
 
     def __init__(self, period=5, match_num=5):
         """
         :param period: 均线周期
         :param match_num:
         """
-        ind_sma_name = "ind_sma{}"
-        sma_x_count = "sma{}_up_count"
         self.period = period
 
-        self.ind_sma_name = ind_sma_name.format(period)
-        self.sma_x_count = sma_x_count.format(period)
         self.match_num = match_num
 
     def init_ind(self, data: PandasData, company: Company):
@@ -27,22 +26,27 @@ class KdjGolden(SubST):
         初始化指标
         :return:
         """
-        company.set(self.ind_sma_name, bt.indicators.SimpleMovingAverage(
-            data, period=5))
+
+        company.set(self.ind_name, KDJ(data))
+        company.set("kdj_hit", False)
 
     def next(self, data: PandasData, comp: Company):
         """
         n日线策略进行筛选
         :return:
         """
+        logging.info(data.datetime.date(0))
         day = data.buflen() - len(data)
-        if day >= 5: return  # 只考虑5交易日内的数据
+        if day >= 3: return  # 只考虑5交易日内的数据
 
-        count = comp.get(self.sma_x_count, 0)
-        if data.close[0] > comp.get(self.ind_sma_name)[0]:
-            count = count + 1
+        kdj = comp.get(self.ind_name)
+        K_0 = kdj.K[0]
+        D_0 = kdj.D[0]
+        K_1 = kdj.K[-1]
+        D_1 = kdj.D[-1]
 
-        comp.sma5_up_count = count
+        if K_1 < D_1 and K_0 >= D_0:
+            comp.kdj_hit = True
 
     def match_condition(self, comp: Company):
         """
@@ -50,4 +54,4 @@ class KdjGolden(SubST):
         :param comp:
         :return:
         """
-        return comp.get(self.sma_x_count) >= self.match_num
+        return comp.kdj_hit

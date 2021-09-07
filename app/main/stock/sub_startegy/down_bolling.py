@@ -1,17 +1,17 @@
 from backtrader.feeds.pandafeed import PandasData
 from app.main.stock.sub_startegy import SubST
 from app.main.stock.company import Company
-import backtrader as bt
+from app.main.stock.ind.bollinger import BollingerBands
 from app.main.stock.ind.bollinger import BollingerBandsWidth
 import logging
 
 
-class BollingWidth(SubST):
+class DownBolling(SubST):
     """
-    均线筛选策略
+    boll轨道下轨策略
     """
-    bolling = "bolling"
-    bolling_width = "bolling_width"
+    ind_name = "down_bolling"
+    hit_result = "down_bolling_hit"
 
     def __init__(self, period=5, match_num=5):
         """
@@ -28,17 +28,22 @@ class BollingWidth(SubST):
         初始化指标
         :return:
         """
-        company.set(self.bolling_width, BollingerBandsWidth())
-
+        company.set(self.ind_name, BollingerBands(data))
+        company.set(self.hit_result, False)
 
     def next(self, data: PandasData, comp: Company):
         """
         n日线策略进行筛选
         :return:
         """
-        width = comp.bolling_width.width[0]
+        day = data.buflen() - len(data)
+        if day >= 3: return  # 只考虑5交易日内的数据
 
-        logging.debug("{},{}".format(data.datetime.date(0),width))
+        ind: BollingerBands = comp.get(self.ind_name)
+
+        # 处于中轨和下轨之间
+        if data.close[0] > ind.bot[0] and data.close[0] < ind.mid[0]:
+            comp.set(self.hit_result, True)
 
     def match_condition(self, comp: Company):
         """
@@ -46,4 +51,4 @@ class BollingWidth(SubST):
         :param comp:
         :return:
         """
-        return True
+        return comp.get(self.hit_result)

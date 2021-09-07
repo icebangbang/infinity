@@ -7,7 +7,8 @@ def stock_zh_a_hist(
         start_date: str = "19700101",
         end_date: str = "22220101",
         adjust: str = "",
-        klt: str = "101"
+        klt: str = "101",
+        code_id_dict=None
 ) -> pd.DataFrame:
     """
     东方财富网-行情首页-上证 A 股-每日行情
@@ -23,7 +24,8 @@ def stock_zh_a_hist(
     :return: 每日行情
     :rtype: pandas.DataFrame
     """
-    code_id_dict = _code_id_map()
+    if code_id_dict is None:
+        code_id_dict = _code_id_map()
     adjust_dict = {"qfq": "1", "hfq": "2", "": "0"}
     url = "http://push2his.eastmoney.com/api/qt/stock/kline/get"
     params = {
@@ -150,9 +152,9 @@ def stock_ind(symbol, code_id_dict=None):
         "staticPERation",
         "RollingPERations"
     ]
-    df.loc[df["staticPERation"] == '-',["staticPERation"]] = 0
-    df.loc[df["PERation"] == '-',["PERation"]] = 0
-    df.loc[df["RollingPERations"] == '-',["RollingPERations"]] = 0
+    df.loc[df["staticPERation"] == '-', ["staticPERation"]] = 0
+    df.loc[df["PERation"] == '-', ["PERation"]] = 0
+    df.loc[df["RollingPERations"] == '-', ["RollingPERations"]] = 0
     df = df.astype(
         {
             "MarketValue": float,

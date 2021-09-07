@@ -60,6 +60,7 @@ class BollingerBands(Indicator):
         self.lines.mid = ma = self.p.movav(self.data, period=self.p.period)
         stddev = self.p.devfactor * SampleStandardDeviation(self.data, ma, period=self.p.period,
                                                             movav=self.p.movav)
+        self.stddev = stddev
         self.lines.top = ma + stddev
         self.lines.bot = ma - stddev
 

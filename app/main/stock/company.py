@@ -2,6 +2,7 @@ from typing import Tuple, List, Dict
 from app.main.stock.sub_startegy import SubST
 from backtrader.feeds.pandafeed import PandasData
 import logging
+import json
 
 
 class Company:
@@ -42,6 +43,7 @@ class Company:
     def macth_condition(self) -> bool:
         logging.info(self.code)
         result = [st.match_condition(self) for st in self.sub_st_list]
+        logging.info(json.dumps(result))
         return all(result)
 
     def __str__(self):
