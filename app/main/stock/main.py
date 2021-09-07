@@ -1,4 +1,5 @@
-from app.main.stock import stock_info, stock_concept
+from app.main.stock import stock_concept
+from app.main.stock.api import stock_info
 import logging as log
 import pymongo
 

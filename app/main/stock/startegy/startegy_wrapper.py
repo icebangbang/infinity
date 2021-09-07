@@ -2,9 +2,10 @@ import backtrader as bt
 import logging
 from app.main.stock.company import CompanyGroup,Company
 from app.main.stock.sub_startegy.up_sma import UpSma
+from app.main.stock.sub_startegy.bolling_width import BollingWidth
 
 
-class Sma5Startegy(bt.Strategy):
+class StrategyWrapper(bt.Strategy):
 
     def log(self, txt, dt=None):
         ''' Logging function fot this strategy'''
@@ -18,7 +19,9 @@ class Sma5Startegy(bt.Strategy):
             code = d._name
             logging.info("init {}".format(code))
             company = Company(code,
-                        UpSma(period=5, match_num=5))
+                              BollingWidth(),
+                        UpSma(period=5, match_num=5)
+                              )
             company_group.add_company(company)
 
             company:Company = company_group.get_company(code)

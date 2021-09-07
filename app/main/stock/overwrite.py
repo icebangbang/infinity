@@ -119,3 +119,52 @@ def _code_id_map() -> dict:
     temp_df_sz["sz_id"] = 0
     code_id_dict.update(dict(zip(temp_df_sz["f12"], temp_df_sz["sz_id"])))
     return code_id_dict
+
+
+def stock_ind(symbol, code_id_dict=None):
+    """
+    MarketValue f116,市值
+    PERation f162,市盈率(动),动态市盈率，总市值除以全年预估净利润，例如当前一季度净利润1000万，则预估全年净利润4000万
+    staticPERation f163,静态市盈率,静态市盈率，总市值除以上一年度净利润
+    RollingPERations f164,滚动市盈率 滚动市盈率，最新价除以最近4个季度的每股收益
+    :param symbol:
+    :return:
+    """
+    url = "http://push2his.eastmoney.com/api/qt/stock/get"
+    if code_id_dict is None:
+        code_id_dict = _code_id_map()
+    params = {
+        "ut": "fa5fd1943c7b386f172d6893dbfba10b",
+        "fltt": 2,
+        "invt": 2,
+        "fields": "f116,f117,f162,f163,f164",
+        "secid": f"{code_id_dict[symbol]}.{symbol}"
+    }
+    r = requests.get(url, params=params)
+    data_json = r.json()
+    df = pd.DataFrame([data_json["data"]])
+    df.columns = [
+        "MarketValue",
+        "flowCapitalValue",
+        "PERation",
+        "staticPERation",
+        "RollingPERations"
+    ]
+    df.loc[df["staticPERation"] == '-',["staticPERation"]] = 0
+    df.loc[df["PERation"] == '-',["PERation"]] = 0
+    df.loc[df["RollingPERations"] == '-',["RollingPERations"]] = 0
+    df = df.astype(
+        {
+            "MarketValue": float,
+            "flowCapitalValue": float,
+            "PERation": float,
+            "staticPERation": float,
+            "RollingPERations": float,
+        }
+    )
+    df['code'] = symbol
+    return df
+
+
+def code_id_map():
+    return _code_id_map()

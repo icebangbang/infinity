@@ -3,6 +3,7 @@ import json
 import pymongo
 import pandas as pd
 import logging as log
+import requests
 
 
 # concept = ak.stock_board_concept_name_ths()
@@ -29,3 +30,16 @@ def get_stock_list():
     total = pd.concat([sh_custom_df, sh_kc_custom_df, sz_custom_df], axis=0)
 
     return total.to_dict(orient='records')
+
+
+def get_stock_indicator(code, name):
+    log.info("开始获取 {},{} 个股指标".format(code, name))
+    resp = requests.get("https://stock.9fzt.com/index/sz_300763.html?from=BaiduAladdin")
+    body = resp.text
+
+def get_all_stock():
+    df = ak.stock_a_lg_indicator(stock="all")
+    return df.to_dict(orient='records')
+
+if __name__ == "__main__":
+    get_stock_indicator("","")

@@ -3,18 +3,19 @@ import backtrader.feeds as btfeeds  # 导入数据模块
 from datetime import datetime
 import pandas as pd
 import logging
-from app.main.stock.startegy.sma_startegy import Sma5Startegy
+from app.main.stock.startegy.startegy_wrapper import StrategyWrapper
+from app.main.stock.startegy.ind_test_strategy import IndTestStrategy
 from app.main.stock.sub_startegy.up_sma import UpSma
 from app.main.stock.company import Company, CompanyGroup
 
 from app.main.stock.dao import k_line_dao
 
-from_date = datetime(2021, 8, 1)
-to_date = datetime(2021, 9, 3)
+from_date = datetime(2021, 7, 1)
+to_date = datetime(2021, 9, 6)
 cerebro = bt.Cerebro()
 
-daily_price = pd.DataFrame(k_line_dao.get_k_line_data(from_date, to_date))
-# daily_price = pd.DataFrame(k_line_dao.get_k_line_by_code(['301052'], from_date, to_date))
+# daily_price = pd.DataFrame(k_line_dao.get_k_line_data(from_date, to_date))
+daily_price = pd.DataFrame(k_line_dao.get_k_line_by_code(['300763'], from_date, to_date))
 daily_price = daily_price.set_index("date", drop=False)
 
 count = 1
@@ -42,7 +43,8 @@ cerebro.broker.setcommission(commission=0.001)
 print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
 house = dict()
-cerebro.addstrategy(Sma5Startegy, company_group=company_group)
+# cerebro.addstrategy(IndTestStrategy, company_group=company_group)
+cerebro.addstrategy(IndTestStrategy)
 cerebro.run()
 
 matched = company_group.get_matched_company()
@@ -50,4 +52,4 @@ matched = company_group.get_matched_company()
 
 print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
-# cerebro.plot()
+cerebro.plot()
