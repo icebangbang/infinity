@@ -58,6 +58,36 @@ def get_kline_of_stock(code,latest_valid_day,time_window=60):
     if date_util.get_days_between(now, before) <= 0:
         return None
 
+def sync_concept_k_line(name, base_time = None,time_window=60):
+    """
+    同步60天内的数据
+    :param code:
+    :return:
+    """
+    point = k_line_dao.get_concept_oldest_k_line(name)
+
+    if base_time is None:
+        now = datetime.now()
+
+    if len(point) == 0:
+        before = now - timedelta(days=time_window)
+    else:
+        before = point[0]['create_time']
+
+    if date_util.get_days_between(now, before) <= 0:
+        return None
+
+    if (before.hour >=15):
+        start = before + timedelta(days=1)
+    else:
+        start = before
+
+    df = k_line_dao.get_concept_k_line_data(name,
+                                      date_util.dt_to_str(start),
+                                      date_util.dt_to_str(now))
+    data = df.to_dict(orient='records')
+    k_line_dao.dump_concept_k_line(data)
+    return data
 
 if __name__ == "__main__":
     a = sync_day_level("300763", "xx")

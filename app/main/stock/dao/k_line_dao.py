@@ -1,6 +1,8 @@
 from app.main.db.mongo import db
 from datetime import datetime
 from typing import List
+import pandas as pd
+import akshare as ak
 
 
 def get_oldest_k_line(code, level='day'):
@@ -9,9 +11,24 @@ def get_oldest_k_line(code, level='day'):
 
     return list(my_set.find({"code": code}).sort("date", -1).limit(1))
 
+def get_concept_oldest_k_line(name):
+    db_name = "concept_k_line"
+    my_set = db[db_name]
+
+    return list(my_set.find({"name": name}).sort("date", -1).limit(1))
+
 
 def dump_k_line(data, level='day'):
     db_name = "k_line_" + level
+    my_set = db[db_name]
+
+    if len(data) == 0:
+        return
+
+    return my_set.insert(data)
+
+def dump_concept_k_line(data, level='day'):
+    db_name = "concept_k_line"
     my_set = db[db_name]
 
     if len(data) == 0:
@@ -59,6 +76,33 @@ def get_k_line_data(
         .find({"date": {"$lte": end_day, "$gte": start_day}})\
         .sort("date", 1)
     return list(query)
+
+
+def get_concept_k_line_data(
+        name,
+        start_day: datetime,
+        end_day: datetime,
+        ) -> List:
+    """
+    获取特定时间的股票走势
+    :param start_day:
+    :param end_day:
+    :param level:
+    :return:
+    """
+    data = \
+        ak.stock_board_concept_hist_em(
+            symbol=name,
+            beg=start_day,
+            end=end_day)
+    data = pd.DataFrame(data[['日期', '开盘', '收盘', '最高', '最低', '成交量']])
+    data.columns = ['date', 'open', 'close', 'high', 'low', 'volume']
+    data['name'] = str(name)
+    data['date'] = pd.to_datetime(data['date'], format='%Y-%m-%d')
+    data['create_time'] = datetime.now()
+    return data
+
+
 
 
 if __name__ == "__main__":
