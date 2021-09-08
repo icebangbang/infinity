@@ -4,6 +4,8 @@ from app.main.stock.company import CompanyGroup, Company
 from app.main.stock.sub_startegy.up_sma import UpSma
 from app.main.stock.sub_startegy.down_bolling import DownBolling
 from app.main.stock.sub_startegy.kdj_golden import KdjGolden
+from app.main.stock.sub_startegy.heavy_vol import HeavyVol
+from app.main.stock.sub_startegy.bolling_width import BollingWidth
 
 
 class StrategyWrapper(bt.Strategy):
@@ -20,8 +22,10 @@ class StrategyWrapper(bt.Strategy):
             code = d._name
             logging.info("init {}".format(code))
             company = Company(code,
-                              DownBolling(),
-                              KdjGolden())
+                              HeavyVol(),
+                              KdjGolden(),
+                              BollingWidth()
+                              )
             company_group.add_company(company)
 
             company: Company = company_group.get_company(code)

@@ -43,7 +43,6 @@ def run(from_date, to_date, codes):
     cerebro.broker.setcommission(commission=0.001)
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
-    house = dict()
     cerebro.addstrategy(StrategyWrapper, company_group=company_group)
     cerebro.run()
 
@@ -57,8 +56,8 @@ def run(from_date, to_date, codes):
 
 
 from_date = datetime(2021, 8, 1)
-to_date = datetime(2021, 9, 7)
-# codes = ["600619","600618"]
+to_date = datetime(2021, 9, 8)
+# codes = ["600725"]
 codes = []
 
 run(from_date, to_date, codes)

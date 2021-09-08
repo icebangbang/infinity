@@ -1,5 +1,6 @@
 import backtrader as bt
 from app.main.stock.ind.kdj import KDJ
+from app.main.stock.ind.bollinger import BollingerBandsWidth
 
 class IndTestStrategy(bt.Strategy):
     params = (
@@ -20,7 +21,8 @@ class IndTestStrategy(bt.Strategy):
         self.buyprice = None
         self.buycomm = None
         # Add a MovingAverageSimple indicator
-        self.kdj = KDJ()
+        # self.kdj = KDJ()
+        # self.boll_width = BollingerBandsWidth()
 
         # Indicators for the plotting show
         # bt.indicators.ExponentialMovingAverage(self.datas[0], period=25)
@@ -33,5 +35,12 @@ class IndTestStrategy(bt.Strategy):
         # bt.indicators.ATR(self.datas[0], plot=False)
 
     def next(self):
-        self.log("{},{},{}".format(self.kdj.K[0],self.kdj.D[0],self.kdj.J[0]))
+        # self.log("{},{},{}".format(self.kdj.K[0],self.kdj.D[0],self.kdj.J[0]))
+        # self.log("{} {} {} {}".format(self.boll_width.mid[0],
+        #                               self.boll_width.top[0],
+        #                               self.boll_width.bot[0],
+        #                               self.boll_width.width[0]))
+
+        print('%s' %
+              (self.sar[0]))
 

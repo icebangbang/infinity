@@ -55,4 +55,4 @@ def publish(days=10,slice=30):
     for i in bot:
         print("{} {} {}".format(i['code'], i['name'], i['rise']))
 
-publish(5,30)
+publish(2,30)

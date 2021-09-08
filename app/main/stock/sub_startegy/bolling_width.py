@@ -11,7 +11,7 @@ class BollingWidth(SubST):
     均线筛选策略
     """
     bolling = "bolling"
-    bolling_width = "bolling_width"
+    bolling_width = "bolling_width_ind"
 
     def __init__(self, period=5, match_num=5):
         """
@@ -29,6 +29,7 @@ class BollingWidth(SubST):
         :return:
         """
         company.set(self.bolling_width, BollingerBandsWidth())
+        company.set("width_change_hit", False)
 
 
     def next(self, data: PandasData, comp: Company):
@@ -36,9 +37,16 @@ class BollingWidth(SubST):
         n日线策略进行筛选
         :return:
         """
-        width = comp.bolling_width.width[0]
+        day = data.buflen() - len(data)
+        if day >= 1: return  # 最近一天
 
-        logging.debug("{},{}".format(data.datetime.date(0),width))
+        width_0 = comp.get('bolling_width_ind').width[0]
+        width_loss_1 = comp.get('bolling_width_ind').width[-1]
+        pct = (width_0 - width_loss_1) / width_loss_1
+        if pct >= 0.25:
+            comp.set("width_change_hit", True)
+            comp.set("boll_width", pct)
+
 
     def match_condition(self, comp: Company):
         """
@@ -46,4 +54,4 @@ class BollingWidth(SubST):
         :param comp:
         :return:
         """
-        return True
+        return comp.get("width_change_hit")

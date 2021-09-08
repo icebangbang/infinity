@@ -7,12 +7,12 @@ from app.main.stock.startegy.ind_test_strategy import IndTestStrategy
 
 from app.main.stock.dao import k_line_dao
 
-from_date = datetime(2021, 7, 1)
+from_date = datetime(2021, 6, 1)
 to_date = datetime(2021, 9, 6)
 cerebro = bt.Cerebro()
 
 # daily_price = pd.DataFrame(k_line_dao.get_k_line_data(from_date, to_date))
-daily_price = pd.DataFrame(k_line_dao.get_k_line_by_code(['300763'], from_date, to_date))
+daily_price = pd.DataFrame(k_line_dao.get_k_line_by_code(['300809'], from_date, to_date))
 daily_price = daily_price.set_index("date", drop=False)
 
 count = 1
@@ -44,4 +44,4 @@ cerebro.run()
 
 print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
-cerebro.plot()
+# cerebro.plot()
