@@ -77,6 +77,25 @@ def get_k_line_data(
         .sort("date", 1)
     return list(query)
 
+def get_concept_k_line_data_from_db(
+        start_day: datetime,
+        end_day: datetime,
+        ) -> List:
+    """
+    获取特定时间的股票走势
+    :param start_day:
+    :param end_day:
+    :param level:
+    :return:
+    """
+    db_name = 'concept_k_line'
+    my_set = db[db_name]
+
+    query = my_set\
+        .find({"date": {"$lte": end_day, "$gte": start_day}})\
+        .sort("date", 1)
+    return list(query)
+
 
 def get_concept_k_line_data(
         name,

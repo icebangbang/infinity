@@ -10,20 +10,30 @@ from app.main.stock.company import Company, CompanyGroup
 from app.main.stock.dao import k_line_dao
 
 
-def run(from_date, to_date, codes):
+def run(from_date, to_date, codes=None,concept_names=None,sub_st=None,**kwargs):
     cerebro = bt.Cerebro()
-    if codes is None or len(codes) == 0:
-        daily_price = pd.DataFrame(k_line_dao.get_k_line_data(from_date, to_date))
-    else:
-        daily_price = pd.DataFrame(k_line_dao.get_k_line_by_code(codes, from_date, to_date))
+
+    if codes is not None:
+        key="code"
+        if len(codes) == 0:
+            daily_price = pd.DataFrame(k_line_dao.get_k_line_data(from_date, to_date))
+        else:
+            daily_price = pd.DataFrame(k_line_dao.get_k_line_by_code(codes, from_date, to_date))
+    if concept_names is not None:
+        key = "name"
+        if len(concept_names) == 0:
+            daily_price = pd.DataFrame(k_line_dao.get_concept_k_line_data_from_db(from_date, to_date))
+        else:
+            return
+
     daily_price = daily_price.set_index("date", drop=False)
 
     count = 1
     company_group = CompanyGroup()
 
-    for code in daily_price['code'].unique():
+    for code in daily_price[key].unique():
         # if count >=500 : continue
-        df = daily_price.query(f"code=='{code}'")[['open', 'high', 'low', 'close', 'volume']]
+        df = daily_price.query("{}=='{}'".format(key,code))[['open', 'high', 'low', 'close', 'volume']]
         if len(df) <= 5:
             logging.info("{} may not have sma5".format(code))
             continue
@@ -43,7 +53,7 @@ def run(from_date, to_date, codes):
     cerebro.broker.setcommission(commission=0.001)
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
-    cerebro.addstrategy(StrategyWrapper, company_group=company_group)
+    cerebro.addstrategy(StrategyWrapper, company_group=company_group,sub_st = sub_st,**kwargs)
     cerebro.run()
 
     matched_company = company_group.get_matched_company()
@@ -54,10 +64,10 @@ def run(from_date, to_date, codes):
 
     # cerebro.plot()
 
+if __name__ == "__main__":
+    from_date = datetime(2021, 8, 1)
+    to_date = datetime(2021, 9, 8)
+    # codes = ["600725"]
+    codes = []
 
-from_date = datetime(2021, 8, 1)
-to_date = datetime(2021, 9, 8)
-# codes = ["600725"]
-codes = []
-
-run(from_date, to_date, codes)
+    run(from_date, to_date, codes)
