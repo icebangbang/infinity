@@ -10,23 +10,8 @@ from app.main.stock.company import Company, CompanyGroup
 from app.main.stock.dao import k_line_dao
 
 
-def run(from_date, to_date, codes=None,concept_names=None,sub_st=None,**kwargs):
+def run(from_date, to_date,daily_price,key,sub_st=None,**kwargs):
     cerebro = bt.Cerebro()
-
-    if codes is not None:
-        key="code"
-        if len(codes) == 0:
-            daily_price = pd.DataFrame(k_line_dao.get_k_line_data(from_date, to_date))
-        else:
-            daily_price = pd.DataFrame(k_line_dao.get_k_line_by_code(codes, from_date, to_date))
-    if concept_names is not None:
-        key = "name"
-        if len(concept_names) == 0:
-            daily_price = pd.DataFrame(k_line_dao.get_concept_k_line_data_from_db(from_date, to_date))
-        else:
-            return
-
-    daily_price = daily_price.set_index("date", drop=False)
 
     count = 1
     company_group = CompanyGroup()

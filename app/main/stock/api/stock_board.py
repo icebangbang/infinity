@@ -3,7 +3,7 @@ import logging as log
 import time
 
 """
-同花顺概念相关
+东方财富概念和板块相关
 """
 
 # 获取所有概念

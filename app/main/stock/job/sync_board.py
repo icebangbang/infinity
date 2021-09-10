@@ -1,5 +1,4 @@
-from app.main.stock import stock_board
-from app.main.stock.api import stock_info
+from app.main.stock.api import stock_info, stock_board
 import logging as log
 import pymongo
 myclient = pymongo.MongoClient("mongodb://admin:123456@101.37.24.40:20017/")
@@ -29,7 +28,7 @@ for t in type_list:
         board_list.append(board_dict)
 
         log.info("正在获取:{} {}".format(label,str(index)))
-        mappings = stock_board.get_board_mapping(symbol_code =code )
+        mappings = stock_board.get_board_mapping(symbol_code =code)
         for mapping in mappings:
             if mapping['代码'] == '暂无成份股数据':
                 log.info("{} 暂无成分股数据".format(mapping['代码']))
