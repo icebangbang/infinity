@@ -58,7 +58,7 @@ def get_kline_of_stock(code,latest_valid_day,time_window=60):
     if date_util.get_days_between(now, before) <= 0:
         return None
 
-def sync_concept_k_line(name, base_time = None,time_window=60):
+def sync_concept_k_line(name, base_time = None,time_window=120):
     """
     同步60天内的数据
     :param code:

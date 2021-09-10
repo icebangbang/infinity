@@ -1,8 +1,11 @@
 import logging as log
-from app.main.stock.overwrite import stock_zh_a_hist
-from app.main.stock.overwrite import stock_ind
-from app.main.stock.overwrite import code_id_map
-from app.main.stock.overwrite import stock_board_concept_hist_em
+from app.main.stock.overwrite import stock_zh_a_hist,\
+    stock_ind,\
+    code_id_map,\
+    stock_board_concept_hist_em,\
+    stock_board_concept_name_em,\
+stock_board_concept_cons_em
+
 
 log.basicConfig(
     level=log.INFO,
@@ -14,3 +17,5 @@ akshare.stock_zh_a_hist = stock_zh_a_hist
 akshare.stock_ind = stock_ind
 akshare.code_id_map = code_id_map
 akshare.stock_board_concept_hist_em = stock_board_concept_hist_em
+akshare.stock_board_concept_name_em = stock_board_concept_name_em
+akshare.stock_board_concept_cons_em = stock_board_concept_cons_em
