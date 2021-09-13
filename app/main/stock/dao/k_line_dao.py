@@ -27,6 +27,11 @@ def dump_k_line(data, level='day'):
 
     return my_set.insert(data)
 
+def clear_k_line(level='week'):
+    db_name = "k_line_" + level
+    my_set = db[db_name]
+    my_set.delete_many({})
+
 def dump_board_k_line(data, level='day'):
     db_name = "board_k_line"
     my_set = db[db_name]
@@ -78,7 +83,7 @@ def get_k_line_data(
     return list(query)
 
 
-def get_concept_k_line_data(
+def get_board_k_line_data(
         name,
         start_day: datetime,
         end_day: datetime,

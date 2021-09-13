@@ -1,6 +1,11 @@
 from app.main.stock.api import stock_info, stock_board
 import logging as log
 import pymongo
+
+"""
+同步板块
+"""
+
 myclient = pymongo.MongoClient("mongodb://admin:123456@101.37.24.40:20017/")
 mydb = myclient["stock"]
 stock_detail = mydb["stock_detail"]

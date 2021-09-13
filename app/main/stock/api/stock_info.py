@@ -54,7 +54,7 @@ def get_zt_pool():
     return df,industry
 
 def get_best(origin,industry):
-    name = industry.iloc[[0,1]].industry
+    name = industry.iloc[0].industry
     selected = origin[origin['所属行业'] == name]
     codes = selected['代码'].to_list()
     details = stock_dao.get_stock_detail(codes)

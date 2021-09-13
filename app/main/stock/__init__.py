@@ -1,5 +1,5 @@
 import logging as log
-from app.main.stock.overwrite import stock_zh_a_hist,\
+from app.main.stock.api.overwrite import stock_zh_a_hist,\
     stock_ind,\
     code_id_map,\
     stock_board_concept_hist_em,\

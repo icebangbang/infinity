@@ -16,7 +16,7 @@ def fetch_kline_data(code, start_date, end_date, adjust, klt='101'):
                               code_id_dict=id_map)
     data = pd.DataFrame(data[['日期', '开盘', '收盘', '最高', '最低', '成交量']])
     data.columns = ['date', 'open', 'close', 'high', 'low', 'volume']
-    data['klt'] = "101"
+    data['klt'] = klt
     data['code'] = str(code)
     data['date'] = pd.to_datetime(data['date'], format='%Y-%m-%d')
     data['create_time'] = datetime.now()
@@ -24,6 +24,6 @@ def fetch_kline_data(code, start_date, end_date, adjust, klt='101'):
 
 
 if __name__ == '__main__':
-    a = fetch_kline_data('300763', '20210301', '20210903', 'qfq')
-    boll.get_boll(a)
+    a = fetch_kline_data('300763', '20210301', '20210909', 'qfq',klt="102")
+    # boll.get_boll(a)
     print(a)

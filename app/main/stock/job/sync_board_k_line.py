@@ -1,9 +1,11 @@
 import akshare as ak
-
-
 from app.main.stock.dao import stock_dao,board_dao
 from app.main.stock.service import sync_kline_service
 import logging
+
+"""
+同步板块k线数据
+"""
 
 boards = board_dao.get_all_board()
 # 获取最近一个交易日

@@ -4,6 +4,10 @@ import akshare as ak
 from app.main.stock.dao import stock_dao
 import logging
 
+"""
+同步公司各项指标
+"""
+
 stocks = stock_dao.get_all_stock()
 ind_set = db["stock_indicator"]
 ind_list = []

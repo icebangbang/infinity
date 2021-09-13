@@ -36,6 +36,21 @@ def sync_day_level(code, base_time=None, time_window=60):
     k_line_dao.dump_k_line(data)
     return data
 
+def sync_week_level(code, start):
+    """
+    同步周k数据
+    :param code:
+    :return:
+    """
+    now = date_util.get_friday_of_week()
+
+    df = stock_kline.fetch_kline_data(code,
+                                      date_util.dt_to_str(start),
+                                      date_util.dt_to_str(now), 'qfq')
+    data = df.to_dict(orient='records')
+    k_line_dao.dump_k_line(data,level="week")
+    return data
+
 
 def get_latest_valid_day():
     t = datetime.now()
@@ -85,16 +100,15 @@ def sync_board_k_line(name, base_time=None, time_window=120):
     else:
         start = before
 
-    df = k_line_dao.get_concept_k_line_data(name,
-                                            date_util.dt_to_str(start),
-                                            date_util.dt_to_str(now))
+    df = k_line_dao.get_board_k_line_data(name,
+                                          date_util.dt_to_str(start),
+                                          date_util.dt_to_str(now))
     data = df.to_dict(orient='records')
     k_line_dao.dump_board_k_line(data)
     return data
 
 
 def get_stock_k_line(from_date, to_date, codes=None):
-    key = "code"
     if codes is None:
         daily_price = pd.DataFrame(k_line_dao.get_k_line_data(from_date, to_date))
     else:
@@ -104,4 +118,4 @@ def get_stock_k_line(from_date, to_date, codes=None):
 
 
 if __name__ == "__main__":
-    a = sync_day_level("300763", "xx")
+    a = sync_week_level("300763", "xx")

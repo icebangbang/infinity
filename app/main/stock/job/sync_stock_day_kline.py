@@ -2,6 +2,10 @@ from app.main.stock.dao import stock_dao
 from app.main.stock.service import sync_kline_service
 import logging
 
+"""
+同步日k数据
+"""
+
 stocks = stock_dao.get_all_stock()
 # 获取最近一个交易日
 
