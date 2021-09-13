@@ -1,6 +1,6 @@
 from app.main.db.mongo import db
 from typing import List
-from  datetime import datetime
+from datetime import datetime
 
 
 def get_all_board():
@@ -20,10 +20,12 @@ def get_stock_bt_board(board) -> List[str]:
     code_list = detail['codes']
     return code_list
 
+
 def get_board_k_line_data_from_db(
         start_day: datetime,
         end_day: datetime,
-        ) -> List:
+        board_name: List
+) -> List:
     """
     获取特定时间的股票走势
     :param start_day:
@@ -34,10 +36,15 @@ def get_board_k_line_data_from_db(
     db_name = 'board_k_line'
     my_set = db[db_name]
 
-    query = my_set\
-        .find({"date": {"$lte": end_day, "$gte": start_day}})\
+    base = {"date": {"$lte": end_day, "$gte": start_day}}
+    if board_name is not None:
+        base["name"] = {"$in": board_name}
+
+    query = my_set \
+        .find(base) \
         .sort("date", 1)
     return list(query)
+
 
 if __name__ == "__main__":
     a = get_stock_bt_board("猪肉")

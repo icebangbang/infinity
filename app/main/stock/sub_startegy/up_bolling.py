@@ -13,14 +13,14 @@ class UpBolling(SubST):
     ind_name = "down_bolling"
     hit_result = "down_bolling_hit"
 
-    def __init__(self, period=5, match_num=5,**kwargs):
+    def __init__(self, period=5, match_num=5,**kwargs:dict):
         """
         :param period: 布林轨道宽度
         :param match_num:
         """
         pass
 
-        # self.period = period
+        self.period = kwargs.get("up_mid_bolling_period",1)
         # self.match_num = match_num
 
     def init_ind(self, data: PandasData, company: Company):
@@ -37,13 +37,15 @@ class UpBolling(SubST):
         :return:
         """
         day = data.buflen() - len(data)
-        if day >= 1: return  # 只考虑5交易日内的数据
+        if day >= self.period: return  # 只考虑5交易日内的数据
 
         ind: BollingerBands = comp.get(self.ind_name)
 
         # 处于中轨和下轨之间
         if data.close[-1] > ind.bot[-1] and data.close[-1] <= ind.mid[-1]:
             if data.close[0] < ind.top[0] and data.close[0] >= ind.mid[0]:
+                print(ind.bot.array)
+                print(ind.mid.array)
                 comp.set(self.hit_result, True)
 
     def match_condition(self, comp: Company):

@@ -10,7 +10,7 @@ from app.main.stock.company import Company, CompanyGroup
 from app.main.stock.dao import k_line_dao
 
 
-def run(from_date, to_date,daily_price,key,sub_st=None,**kwargs):
+def run(from_date, to_date, daily_price, key, sub_st=None, **kwargs):
     cerebro = bt.Cerebro()
 
     count = 1
@@ -18,7 +18,7 @@ def run(from_date, to_date,daily_price,key,sub_st=None,**kwargs):
 
     for code in daily_price[key].unique():
         # if count >=500 : continue
-        df = daily_price.query("{}=='{}'".format(key,code))[['open', 'high', 'low', 'close', 'volume']]
+        df = daily_price.query("{}=='{}'".format(key, code))[['open', 'high', 'low', 'close', 'volume']]
         if len(df) <= 5:
             logging.info("{} may not have sma5".format(code))
             continue
@@ -38,16 +38,17 @@ def run(from_date, to_date,daily_price,key,sub_st=None,**kwargs):
     cerebro.broker.setcommission(commission=0.001)
     print('Starting Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
-    cerebro.addstrategy(StrategyWrapper, company_group=company_group,sub_st = sub_st,**kwargs)
+    cerebro.addstrategy(StrategyWrapper, company_group=company_group, sub_st=sub_st, **kwargs)
     cerebro.run()
 
     matched_company = company_group.get_matched_company()
     # [k for k, v in house.items() if v['sma5_up_count'] >= 2]
-    print([str(matched) for matched in matched_company])
+    return [str(matched) for matched in matched_company]
 
-    print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
+    # print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
     # cerebro.plot()
+
 
 if __name__ == "__main__":
     from_date = datetime(2021, 8, 1)

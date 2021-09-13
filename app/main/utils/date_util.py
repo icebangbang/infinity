@@ -40,6 +40,14 @@ def get_friday_of_week():
 def is_weekend(t)->bool:
     return t.weekday() >= 5
 
+def get_work_day(now,offset):
+    new_offset = offset
+    for i in range(offset):
+        t = now - timedelta(days=i+1)
+        if is_weekend(t): new_offset=new_offset+1
+
+    return now-timedelta(days=new_offset),now
+
 
 if __name__ == "__main__":
     # d = parse_date_time("20210823212121", fmt="%Y%m%d%H%M%S")

@@ -14,4 +14,7 @@ def get_stock_detail(codes):
     return {data['code']: data for data in data_list}
 
 
-
+def get_stock_detail_list(codes):
+    my_set = db['stock_detail']
+    data_list = list(my_set.find({"code": {"$in": codes}}))
+    return data_list
