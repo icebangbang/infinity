@@ -33,3 +33,10 @@
 # plt.xlabel('$X$',fontsize=25)
 # plt.ylabel('$Y$',fontsize=25)
 # plt.show()
+
+if __name__ == "__main__":
+    import time
+    from datetime import datetime
+    t = time.strptime("93012",'%H%M%S')
+    t2 =datetime(2021,9,10,t.tm_hour,t.tm_min,t.tm_sec)
+    print(t2)

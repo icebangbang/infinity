@@ -5,6 +5,8 @@ import requests
 import pandas as pd
 
 from app.main.utils import date_util
+from datetime import datetime
+import time
 
 type_dict = {
     1: {"name": "顶级买单", "color": "red", "type": 'sl'},
@@ -41,8 +43,13 @@ type_dict = {
     8218: {"name": "向下缺口", "color": "green", "type": 'change'}
 }
 
+def parse_time(df,date:datetime):
+    t = time.strptime(str(df["time"]), '%H%M%S')
 
-def get_stock_changes(code, date, market):
+    return datetime(date.year, date.month, date.day,
+             t.tm_hour,t.tm_min,t.tm_sec)
+
+def get_stock_changes(code:str, date: datetime, market:int):
     """
     MarketValue f116,市值
     PERation f162,市盈率(动),动态市盈率，总市值除以全年预估净利润，例如当前一季度净利润1000万，则预估全年净利润4000万
@@ -79,8 +86,8 @@ def get_stock_changes(code, date, market):
         # 8194 大单卖出
     ]
     df['code'] = code
-    df['date'] = date_util.get_start_of_day(date)
-    print(dt_str)
+    df['date'] = df.apply(lambda a:
+                          parse_time(a,date),axis=1)
     df['type_name'] = df.apply(lambda a: type_dict[a['type']]['name'],axis=1)
 
     return df

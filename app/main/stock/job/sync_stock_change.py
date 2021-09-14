@@ -17,7 +17,7 @@ for index, stock in enumerate(stocks):
     belong = stock['belong']
     logging.info("{} {}".format(index, code))
 
-    for i in range(20):
+    for i in range(5):
         t = now - timedelta(days=i)
         if date_util.is_weekend(t): continue
         if now == t and t.hour < 15: continue
