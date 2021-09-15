@@ -12,13 +12,12 @@ to_date = datetime(2021, 9, 6)
 cerebro = bt.Cerebro()
 
 # daily_price = pd.DataFrame(k_line_dao.get_k_line_data(from_date, to_date))
-daily_price = pd.DataFrame(k_line_dao.get_k_line_by_code(['300809'], from_date, to_date))
+daily_price = pd.DataFrame(k_line_dao.get_k_line_by_code(['000586'], from_date, to_date))
 daily_price = daily_price.set_index("date", drop=False)
 
 count = 1
 
 for code in daily_price['code'].unique():
-    if count >= 1000: continue
     df = daily_price.query(f"code=='{code}'")[['open', 'high', 'low', 'close', 'volume']]
     if len(df) <= 5:
         logging.info("{} may not have sma5".format(code))

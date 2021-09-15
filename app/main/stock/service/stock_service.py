@@ -7,7 +7,7 @@ from app.main.stock.dao import stock_dao, k_line_dao
 from app.main.utils import date_util
 
 
-def publish(days=10, slice=30, code_list=None):
+def publish(days=10, slice=30, code_list=None,stock_map=None):
     now = date_util.get_start_of_day(datetime.now())
     start,now = date_util.get_work_day(now,offset=days)
 
@@ -68,11 +68,16 @@ def publish(days=10, slice=30, code_list=None):
 
     print("涨幅前{}是:".format(slice))
     for i in top:
-        print("{} {} {}".format(i['code'], i['name'], i['rise']))
+        print("{} {} {} {}".format(i['code'], i['name'], i['rise'],get_concepts(stock_map,i['code'])))
 
     print("跌幅前{}是:".format(slice))
     for i in bot:
-        print("{} {} {}".format(i['code'], i['name'], i['rise']))
+        print("{} {} {} {}".format(i['code'], i['name'], i['rise'],get_concepts(stock_map,i['code'])))
+
+def get_concepts(stock_map,code):
+    if code in stock_map.keys():
+        return stock_map[code]['board']
+    return ""
 
 if __name__ == "__main__":
     publish(2,10)

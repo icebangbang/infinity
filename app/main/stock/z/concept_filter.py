@@ -17,7 +17,7 @@ from app.main.stock.sub_startegy.k_type import DojiType
 concept_names = None
 from_date = datetime(2021, 8, 1)
 to_date = datetime(2021, 9, 13)
-data = board_service.get_concept_k_line(from_date, to_date,concept_names)
+data = board_service.get_board_k_line(from_date, to_date, concept_names)
 
 sub_st = [UpSma]
 kwargs = {"ma_period": 17,

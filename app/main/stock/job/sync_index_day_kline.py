@@ -3,7 +3,8 @@ from datetime import datetime
 
 from app.main.utils import date_util
 
-id_list = ["sh000001", "zs399001"]
+# 上证,深证,创业板
+id_list = ["sh000001", "zs399001", "zs399006"]
 
 # 删除数据
 stock_index_service.clear_index_data()

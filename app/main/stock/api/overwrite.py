@@ -43,6 +43,7 @@ def stock_zh_a_hist(
     r = requests.get(url, params=params)
     data_json = r.json()
     temp_df = pd.DataFrame([item.split(",") for item in data_json["data"]["klines"]])
+    if temp_df.empty: return None
     temp_df.columns = [
         "日期",
         "开盘",
@@ -172,7 +173,8 @@ def stock_ind(symbol, code_id_dict=None):
 def code_id_map():
     return _code_id_map()
 
-def stock_board_concept_hist_em(symbol: str = "数字货币", adjust: str = "qfq",beg="0",end="20500101") -> pd.DataFrame:
+
+def stock_board_concept_hist_em(symbol: str = "数字货币", adjust: str = "qfq", beg="0", end="20500101") -> pd.DataFrame:
     """
     东方财富-沪深板块-概念板块-历史行情
     http://quote.eastmoney.com/bk/90.BK0715.html
@@ -186,7 +188,7 @@ def stock_board_concept_hist_em(symbol: str = "数字货币", adjust: str = "qfq
     stock_board_concept_em_map = ak.stock_board_concept_name_em()
     stock_board_code = stock_board_concept_em_map[
         stock_board_concept_em_map["板块名称"] == symbol
-    ]["板块代码"].values[0]
+        ]["板块代码"].values[0]
     adjust_map = {"": "0", "qfq": "1", "hfq": "2"}
     url = "http://91.push2his.eastmoney.com/api/qt/stock/kline/get"
     params = {
@@ -245,7 +247,8 @@ def stock_board_concept_hist_em(symbol: str = "数字货币", adjust: str = "qfq
     temp_df["换手率"] = pd.to_numeric(temp_df["换手率"])
     return temp_df
 
-def stock_board_concept_hist_em(symbol: str = "数字货币", adjust: str = "qfq",beg="0",end="20500101") -> pd.DataFrame:
+
+def stock_board_concept_hist_em(symbol: str = "数字货币", adjust: str = "qfq", beg="0", end="20500101") -> pd.DataFrame:
     """
     东方财富-沪深板块-概念板块-历史行情
     http://quote.eastmoney.com/bk/90.BK0715.html
@@ -259,7 +262,7 @@ def stock_board_concept_hist_em(symbol: str = "数字货币", adjust: str = "qfq
     stock_board_concept_em_map = ak.stock_board_concept_name_em()
     stock_board_code = stock_board_concept_em_map[
         stock_board_concept_em_map["板块名称"] == symbol
-    ]["板块代码"].values[0]
+        ]["板块代码"].values[0]
     adjust_map = {"": "0", "qfq": "1", "hfq": "2"}
     url = "http://91.push2his.eastmoney.com/api/qt/stock/kline/get"
     params = {
@@ -317,6 +320,7 @@ def stock_board_concept_hist_em(symbol: str = "数字货币", adjust: str = "qfq
     temp_df["振幅"] = pd.to_numeric(temp_df["振幅"])
     temp_df["换手率"] = pd.to_numeric(temp_df["换手率"])
     return temp_df
+
 
 def stock_board_concept_name_em(t=None) -> pd.DataFrame:
     """
@@ -331,7 +335,7 @@ def stock_board_concept_name_em(t=None) -> pd.DataFrame:
     """
     fs = "m:90 f:!50"
     if t is not None:
-        fs = fs+" t:{}".format(t)
+        fs = fs + " t:{}".format(t)
     url = "http://79.push2.eastmoney.com/api/qt/clist/get"
     params = {
         "pn": "1",
@@ -406,7 +410,8 @@ def stock_board_concept_name_em(t=None) -> pd.DataFrame:
     temp_df["领涨股票-涨跌幅"] = pd.to_numeric(temp_df["领涨股票-涨跌幅"])
     return temp_df
 
-def stock_board_concept_cons_em(symbol: str = "车联网",symbol_code=None) -> pd.DataFrame:
+
+def stock_board_concept_cons_em(symbol: str = "车联网", symbol_code=None) -> pd.DataFrame:
     """
     东方财富-沪深板块-概念板块-板块成份
     http://quote.eastmoney.com/center/boardlist.html#boards-BK06551
@@ -419,7 +424,7 @@ def stock_board_concept_cons_em(symbol: str = "车联网",symbol_code=None) -> p
         stock_board_concept_em_map = stock_board_concept_name_em()
         stock_board_code = stock_board_concept_em_map[
             stock_board_concept_em_map["板块名称"] == symbol
-        ]["板块代码"].values[0]
+            ]["板块代码"].values[0]
     else:
         stock_board_code = symbol_code
     url = "http://29.push2.eastmoney.com/api/qt/clist/get"

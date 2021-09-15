@@ -62,3 +62,6 @@ class CompanyGroup:
 
     def get_matched_company(self):
         return [company for company in self.items.values() if company.macth_condition()]
+
+    def get_companies(self):
+        return list(self.items.values())

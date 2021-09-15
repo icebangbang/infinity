@@ -19,8 +19,8 @@ def run(from_date, to_date, daily_price, key, sub_st=None, **kwargs):
     for code in daily_price[key].unique():
         # if count >=500 : continue
         df = daily_price.query("{}=='{}'".format(key, code))[['open', 'high', 'low', 'close', 'volume']]
-        if len(df) <= 5:
-            logging.info("{} may not have sma5".format(code))
+        if len(df) <= kwargs.get("timeline_limit",10):
+            logging.info("{} may not have sma5".format(kwargs.get("timeline_limit",10),code))
             continue
         data = pd.DataFrame(index=daily_price.index.unique())
         data_ = pd.merge(data, df, left_index=True, right_index=True, how='left')
@@ -40,10 +40,8 @@ def run(from_date, to_date, daily_price, key, sub_st=None, **kwargs):
 
     cerebro.addstrategy(StrategyWrapper, company_group=company_group, sub_st=sub_st, **kwargs)
     cerebro.run()
-
-    matched_company = company_group.get_matched_company()
     # [k for k, v in house.items() if v['sma5_up_count'] >= 2]
-    return [str(matched) for matched in matched_company]
+    return company_group
 
     # print('Final Portfolio Value: %.2f' % cerebro.broker.getvalue())
 
