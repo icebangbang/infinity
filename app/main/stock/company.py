@@ -8,6 +8,7 @@ import json
 class Company:
 
     def __init__(self, code, *st):
+        self.match_time = []
         self.code = code
         self.sub_st_list: List[SubST] = list()
         self.sub_st_list.extend(st)
@@ -39,6 +40,10 @@ class Company:
 
     def set(self, key, value):
         self.__setattr__(key, value)
+
+    def set_condition(self,strategy,value):
+        self.set(strategy.__class__.__name__,value)
+
 
     def macth_condition(self) -> bool:
         logging.info(self.code)

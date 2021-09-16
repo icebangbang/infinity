@@ -4,7 +4,7 @@ from datetime import datetime
 
 from app.main.stock.service import board_service, stock_service, stock_index_service
 from app.main.stock.sub_startegy.up_sma import UpSma
-from app.main.stock.sub_startegy.trend.ma60 import MediumLongTerm
+from app.main.stock.sub_startegy.trend.term import MediumLongTerm
 
 """
 中长期(Medium&LongTerm)指数强弱判断

@@ -69,7 +69,7 @@ class MediumLongTerm(SubST):
         return comp.get(self.__class__.__name__)
 
 
-class MediumShortTerm(SubST):
+class MediumShortUpTerm(SubST):
     """
         中短期上升策略
         """
@@ -91,7 +91,7 @@ class MediumShortTerm(SubST):
         """
         company.set("ma20", bt.indicators.SimpleMovingAverage(
             data, period=20))
-        company.set("macd", bt.indicators.MACDHisto(
+        company.set("macd", bt.indicators.MACD(
             data, period_me1=12, period_me2=26, period_signal=9))
 
         company.set("close_gte_ma20", False)
@@ -117,7 +117,7 @@ class MediumShortTerm(SubST):
         c1 = data.close[0] >= ma20[0]
         c2 = ma20[0] >= ma20[-1]
         c3 = macd[0] > 0
-        c4 = macd[-1] <0
+        c4 = macd[-1] < 0
 
         company.set("close_gte_ma20", c1)
         company.set("ma20[0]_gte_ma20[-1]", c2)
@@ -126,7 +126,7 @@ class MediumShortTerm(SubST):
 
         # 收盘价>20
         if c1 and c2 and c3 and c4:
-            company.set(self.__class__.__name__, True)
+            company.set_condition(self, True)
 
     def match_condition(self, comp: Company):
         """

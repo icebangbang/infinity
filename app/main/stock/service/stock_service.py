@@ -7,9 +7,11 @@ from app.main.stock.dao import stock_dao, k_line_dao
 from app.main.utils import date_util
 
 
-def publish(days=10, slice=30, code_list=None,stock_map=None):
-    now = date_util.get_start_of_day(datetime.now())
-    start,now = date_util.get_work_day(now,offset=days)
+def publish(days=10, slice=30, code_list=None,stock_map=None,start=None,end=None):
+    if start is None and end is None:
+
+        end = date_util.get_start_of_day(datetime.now())
+        start,end = date_util.get_work_day(end,offset=days)
 
     if code_list is None:
         stocks = stock_dao.get_all_stock()
@@ -38,7 +40,7 @@ def publish(days=10, slice=30, code_list=None,stock_map=None):
             flag = True
         temp_code_list = [item['code'] for item in inner]
         result_dict = {item['code']: [] for item in inner}
-        k_list = k_line_dao.get_k_line_by_code(temp_code_list, start, now)
+        k_list = k_line_dao.get_k_line_by_code(temp_code_list, start, end)
         for k in k_list:
             result_dict[k['code']].append(k)
         for k, v in result_dict.items():
