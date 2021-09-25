@@ -37,15 +37,15 @@ class KDJ(bt.Indicator):
         df['low'] = pd.Series(self.data.low.array)
         # 计算kdj
         k, d, j = self.calc_kdj(df,
-                              fastk_period=fastk_period or 9,
-                              slowk_period=slowk_period or 3,
-                              slowd_period=slowd_period or 3)
+                                fastk_period=fastk_period or 9,
+                                slowk_period=slowk_period or 6,
+                                slowd_period=slowd_period or 12)
         # 将序列赋值给lines的array,在Strategy中可以通过访问lines进行访问下面数据
         self.lines.K.array = array.array(str('d'), list(k.values))
         self.lines.D.array = array.array(str('d'), list(d.values))
         self.lines.J.array = array.array(str('d'), list(j.values))
 
-    def calc_kdj(self,df, fastk_period=9, slowk_period=3, slowd_period=3, fillna=True):
+    def calc_kdj(self, df, fastk_period=9, slowk_period=3, slowd_period=3, fillna=True):
         '''
         根据传入的最高价、最低价、收盘价计算KDJ指标
         参数:
@@ -77,12 +77,20 @@ class KDJ(bt.Indicator):
         # RSV赋值:(收盘价-N日内最低价的最低值)/(N日内最高价的最高值-N日内最低价的最低值)*100
         rsv = (df['close'] - low_list) / (high_list - low_list) * 100
 
-        k = pd.DataFrame(rsv).ewm(
-            com=slowk_period - 1,
-            adjust=False).mean()  # rsv针对slowk_period参数求移动权重平均数
+        k = pd.DataFrame(rsv).rolling(3).mean()  # rsv针对slowk_period参数求移动权重平均数
 
-        d = k.ewm(com=slowd_period - 1, adjust=False).mean(
+        d = k.rolling(3).mean(
         )  # k针对slowd_period参数求移动权重平均数当,adjust为False时，以递归方式计算加权平均值
 
         j = 3 * k - 2 * d
         return (k, d, j)
+
+
+class KDJ_MACD(KDJ):
+    alias = ('KdjMacdHistogram',)
+    lines = ('KMhisto',)
+    plotlines = dict(histo=dict(_method='bar', alpha=0.50, width=1.0))
+
+    def __init__(self,**kwargs):
+        super(KDJ_MACD, self).__init__(**kwargs)
+        self.lines.KMhisto = 2 * (self.lines.K - self.lines.D)

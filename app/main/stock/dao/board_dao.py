@@ -3,9 +3,9 @@ from typing import List
 from datetime import datetime
 
 
-def get_all_board():
+def get_all_board(type=[1,2,3]):
     my_set = db['board_detail']
-    data = list(my_set.find({}))
+    data = list(my_set.find({"type":{"$in":type}}))
     return data
 
 
@@ -24,7 +24,7 @@ def get_stock_bt_board(board) -> List[str]:
 def get_board_k_line_data_from_db(
         start_day: datetime,
         end_day: datetime,
-        board_name: List
+        board_name: List = None
 ) -> List:
     """
     获取特定时间的股票走势

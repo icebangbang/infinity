@@ -1,5 +1,7 @@
 from datetime import datetime,timedelta
 from datetime import time
+from chinese_calendar import is_workday
+
 
 
 def utc_now():
@@ -41,12 +43,16 @@ def is_weekend(t)->bool:
     return t.weekday() >= 5
 
 def get_work_day(now,offset):
-    new_offset = offset
-    for i in range(offset):
-        t = now - timedelta(days=i+1)
-        if is_weekend(t): new_offset=new_offset+1
+    i = 1
+    while i <= offset:
+        t = now - timedelta(days=i)
+        if  is_workday(t) is False or is_weekend(t):
+            offset = offset+1
+        i= i+1
 
-    return now-timedelta(days=new_offset),now
+    return now-timedelta(days=offset),now
+
+
 
 
 if __name__ == "__main__":
@@ -55,3 +61,6 @@ if __name__ == "__main__":
     print(get_friday_of_week())
     now = datetime.now()-timedelta(days=10)
     print(now.weekday())
+
+
+

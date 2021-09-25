@@ -7,7 +7,7 @@ from app.main.stock.dao import stock_dao, k_line_dao
 from app.main.utils import date_util
 
 
-def publish(days=10, slice=30, code_list=None,stock_map=None,start=None,end=None):
+def publish(days=10, slice=30, code_list=None,stock_map={},start=None,end=None):
     if start is None and end is None:
 
         end = date_util.get_start_of_day(datetime.now())
@@ -24,7 +24,7 @@ def publish(days=10, slice=30, code_list=None,stock_map=None,start=None,end=None
     for stock in stocks:
         name_dict[stock['code']] = stock['name']
 
-    page_size = 100
+    page_size = 200
     start_index = 0
     end_index = page_size
     flag = False
@@ -50,6 +50,8 @@ def publish(days=10, slice=30, code_list=None,stock_map=None,start=None,end=None
                     latest = v[0]["close"]
                     c = (latest - earliest) / earliest
                 else:
+                    if v[0]['code'] == '300882':
+                        print(123)
                     earliest = v[0]["close"]
                     latest = v[-1:][0]["close"]
                     c = (latest - earliest) / earliest
@@ -70,11 +72,11 @@ def publish(days=10, slice=30, code_list=None,stock_map=None,start=None,end=None
 
     print("涨幅前{}是:".format(slice))
     for i in top:
-        print("{} {} {} {}".format(i['code'], i['name'], i['rise'],get_concepts(stock_map,i['code'])))
+        print("{} {} {} {}".format(i['code'], i['name'], round(i['rise'] * 100,3),get_concepts(stock_map,i['code'])))
 
     print("跌幅前{}是:".format(slice))
     for i in bot:
-        print("{} {} {} {}".format(i['code'], i['name'], i['rise'],get_concepts(stock_map,i['code'])))
+        print("{} {} {} {}".format(i['code'], i['name'], round(i['rise'] * 100,3),get_concepts(stock_map,i['code'])))
 
 def get_concepts(stock_map,code):
     if code in stock_map.keys():
@@ -82,4 +84,4 @@ def get_concepts(stock_map,code):
     return ""
 
 if __name__ == "__main__":
-    publish(2,10)
+    publish(3,100)

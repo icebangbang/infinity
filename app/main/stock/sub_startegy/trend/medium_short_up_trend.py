@@ -64,8 +64,10 @@ class MediumShortUpTrend(SubST):
         # 20日线在抬高
         c2 = (round(ma20[0],2) >= round(ma20[-1],2))
 
+        # macd 下跌动能减弱
         c3 = (macd.histo[0] >= macd.histo[-1])
 
+        #kdj金叉
         c4 = (K_1 < D_1 and K_0 >= D_0)
 
         macd_histo_list = [macd.histo[0],macd.histo[-1],macd.histo[-2]]
