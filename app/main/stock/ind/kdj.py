@@ -38,8 +38,8 @@ class KDJ(bt.Indicator):
         # 计算kdj
         k, d, j = self.calc_kdj(df,
                                 fastk_period=fastk_period or 9,
-                                slowk_period=slowk_period or 6,
-                                slowd_period=slowd_period or 12)
+                                slowk_period=slowk_period or 3,
+                                slowd_period=slowd_period or 3)
         # 将序列赋值给lines的array,在Strategy中可以通过访问lines进行访问下面数据
         self.lines.K.array = array.array(str('d'), list(k.values))
         self.lines.D.array = array.array(str('d'), list(d.values))
@@ -69,7 +69,7 @@ class KDJ(bt.Indicator):
         if fillna is True:
             low_list.fillna(value=df['low'].expanding().min(), inplace=True)
         # 计算指定日期间隔的最高阶的最大值
-        high_list = df['high'].rolling(9, min_periods=9).max()
+        high_list = df['high'].rolling(fastk_period, min_periods=fastk_period).max()
         # 将NAN填充成现有数据中的最大值
         if fillna is True:
             high_list.fillna(value=df['high'].expanding().max(), inplace=True)
@@ -77,10 +77,9 @@ class KDJ(bt.Indicator):
         # RSV赋值:(收盘价-N日内最低价的最低值)/(N日内最高价的最高值-N日内最低价的最低值)*100
         rsv = (df['close'] - low_list) / (high_list - low_list) * 100
 
-        k = pd.DataFrame(rsv).rolling(3).mean()  # rsv针对slowk_period参数求移动权重平均数
+        k = rsv.ewm(com=slowk_period-1,adjust=False).mean() # rsv针对slowk_period参数求移动权重平均数
 
-        d = k.rolling(3).mean(
-        )  # k针对slowd_period参数求移动权重平均数当,adjust为False时，以递归方式计算加权平均值
+        d = k.ewm(com = slowd_period-1,adjust=False).mean()  # k针对slowd_period参数求移动权重平均数当,adjust为False时，以递归方式计算加权平均值
 
         j = 3 * k - 2 * d
         return (k, d, j)

@@ -16,10 +16,12 @@ class StrategyWrapper(bt.Strategy):
         self.company_group = company_group
 
         for i, d in enumerate(self.datas):
-            code = d._name
+            code = d._name.split("_")[0]
+            name = d._name.split("_")[1]
             logging.info("init {}".format(code))
             sub_st_instance = [ st(**kwargs) for st in sub_st]
             company = Company(code,
+                              name,
                               *sub_st_instance
                               )
             company_group.add_company(company)
@@ -29,7 +31,7 @@ class StrategyWrapper(bt.Strategy):
 
     def next(self):
         for i, d in enumerate(self.datas):
-            code = d._name
+            code = d._name.split("_")[0]
             company: Company = self.company_group.get_company(code)
             company.next(d)
 

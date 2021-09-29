@@ -7,11 +7,14 @@ import json
 
 class Company:
 
-    def __init__(self, code, *st):
+    def __init__(self, code, name,*st):
         self.match_time = []
         self.code = code
+        self.name = name
         self.sub_st_list: List[SubST] = list()
         self.sub_st_list.extend(st)
+        self.inds = {}
+        self.features = {}
 
     def init_ind(self, data: PandasData):
         for sub_st in self.sub_st_list:
@@ -29,21 +32,22 @@ class Company:
         self.sub_st_list.extend(st)
 
     def get(self, name, default=None):
-        try:
-            obj = self.__getattribute__(name)
-            if obj is None:
-                return default
-            return obj
-        except AttributeError:
+        if name in self.features.keys():
+            return self.features[name]
+        else:
             return default
 
-
     def set(self, key, value):
-        self.__setattr__(key, value)
+        self.features[key] = value
 
-    def set_condition(self,strategy,value):
-        self.set(strategy.__class__.__name__,value)
+    def setInd(self, key, value):
+        self.inds[key] = value
 
+    def getInd(self, key):
+        return self.inds[key]
+
+    def set_condition(self, strategy, value):
+        self.set(strategy.__class__.__name__, value)
 
     def macth_condition(self) -> bool:
         logging.info(self.code)

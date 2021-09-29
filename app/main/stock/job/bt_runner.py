@@ -10,7 +10,7 @@ from app.main.stock.company import Company, CompanyGroup
 from app.main.stock.dao import k_line_dao
 
 
-def run(from_date, to_date, daily_price, key, sub_st=None, **kwargs):
+def run(from_date, to_date, daily_price, key, sub_st=None,code_name_map={}, **kwargs):
     cerebro = bt.Cerebro()
 
     count = 1
@@ -31,7 +31,7 @@ def run(from_date, to_date, daily_price, key, sub_st=None, **kwargs):
         data_feed = btfeeds.PandasData(dataname=data_, fromdate=from_date, todate=to_date)
         logging.info("feed {} to cerebro,index {}".format(code, count))
         count = count + 1
-        cerebro.adddata(data_feed, name=code)  # 通过 name 实现数据集与股票的一一对应
+        cerebro.adddata(data_feed, name=code+"_"+code_name_map[code])  # 通过 name 实现数据集与股票的一一对应
 
     # 实例化 cerebro
     cerebro.broker.setcash(100000.0) # 设置现金

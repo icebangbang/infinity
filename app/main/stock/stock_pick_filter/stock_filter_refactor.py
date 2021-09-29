@@ -15,8 +15,8 @@ from app.main.stock.sub_startegy.trend.medium_short_up_trend import MediumShortU
 
 stocks = stock_dao.get_all_stock()
 
-vcstore = bt.stores.VCStore()
-data = vcstore.getdata(dataname='015ES', timeframe=bt.TimeFrame.Minutes, compression=2)
+# vcstore = bt.stores.VCStore()
+# data = vcstore.getdata(dataname='015ES', timeframe=bt.TimeFrame.Minutes, compression=2)
 
 
 
