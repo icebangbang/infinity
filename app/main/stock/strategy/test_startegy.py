@@ -11,7 +11,7 @@ class TestStrategy(bt.Strategy):
         dt = dt or self.datas[0].datetime.date(0)
         print('%s, %s' % (dt.isoformat(), txt))
 
-    def __init__(self):
+    def __init__(self,**kwargs):
         # Keep a reference to the "close" line in the data[0] dataseries
         self.dataclose = self.datas[0].close
 
@@ -22,8 +22,10 @@ class TestStrategy(bt.Strategy):
 
         boll_mid = bt.ind.BBands(self.datas[0].close).mid
         # Add a MovingAverageSimple indicator
-        self.sma = bt.indicators.SimpleMovingAverage(
-            self.datas[0], period=self.params.maperiod)
+        self.atr = bt.indicators.ATR(self.datas[0], plot=False)
+        # self.sma = bt.indicators.SimpleMovingAverage(
+        #     self.datas[0], period=self.params.maperiod)
+
 
         # Indicators for the plotting show
         # bt.indicators.ExponentialMovingAverage(self.datas[0], period=25)

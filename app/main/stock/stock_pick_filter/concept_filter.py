@@ -8,7 +8,7 @@ from app.main.stock.sub_startegy.down_bolling import DownBolling, CloseMidBollin
 from app.main.stock.sub_startegy.kdj_golden import KdjGolden
 from app.main.stock.sub_startegy.heavy_vol import HeavyVol
 from app.main.stock.sub_startegy.bolling_width import BollingWidth
-from app.main.stock.sub_startegy.up_bolling import UpBolling
+from app.main.stock.sub_startegy.bolling import BollingFeatures
 from app.main.stock.sub_startegy.k_type import DojiType
 
 """
