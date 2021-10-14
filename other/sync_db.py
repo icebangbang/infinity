@@ -31,9 +31,11 @@ def request_method(third_order_id):
 	return None
 
 def get_upload_url(face_img_url, third_order_id):
-	endpoint = 'http://oss-cn-hangzhou.aliyuncs.com'
+	# endpoint = 'http://oss-cn-hangzhou.aliyuncs.com'
+	endpoint = 'http://oss-ap-southeast-5.aliyuncs.com'
 	auth = oss2.Auth('LTAI5t7WPBhWD6seW835H9Ti', 'Bq1FrB88AI6Qut1D7iWBbgp22oFbAP')
-	bucket = oss2.Bucket(auth, endpoint, 'sake-storage-hz')
+	# bucket = oss2.Bucket(auth, endpoint, 'sake-storage-hz')
+	bucket = oss2.Bucket(auth, endpoint, 'sake-storage')
 	input = requests.get(face_img_url)
 	sign_uuid = uuid.uuid1()
 	img_path_key = str(sign_uuid)
@@ -42,6 +44,25 @@ def get_upload_url(face_img_url, third_order_id):
 		print('{} ,上传oss成功'.format(face_img_url))  # 打印上传的返回值 200成功
 		# jpg_url = bucket.sign_url('GET', img_path_key, 300)  # 阿里返回一个关于Zabbix_Graph.jpg的url地址 60是链接60秒有效
 		return sign_uuid
+	else:
+		print('{} ,上传oss失败'.format(face_img_url))
+	return None
+
+def upload_file(fileName, fileContent):
+	# endpoint = 'http://oss-cn-hangzhou.aliyuncs.com'
+	endpoint = 'http://oss-ap-southeast-5.aliyuncs.com'
+	auth = oss2.Auth('LTAI5t7WPBhWD6seW835H9Ti', 'Bq1FrB88AI6Qut1D7iWBbgp22oFbAP')
+	# bucket = oss2.Bucket(auth, endpoint, 'sake-storage-hz')
+	bucket = oss2.Bucket(auth, endpoint, 'sake-storage')
+	file_data = {}
+	file_data['contact'] = fileContent
+	result = bucket.put_object(fileName, json.dumps(file_data, ensure_ascii=False))
+	if result.status == 200:
+		print('{} ,上传oss成功'.format(fileName))  # 打印上传的返回值 200成功
+		# jpg_url = bucket.sign_url('GET', img_path_key, 300)  # 阿里返回一个关于Zabbix_Graph.jpg的url地址 60是链接60秒有效
+		return fileName
+	else:
+		print('{} ,上传oss失败'.format(fileName))
 	return None
 
 def convert_status(source_status):
@@ -72,13 +93,13 @@ def cal_time(target_time):
 		count_days = 0
 	return count_days
 
-def insert_bid(conn_sake, cursor_sake,item, new_user_id, bankcard_id):
+def insert_bid(conn_sake, cursor_sake,item, new_user_id, bankcard_id, contact):
 	bid_id = snowflake.client.get_guid()
 	status = convert_status(int(item['status']))
 	product_id = 200
 	# bank_account_id = convert_back_id(item['debit_open_bank_id'])
 	bank_account_id = bankcard_id
-	amount = item['actual_amount']
+	amount = item['loan_amount']
 	period = item['loan_term']
 	cid = item['user_cid']
 	mobile = item['phone']
@@ -109,11 +130,14 @@ def insert_bid(conn_sake, cursor_sake,item, new_user_id, bankcard_id):
 	else:
 		disburse_count = 0
 	bid_creat_time = item['submit_time']
-	insert_bid_sql = "INSERT INTO `sake`.`bid`(`id`, `gmt_create`, `gmt_modified`, `status`, `user_id`, `saas_id`, `product_id`, `bank_account_id`, `amount`, `period`, `cid`, `mobile`, `name`, `contract_no`, `other_order_id`, `latitude`, `longitude`, `ip_address`, `bank_account_number`, `channel_id`, `channel_name`, `channel_label`, `operate_time`, `operator_id`, `deduct_time`, `repayment_time`, `real_repayment_time`, `is_reloan`, `is_overdue`, `overdue_days`,  `disburse_count`) " \
-					 "VALUES ({}, '{}', '{}', {}, {}, 2237, {}, {}, {}, {}, '{}', '{}', '{}', '{}', '{}',  {}, {}, '{}', '{}', 2, '{}', '{}', '{}', 0, '{}', '{}', '{}', {}, {}, {}, {});".format(
+
+	device_info_id = "device/%s_%s.json" % (other_order_id, snowflake.client.get_guid())
+	device_info_id = upload_file(device_info_id, contact)
+	insert_bid_sql = "INSERT INTO `sake`.`bid`(`id`, `gmt_create`, `gmt_modified`, `status`, `user_id`, `saas_id`, `product_id`, `bank_account_id`, `amount`, `period`, `cid`, `mobile`, `name`, `contract_no`, `other_order_id`, `latitude`, `longitude`, `ip_address`, `bank_account_number`, `channel_id`, `channel_name`, `channel_label`, `operate_time`, `operator_id`, `deduct_time`, `repayment_time`, `real_repayment_time`, `is_reloan`, `is_overdue`, `overdue_days`,  `disburse_count`, `device_info_id`) " \
+					 "VALUES ({}, '{}', '{}', {}, {}, 2237, {}, {}, {}, {}, '{}', '{}', '{}', '{}', '{}',  {}, {}, '{}', '{}', 2, '{}', '{}', '{}', 0, '{}', '{}', '{}', {}, {}, {}, {} ,'{}');".format(
 		bid_id, bid_creat_time, bid_creat_time, status, new_user_id, product_id, bank_account_id, amount, period, cid, mobile, name, contract_no,
 		other_order_id, latitude, longitude, ip_address, bank_account_number, channel_name, channel_label, operate_time,
-		deduct_time, repayment_time, real_repayment_time, is_reloan, is_overdue, overdue_days, disburse_count
+		deduct_time, repayment_time, real_repayment_time, is_reloan, is_overdue, overdue_days, disburse_count, device_info_id
 	).replace("'None',", "null,").replace("None,", "null,")
 	cursor_sake.execute(insert_bid_sql)
 	print(item['user_cid'] + ',' + item['phone'] + '，' + str(bid_id) + ', insert bid ok')
@@ -144,7 +168,9 @@ def insert_bid(conn_sake, cursor_sake,item, new_user_id, bankcard_id):
 		real_repayment_time = repayment_time
 		real_repayment_corpus = repayment_corpus
 		real_repayment_interest = repayment_interest
-		real_repayment_amount = repayment_amount
+		real_repayment_amount = None
+		if real_repayment_time == None:
+			real_repayment_amount = repayment_amount
 		real_repayment_overdue_fine = overdue_manage_fee
 
 		insert_bill_sql = "INSERT INTO `sake`.`bill`(`id`, `gmt_create`, `gmt_modified`, `status`, `bid_id`, `other_order_id`, `user_id`, `product_id`, `saas_id`, `channel_id`, `deduct_time`, `deduct_operator`, `loan_amount`, `period`, `daily_interest_rate`, `manage_fee`, `repayment_time`, `repayment_amount`, `repayment_corpus`, `repayment_interest`, `total_overdue_days`,  `overdue_manage_fee`, `current_repayment_time`, `current_repayment_amount`, `current_returned_amount`, `real_repayment_time`, `real_repayment_corpus`, `real_repayment_interest`, `real_repayment_amount`, `real_repayment_overdue_fine`, `is_reloan`) " \
@@ -156,6 +182,16 @@ def insert_bid(conn_sake, cursor_sake,item, new_user_id, bankcard_id):
 		).replace("'None',", "null,").replace("None,", "null,")
 		cursor_sake.execute(insert_bill_sql)
 		print(item['user_cid'] + ',' + item['phone'] + '，' + str(bid_id) + ', insert bill ok')
+
+		payment_record_id = snowflake.client.get_guid()
+		insert_payment_record_sql = "INSERT INTO `sake`.`payment_record`(`id`, `type`, `bank_account`, `bank_id`, `amount`, `status`, `bid_id`, `mobile`, `saas_id`, `channel_id`, `payment_channel`, `notify_time`) " \
+		"VALUES ({}, 3, '{}', {}, {}, 1, {}, '{}', 2237, 2, 'flinpay', '{}');".format(
+			payment_record_id, bank_account_number, bank_account_id, amount, bid_id, mobile, deduct_time
+		).replace("'None',", "null,").replace("None,", "null,")
+
+		cursor_sake.execute(insert_payment_record_sql)
+		print(item['user_cid'] + ',' + item['phone'] + '，' + str(bid_id) + ', insert payment_record ok')
+
 
 		ks_loan_order_tran_sql = "SELECT * FROM ks_loan_order_tran where partner_code='{}' and order_id={}".format(
 			'mautunai', item['id'])
@@ -213,15 +249,64 @@ def insert_user(conn_sake, cursor_sake, new_item, bankcard_id):
 	idcard_front_img = None
 	live_img = None
 	idcard_image_hand = None
+	address = None
+	gender = None
+	birth_day = None
+	marital_status = None
+	month_income = None
+	education = None
+	emrg_contact_name_a = None
+	emrg_contact_mobile_a = None
+	emrg_contact_rel_a = None
+	emrg_contact_name_b = None
+	emrg_contact_mobile_b = None
+	emrg_contact_rel_b = None
+	work_type = None
+	company_name = None
+	has_work =None
+
 	if thirdpart_response_data != None:
 		idcard_front_img = get_upload_url(thirdpart_response_data['data']['idcard_image_front'], new_item['thirdparty_order_id'])
 		live_img = get_upload_url(thirdpart_response_data['data']['face_img_url'], new_item['thirdparty_order_id'])
 		idcard_image_hand = get_upload_url(thirdpart_response_data['data']['work_picture'], new_item['thirdparty_order_id'])
+		address = thirdpart_response_data['data']['address']
+		gender = thirdpart_response_data['data']['gender']
+		birth_day = thirdpart_response_data['data']['birth_day']
+		marital_status = thirdpart_response_data['data']['marital_status']
+		month_income = thirdpart_response_data['data']['month_income']
+		education = thirdpart_response_data['data']['education']
+		# 避免只有一个联系人
+		flag = 0
+		for contact_info in thirdpart_response_data['data']['contact_info']:
+			if flag == 0:
+				emrg_contact_name_a = contact_info['emergencyName']
+				emrg_contact_mobile_a = contact_info['emergencyPhone']
+				emrg_contact_rel_a = contact_info['emergencyRelation']
+				flag = flag + 1
+			elif flag == 1:
+				emrg_contact_name_b = contact_info['emergencyName']
+				emrg_contact_mobile_b = contact_info['emergencyPhone']
+				emrg_contact_rel_b = contact_info['emergencyRelation']
+		flag = 0
+		work_type = thirdpart_response_data['data']['work_type']
+		company_name = thirdpart_response_data['data']['company_name']
+		if work_type != None:
+			has_work = 1
+		contact = thirdpart_response_data['data']['contact']
 
-	insert_user_detail_sql = "INSERT INTO `sake`.`user_detail`(`id`, `saas_id`, `user_id`, `cid`, `mobile`, `name`, `channel_id`, `channel_name`, `bank_account_id`, `operator_id`, `first_apply_time`, `first_deduct_time`, `loan_amount`, `name_mirror`, `cid_md5`, `mobile_md5`, `liveness_score`, `idcard_front_img`, `live_img`, `idcard_image_hand`) " \
-							 "VALUES ({}, 2237, {}, '{}', '{}', '{}', 2, '{}', {}, 0, '{}', '{}', {}, '{}', '{}', '{}', {}, '{}', '{}', '{}');".format(
-		user_detail_id, user_id, cid, mobile, name, registerChannel, bank_account_id, first_apply_time, first_deduct_time,
-		loan_amount, name_mirror, cidMd5, mobileMd5, liveness_score, idcard_front_img, live_img, idcard_image_hand).replace("'None',", "null,").replace("None,", "null,")
+	# insert_user_detail_sql = "INSERT INTO `sake`.`user_detail`(`id`, `saas_id`, `user_id`, `cid`, `mobile`, `name`, `channel_id`, `channel_name`, `bank_account_id`, `operator_id`, `first_apply_time`, `first_deduct_time`, `loan_amount`, `name_mirror`, `cid_md5`, `mobile_md5`, `liveness_score`, `idcard_front_img`, `live_img`, `idcard_image_hand`) " \
+	# 						 "VALUES ({}, 2237, {}, '{}', '{}', '{}', 2, '{}', {}, 0, '{}', '{}', {}, '{}', '{}', '{}', {}, '{}', '{}', '{}');".format(
+	# 	user_detail_id, user_id, cid, mobile, name, registerChannel, bank_account_id, first_apply_time, first_deduct_time,
+	# 	loan_amount, name_mirror, cidMd5, mobileMd5, liveness_score, idcard_front_img, live_img, idcard_image_hand).replace("'None',", "null,").replace("None,", "null,")
+
+	insert_user_detail_sql = "INSERT INTO `sake`.`user_detail`(`id`, `saas_id`, `user_id`, `cid`, `mobile`, `name`, `channel_id`, `channel_name`, `address`, `gender`, `birthday`, `marital_status`, `income`, `education_level`, `bank_account_id`, `operator_id`, `first_apply_time`, `first_deduct_time`, `loan_amount`, `emrg_contact_name_a`, `emrg_contact_name_b`, `emrg_contact_mobile_a`, `emrg_contact_mobile_b`, `emrg_contact_rel_a`, `emrg_contact_rel_b`, `idcard_front_img`, `live_img`, `name_mirror`, `cid_md5`, `mobile_md5`, `liveness_score`, `has_work`, `work_type`, `company_name`, `idcard_image_hand`) " \
+	"VALUES ({}, 2237, {}, '{}', '{}', '{}', 2, '{}', '{}', {}, '{}', {}, {}, None, {}, 0, '{}', '{}', {}, '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', {}, {}, {}, '{}', '{}');".format(
+		user_detail_id, user_id, cid, mobile, name, registerChannel, address, gender, birth_day, marital_status,
+		month_income, bank_account_id, first_apply_time, first_deduct_time, loan_amount, emrg_contact_name_a,
+		emrg_contact_name_b, emrg_contact_mobile_a, emrg_contact_mobile_b, emrg_contact_rel_a, emrg_contact_rel_b,
+		idcard_front_img, live_img, name_mirror, cidMd5, mobileMd5, liveness_score, has_work, work_type, company_name, idcard_image_hand
+	).replace("'None',", "null,").replace("None,", "null,")
+
 	cursor_sake.execute(insert_user_detail_sql)
 
 	print(new_item['user_cid'] + ',' + new_item['phone'] + ', insert user_detail ok')
@@ -236,7 +321,7 @@ def insert_user(conn_sake, cursor_sake, new_item, bankcard_id):
 	cursor_sake.execute(insert_bankcard_sql)
 	conn_sake.commit()
 	print(new_item['user_cid'] + ',' + new_item['phone'] + ', insert bankcard ok')
-	return user_id
+	return user_id, contact
 
 def confirm_data(cursor_rum, cursor_sake, conn_sake, total, last_offset, page_size):
 	last_time_sql = "SELECT * FROM ks_loan_order where status in('100','121','131','132','200') and  partner_code='{}' limit {},{}".format(
@@ -253,12 +338,12 @@ def confirm_data(cursor_rum, cursor_sake, conn_sake, total, last_offset, page_si
 		group_count = group_count + 1
 		bankcard_id = snowflake.client.get_guid()
 		# user & user_detail & bankcard, 返回user_id
-		new_user_id = insert_user(conn_sake, cursor_sake, new_item, bankcard_id)
+		new_user_id, contact = insert_user(conn_sake, cursor_sake, new_item, bankcard_id)
 
 		for item in sort_list:
 			total = total + 1
 			# bid & bill & bill_extension
-			insert_bid(conn_sake, cursor_sake, item, new_user_id, bankcard_id)
+			insert_bid(conn_sake, cursor_sake, item, new_user_id, bankcard_id, contact)
 
 			print('第%s条迁移成功, 状态是%s' % (total, convert_status(int(item['status']))))
 			print('---------------------------------------------------------------------------------------------------------------')
@@ -287,7 +372,7 @@ def public_sql(cursor_sake):
 
 def execute(cursor_rum, cursor_sake, conn_sake):
 	try:
-		public_sql(cursor_sake)
+		# public_sql(cursor_sake)
 		pass
 	except Exception as error:
 		conn_sake.rollback()
@@ -314,7 +399,7 @@ def execute(cursor_rum, cursor_sake, conn_sake):
 		print('--- 第%s模块，完成 ---' % (i + 1))
 	last_offset = times * page_size
 	print('--- 最后偏移量为%s ---' % last_offset)
-	total = confirm_data(cursor_rum, cursor_sake, conn_sake, total, last_offset, page_size)
+	total = confirm_data(cursor_rum, cursor_sake, conn_sake, total, last_offset, 1)
 	print('#--- 迁移完成, %s ---#' % total)
 
 if __name__ == '__main__':
