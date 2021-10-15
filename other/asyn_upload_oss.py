@@ -16,7 +16,7 @@ from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED
 import threading
 
 def request_method(third_order_id):
-	print('%s request start' % third_order_id)
+	# print('%s request start' % third_order_id)
 	request_url = 'https://api.mautunai.finboat.net/admin/orders/order/detail'
 	data_search = {}
 	data_search['_id'] = third_order_id
@@ -25,10 +25,10 @@ def request_method(third_order_id):
 		'Content-Type': 'application/json',
 		'Referer': 'https://mautunai.finboat.net/',
 		'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36',
-		'Cookie': 'access_token_cookie=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2MzQxNzMxMjAsIm5iZiI6MTYzNDE3MzEyMCwianRpIjoiMTM2NTM3YjYtOTE3Yy00NThlLWI2ODctZjg5NWZhMWZmNTI0IiwiZXhwIjoxNjM0MjA5MTIwLCJpZGVudGl0eSI6eyJ1aWQiOiI2MDQ1ODIyMDJiMzllMTRlZWY5NjE0MTQiLCJuYW1lIjoibWF1dHVuYWkiLCJwZmxhZyI6MCwicm9sZSI6Ilx1N2JhMVx1NzQwNlx1NTQ1OCJ9LCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MiLCJjc3JmIjoiM2JlZDQ5NTUtNDU4OC00ZDdjLTkxM2EtODg4Y2JkNDM1MGNlIn0.YhWTNrhVYgDjRr6SZ1Dj3tSQ7yrEKE8dhodiBEXo9eM; csrf_access_token=3bed4955-4588-4d7c-913a-888cbd4350ce'
+		'Cookie': 'access_token_cookie=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2MzQyNjAxOTgsIm5iZiI6MTYzNDI2MDE5OCwianRpIjoiMjc1YTg3ODgtODE1NC00MGJmLTkxYmYtNzA2NGViZjM0NzhkIiwiZXhwIjoxNjM0Mjk2MTk4LCJpZGVudGl0eSI6eyJ1aWQiOiI2MDQ1ODIyMDJiMzllMTRlZWY5NjE0MTQiLCJuYW1lIjoibWF1dHVuYWkiLCJwZmxhZyI6MCwicm9sZSI6Ilx1N2JhMVx1NzQwNlx1NTQ1OCJ9LCJmcmVzaCI6ZmFsc2UsInR5cGUiOiJhY2Nlc3MiLCJjc3JmIjoiNzA0ZDNkNGYtZTE4MS00NTI2LWI4MmQtZDYyYzgyYjhhMjM3In0.8NWxC-6LMsRSKdQR4ighBkCEN-NJ2yRbJmWDaeAnA0c; csrf_access_token=704d3d4f-e181-4526-b82d-d62c82b8a237'
 	}
 	response = requests.post(url=request_url, headers=headers, data=request_body)
-	print('%s request end' % third_order_id)
+	# print('%s request end' % third_order_id)
 	if response.status_code == 200:
 		response_data = response.json()
 		return response_data
@@ -37,7 +37,7 @@ def request_method(third_order_id):
 	return None
 
 def get_upload_url(face_img_url, user_cid, phone):
-	print('%s, %s开始上传oos' % (user_cid, phone))
+	# print('%s, %s开始上传oos' % (user_cid, phone))
 	# endpoint = 'http://oss-cn-hangzhou.aliyuncs.com'
 	endpoint = 'http://oss-ap-southeast-5.aliyuncs.com'
 	auth = oss2.Auth('LTAI5t7WPBhWD6seW835H9Ti', 'Bq1FrB88AI6Qut1D7iWBbgp22oFbAP')
@@ -93,67 +93,63 @@ semaphore = threading.Semaphore(20)
 def upload_oss_and_write_file(new_item, type, test_count):
 	global once, total
 	semaphore.acquire()
-	# print(test_count)
 
 	# 报错重跑或者更新，需要加校验
-	# is_exist = 0
-	# with open('bid.csv', 'r') as oldBidFile:
-	# 	reader = csv.DictReader(oldBidFile)
-	# 	for row in reader:
-	# 		if row['thirdparty_order_id'] == new_item['thirdparty_order_id']:
-	# 			is_exist = 1
-	# if is_exist == 1:
-	# 	oldBidFile.close()
-	# 	semaphore.release()
-	# 	return
-	# else:
-	# 	print(new_item['user_cid'], new_item['phone'], new_item['thirdparty_order_id'])
+	is_exist = 0
+	with open('bid.csv', 'r') as oldBidFile:
+		reader = csv.DictReader(oldBidFile)
+		for row in reader:
+			if row['thirdparty_order_id'] == new_item['thirdparty_order_id']:
+				is_exist = 1
+				break
+	if is_exist == 1:
+		oldBidFile.close()
+		semaphore.release()
+		total = total + 1
+		print('*old*第%s条迁移成功, %s, %s' % (total, new_item['user_cid'], new_item['phone']))
+		return
 
 
 	thirdpart_response_data = request_method(new_item['thirdparty_order_id'])
 
 	if thirdpart_response_data != None:
-		idcard_front_img = None
-		live_img = None
-		idcard_image_hand = None
-		while (idcard_front_img == None) or (idcard_front_img == None) or (idcard_image_hand == None):
+		if type == 0:
 			idcard_front_img = get_upload_url(thirdpart_response_data['data']['idcard_image_front'], new_item['user_cid'], new_item['phone'])
 			live_img = get_upload_url(thirdpart_response_data['data']['face_img_url'], new_item['user_cid'], new_item['phone'])
 			idcard_image_hand = get_upload_url(thirdpart_response_data['data']['work_picture'], new_item['user_cid'], new_item['phone'])
-			# time.sleep(1)
-		address = thirdpart_response_data['data']['address']
-		gender = thirdpart_response_data['data']['gender']
-		birth_day = thirdpart_response_data['data']['birth_day']
-		marital_status = thirdpart_response_data['data']['marital_status']
-		month_income = thirdpart_response_data['data']['month_income']
-		education = thirdpart_response_data['data']['education']
-		# 避免只有一个联系人
-		flag = 0
-		for contact_info in thirdpart_response_data['data']['contact_info']:
-			if flag == 0:
-				emrg_contact_name_a = contact_info['emergencyName']
-				emrg_contact_mobile_a = contact_info['emergencyPhone']
-				emrg_contact_rel_a = contact_info['emergencyRelation']
-				flag = flag + 1
-			elif flag == 1:
-				emrg_contact_name_b = contact_info['emergencyName']
-				emrg_contact_mobile_b = contact_info['emergencyPhone']
-				emrg_contact_rel_b = contact_info['emergencyRelation']
-		flag = 0
-		work_type = thirdpart_response_data['data']['work_type']
-		company_name = thirdpart_response_data['data']['company_name']
-		if work_type != None:
-			has_work = 1
-		if type == 0:
+			address = thirdpart_response_data['data']['address']
+			gender = thirdpart_response_data['data']['gender']
+			birth_day = thirdpart_response_data['data']['birth_day']
+			marital_status = thirdpart_response_data['data']['marital_status']
+			month_income = thirdpart_response_data['data']['month_income']
+			education = thirdpart_response_data['data']['education']
+			# 避免只有一个联系人
+			flag = 0
+			for contact_info in thirdpart_response_data['data']['contact_info']:
+				if flag == 0:
+					emrg_contact_name_a = contact_info['emergencyName']
+					emrg_contact_mobile_a = contact_info['emergencyPhone']
+					emrg_contact_rel_a = contact_info['emergencyRelation']
+					flag = flag + 1
+				elif flag == 1:
+					emrg_contact_name_b = contact_info['emergencyName']
+					emrg_contact_mobile_b = contact_info['emergencyPhone']
+					emrg_contact_rel_b = contact_info['emergencyRelation']
+			flag = 0
+			work_type = thirdpart_response_data['data']['work_type']
+			company_name = thirdpart_response_data['data']['company_name']
+			if work_type != None:
+				has_work = 1
+
 			with open('user_detail.csv', 'a+', newline='') as userFile:
 				fieldnames = ['user_cid', 'phone', 'idcard_front_img', 'live_img', 'idcard_image_hand', 'address',
 							  'gender', 'birth_day', 'marital_status', 'month_income', 'emrg_contact_name_a',
 							  'emrg_contact_mobile_a', 'emrg_contact_rel_a', 'emrg_contact_name_b', 'emrg_contact_mobile_b',
 							  'emrg_contact_rel_b', 'work_type', 'company_name', 'has_work']
 				writer = csv.DictWriter(userFile, fieldnames=fieldnames)
-				if once == 0:
-					writer.writeheader()
-					once = 1
+				# if once == 0:
+				# 	writer.writeheader()
+				# 	once = 1
 				writer.writerow(
 					{'user_cid': new_item['user_cid'], 'phone': new_item['phone'], 'idcard_front_img': idcard_front_img, 'live_img': live_img,
 					 'idcard_image_hand': idcard_image_hand,
@@ -169,18 +165,18 @@ def upload_oss_and_write_file(new_item, type, test_count):
 		device_info_file_name = "device/{}.json".format(new_item['thirdparty_order_id'])
 		device_info_id = None
 		other_order_id = thirdpart_response_data['data']['apply_list'][0]['_id']
-		while device_info_id == None:
-			device_info_id = upload_file(device_info_file_name, thirdpart_response_data['data']['contact'])
+		device_info_id = upload_file(device_info_file_name, thirdpart_response_data['data']['contact'])
 		with open('bid.csv', 'a+', newline='') as bidFile:
 			fieldnames = ['thirdparty_order_id', 'device_info_id', 'other_order_id']
 			writer = csv.DictWriter(bidFile, fieldnames=fieldnames)
-			if once == 1:
-				writer.writeheader()
-				once = 2
+			# if once == 1:
+			# 	writer.writeheader()
+			# 	once = 2
 			writer.writerow({'thirdparty_order_id': new_item['thirdparty_order_id'], 'device_info_id': device_info_id, 'other_order_id': other_order_id})
 			total = total + 1
 		bidFile.close()
-		print('*第%s条迁移成功, %s, %s' % (total, new_item['user_cid'], new_item['phone']))
+
+		print('*new*第%s条迁移成功, %s, %s' % (total, new_item['user_cid'], new_item['phone']))
 		print('---------------------------------------------------------------------------------------------------------------')
 	else:
 		print('requst error')
@@ -190,7 +186,7 @@ def upload_oss_and_write_file(new_item, type, test_count):
 def confirm_data(cursor_rum, last_offset, page_size):
 	global total, total
 
-	last_time_sql = "SELECT * FROM ks_loan_order where status in('100','121','131','132','200') and  partner_code='{}' limit {},{}".format(
+	last_time_sql = "SELECT * FROM ks_loan_order where status in('100','121','131','132','200') and  partner_code='{}' limit {},{}; ".format(
 		'mautunai', last_offset, page_size)
 	cursor_rum.execute(last_time_sql)
 	source_list = cursor_rum.fetchall()
@@ -202,14 +198,14 @@ def confirm_data(cursor_rum, last_offset, page_size):
 	for key, group in user_group:
 		user_group_list = list(group)
 		if len(list(user_group_list)) > 1:
-			print(key[0], key[1])
+			# print(key[0], key[1])
 			sort_list = sorted(user_group_list, key=lambda x: (x["gmt_create"]))
 			latest_user = {}
 			latest_user['user_po'] = sort_list[-1]
 			latest_user['user_cid'] = key[0]
 			latest_user['phone'] = key[1]
 			user_list.append(latest_user)
-
+	print(len(user_list))
 	re = []
 	test_count = 0
 	for item in user_sort:
@@ -222,9 +218,12 @@ def confirm_data(cursor_rum, last_offset, page_size):
 	wait(re, return_when=ALL_COMPLETED)
 	print('偏移量为%s模块内，根据身份证和手机号总共有%s组' % (last_offset, total))
 
+# gmt_create_start = '2021-10-14 00:00:00'
+# gmt_create_end = '2021-10-14 23:59:59'
+# sql = "SELECT count(1) FROM ks_loan_order where status in('100','121','131','132','200') and partner_code='{}' and gmt_create BETWEEN '{}' AND '{}'".format('mautunai', gmt_create_start, gmt_create_end)
 
 def execute(cursor_rum):
-	sql = "SELECT count(1) FROM ks_loan_order where status in('100','121','131','132','200') and partner_code='{}'".format(
+	sql = "SELECT count(1) FROM ks_loan_order where status in('100','121','131','132','200') and partner_code='{}'; ".format(
 		'mautunai')
 	cursor_rum.execute(sql)
 	source_count = cursor_rum.fetchall()
