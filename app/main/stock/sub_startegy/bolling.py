@@ -6,30 +6,26 @@ from app.main.stock.ind.bollinger import BollingerBandsWidth
 import logging
 
 
-class UpBolling(SubST):
+class BollingFeatures(SubST):
     """
     boll轨道下轨到上柜策略
     """
     ind_name = "down_bolling"
     hit_result = "down_bolling_hit"
 
-    def __init__(self, period=5, match_num=5,**kwargs:dict):
+    def __init__(self, **kwargs: dict):
         """
         :param period: 布林轨道宽度
         :param match_num:
         """
         pass
 
-        self.period = kwargs.get("up_mid_bolling_period",1)
-        # self.match_num = match_num
-
     def init_ind(self, data: PandasData, company: Company):
         """
         初始化指标
         :return:
         """
-        company.set(self.ind_name, BollingerBands(data))
-        company.set(self.hit_result, False)
+        company.setInd(self.ind_name, BollingerBands(data))
 
     def next(self, data: PandasData, comp: Company):
         """

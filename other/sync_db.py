@@ -169,6 +169,14 @@ def insert_bid(conn_sake, cursor_sake,item, new_user_id, bankcard_id):
 
 
 def insert_user(conn_sake, cursor_sake, new_item, bankcard_id):
+	"""
+	插入用户数据
+	:param conn_sake:
+	:param cursor_sake:
+	:param new_item:
+	:param bankcard_id:
+	:return:
+	"""
 
 	user_id = snowflake.client.get_guid()
 	cid = new_item['user_cid']
