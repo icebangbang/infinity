@@ -59,6 +59,20 @@ def insert_bid(conn_sake, cursor_sake,item, new_user_id, bankcard_id):
         total = total + 1
         print('*old*第%s条迁移成功, 状态是%s -> %s' % (total, query_bid_list[0]['status'], convert_status(int(item['status']))))
     else:
+
+        device_info_id = None
+        with open('bid.csv', 'r') as bidFile:
+            reader = csv.DictReader(bidFile)
+            for row in reader:
+                if row['thirdparty_order_id'] == item['thirdparty_order_id']:
+                    device_info_id = row['device_info_id']
+                    break
+        if device_info_id is None:
+            bidFile.close()
+            print('bid no %s' % item['thirdparty_order_id'])
+            return
+        bidFile.close()
+
         bid_id = snowflake.client.get_guid()
         status = convert_status(int(item['status']))
         product_id = 200
@@ -96,14 +110,7 @@ def insert_bid(conn_sake, cursor_sake,item, new_user_id, bankcard_id):
             disburse_count = 0
         bid_creat_time = item['submit_time']
 
-        device_info_id = None
-        with open('bid.csv', 'r') as bidFile:
-            reader = csv.DictReader(bidFile)
-            for row in reader:
-                if row['thirdparty_order_id'] == item['thirdparty_order_id']:
-                    device_info_id = row['device_info_id']
-                    break
-        bidFile.close()
+
 
         insert_bid_sql = "INSERT INTO `sake`.`bid`(`id`, `gmt_create`, `gmt_modified`, `status`, `user_id`, `saas_id`, `product_id`, `bank_account_id`, `amount`, `period`, `cid`, `mobile`, `name`, `contract_no`, `other_order_id`, `latitude`, `longitude`, `ip_address`, `bank_account_number`, `channel_id`, `channel_name`, `channel_label`, `operate_time`, `operator_id`, `deduct_time`, `repayment_time`, `real_repayment_time`, `is_reloan`, `is_overdue`, `overdue_days`,  `disburse_count`, `device_info_id`) " \
                          "VALUES ({}, '{}', '{}', {}, {}, 2237, {}, {}, {}, {}, '{}', '{}', '{}', '{}', '{}',  {}, {}, '{}', '{}', 2, '{}', '{}', '{}', 0, '{}', '{}', '{}', {}, {}, {}, {} ,'{}');".format(
@@ -210,6 +217,51 @@ def insert_user(conn_sake, cursor_sake, new_item, bankcard_id):
 
     if int(user_count[0]['count(1)']) > 0:
          return new_item['user_cid']
+    idcard_front_img = None
+    live_img = None
+    idcard_image_hand = None
+    address = None
+    gender = None
+    birth_day = None
+    marital_status = None
+    month_income = None
+    education = None
+    emrg_contact_name_a = None
+    emrg_contact_mobile_a = None
+    emrg_contact_rel_a = None
+    emrg_contact_name_b = None
+    emrg_contact_mobile_b = None
+    emrg_contact_rel_b = None
+    work_type = None
+    company_name = None
+    has_work = None
+
+    with open('user_detail.csv', 'r') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            if row['user_cid'] == new_item['user_cid'] and row['phone'] == new_item['phone']:
+                idcard_front_img = row['idcard_front_img']
+                live_img = row['live_img']
+                idcard_image_hand = row['idcard_image_hand']
+                address = row['address']
+                gender = row['gender']
+                birth_day = row['birth_day']
+                marital_status = row['marital_status']
+                month_income = row['month_income']
+                emrg_contact_name_a = row['emrg_contact_name_a']
+                emrg_contact_mobile_a = row['emrg_contact_mobile_a']
+                emrg_contact_name_b = row['emrg_contact_name_b']
+                emrg_contact_mobile_b = row['emrg_contact_mobile_b']
+                emrg_contact_rel_b = row['emrg_contact_rel_b']
+                work_type = row['work_type']
+                company_name = row['company_name']
+                has_work = row['has_work']
+                break
+    if idcard_front_img == None:
+        csvfile.close()
+        print('user_detail no %s,%s' % (new_item['user_cid'], new_item['user_cid']))
+        return
+    csvfile.close()
 
     user_id = snowflake.client.get_guid()
     cid = new_item['user_cid']
@@ -239,47 +291,6 @@ def insert_user(conn_sake, cursor_sake, new_item, bankcard_id):
     name_mirror = name[-1::-1]
     liveness_score = new_item['face_score']
 
-    idcard_front_img = None
-    live_img = None
-    idcard_image_hand = None
-    address = None
-    gender = None
-    birth_day = None
-    marital_status = None
-    month_income = None
-    education = None
-    emrg_contact_name_a = None
-    emrg_contact_mobile_a = None
-    emrg_contact_rel_a = None
-    emrg_contact_name_b = None
-    emrg_contact_mobile_b = None
-    emrg_contact_rel_b = None
-    work_type = None
-    company_name = None
-    has_work =None
-
-    with open('user_detail.csv', 'r') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            if row['user_cid'] == new_item['user_cid'] and row['phone'] == new_item['phone']:
-                idcard_front_img = row['idcard_front_img']
-                live_img = row['live_img']
-                idcard_image_hand = row['idcard_image_hand']
-                address = row['address']
-                gender = row['gender']
-                birth_day = row['birth_day']
-                marital_status = row['marital_status']
-                month_income = row['month_income']
-                emrg_contact_name_a = row['emrg_contact_name_a']
-                emrg_contact_mobile_a = row['emrg_contact_mobile_a']
-                emrg_contact_name_b = row['emrg_contact_name_b']
-                emrg_contact_mobile_b = row['emrg_contact_mobile_b']
-                emrg_contact_rel_b = row['emrg_contact_rel_b']
-                work_type = row['work_type']
-                company_name = row['company_name']
-                has_work = row['has_work']
-                break
-    csvfile.close()
 
     insert_user_detail_sql = "INSERT INTO `sake`.`user_detail`(`id`, `saas_id`, `user_id`, `cid`, `mobile`, `name`, `channel_id`, `channel_name`, `address`, `gender`, `birthday`, `marital_status`, `income`, `education_level`, `bank_account_id`, `operator_id`, `first_apply_time`, `first_deduct_time`, `loan_amount`, `emrg_contact_name_a`, `emrg_contact_name_b`, `emrg_contact_mobile_a`, `emrg_contact_mobile_b`, `emrg_contact_rel_a`, `emrg_contact_rel_b`, `idcard_front_img`, `live_img`, `name_mirror`, `cid_md5`, `mobile_md5`, `liveness_score`, `has_work`, `work_type`, `company_name`, `idcard_image_hand`) " \
                              "VALUES ({}, 2237, {}, '{}', '{}', '{}', 2, '{}', '{}', {}, '{}', {}, {}, None, {}, 0, '{}', '{}', {}, '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', {}, {}, {}, '{}', '{}');".format(
