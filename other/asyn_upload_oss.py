@@ -87,6 +87,8 @@ def convert_status(source_status):
 
 once = 0
 total = 0
+gmt_create_start = '2021-10-14 00:00:00'
+gmt_create_end = '2021-10-14 23:59:59'
 pool = ThreadPoolExecutor(20)
 semaphore = threading.Semaphore(20)
 
@@ -186,8 +188,8 @@ def upload_oss_and_write_file(new_item, type, test_count):
 def confirm_data(cursor_rum, last_offset, page_size):
 	global total, total
 
-	last_time_sql = "SELECT * FROM ks_loan_order where status in('100','121','131','132','200') and  partner_code='{}' limit {},{}; ".format(
-		'mautunai', last_offset, page_size)
+	last_time_sql = "SELECT * FROM ks_loan_order where status in('100','121','131','132','200') and  partner_code='{}'  and gmt_create BETWEEN '{}' AND '{}' limit {},{}; ".format(
+		'mautunai', gmt_create_start, gmt_create_end, last_offset, page_size)
 	cursor_rum.execute(last_time_sql)
 	source_list = cursor_rum.fetchall()
 	# 多字段排序分组
@@ -218,13 +220,12 @@ def confirm_data(cursor_rum, last_offset, page_size):
 	wait(re, return_when=ALL_COMPLETED)
 	print('偏移量为%s模块内，根据身份证和手机号总共有%s组' % (last_offset, total))
 
-# gmt_create_start = '2021-10-14 00:00:00'
-# gmt_create_end = '2021-10-14 23:59:59'
+
 # sql = "SELECT count(1) FROM ks_loan_order where status in('100','121','131','132','200') and partner_code='{}' and gmt_create BETWEEN '{}' AND '{}'".format('mautunai', gmt_create_start, gmt_create_end)
 
 def execute(cursor_rum):
-	sql = "SELECT count(1) FROM ks_loan_order where status in('100','121','131','132','200') and partner_code='{}'; ".format(
-		'mautunai')
+	sql = "SELECT count(1) FROM ks_loan_order where status in('100','121','131','132','200') and partner_code='{}' and gmt_create BETWEEN '{}' AND '{}'; ".format(
+		'mautunai', gmt_create_start, gmt_create_end)
 	cursor_rum.execute(sql)
 	source_count = cursor_rum.fetchall()
 	# 分块读取，避免一次性读取大量数据
