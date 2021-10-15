@@ -51,11 +51,57 @@ def insert_bid(conn_sake, cursor_sake,item, new_user_id, bankcard_id):
     query_bid_list = cursor_sake.fetchall()
     if len(query_bid_list) > 0:
         new_status = convert_status(int(item['status']))
-        update_bid_sql = "update bid set status = {} where contract_no = {};".format(new_status, item['thirdparty_order_id'])
+        update_bid_sql = "update bid set status = {} where contract_no = '{}';".format(new_status, item['thirdparty_order_id'])
         cursor_rum.execute(update_bid_sql)
+        print(item['thirdparty_order_id'] +  ', update bid ok')
+
         bid_id = query_bid_list[0]['id']
         update_bill_sql = "update bill set status = {} where bid_id = {};".format(new_status, bid_id)
         cursor_rum.execute(update_bill_sql)
+        print(item['thirdparty_order_id'] + ', update bill ok')
+
+        ks_loan_order_tran_sql = "SELECT * FROM ks_loan_order_tran where partner_code='{}' and order_id={} and gmt_create BETWEEN '{}' AND '{}';".format(
+            'mautunai', item['id'], gmt_create_start, gmt_create_end)
+        cursor_rum.execute(ks_loan_order_tran_sql)
+        ks_loan_order_tran_by_order_id_list = cursor_rum.fetchall()
+        product_id = query_bid_list[0]['product_id']
+        repayment_corpus = query_bid_list[0]['repayment_corpus']
+        repayment_amount = query_bid_list[0]['repayment_amount']
+        real_repayment_amount = query_bid_list[0]['real_repayment_amount']
+        real_repayment_corpus = query_bid_list[0]['real_repayment_corpus']
+        overdue_manage_fee = query_bid_list[0]['overdue_manage_fee']
+        bank_account_number = query_bid_list[0]['bank_account_number']
+        contract_no = query_bid_list[0]['contract_no']
+        cid = query_bid_list[0]['cid']
+        name = query_bid_list[0]['name']
+        mobile = query_bid_list[0]['mobile']
+        overdue_days = query_bid_list[0]['overdue_days']
+        is_reloan = query_bid_list[0]['is_reloan']
+        for tran in ks_loan_order_tran_by_order_id_list:
+            if int(tran['current_status']) == 200 or int(tran['current_status']) == 132:
+                bill_extension_id = snowflake.client.get_guid()
+                bill_extension_status = convert_status(int(tran['current_status']))
+                bill_extension_creat_time = tran['gmt_create']
+                bill_extension_repayment_time = tran['repayment_time']
+                if tran['expiry_time'] == None:
+                    bill_extension_overdue_days = 0
+                else:
+                    bill_extension_overdue_days = cal_time(tran['expiry_time'])
+                insert_bill_extension_sql = "INSERT INTO `sake`.`bill_extension`(`id`,`gmt_create`, `gmt_modified`, `bid_id`, `user_id`, `product_id`, `saas_id`, `channel_id`, `status`, `repayment_corpus`, `repayment_amount`, `real_repayment_amount`, `real_repayment_corpus`, `overdue_amount`, `real_pay_overdue_fine`, `current_overdue_days`, `bank_account_number`, `contract_no`, `name`, `cid`, `mobile`, `overdue_day`, `repayment_time`, `is_reloan`) " \
+                                            "VALUES ({}, '{}', '{}', {}, {}, {}, 2237, 2, {}, {}, {}, {}, {}, {}, {}, {}, '{}', '{}', '{}', '{}', '{}', {}, '{}', {});".format(
+                    bill_extension_id, bill_extension_creat_time, bill_extension_creat_time, bid_id, new_user_id,
+                    product_id, bill_extension_status, repayment_corpus, repayment_amount,
+                    real_repayment_amount, real_repayment_corpus, overdue_manage_fee, overdue_manage_fee,
+                    bill_extension_overdue_days,
+                    bank_account_number, contract_no, name, cid, mobile, overdue_days, bill_extension_repayment_time,
+                    is_reloan
+                ).replace("'None',", "null,").replace("None,", "null,")
+                try:
+                    cursor_sake.execute(insert_bill_extension_sql)
+                except:
+                    print('insert_bill_extension_sql error, %s' % insert_bill_extension_sql)
+                print(item['user_cid'] + ',' + item['phone'] + '，' + str(bid_id) + ',' + str(
+                    bill_extension_status) + ', insert bill_extension ok')
         total = total + 1
         print('*old*第%s条迁移成功, 状态是%s -> %s' % (total, query_bid_list[0]['status'], convert_status(int(item['status']))))
     else:
@@ -180,7 +226,7 @@ def insert_bid(conn_sake, cursor_sake,item, new_user_id, bankcard_id):
             print(item['user_cid'] + ',' + item['phone'] + '，' + str(bid_id) + ', insert payment_record ok')
 
 
-            ks_loan_order_tran_sql = "SELECT * FROM ks_loan_order_tran where partner_code='{}' and order_id={} and gmt_create BETWEEN '{}' AND '{}".format(
+            ks_loan_order_tran_sql = "SELECT * FROM ks_loan_order_tran where partner_code='{}' and order_id={} and gmt_create BETWEEN '{}' AND '{}';".format(
                 'mautunai', item['id'], gmt_create_start, gmt_create_end)
             cursor_rum.execute(ks_loan_order_tran_sql)
             ks_loan_order_tran_by_order_id_list = cursor_rum.fetchall()
@@ -206,7 +252,11 @@ def insert_bid(conn_sake, cursor_sake,item, new_user_id, bankcard_id):
                         print('insert_bill_extension_sql error, %s' % insert_bill_extension_sql)
                     print(item['user_cid'] + ',' + item['phone'] + '，' + str(bid_id) + ','+ str(bill_extension_status) + ', insert bill_extension ok')
         total = total + 1
-        print('*new*第%s条迁移成功, 状态是%s -> %s' % (total, query_bid_list[0]['status'], convert_status(int(item['status']))))
+        old_status = None
+        if len(query_bid_list) > 0:
+            old_status = query_bid_list[0]['status']
+        print('*new*第%s条迁移成功, 状态是%s -> %s' % (total, old_status, convert_status(int(item['status']))))
+        print('---------------------------------------------------------------------------------------------------------------')
     conn_sake.commit()
 
 
