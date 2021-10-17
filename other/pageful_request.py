@@ -4,6 +4,8 @@ from sshtunnel import SSHTunnelForwarder
 from other.public import request_method
 from app.main.db.mongo import db
 from bson import ObjectId
+import itertools
+
 
 
 class MI:
@@ -22,6 +24,7 @@ class MI:
         r = self.cursor.fetchall()
         return r
 
+detail = request_method("61696a1121f05c385ed6442c")
 
 with SSHTunnelForwarder(
         ("52.184.8.192", 3007),
@@ -39,16 +42,30 @@ with SSHTunnelForwarder(
 
     cursor_rum = conn_rum.cursor()
 
-    sql = "select id,thirdparty_order_id from ks_loan_order where id > {} and thirdparty_order_id is not null and partner_code = 'mautunai' and status>=100 limit 100"
+    sql = "select id,thirdparty_order_id from ks_loan_order where id > {} and thirdparty_order_id is not null and partner_code = 'mautunai' and status>=100 order by id asc limit 100"
 
     m = MI(cursor_rum, sql)
     for i in m:
         for item in i:
             thirdparty_order_id = item['thirdparty_order_id']
             detail = request_method(thirdparty_order_id)
-            id = detail['data']['apply_list'][0]['_id']
+            apply_list = detail['data']['apply_list']
+
+            if len(apply_list) >1:
+                print("old user")
+                new_apply_list = list(set([i['_id'] for i in apply_list ]))
+                new_apply_list.sort()
+                for temp_id in new_apply_list:
+                    record = db['temp'].find_one({"id":temp_id})
+                    if record is None:
+                        id = temp_id
+                        break
+            else:
+                id = apply_list[0]['_id']
+
+
             index = item['id']
             db['temp'].insert_one(dict(thirdparty_order_id=thirdparty_order_id, id=id))
 
             db['temp2'].update_one({"_id": ObjectId("61656102400a8b112afa54c8")}, {"$set": {"id": index}})
-            print(id)
+            print(id,thirdparty_order_id)
