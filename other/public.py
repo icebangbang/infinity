@@ -1,7 +1,7 @@
 import requests
 import json
-import snowflake
 
+from other.snowflake import get_guid
 proxies = {
     "http": None,
     "https": None,
@@ -24,6 +24,22 @@ def convert_status(source_status):
         return 171
     else:
         return 200
+
+def transferContent(content):
+    if content is None:
+        return None
+    else:
+        string = ""
+        for c in content:
+            if c == '"':
+                string += '\\\"'
+            elif c == "'":
+                string += "\\\'"
+            elif c == "\\":
+                string += "\\\\"
+            else:
+                string += c
+        return string
 
 
 def cal_overdue_day(create_time, repayment_time):
@@ -62,7 +78,7 @@ def insert_bill_extension(order_id, conn, cursor_sake, bank_account_num, name, c
     extension_index = 0
 
     if current_status == 132:
-        bill_extension_id = snowflake.client.get_guid()
+        bill_extension_id = get_guid()
         bill_extension_status = convert_status(current_status)
         bill_extension_creat_time = update_time
         bill_extension_repayment_time = repayment_time
@@ -83,7 +99,7 @@ def insert_bill_extension(order_id, conn, cursor_sake, bank_account_num, name, c
             bill_extension_repayment_time, 7 + day)
 
     if current_status == 200:
-        bill_extension_id = snowflake.client.get_guid()
+        bill_extension_id = get_guid()
         bill_extension_status = convert_status(current_status)
         bill_extension_creat_time = update_time
         bill_extension_repayment_time = repayment_time
@@ -115,7 +131,7 @@ def insert_bill_extension(order_id, conn, cursor_sake, bank_account_num, name, c
         product_id, 2237, 2, bill_extension_status, repayment_corpus, repayment_amount, real_repayment_amount,
         real_repayment_corpus,
         overdue_amount, real_pay_overdue_fine, day, bank_account_num,
-        bid_id, name, cid, mobile, bill_extension_overdue_days, bill_extension_repayment_time, is_reloan,is_extending,order_type,next_repayment_time
+        bid_id, transferContent(name), cid, mobile, bill_extension_overdue_days, bill_extension_repayment_time, is_reloan,is_extending,order_type,next_repayment_time
     ).replace("'None',", "null,").replace("None,", "null,")
     cursor_sake.execute(insert_bill_extension_sql)
     conn.commit()

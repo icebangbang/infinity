@@ -5,7 +5,7 @@ from itertools import groupby
 from operator import itemgetter
 import hashlib
 from sshtunnel import SSHTunnelForwarder
-import snowflake.client
+from other.snowflake import get_guid
 import json
 import time
 import datetime
@@ -71,7 +71,7 @@ error_sql_list = []
 
 def insert_bid(conn_sake, cursor_sake, item, new_user_id, bankcard_id):
     status = item['current_status']
-    update_time = item['gmt_create']
+    update_time = item['update_time']
 
     global total
     query_bid_sql = "SELECT * FROM `bid` WHERE saas_id=2237 and  other_order_id = '{}';".format(
@@ -127,10 +127,10 @@ def insert_bid(conn_sake, cursor_sake, item, new_user_id, bankcard_id):
             bill['current_extension_period'] = 7
             bill['current_extension_repayment_amount'] = 49000
             bill['extension_repayment_amount'] = bill['extension_repayment_amount'] + 49000
-            bill['current_returned_amount'] = bill['current_returned_amount']+49000
+            bill['current_returned_amount'] = bill['current_returned_amount'] + 49000
             bill['extension_returned_amount'] = bill['extension_returned_amount'] + 49000
             bill['real_repayment_amount'] = bill['extension_returned_amount']
-            bill['extension_times'] = bill['extension_times']+1
+            bill['extension_times'] = bill['extension_times'] + 1
             bill['order_type'] = 1 if bid['extension_start_time'] is not None else 0
             bill["last_update_time"] = bid['gmt_modified']
             bill['extension_period'] = bill['extension_period'] + 7
@@ -154,7 +154,6 @@ def insert_bid(conn_sake, cursor_sake, item, new_user_id, bankcard_id):
             bid['is_extending'] = 1
             bid['extension_start_time'] = extensionTime
 
-
             update_by_id("bill", bill, conn_sake)
             update_by_id("bid", bid, conn_sake)
 
@@ -174,18 +173,15 @@ def insert_bid(conn_sake, cursor_sake, item, new_user_id, bankcard_id):
             cursor_sake.execute(query_user_detail_sql)
             user_detail = cursor_sake.fetchone()
 
-            if user_detail['category'] == 25:
-                user_detail['category'] = 3
+            user_detail['category'] = 3 if bid['is_reloan'] == 0 else 4
 
             bill['current_returned_amount'] = bill['current_returned_amount'] + 1400000
             bill['real_repayment_amount'] = bill['real_repayment_amount'] + 1400000
             bill['current_repayment_amount'] = 0
             bill['current_repayment_corpus'] = 0
 
-
             bill['order_type'] = 1 if bid['extension_start_time'] is not None else 0
             bid['order_type'] = bill['order_type']
-
 
             bill['last_update_time'] = update_time
             bill['real_repayment_time'] = update_time
@@ -216,7 +212,7 @@ def insert_bid(conn_sake, cursor_sake, item, new_user_id, bankcard_id):
             # return
         bidFile.close()
 
-        bid_id = snowflake.client.get_guid()
+        bid_id = get_guid()
         status = convert_status(status)
         product_id = 200
         # bank_account_id = convert_back_id(item['debit_open_bank_id'])
@@ -235,12 +231,23 @@ def insert_bid(conn_sake, cursor_sake, item, new_user_id, bankcard_id):
         channel_name = item['channel_source']
         channel_label = item['channel_source']
         operate_time = item['review_time']
-        deduct_time = item['loan_time']
-        repayment_time = item['repayment_time']
+        if status == 170:
+            deduct_time = update_time
+            repayment_time = simple_date_util.get_new_repayment_time(update_time, 7)
+        elif status == 171 or status == 200:
+            deduct_time = simple_date_util.get_new_repayment_time(update_time, -7)
+            repayment_time = update_time
+        elif status == 180:
+            deduct_time = simple_date_util.get_new_repayment_time(update_time, -7)
+            repayment_time = update_time
         real_repayment_time = item['repaymented_time']
         # raise_amount
         # comment
-        is_reloan = int.from_bytes(item['is_reloan'], byteorder='little', signed=True)
+        if item['is_reloan'] is None:
+            is_reloan = 0
+
+        if isinstance(item['is_reloan'], bytes):
+            is_reloan = int.from_bytes(item['is_reloan'], byteorder='little', signed=True)
         if item['expiry_time'] == None:
             is_overdue = 0
             overdue_days = 0
@@ -273,7 +280,7 @@ def insert_bid(conn_sake, cursor_sake, item, new_user_id, bankcard_id):
 
         if int(status) > 100:
 
-            bill_id = snowflake.client.get_guid()
+            bill_id = get_guid()
             manage_fee = item['service_fee']
             if manage_fee == None:
                 loan_amount = item['loan_amount']
@@ -321,7 +328,7 @@ def insert_bid(conn_sake, cursor_sake, item, new_user_id, bankcard_id):
                 error_sql_list.append(insert_bill_sql)
             print(item['user_cid'] + ',' + item['phone'] + '，' + str(bid_id) + ', insert bill ok')
 
-            payment_record_id = snowflake.client.get_guid()
+            payment_record_id = get_guid()
             insert_payment_record_sql = "INSERT INTO `sake`.`payment_record`(`id`, `type`, `bank_account`, `bank_id`, `amount`, `status`, `bid_id`, `mobile`, `saas_id`, `channel_id`, `payment_channel`, `notify_time`) " \
                                         "VALUES ({}, 3, '{}', {}, {}, 1, {}, '{}', 2237, 2, 'flinpay', '{}');".format(
                 payment_record_id, bank_account_number, bank_account_id, amount, bid_id, mobile, deduct_time
@@ -397,7 +404,7 @@ def insert_user(conn_sake, cursor_sake, new_item, bankcard_id):
         # return
     csvfile.close()
 
-    user_id = snowflake.client.get_guid()
+    user_id = get_guid()
     cid = new_item['user_cid']
     mobile = new_item['phone']
     name = new_item['user_name']
@@ -417,7 +424,7 @@ def insert_user(conn_sake, cursor_sake, new_item, bankcard_id):
         error_sql_list.append(insert_user_sql)
     print(new_item['user_cid'] + ',' + new_item['phone'] + ', insert user ok')
 
-    user_detail_id = snowflake.client.get_guid()
+    user_detail_id = get_guid()
     # if len(new_item['marital']) > 0:
     # 	marital_status = new_item['marital']
     # bank_account_id = convert_back_id(new_item['debit_open_bank_id'])
@@ -429,14 +436,15 @@ def insert_user(conn_sake, cursor_sake, new_item, bankcard_id):
     name_mirror = name[-1::-1]
     liveness_score = new_item['face_score']
 
-    insert_user_detail_sql = "INSERT INTO `sake`.`user_detail`(`id`, `saas_id`, `user_id`, `cid`, `mobile`, `name`, `channel_id`, `channel_name`, `address`, `gender`, `birthday`, `marital_status`, `income`, `education_level`, `bank_account_id`, `operator_id`, `first_apply_time`, `first_deduct_time`, `loan_amount`, `emrg_contact_name_a`, `emrg_contact_name_b`, `emrg_contact_mobile_a`, `emrg_contact_mobile_b`, `emrg_contact_rel_a`, `emrg_contact_rel_b`, `idcard_front_img`, `live_img`, `name_mirror`, `cid_md5`, `mobile_md5`, `liveness_score`, `has_work`, `work_type`, `company_name`, `idcard_image_hand`) " \
-                             "VALUES ({}, 2237, {}, '{}', '{}', '{}', 2, '{}', '{}', {}, '{}', {}, {}, None, {}, 0, '{}', '{}', {}, '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', {}, {}, {}, '{}', '{}');".format(
-        user_detail_id, user_id, cid, mobile, transferContent(name), registerChannel, address, gender, birth_day,
+    insert_user_detail_sql = "INSERT INTO `sake`.`user_detail`(`id`, `saas_id`, `user_id`, `cid`, `mobile`, `name`, `channel_id`, `channel_name`, `address`, `gender`, `birthday`, `marital_status`, `income`, `education_level`, `bank_account_id`, `operator_id`, `first_apply_time`, `first_deduct_time`, `loan_amount`, `emrg_contact_name_a`, `emrg_contact_name_b`, `emrg_contact_mobile_a`, `emrg_contact_mobile_b`, `emrg_contact_rel_a`, `emrg_contact_rel_b`, `idcard_front_img`, `live_img`, `name_mirror`, `cid_md5`, `mobile_md5`, `liveness_score`, `has_work`, `work_type`, `company_name`, `idcard_image_hand`,`category`) " \
+                             "VALUES ({}, 2237, {}, '{}', '{}', '{}', 2, '{}', '{}', {}, '{}', {}, {}, None, {}, 0, '{}', '{}', {}, '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', {}, {}, {}, '{}', '{}','{}');".format(
+        user_detail_id, user_id, cid, mobile, transferContent(name), registerChannel, transferContent(address), gender,
+        birth_day,
         marital_status,
         month_income, bank_account_id, first_apply_time, first_deduct_time, loan_amount, emrg_contact_name_a,
         emrg_contact_name_b, emrg_contact_mobile_a, emrg_contact_mobile_b, emrg_contact_rel_a, emrg_contact_rel_b,
         idcard_front_img, live_img, transferContent(name_mirror), cidMd5, mobileMd5, liveness_score, has_work,
-        work_type, company_name, idcard_image_hand
+        work_type, company_name, idcard_image_hand, 25
     ).replace("'None',", "null,").replace("None,", "null,")
     try:
         cursor_sake.execute(insert_user_detail_sql)
@@ -452,7 +460,7 @@ def insert_user(conn_sake, cursor_sake, new_item, bankcard_id):
     bank_account_number = new_item['debit_bank_card']
     insert_bankcard_sql = "INSERT INTO `sake`.`bankcard`(`id`, `user_id`, `bank_id`, `bank_account_number`, `bank_account_name`, `bank_full_name`, `payment_channel`, `check_result`, `saas_id`, `bank_code`)" \
                           " VALUES ({},  {}, {}, '{}', '{}', '{}', 'flinpay', 0, 2237, '{}');".format(
-        bankcard_id, cid, bank_id, bank_account_number, debit_bank_name, debit_bank_name, debit_bank_name
+        bankcard_id, user_id, bank_id, bank_account_number, debit_bank_name, debit_bank_name, debit_bank_name
     )
     try:
         cursor_sake.execute(insert_bankcard_sql)
@@ -486,7 +494,7 @@ def public_sql(cursor_sake):
     print('insert role ok')
 
 
-def execute(cursor_rum, cursor_sake, conn_sake):
+def execute(cursor_rum, cursor_sake, conn_sake, id):
     try:
         # public_sql(cursor_sake)
         pass
@@ -498,11 +506,10 @@ def execute(cursor_rum, cursor_sake, conn_sake):
     print(
         '---------------------------------------------------------------------------------------------------------------')
 
-    ks_loan_order_tran_sql = "SELECT * FROM ks_loan_order_tran where current_status in('121','132','200') and partner_code='{}' and order_id = 4591644".format(
-        'uang', gmt_create_start, gmt_create_end)
+    ks_loan_order_tran_sql = "SELECT * FROM ks_loan_order_tran where current_status in('121','131','132','200') and partner_code='{}' and id > {} limit 50".format(
+        'mautunai', id)
     cursor_rum.execute(ks_loan_order_tran_sql)
     source_size_list = cursor_rum.fetchall()
-    ids = []
     # for size_item in source_size_list:
     #     ids.append(size_item['order_id'])
     # print('ks_loan_order_tran ,%s' % len(list(set(ids))))
@@ -515,21 +522,27 @@ def execute(cursor_rum, cursor_sake, conn_sake):
     # start_time = datetime.datetime.now()  # 程序开始时间
     # print('ks_loan_order ,%s' % len(source_list))
     for item in source_size_list:
+        id = item['id']
         print('%s,%s, sync start' % (item['user_cid'], item['phone']))
-        bankcard_id = snowflake.client.get_guid()
+        bankcard_id = get_guid()
         # user & user_detail & bankcard, 返回user_id
         new_user_id = insert_user(conn_sake, cursor_sake, item, bankcard_id)
 
         insert_bid(conn_sake, cursor_sake, item, new_user_id, bankcard_id)
-
+        db['temp2'].update_one({"_id": ObjectId("616c0d685264584b28c48440")}, {"$set": {"id": id}})
     over_time = datetime.datetime.now()  # 程序结束时间
     print('#--- 迁移完成, %s ---#' % (total))
     print('--error_sql--')
     for error_sql in error_sql_list:
         print(error_sql)
 
+    return id
+
 
 if __name__ == '__main__':
+    from app.main.db.mongo import db
+    from bson import ObjectId
+
     # 开发环境
     # conn_rum = pymysql.Connect(
     # 	host='120.55.200.28',
@@ -581,7 +594,13 @@ if __name__ == '__main__':
         if not cursor_rum:
             raise (NameError, "连接数据库失败")
 
-        execute(cursor_rum, cursor_sake, conn_sake)
+        while True:
+            latest_id = db['temp2'].find_one({"_id": ObjectId("616c0d685264584b28c48440")})['id']
+            new = execute(cursor_rum, cursor_sake, conn_sake, latest_id)
+
+            if latest_id == new:
+                print(datetime.datetime.now())
+                break
         cursor_rum.close()
         conn_rum.close()
         cursor_sake.close()
