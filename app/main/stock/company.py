@@ -16,13 +16,13 @@ class Company:
         self.inds = {}
         self.features = {}
 
-    def init_ind(self, data: PandasData):
+    def init_ind(self, datas: List[PandasData]):
         for sub_st in self.sub_st_list:
-            sub_st.init_ind(data, self)
+            sub_st.init_ind(datas, self)
 
-    def next(self, data: PandasData):
+    def next(self, datas: List[PandasData]):
         for sub_st in self.sub_st_list:
-            sub_st.next(data, self)
+            sub_st.next(datas, self)
 
     def add_sub_st(self, *st: SubST):
         """

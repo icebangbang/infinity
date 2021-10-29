@@ -12,28 +12,13 @@ class StrategyWrapper(bt.Strategy):
         dt = dt or self.datas[0].datetime.date(0)
         logging.info('%s, %s' % (dt.isoformat(), txt))
 
-    def __init__(self, company_group: CompanyGroup,sub_st:List[SubST],**kwargs):
-        self.company_group = company_group
-
-        for i, d in enumerate(self.datas):
-            code = d._name.split("_")[0]
-            name = d._name.split("_")[1]
-            logging.info("init {}".format(code))
-            sub_st_instance = [ st(**kwargs) for st in sub_st]
-            company = Company(code,
-                              name,
-                              *sub_st_instance
-                              )
-            company_group.add_company(company)
-
-            company: Company = company_group.get_company(code)
-            company.init_ind(d)
+    def __init__(self, company: Company, sub_st: List[SubST], **kwargs):
+        self.company = company
+        company.init_ind(self.datas)
 
     def next(self):
-        for i, d in enumerate(self.datas):
-            code = d._name.split("_")[0]
-            company: Company = self.company_group.get_company(code)
-            company.next(d)
+        self.company.next(self.datas)
+
 
 class SellStrategyWrapper(bt.Strategy):
 
@@ -42,13 +27,13 @@ class SellStrategyWrapper(bt.Strategy):
         dt = dt or self.datas[0].datetime.date(0)
         logging.info('%s, %s' % (dt.isoformat(), txt))
 
-    def __init__(self, company_group: CompanyGroup,sub_st:List[SubST],**kwargs):
+    def __init__(self, company_group: CompanyGroup, sub_st: List[SubST], **kwargs):
         self.company_group = company_group
 
         for i, d in enumerate(self.datas):
             code = d._name
             logging.info("init {}".format(code))
-            sub_st_instance = [ st(**kwargs) for st in sub_st]
+            sub_st_instance = [st(**kwargs) for st in sub_st]
             company = Company(code,
                               *sub_st_instance
                               )

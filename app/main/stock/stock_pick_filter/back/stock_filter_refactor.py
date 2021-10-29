@@ -11,7 +11,7 @@ from app.main.stock.service import board_service, stock_service, stock_index_ser
 from app.main.stock.strategy.kdj_macd_strategy import KdjMacdStrategy
 from app.main.stock.sub_startegy.up_sma import UpSma
 from app.main.stock.sub_startegy.trend.term import MediumLongTerm, MediumShortUpTerm
-from app.main.stock.sub_startegy.trend.medium_short_up_trend import MediumShortUpTrend
+from app.main.stock.sub_startegy.trend.base_feature import BaseFeature
 
 stocks = stock_dao.get_all_stock()
 
@@ -30,7 +30,7 @@ def get_stock_status():
     # data = pd.DataFrame(k_line_dao.get_k_line_data(from_date, to_date))
     # daily_price = data.set_index("date", drop=False)
 
-    sub_st = [MediumShortUpTrend, ]
+    sub_st = [BaseFeature, ]
     kwargs = {"ma_period": 17,
               "ma_match_num": 17,
               "up_mid_bolling_period": 1,

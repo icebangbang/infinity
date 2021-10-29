@@ -13,6 +13,7 @@ import csv
 from other.public import insert_bill_extension
 from other.public import update_by_id
 from other import simple_date_util
+from app.main.db.mongo import db
 
 
 def convert_status(source_status):
@@ -73,9 +74,12 @@ def insert_bid(conn_sake, cursor_sake, item, new_user_id, bankcard_id):
     status = item['current_status']
     update_time = item['update_time']
 
+    result = db['temp'].find_one({"thirdparty_order_id":item['thirdparty_order_id']})
+    other_order_id = result["id"]
+
     global total
     query_bid_sql = "SELECT * FROM `bid` WHERE saas_id=2237 and  other_order_id = '{}';".format(
-        item['thirdparty_order_id'])
+        other_order_id)
     cursor_sake.execute(query_bid_sql)
     bid = cursor_sake.fetchone()
     if bid is not None:
@@ -85,7 +89,7 @@ def insert_bid(conn_sake, cursor_sake, item, new_user_id, bankcard_id):
             return
 
         update_bid_sql = "update bid set status = {} where other_order_id = '{}';".format(new_status,
-                                                                                          item['thirdparty_order_id'])
+                                                                                          other_order_id)
         try:
             cursor_sake.execute(update_bid_sql)
             conn_sake.commit()
@@ -357,7 +361,10 @@ def insert_user(conn_sake, cursor_sake, new_item, bankcard_id):
     user = cursor_sake.fetchone()
 
     if user is not None:
-        return user['id']
+        query_bank_sql = "select id from bankcard where saas_id=2237 and user_id={}".format(user['id'])
+        cursor_sake.execute(query_bank_sql)
+        bankcard = cursor_sake.fetchone()
+        return user['id'],bankcard['id']
     idcard_front_img = None
     live_img = None
     idcard_image_hand = None
@@ -470,7 +477,7 @@ def insert_user(conn_sake, cursor_sake, new_item, bankcard_id):
         print(err)
         error_sql_list.append(insert_bankcard_sql)
     print(new_item['user_cid'] + ',' + new_item['phone'] + ', insert bankcard ok')
-    return user_id
+    return user_id,bankcard_id
 
 
 def public_sql(cursor_sake):
@@ -526,7 +533,7 @@ def execute(cursor_rum, cursor_sake, conn_sake, id):
         print('%s,%s, sync start' % (item['user_cid'], item['phone']))
         bankcard_id = get_guid()
         # user & user_detail & bankcard, 返回user_id
-        new_user_id = insert_user(conn_sake, cursor_sake, item, bankcard_id)
+        new_user_id,bankcard_id = insert_user(conn_sake, cursor_sake, item, bankcard_id)
 
         insert_bid(conn_sake, cursor_sake, item, new_user_id, bankcard_id)
         db['temp2'].update_one({"_id": ObjectId("616c0d685264584b28c48440")}, {"$set": {"id": id}})
@@ -552,13 +559,13 @@ if __name__ == '__main__':
     # 	cursorclass=pymysql.cursors.DictCursor)
     # cursor_rum = conn_rum.cursor()
 
-    conn_sake = pymysql.Connect(
-        host='120.55.200.28',
-        port=3306,
-        user='ecreditpal', passwd='vaiFA3MQ9dLcDjWL',
-        db='sake', charset='utf8',
-        cursorclass=pymysql.cursors.DictCursor)
-    cursor_sake = conn_sake.cursor()
+    # conn_sake = pymysql.Connect(
+    #     host='120.55.200.28',
+    #     port=3306,
+    #     user='ecreditpal', passwd='vaiFA3MQ9dLcDjWL',
+    #     db='sake', charset='utf8',
+    #     cursorclass=pymysql.cursors.DictCursor)
+    # cursor_sake = conn_sake.cursor()
 
     # execute(cursor_rum, cursor_sake, conn_sake)
     # cursor_rum.close()
@@ -580,6 +587,15 @@ if __name__ == '__main__':
             user='tropic', passwd='5pdUNJBoBW#GZldg',
             db='rum', charset='utf8',
             cursorclass=pymysql.cursors.DictCursor)
+
+        conn_sake = pymysql.Connect(
+            host='127.0.0.1',
+            port=tunnel.local_bind_port,
+            user='tropic', passwd='5pdUNJBoBW#GZldg',
+            db='sake', charset='utf8',
+            cursorclass=pymysql.cursors.DictCursor)
+
+        cursor_sake = conn_sake.cursor()
 
         cursor_rum = conn_rum.cursor()
 

@@ -7,7 +7,6 @@ from bson import ObjectId
 import itertools
 
 
-
 class MI:
     def __init__(self, cursor, sql):
         self.cursor = cursor
@@ -23,6 +22,7 @@ class MI:
         self.cursor.execute(sql)
         r = self.cursor.fetchall()
         return r
+
 
 detail = request_method("61696a1121f05c385ed6442c")
 
@@ -51,21 +51,20 @@ with SSHTunnelForwarder(
             detail = request_method(thirdparty_order_id)
             apply_list = detail['data']['apply_list']
 
-            if len(apply_list) >1:
+            if len(apply_list) > 1:
                 print("old user")
-                new_apply_list = list(set([i['_id'] for i in apply_list ]))
+                new_apply_list = list(set([i['_id'] for i in apply_list if i['status'] != 2]))
                 new_apply_list.sort()
                 for temp_id in new_apply_list:
-                    record = db['temp'].find_one({"id":temp_id})
+                    record = db['tempx'].find_one({"id": temp_id})
                     if record is None:
                         id = temp_id
                         break
             else:
                 id = apply_list[0]['_id']
 
-
             index = item['id']
-            db['temp'].insert_one(dict(thirdparty_order_id=thirdparty_order_id, id=id))
+            db['tempx'].insert_one(dict(thirdparty_order_id=thirdparty_order_id, id=id))
 
             db['temp2'].update_one({"_id": ObjectId("61656102400a8b112afa54c8")}, {"$set": {"id": index}})
-            print(id,thirdparty_order_id)
+            print(id, thirdparty_order_id)

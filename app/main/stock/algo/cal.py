@@ -44,26 +44,60 @@ def get_bot_line(Y):
     bot_array = []
     for i, v in enumerate(Y):
         y = m * (i + 1) + c
-        if v < y: bot_array.append([i, v])
+        # 拟合出一个线段后,获取位于线段底部的点
+        if v <= y: bot_array.append([i, v])
 
     dis = {i: get_dis([m, c], [i + 1, v]) for [i, v] in bot_array}
 
     new_Y = []
     new_X = []
     for k, v in dis.items():
-        prev = k - 1
-        next = k + 1
-        if prev in dis.keys() and next in dis.keys():
-            if v > dis[prev] and v > dis[next]:
-                new_Y.append(Y[k])
-                new_X.append(k + 1)
+        # prev = k - 1
+        # next = k + 1
+        # if prev in dis.keys() and next in dis.keys():
+        #     if v > dis[prev] and v > dis[next]:
+        new_Y.append(Y[k])
+        new_X.append(k + 1)
 
     [m, c] = get_line(new_Y, new_X)
 
-    return [m, c]
+    return [m, c,new_Y,new_X]
 
-    # d_order = sorted(dis.items(), key=lambda x: x[1], reverse=False)
-    # print(d_order)
+
+def get_top_line(Y):
+    """
+    获取顶部支撑线
+    :param Y:
+    :return:
+    """
+    # Y = [1.066, 1.155, 1.251, 1.308, 1.443, 1.648, 1.918, 2.095, 2.157, 2.050, 2.063, 2.182, 2.397, 2.576]
+    [m, c] = get_line(Y)
+
+    top_array = []
+    for i, v in enumerate(Y):
+        y = m * (i + 1) + c
+        # 拟合出一个线段后,获取位于线段上部的点
+        if v >= y: top_array.append([i, v])
+
+    dis = {i: get_dis([m, c], [i + 1, v]) for [i, v] in top_array}
+
+    new_Y = []
+    new_X = []
+    for k, v in dis.items():
+        # prev = k - 1
+        # next = k + 1
+        # if prev in dis.keys() and next in dis.keys():
+        #     if v >= dis[prev] and v >= dis[next]:
+        new_Y.append(Y[k])
+        new_X.append(k + 1)
+
+    [m, c] = get_line(new_Y, new_X)
+
+    return [m, c,new_Y,new_X]
+
+
+# d_order = sorted(dis.items(), key=lambda x: x[1], reverse=False)
+# print(d_order)
 
 
 def _trace(x):
@@ -93,7 +127,8 @@ def get_reverse_point(points):
         if prev >= 0 and next < 0:     neg_p.append(i)
         if prev < 0 and next >= 0:      pos_p.append(i)
 
-    return pos_p,neg_p
+    return pos_p, neg_p
+
 
 if __name__ == "__main__":
     print(_trace(math.atan(0.55)))
@@ -105,4 +140,4 @@ if __name__ == "__main__":
     get_bot_line(a)
 
     pos_p, neg_p = get_reverse_point(a)
-    print(pos_p,neg_p)
+    print(pos_p, neg_p)

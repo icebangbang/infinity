@@ -7,7 +7,7 @@ from app.main.stock.algo import cal
 from app.main.stock import constant
 
 
-class MediumShortUpTrend(SubST):
+class BaseFeature(SubST):
     """
         中短期上升策略
         """

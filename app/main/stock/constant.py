@@ -12,6 +12,13 @@ kdj_k_prev = "kdj_k_prev"  #
 high_volume_10 = "high_volume_10"
 high_volume_5 = "high_volume_5"
 
+box_top_formulas = "box_high_formulas" # 箱体上沿线性公式
+box_bottom_formulas = "box_low_formulas" # 箱体下沿线性公式
+
+box_period = "box_period"
+box_top = "box_top"
+box_bottom = "box_bottom"
+
 
 feature = {
     "close_gte_ma20": "收盘价大于20日均线",
@@ -23,6 +30,8 @@ feature = {
     "macd_histo": "macd柱值",
     "macd_histo_smallest_3": "macd柱值最近3天最小",
     "macd_histo_rise_point": "macd柱上升拐点",
-    "kdj_k_prev": "kdj前一天的k值"
-
+    "kdj_k_prev": "kdj前一天的k值",
+    "box_high_formulas":"箱体上沿线性公式",
+    "box_low_formulas":"箱体下沿线性公式",
+    "box_period":"箱体周期",
 }

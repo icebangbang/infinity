@@ -9,7 +9,7 @@ import backtrader.feeds as btfeeds  # 导入数据模块
 from app.main.stock.service import board_service, stock_service, stock_index_service
 from app.main.stock.sub_startegy.up_sma import UpSma
 from app.main.stock.sub_startegy.trend.term import MediumLongTerm, MediumShortUpTerm
-from app.main.stock.sub_startegy.trend.medium_short_up_trend import MediumShortUpTrend
+from app.main.stock.sub_startegy.trend.base_feature import BaseFeature
 
 
 def cal_rsv_predict(df,
