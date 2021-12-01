@@ -27,15 +27,16 @@ class BaseFeature(SubST):
         初始化指标
         :return:
         """
-        company.setInd("ma20", bt.indicators.SimpleMovingAverage(
-            data, period=20))
+        company.setInd("ma250", bt.indicators.SimpleMovingAverage(data, period=250))
+        company.setInd("ma200", bt.indicators.SimpleMovingAverage(data, period=200))
+        company.setInd("ma60", bt.indicators.SimpleMovingAverage(data, period=60))
+        company.setInd("ma30", bt.indicators.SimpleMovingAverage(data, period=30))
+        company.setInd("ma20", bt.indicators.SimpleMovingAverage(data, period=20))
+        company.setInd("ma10", bt.indicators.SimpleMovingAverage(data, period=10))
+        company.setInd("ma5", bt.indicators.SimpleMovingAverage(data, period=5))
 
-        company.setInd("ma10", bt.indicators.SimpleMovingAverage(
-            data, period=10))
         company.setInd("macd", bt.indicators.MACDHisto(data, period_me1=12, period_me2=26, period_signal=9))
         company.setInd("kdj", KDJ(data))
-        company.setInd("ma5", bt.indicators.SimpleMovingAverage(
-            data, period=5))
 
         company.set(constant.close_gte_ma20, False)
         company.set(constant.ma20_incr, False)
@@ -50,8 +51,13 @@ class BaseFeature(SubST):
         n日线策略进行筛选
         :return:
         """
+        ma250 = company.getInd("ma250")
+        ma200 = company.getInd("ma200")
+        ma60 = company.getInd("ma60")
+        ma30 = company.getInd("ma30")
         ma20 = company.getInd("ma20")
         ma10 = company.getInd("ma10")
+        ma5 = company.getInd("ma10")
         macd = company.getInd("macd")
         kdj = company.getInd("kdj")
 
@@ -82,7 +88,6 @@ class BaseFeature(SubST):
         # macd柱子近3三天最小
         company.set(constant.macd_histo_smallest_3, macd_histo_smallest_3)
 
-
         m1, ignore = cal.get_line([macd.histo[-2], macd.histo[-1]])
         m2, ignore = cal.get_line([macd.histo[-1], macd.histo[0]])
         macd_histo_incr = bool(m2 > m1)
@@ -90,3 +95,11 @@ class BaseFeature(SubST):
         company.set(constant.macd_histo_rise_point, macd_histo_incr)
         company.set(constant.kdj_k_prev,K_1)
         company.set(constant.close_gte_ma10, data.close[0] >= ma10[0])
+
+        company.set(constant.ma5,ma5[0])
+        company.set(constant.ma10,ma10[0])
+        company.set(constant.ma20,ma20[0])
+        company.set(constant.ma30,ma30[0])
+        company.set(constant.ma60,ma60[0])
+        company.set(constant.ma200,ma200[0])
+        company.set(constant.ma250,ma250[0])

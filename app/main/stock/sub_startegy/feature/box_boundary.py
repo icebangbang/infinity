@@ -14,7 +14,7 @@ def custom_sort(e):
     return e['v']
 
 
-class InBox(SubST):
+class BoxBoundary(SubST):
     """
     箱体判断策略
     """
@@ -71,29 +71,29 @@ class InBox(SubST):
         """
         pass
 
-    def next(self, datas: List[PandasData], company: Company):
+    def next(self, data: PandasData, company: Company):
         """
-        n日线策略进行筛选
+
         :return:
         """
-        data = datas[0]
         day = data.buflen() - len(data)
-        if day != 0: return  # 只考虑当日触发情况
+        if day != 0: return  # 从当日开始统计数据
 
-        high = data.high.get(ago=-1, size=20)
-        high_type: list = self.get_top_type(high)
-        tm, tc, ty, tx = cal.get_top_line(high_type)
-        high_type.sort(reverse=True)
+        periods = [5, 10, 20, 30, 40, 50, 60, 90, 200]
+        box = {"close": data.close[0]}
 
-        low = data.low.get(ago=-1, size=20)
-        low_type: list = self.get_bottom_type(low)
-        bm, bc, by, bx = cal.get_bot_line(low_type)
-        # low_type.sort(key=custom_sort)
-        low_type.sort(reverse=False)
+        for period in periods:
+            high = list(data.high.get(ago=-1, size=period))
+            if len(high) < period: continue
 
-        company.set(constant.box_top_formulas, dict(k=tm, c=tc))
-        company.set(constant.box_bottom_formulas, dict(k=bm, c=bc))
+            high.sort(reverse=True)
 
-        company.set(constant.box_period, 20)
-        company.set(constant.box_top, high_type[0])
-        company.set(constant.box_bottom, low_type[0])
+            low = list(data.low.get(ago=-1, size=period))
+            low.sort(reverse=False)
+
+            box["D" + str(period)] = dict(
+                top=high[0],
+                bottom=low[0]
+            )
+
+        company.set(constant.box_boundary, box)

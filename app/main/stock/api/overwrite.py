@@ -1,6 +1,10 @@
 import pandas as pd
 import requests
 import akshare as ak
+import json
+from datetime import datetime,timedelta
+import dateutil
+
 
 
 def stock_zh_a_hist(
@@ -516,3 +520,98 @@ def stock_board_concept_cons_em(symbol: str = "车联网", symbol_code=None) -> 
     temp_df["市盈率-动态"] = pd.to_numeric(temp_df["市盈率-动态"], errors="coerce")
     temp_df["市净率"] = pd.to_numeric(temp_df["市净率"], errors="coerce")
     return temp_df
+
+def chinese_ppi():
+    """
+    工业品出厂价格指数是反映全部工业产品出厂价格总水平的变动趋势和程度的相对数。
+    重要性非常高：
+    工业品出厂价格指数是衡量工业企业产品出厂价格变动趋势和变动程度的指数，
+    是反映某一时期生产领域价格变动情况的重要经济指标，也是制定有关经济政策和国民经济核算的重要依据。
+    :return:
+    """
+    url = "https://datainterface.eastmoney.com/EM_DataCenter/JS.aspx"
+    params = {
+        "type": "GJZB",
+        "sty": "ZGZB",
+        "ps": 200,
+        "mkt": 22
+    }
+    r = requests.get(url, params=params)
+    content = r.text
+    content = content.replace("(","").replace(")","")
+    return json.loads(content)
+
+def chinese_cpi():
+    """
+    工业品出厂价格指数是反映全部工业产品出厂价格总水平的变动趋势和程度的相对数。
+    重要性非常高：
+    工业品出厂价格指数是衡量工业企业产品出厂价格变动趋势和变动程度的指数，
+    是反映某一时期生产领域价格变动情况的重要经济指标，也是制定有关经济政策和国民经济核算的重要依据。
+    :return:
+    """
+    url = "https://datainterface.eastmoney.com/EM_DataCenter/JS.aspx"
+    params = {
+        "type": "GJZB",
+        "sty": "ZGZB",
+        "ps": 200,
+        "mkt": 19
+    }
+    r = requests.get(url, params=params)
+    content = r.text
+    content = content.replace("(","").replace(")","")
+    return json.loads(content)
+
+def pig_data():
+    """
+    获取农业部猪肉相关数据
+    :return:
+    """
+    now = datetime.now()
+    start_time = datetime(2021,3,1)
+    current = start_time
+    flag = True
+    results = []
+    while flag:
+        current = current+dateutil.relativedelta.relativedelta(months=1)
+        url = "http://www.moa.gov.cn/ztzl/szcpxx/jdsj/"+datetime.strftime(current,"%Y%m")
+
+        print(current)
+
+        r = requests.get(url)
+
+        if r.status_code == 403:
+            url = "http://www.moa.gov.cn/ztzl/szcpxx/jdsj/"
+            flag = False
+            r = requests.get(url)
+        text = str(r.content,'utf8')
+        temp_df = pd.read_html(text)[0]
+
+        keys = ['能繁母猪存栏','生猪存栏','生猪出栏','月份规模以上生猪定点屠宰企业屠宰量','猪肉产量']
+
+        for index, row in temp_df.iterrows():
+            indicator = row['指标']
+            for key in keys:
+                if key in indicator:
+                    result = dict(date=current)
+                    results.append(result)
+                    result['name']=key
+                    num = row['数值']
+                    if "（" in num:
+                        num = num[0:num.index("（")]
+                    if num == '—':
+                        num = None
+
+                    result['num'] = num
+                    result['tb'] = row['同比']
+                    hb = row['环比']
+
+                    if hb == '—': hb = None
+                    result['hb'] = hb
+
+        if flag is False:
+            break
+    return results
+
+
+if __name__ == "__main__":
+    results = pig_data()

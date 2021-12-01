@@ -15,6 +15,10 @@ def parse_date_time(dt_str, fmt="%Y-%m-%d %H:%M:%S") -> datetime:
     time = datetime.strptime(dt_str, fmt)
     return time
 
+def date_time_to_str(dt:datetime,fmt="%Y-%m-%d %H:%M:%S"):
+    return dt.strftime(fmt)
+
+
 
 def get_days_between(end: datetime, start: datetime) -> int:
     secokds = (get_start_of_day(end) - get_start_of_day(start)).total_seconds()

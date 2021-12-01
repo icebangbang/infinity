@@ -14,10 +14,10 @@ class StrategyWrapper(bt.Strategy):
 
     def __init__(self, company: Company, sub_st: List[SubST], **kwargs):
         self.company = company
-        company.init_ind(self.datas)
+        company.init_ind(self.data)
 
     def next(self):
-        self.company.next(self.datas)
+        self.company.next(self.data)
 
 
 class SellStrategyWrapper(bt.Strategy):

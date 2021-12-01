@@ -17,6 +17,9 @@ def get_stock_detail(codes):
     data_list = list(my_set.find({"code": {"$in": codes}}))
     return {data['code']: data for data in data_list}
 
+def get_one_stock(code):
+    my_set = db['stock_detail']
+    return my_set.find_one({"code":code})
 
 def get_stock_detail_list(codes):
     my_set = db['stock_detail']
@@ -49,3 +52,25 @@ def pick_by_feature(condition,date):
     my_set = db['stock_feature']
     result = list(my_set.find(c,dict(code=1, name=1, _id=0)))
     return result
+
+def get_company_feature(code,date):
+    """
+    获取公司在某一日的数据特征
+    :param date:
+    :return:
+    """
+    my_set = db['stock_feature']
+    result = my_set.find_one({"code":code,"date":date})
+    if result is None: return None
+    company = Company.load(code,result['name'],result['features'])
+    return company
+
+def add_event(record):
+    my_set = db['event']
+    my_set.insert(record)
+
+
+
+
+if __name__ == "__main__":
+    get_company_feature("689009",datetime(2021,11,1))

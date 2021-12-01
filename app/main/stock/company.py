@@ -7,7 +7,7 @@ import json
 
 class Company:
 
-    def __init__(self, code, name,*st):
+    def __init__(self, code, name, *st):
         self.match_time = []
         self.code = code
         self.name = name
@@ -15,6 +15,13 @@ class Company:
         self.sub_st_list.extend(st)
         self.inds = {}
         self.features = {}
+
+    @classmethod
+    def load(cls, code, name, features):
+        instance = cls(code=code, name=name)
+        instance.features = features
+
+        return instance
 
     def init_ind(self, datas: List[PandasData]):
         for sub_st in self.sub_st_list:

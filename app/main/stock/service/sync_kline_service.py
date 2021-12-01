@@ -5,7 +5,7 @@ from app.main.stock import stock_kline
 import pandas as pd
 
 
-def sync_day_level(code, base_time=None, time_window=365):
+def sync_day_level(code, base_time=None, time_window=3650):
     """
     同步60天内的数据
     :param code:

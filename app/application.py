@@ -3,10 +3,6 @@ from flask import Flask
 from app.log import init_log
 from app.main.db.models import init_db
 from config import config
-from flask_docs import ApiDoc
-
-# from app.main.rest import init_all_blueprint
-
 
 app = None
 
@@ -27,14 +23,9 @@ def create_app(config_name):
     init_db(app)
     init_log(app)
 
-    # 文档初始化
-    ApiDoc(app)
-
     # init_all_blueprint(app)
 
-    from app.main.rest import rest, auth, tr
+    from app.main.rest import rest
     app.register_blueprint(rest)
-    app.register_blueprint(auth)
-    app.register_blueprint(tr)
 
     return app

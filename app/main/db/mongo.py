@@ -2,5 +2,5 @@ import pymongo
 import pytz
 
 tzinfo = pytz.timezone('Asia/Shanghai')
-myclient = pymongo.MongoClient("mongodb://admin:123456@101.37.24.40:20017/")
+myclient = pymongo.MongoClient("mongodb://127.0.0.1:27017/")
 db = myclient["stock"]
