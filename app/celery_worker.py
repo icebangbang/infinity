@@ -1,16 +1,37 @@
-from app import application
+from app.application import app
 import os
+from celery import Celery
 
 # 获取环境变量,
 # pycharm启动可以在 RUN/DEBUG Configuration-Environment variables中添加FLASK_ENV
 # 线上启动在 honeybee.sysconfig中指定
-env = os.environ.get('FLASK_ENV') or 'development'
-app = application.create_app(env)  # from .main.rest import rest as main_blueprint
-
-celery = application.make_celery(app)
+# env = os.environ.get('FLASK_ENV') or 'development'
+# app = application.create_app(env)  # from .main.rest import rest as main_blueprint
 
 
-class MyTask(celery.Task): # celery 基类
+celery = Celery(
+    app.import_name,
+    backend=app.config['RESULT_BACKEND'],
+    broker=app.config['CELERY_BROKER_URL']
+)
+
+celery.conf.update(
+    result_expires=300,   # Celery结果存在中间件Redis的超时时间[仅针对当前的Celery的App]
+)
+
+
+# celery.conf.update(app.config)
+
+class ContextTask(celery.Task):
+    def __call__(self, *args, **kwargs):
+        with app.app_context():
+            return self.run(*args, **kwargs)
+
+
+celery.Task = ContextTask
+
+
+class MyTask(celery.Task):  # celery 基类
 
     def on_success(self, retval, task_id, args, kwargs):
         # 执行成功的操作
@@ -22,4 +43,3 @@ class MyTask(celery.Task): # celery 基类
         # 任务执行失败，可以调用接口进行失败报警等操作
         print('MyTasks 基类回调，任务执行失败')
         return super(MyTask, self).on_failure(exc, task_id, args, kwargs, einfo)
-

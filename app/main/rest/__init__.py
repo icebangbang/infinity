@@ -11,4 +11,4 @@ rest = Blueprint('op', __name__,url_prefix='/api')
 #     app.register_blueprint(tr)
 
 
-from . import indicator,test,board
+from . import indicator,test,board,celery

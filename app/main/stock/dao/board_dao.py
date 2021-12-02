@@ -5,7 +5,7 @@ from datetime import datetime
 
 def get_all_board(type=[1,2,3]):
     my_set = db['board_detail']
-    data = list(my_set.find({"type":{"$in":type}}))
+    data = list(my_set.find({"type":{"$in":type}},dict(_id=0)))
     return data
 
 

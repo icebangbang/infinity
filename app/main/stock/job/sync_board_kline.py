@@ -30,3 +30,4 @@ def sync_live_data():
 
 sync_history()
 
+

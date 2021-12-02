@@ -80,9 +80,9 @@ def get_kline_of_stock(code, latest_valid_day, time_window=60):
         return None
 
 
-def sync_board_k_line(name, type,base_time=None, time_window=365):
+def sync_board_k_line(name, type,base_time=None, time_window=3):
     """
-    同步60天内的数据
+    同步360天内的数据
     :param code:
     :return:
     """
@@ -96,20 +96,23 @@ def sync_board_k_line(name, type,base_time=None, time_window=365):
     else:
         before = point[0]['create_time']
 
-    if date_util.get_days_between(now, before) <= 0:
-        return None
-
-    if (before.hour >= 15):
-        start = before + timedelta(days=1)
-    else:
-        start = before
+    # if date_util.get_days_between(now, before) == 0:
+    #     return None
 
     df = k_line_dao.get_board_k_line_data(name,
-                                          date_util.dt_to_str(start),
+                                          date_util.dt_to_str(before),
                                           date_util.dt_to_str(now))
     df['type'] = type
     data = df.to_dict(orient='records')
-    k_line_dao.dump_board_k_line(data)
+    # if (before.hour >= 15):
+    #     start = before + timedelta(days=1)
+    # else:
+    #     start = before
+
+    if date_util.get_days_between(now, before) == 0:
+        k_line_dao.update_board_k_line(name,datetime(now.year,now.month,now.day),data)
+    else:
+        k_line_dao.dump_board_k_line(data)
     return data
 
 

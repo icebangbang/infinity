@@ -11,11 +11,12 @@ def get_oldest_k_line(code, level='day'):
 
     return list(my_set.find({"code": code}).sort("date", -1).limit(1))
 
+
 def get_concept_oldest_k_line(name):
     db_name = "board_k_line"
     my_set = db[db_name]
 
-    return list(my_set.find({"name": name}).sort("date", -1).limit(1))
+    return list(my_set.find({"name": name}).sort("_id", -1).limit(1))
 
 
 def dump_k_line(data, level='day'):
@@ -27,10 +28,12 @@ def dump_k_line(data, level='day'):
 
     return my_set.insert(data)
 
+
 def clear_k_line(level='week'):
     db_name = "k_line_" + level
     my_set = db[db_name]
     my_set.delete_many({})
+
 
 def dump_board_k_line(data, level='day'):
     db_name = "board_k_line"
@@ -40,6 +43,14 @@ def dump_board_k_line(data, level='day'):
         return
 
     return my_set.insert(data)
+
+
+def update_board_k_line(name, date,data):
+    db_name = "board_k_line"
+    my_set = db[db_name]
+
+    for d in data:
+        r = my_set.update({"name": name, "date": d['date']},d)
 
 
 def get_k_line_by_code(code: List,
@@ -57,8 +68,8 @@ def get_k_line_by_code(code: List,
     db_name = "k_line_" + level
     my_set = db[db_name]
 
-    query = my_set.find({"code": {"$in":code},
-                         "date": {"$lte": end_day, "$gte": start_day}})\
+    query = my_set.find({"code": {"$in": code},
+                         "date": {"$lte": end_day, "$gte": start_day}}) \
         .sort("date", 1)
     return list(query)
 
@@ -77,10 +88,11 @@ def get_k_line_data(
     db_name = "k_line_" + level
     my_set = db[db_name]
 
-    query = my_set\
-        .find({"date": {"$lte": end_day, "$gte": start_day}})\
+    query = my_set \
+        .find({"date": {"$lte": end_day, "$gte": start_day}}) \
         .sort("date", 1)
     return list(query)
+
 
 def get_index_kline_data(
         start_day: datetime,
@@ -96,8 +108,8 @@ def get_index_kline_data(
     db_name = "stock_index_k_line_" + level
     my_set = db[db_name]
 
-    query = my_set\
-        .find({"date": {"$lte": end_day, "$gte": start_day}})\
+    query = my_set \
+        .find({"date": {"$lte": end_day, "$gte": start_day}}) \
         .sort("date", 1)
     return list(query)
 
@@ -106,7 +118,7 @@ def get_board_k_line_data(
         name,
         start_day: datetime,
         end_day: datetime,
-        ) -> List:
+) -> List:
     """
     获取特定时间的股票走势
     :param start_day:
@@ -125,8 +137,6 @@ def get_board_k_line_data(
     data['date'] = pd.to_datetime(data['date'], format='%Y-%m-%d')
     data['create_time'] = datetime.now()
     return data
-
-
 
 
 if __name__ == "__main__":

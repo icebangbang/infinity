@@ -7,12 +7,12 @@ import os
 env = os.environ.get('FLASK_ENV') or 'development'
 app = application.create_app(env)  # from .main.rest import rest as main_blueprint
 
-celery = application.make_celery(app)
+from app.celery_worker import celery
 
 celery.conf.beat_schedule = {
         'ddddddddd': {  # 任务名，可以自定义
             "task": "app.main.task.board_task.sync_board_k_line",  # 任务函数所在位置
-            "schedule": 10,  # 定时每秒执行一次
+            "schedule": 5,  # 定时每秒执行一次
         }
     }
 

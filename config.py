@@ -40,8 +40,8 @@ class DevelopmentConfig(Config):
     REDIS_DB_ID = 10
     REDIS_PASSWORD = None
 
-    CELERY_BROKER_URL = 'redis://:ironBackRedis123@172.16.1.184:30004/0'
-    RESULT_BACKEND = 'redis://:ironBackRedis123@172.16.1.184:30004/0'
+    CELERY_BROKER_URL = 'redis://:ironBackRedis123@172.16.1.184:30004/1'
+    RESULT_BACKEND = 'redis://:ironBackRedis123@172.16.1.184:30004/1'
 
 
 
