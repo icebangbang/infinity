@@ -1,6 +1,7 @@
 from flask import Blueprint
 
-rest = Blueprint('op', __name__,url_prefix='/api/indicator')
+
+rest = Blueprint('op', __name__,url_prefix='/api')
 
 
 
@@ -10,4 +11,4 @@ rest = Blueprint('op', __name__,url_prefix='/api/indicator')
 #     app.register_blueprint(tr)
 
 
-from . import indicator
+from . import indicator,test,board

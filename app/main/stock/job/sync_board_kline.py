@@ -7,7 +7,7 @@ import logging
 同步板块k线数据
 """
 
-def sync():
+def sync_history():
     boards = board_dao.get_all_board()
     # 获取最近一个交易日
 
@@ -21,5 +21,12 @@ def sync():
             logging.info("已经处理过")
 
 
-sync()
+def sync_live_data():
+    """
+    实时更新
+    :return:
+    """
+
+
+sync_history()
 

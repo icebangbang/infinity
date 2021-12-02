@@ -7,7 +7,7 @@ from app.main.db.mongo import db
 from datetime import datetime
 
 
-@rest.route("/ppi", methods=['get'])
+@rest.route("/indicator/ppi", methods=['get'])
 def get_ppi():
     start = datetime(2008, 1, 1)
     ppi = db['ppi']
@@ -32,7 +32,7 @@ def get_ppi():
     return restful.response(data=dict(date=date, current=current, grace=grace, accum=accum, cpi=cpi))
 
 
-@rest.route("/sow", methods=['get'])
+@rest.route("/indicator/sow", methods=['get'])
 def get_sow_data():
     pig_data = db['pig_data']
     sow_data_list = list(pig_data.find({"name": "能繁母猪存栏"}).sort("_id", 1))

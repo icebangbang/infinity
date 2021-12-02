@@ -3,8 +3,13 @@ from flask import Flask
 from app.log import init_log
 from app.main.db.models import init_db
 from config import config
+from celery import Celery
+from datetime import timedelta
+from celery.schedules import crontab
+
 
 app = None
+celery = None
 
 
 def create_app(config_name):
@@ -29,3 +34,24 @@ def create_app(config_name):
     app.register_blueprint(rest)
 
     return app
+
+def make_celery(app):
+    celery = Celery(
+        app.import_name,
+        backend=app.config['RESULT_BACKEND'],
+        broker=app.config['CELERY_BROKER_URL']
+    )
+    # celery.conf.update(app.config)
+
+    class ContextTask(celery.Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery.Task = ContextTask
+    return celery
+
+
+
+
+
