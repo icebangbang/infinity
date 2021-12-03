@@ -91,11 +91,14 @@ def sync_board_k_line(name, type,base_time=None, time_window=3):
     if base_time is None:
         now = datetime.now()
 
+
+
     if len(point) == 0:
         before = now - timedelta(days=time_window)
     else:
-        before = point[0]['create_time']
-
+        before = point[0]['date']
+    if date_util.get_days_between(now, before) == 0:
+        before = now
     # if date_util.get_days_between(now, before) == 0:
     #     return None
 
@@ -103,11 +106,12 @@ def sync_board_k_line(name, type,base_time=None, time_window=3):
                                           date_util.dt_to_str(before),
                                           date_util.dt_to_str(now))
     df['type'] = type
-    data = df.to_dict(orient='records')
+
     # if (before.hour >= 15):
     #     start = before + timedelta(days=1)
     # else:
     #     start = before
+    data = df.to_dict(orient='records')
 
     if date_util.get_days_between(now, before) == 0:
         k_line_dao.update_board_k_line(name,datetime(now.year,now.month,now.day),data)

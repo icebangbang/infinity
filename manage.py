@@ -12,7 +12,7 @@ from app.celery_worker import celery
 celery.conf.beat_schedule = {
         'ddddddddd': {  # 任务名，可以自定义
             "task": "app.main.task.board_task.sync_board_k_line",  # 任务函数所在位置
-            "schedule": 5,  # 定时每秒执行一次
+            "schedule": 20,  # 定时每秒执行一次
         }
     }
 

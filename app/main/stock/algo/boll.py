@@ -4,18 +4,6 @@ boll布林轨道
 # 导入及处理数据
 import pandas as pd
 import numpy as np
-# 绘图
-import matplotlib.pyplot as plt
-# 设置图像标签显示中文
-plt.rcParams['font.sans-serif'] = ['SimHei']
-plt.rcParams['axes.unicode_minus'] = False
-import matplotlib as mpl
-# 解决一些编辑器(VSCode)或IDE(PyCharm)等存在的图片显示问题，
-# 应用Tkinter绘图，以便对图形进行放缩操作
-mpl.use('TkAgg')
-
-
-
 
 stock_code = 'sh600519'
 # 绘制数据的规模
