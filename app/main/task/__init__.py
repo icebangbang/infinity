@@ -7,3 +7,6 @@
 # boards = [boards[i:i + step] for i in range(0, len(boards), step)]
 # # sync_data(boards)
 # print(123)
+# from app.main.stock.service import sync_kline_service
+
+# sync_kline_service.sync_day_level('300763')

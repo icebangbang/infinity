@@ -5,7 +5,7 @@ from app.main.stock import stock_kline
 import pandas as pd
 
 
-def sync_day_level(code, base_time=None, time_window=3650):
+def sync_day_level(code, base_time=None, time_window=1095):
     """
     同步60天内的数据
     :param code:
@@ -19,26 +19,29 @@ def sync_day_level(code, base_time=None, time_window=3650):
     if len(point) == 0:
         before = now - timedelta(days=time_window)
     else:
-        before = point[0]['create_time']
-
-        if before.hour < 15:
-            before = before - timedelta(days=1)
+        before = point[0]['date']+timedelta(days=1)
 
     if date_util.get_days_between(now, before) <= 0:
-        return None
-
-    if before.hour >= 15:
-        start = before + timedelta(days=1)
-    else:
-        start = before
+        before = now
 
     df = stock_kline.fetch_kline_data(code,
-                                      date_util.dt_to_str(start),
+                                      date_util.dt_to_str(before),
                                       date_util.dt_to_str(now), 'qfq')
     if df is None: return None
+
     data = df.to_dict(orient='records')
-    k_line_dao.dump_k_line(data)
+
+    if date_util.get_days_between(now, before) == 0:
+        k_line_dao.update_k_line(code,data)
+    else:
+        k_line_dao.dump_k_line(data)
+
+
+
+
+
     return data
+
 
 def sync_week_level(code, start):
     """
@@ -82,7 +85,7 @@ def get_kline_of_stock(code, latest_valid_day, time_window=60):
 
 def sync_board_k_line(name, type,base_time=None, time_window=15):
     """
-    同步360天内的数据
+    同步15天内的数据
     :param code:
     :return:
     """

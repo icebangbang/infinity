@@ -15,6 +15,18 @@ from app.main.stock.dao import k_line_dao
 
 
 def run(from_date, to_date, data, main_st,sub_st, code, name, **kwargs):
+    """
+
+    :param from_date: 开始时间
+    :param to_date: 结束时间
+    :param data: k线数据
+    :param main_st: 主题策略,控制买卖,或者是筛选
+    :param sub_st: 子策略,用于计算具体指标
+    :param code: 股票代码
+    :param name: 股票名称
+    :param kwargs: 其他参数
+    :return:
+    """
     cerebro = bt.Cerebro()
 
     count = 1

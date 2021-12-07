@@ -20,6 +20,12 @@ def get_concept_oldest_k_line(name):
 
 
 def dump_k_line(data, level='day'):
+    """
+    存储个股日k
+    :param data:
+    :param level:
+    :return:
+    """
     db_name = "k_line_" + level
     my_set = db[db_name]
 
@@ -27,6 +33,13 @@ def dump_k_line(data, level='day'):
         return
 
     return my_set.insert(data)
+
+def update_k_line(code, data):
+    db_name = "k_line_day"
+    my_set = db[db_name]
+
+    for d in data:
+        r = my_set.update({"code": code, "date": d['date']}, d, upsert=True)
 
 
 def clear_k_line(level='week'):
@@ -45,12 +58,12 @@ def dump_board_k_line(data, level='day'):
     return my_set.insert(data)
 
 
-def update_board_k_line(name, date,data):
+def update_board_k_line(name, date, data):
     db_name = "board_k_line"
     my_set = db[db_name]
 
     for d in data:
-        r = my_set.update({"name": name, "date": d['date']},d,upsert=True)
+        r = my_set.update({"name": name, "date": d['date']}, d, upsert=True)
 
 
 def get_k_line_by_code(code: List,
@@ -77,7 +90,7 @@ def get_k_line_by_code(code: List,
 def get_k_line_data(
         start_day: datetime,
         end_day: datetime,
-        level='day') -> List:
+        level='day', codes=None) -> List:
     """
     获取特定时间的股票走势
     :param start_day:
@@ -87,9 +100,12 @@ def get_k_line_data(
     """
     db_name = "k_line_" + level
     my_set = db[db_name]
+    query_set = {"date": {"$lte": end_day, "$gte": start_day}}
+    if codes is not None:
+        query_set['code'] = {"$in":codes}
 
     query = my_set \
-        .find({"date": {"$lte": end_day, "$gte": start_day}}) \
+        .find(query_set) \
         .sort("date", 1)
     return list(query)
 

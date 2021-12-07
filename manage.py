@@ -10,11 +10,11 @@ app = application.create_app(env)  # from .main.rest import rest as main_bluepri
 from app.celery_worker import celery
 
 celery.conf.beat_schedule = {
-        'ddddddddd': {  # 任务名，可以自定义
-            "task": "app.main.task.board_task.sync_board_k_line",  # 任务函数所在位置
-            "schedule": 20,  # 定时每秒执行一次
-        }
+    'stock_data_sync': {  # 股票数据同步
+        "task": "app.main.task.board_task.sync_stock_k_line",  # 任务函数所在位置
+        "schedule": 20,  # 定时每60秒执行一次
     }
+}
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8191, debug=True, use_reloader=False, threaded=True)
