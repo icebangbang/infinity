@@ -9,6 +9,6 @@ from app.main.utils import my_redis
 @rest.route("/task/sync/boark_k_line/on", methods=['get'])
 def send_job():
     switch = request.args.get("on","false")
-    my_redis.set("board_sync_after_15",switch)
+    my_redis.set("sync_after_15",switch)
 
     return restful.response("ok")
