@@ -80,7 +80,7 @@ def get_kline_of_stock(code, latest_valid_day, time_window=60):
         return None
 
 
-def sync_board_k_line(name, type,base_time=None, time_window=3):
+def sync_board_k_line(name, type,base_time=None, time_window=15):
     """
     同步360天内的数据
     :param code:
@@ -96,8 +96,8 @@ def sync_board_k_line(name, type,base_time=None, time_window=3):
     if len(point) == 0:
         before = now - timedelta(days=time_window)
     else:
-        before = point[0]['date']
-    if date_util.get_days_between(now, before) == 0:
+        before = point[0]['date']+timedelta(days=1)
+    if date_util.get_days_between(now, before) <= 0:
         before = now
     # if date_util.get_days_between(now, before) == 0:
     #     return None

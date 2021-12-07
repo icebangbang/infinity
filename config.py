@@ -35,10 +35,10 @@ class DevelopmentConfig(Config):
     # REDIS_PASSWORD = '123'
     # MACHINE_ID = 0
     # 'sqlite:///' + os.path.join(basedir, 'data-test.sqlite')
-    REDIS_HOST = '127.0.0.1'
-    REDIS_PORT = 6379
-    REDIS_DB_ID = 10
-    REDIS_PASSWORD = None
+    REDIS_HOST = '172.16.1.184'
+    REDIS_PORT = 30004
+    REDIS_DB_ID = 1
+    REDIS_PASSWORD = 'ironBackRedis123'
 
     CELERY_BROKER_URL = 'redis://:ironBackRedis123@172.16.1.184:30004/1'
     RESULT_BACKEND = 'redis://:ironBackRedis123@172.16.1.184:30004/1'

@@ -9,6 +9,8 @@ import requests
 """
 同步板块
 """
+
+
 def sync_board():
     # myclient = pymongo.MongoClient("mongodb://admin:123456@101.37.24.40:20017/")
     # mydb = myclient["stock"]
@@ -61,6 +63,7 @@ def sync_board():
 
             if len((diffs)) > 0:
                 for diff in diffs:
+                    if diff == '融资融券':  continue
                     headers = {'Content-Type': 'application/json'}
                     d = {"msgtype": "text",
                          "text": {
@@ -78,5 +81,6 @@ def sync_board():
     board_detail.insert_many(board_list)
 
     print(x.inserted_ids)
+
 
 sync_board()

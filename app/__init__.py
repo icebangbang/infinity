@@ -11,7 +11,7 @@ from app.main.stock.api.overwrite import stock_zh_a_hist,\
     code_id_map,\
     stock_board_concept_hist_em,\
     stock_board_concept_name_em,\
-stock_board_concept_cons_em,chinese_ppi,chinese_cpi,pig_data
+stock_board_concept_cons_em,chinese_ppi,chinese_cpi,pig_data,chinese_pmi
 
 
 log.basicConfig(
@@ -28,4 +28,5 @@ akshare.stock_board_concept_name_em = stock_board_concept_name_em
 akshare.stock_board_concept_cons_em = stock_board_concept_cons_em
 akshare.chinese_ppi = chinese_ppi
 akshare.chinese_cpi = chinese_cpi
+akshare.chinese_pmi = chinese_pmi
 akshare.pig_data = pig_data

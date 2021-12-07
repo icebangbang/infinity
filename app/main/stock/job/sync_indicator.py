@@ -22,6 +22,26 @@ def sync_ppi():
     set.insert_many(data_format)
 
 
+def sync_pmi():
+    data_list = ak.chinese_pmi()
+
+    data_format = []
+
+    for data in data_list:
+        array = data.split(",")
+        date = date_util.parse_date_time(array[0], "%Y-%m-%d")
+        zzy_value = array[1]  # 制造业指数
+        zzy_tb = array[2]  # 同比增长
+        fzzy_value = array[3]  # 累计
+        fzzy_tb = array[4]  # 累计
+
+        data_format.append(dict(date=date, zzy_value=zzy_value, zzy_tb=zzy_tb, fzzy_value=fzzy_value, fzzy_tb=fzzy_tb))
+
+    set = db['pmi']
+    set.drop()
+    set.insert_many(data_format)
+
+
 def sync_cpi():
     data_list = ak.chinese_cpi()
 
@@ -60,13 +80,15 @@ def sync_cpi():
     set.drop()
     set.insert_many(data_format)
 
+
 def sync_pig_data():
     pig_data = ak.pig_data()
     set = db['pig_data']
     set.drop()
     set.insert_many(pig_data)
 
+
 if __name__ == "__main__":
-    # sync_cpi()
+    sync_pmi()
     # sync_ppi()
-    sync_pig_data()
+    # sync_pig_data()

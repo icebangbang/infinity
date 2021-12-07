@@ -50,7 +50,7 @@ def update_board_k_line(name, date,data):
     my_set = db[db_name]
 
     for d in data:
-        r = my_set.update({"name": name, "date": d['date']},d)
+        r = my_set.update({"name": name, "date": d['date']},d,upsert=True)
 
 
 def get_k_line_by_code(code: List,
