@@ -15,6 +15,13 @@ from app.main.stock.sub_startegy.feature.base_feature import BaseFeature
 
 def get_stock_status(from_date, to_date, data_list=None, codes=None, code_name_map=None):
     """
+
+    :param from_date: 开始时间
+    :param to_date: 结束时间
+    :param data_list:
+    :param codes:
+    :param code_name_map:
+    :return:
     """
     if data_list is None:
         data_list = pd.DataFrame(k_line_dao.get_k_line_data(from_date, to_date, codes=codes))

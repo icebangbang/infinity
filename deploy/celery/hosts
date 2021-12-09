@@ -5,3 +5,11 @@
 ansible_user=ironmansre
 ansible_port=22
 inner_host=172.16.1.184
+
+[jumper]
+121.40.179.191 ansible_ssh_host=121.40.179.191
+
+[jumper:vars]
+ansible_user=ironmansre
+ansible_port=22
+inner_host=121.40.179.191

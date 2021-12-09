@@ -6,9 +6,11 @@ from app.main.stock.company import Company
 from app.main.utils import date_util
 
 
-def get_all_stock():
+def get_all_stock(fields=None):
+    if fields is None:
+        fields = dict(code=1, date=1, belong=1, name=1, _id=0)
     my_set = db['stock_detail']
-    data = list(my_set.find({}, dict(code=1, date=1, belong=1, name=1, _id=0)))
+    data = list(my_set.find({}, fields))
     return data
 
 

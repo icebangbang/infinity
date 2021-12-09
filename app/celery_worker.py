@@ -18,6 +18,7 @@ celery = Celery(
 
 celery.conf.update(
     result_expires=300,   # Celery结果存在中间件Redis的超时时间[仅针对当前的Celery的App]
+    broker_heartbeat=10
 )
 
 

@@ -1,4 +1,4 @@
-from app.main.stock.api.overwrite import code_id_map, stock_zh_a_hist
+from app.main.stock.api.overwrite import stock_zh_a_hist
 import pandas as pd
 from datetime import datetime
 

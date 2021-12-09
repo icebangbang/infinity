@@ -1,19 +1,21 @@
-# sh run.sh ~/Work/pem/ironmansre_cdh.pem deveploment dev
+# sh run-cerely.sh ~/Work/pem/ironmansre_cdh.pem deveploment dev 2
+# sh run-cerely.sh ~/Work/pem/jumper.pem deveploment jumper 2
 
 pem=${1}
 env=${2}
 target=${3}
+num=${4}
 skipCopy=true
 
 
 project=dao-celery
 version=latest
 
-#docker build -f ./CerelyDockerfile -t ${project}:${version} .
-#docker save ${project}:${version} > ${project}.tar
+docker build -f ./CerelyDockerfile -t ${project}:${version} .
+docker save ${project}:${version} > ${project}.tar
 
 
-for index in {1..3}
+for ((index=1; index<=num; index++))
 do
 
 echo ${index}

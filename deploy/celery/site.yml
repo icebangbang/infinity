@@ -19,7 +19,7 @@
 
     - name: stop service
       shell:  |
-        docker stop {{project}}-{{port}}
+        docker stop {{project}}-{{index}}
       ignore_errors: yes
 
     - name: remove image

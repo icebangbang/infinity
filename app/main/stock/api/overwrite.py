@@ -4,6 +4,7 @@ import akshare as ak
 import json
 from datetime import datetime,timedelta
 import dateutil
+import logging
 
 
 
@@ -98,7 +99,7 @@ def _code_id_map() -> dict:
         "fltt": "2",
         "invt": "2",
         "fid": "f3",
-        "fs": "m:1 t:2,m:1 t:23",
+        "fs": "m:1+t:2,m:1+t:23",
         "fields": "f12",
         "_": "1623833739532",
     }
@@ -117,7 +118,7 @@ def _code_id_map() -> dict:
         "fltt": "2",
         "invt": "2",
         "fid": "f3",
-        "fs": "m:0 t:6,m:0 t:80",
+        "fs": "m:0+t:6,m:0+t:80",
         "fields": "f12",
         "_": "1623833739532",
     }
@@ -634,4 +635,5 @@ def pig_data():
 
 
 if __name__ == "__main__":
-    results = pig_data()
+    results = _code_id_map()
+    print(123)
