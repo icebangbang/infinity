@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 
 from app.main.stock.dao import stock_dao, k_line_dao
+from app.main.stock.stock_pick_filter import stock_filter
 from app.main.utils import date_util
 
 
@@ -83,5 +84,11 @@ def get_concepts(stock_map,code):
         return stock_map[code]['board']
     return ""
 
+
 if __name__ == "__main__":
+    stocks = stock_dao.get_all_stock(dict(code=1))
+    code_name_map = stock_dao.get_code_name_map()
+    to_time = datetime.now()
+    from_time = to_time - timedelta(739)
+    stock_filter.get_stock_status(from_time,to_time)
     publish(3,100)

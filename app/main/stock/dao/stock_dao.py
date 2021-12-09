@@ -36,9 +36,10 @@ def get_code_name_map():
 
 
 def dump_stock_feature(companies: List[Company], date):
-    delete_stock_feature(date_util.get_start_of_day(datetime.now()))
+    start_of_day =date_util.get_start_of_day(date)
+    delete_stock_feature(start_of_day)
     my_set = db['stock_feature']
-    features = [dict(code=company.code, name=company.name, date=date, features=company.features)
+    features = [dict(code=company.code, name=company.name, date=start_of_day, features=company.features)
                 for company in companies]
     my_set.insert_many(features)
 

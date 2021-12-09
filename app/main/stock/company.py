@@ -7,10 +7,11 @@ import json
 
 class Company:
 
-    def __init__(self, code, name, *st):
+    def __init__(self, code, name,data_size, *st):
         self.match_time = []
         self.code = code
         self.name = name
+        self.data_size = data_size
         self.sub_st_list: List[SubST] = list()
         self.sub_st_list.extend(st)
         self.inds = {}
@@ -45,13 +46,16 @@ class Company:
             return default
 
     def set(self, key, value):
+        if isinstance(value,float):
+            value = round(value,2)
         self.features[key] = value
 
     def setInd(self, key, value):
         self.inds[key] = value
 
     def getInd(self, key):
-        return self.inds[key]
+        if key in self.inds.keys():
+            return self.inds[key]
 
     def set_condition(self, strategy, value):
         self.set(strategy.__class__.__name__, value)

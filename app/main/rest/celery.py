@@ -6,7 +6,7 @@ from . import rest
 from app.main.task import demo
 from app.main.task import board_task
 from app.celery_worker import celery
-from app.main.task import board_task
+from app.main.task import board_task,stock_task
 
 
 @rest.route("/celery/board", methods=['get'])
@@ -19,5 +19,11 @@ def maunlly():
     for index, boards in enumerate(boards_group):
         logging.info("提交同步任务,时序{}".format(index))
         board_task.sync_data.apply_async(args=[boards])
+
+    return restful.response("ok")
+
+@rest.route("/celery/stock/feature", methods=['get'])
+def get_stock_feature():
+    stock_task.submit_stock_feature()
 
     return restful.response("ok")

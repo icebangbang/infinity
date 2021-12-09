@@ -31,10 +31,7 @@ def run(from_date, to_date, data, main_st,sub_st, code, name, **kwargs):
 
     count = 1
     sub_st_instance = [st(**kwargs) for st in sub_st]
-    company = Company(code,
-                      name,
-                      *sub_st_instance
-                      )
+
 
     timeline_limit = kwargs.get("timeline_limit", 10)
 
@@ -47,11 +44,16 @@ def run(from_date, to_date, data, main_st,sub_st, code, name, **kwargs):
 
         if len(df) <= timeline_limit:
             logging.info("{} may not have sma5".format(kwargs.get("timeline_limit", 10), code))
-            return None
+            # return None
 
         data_feed = btfeeds.PandasData(dataname=df, timeframe=bt.TimeFrame.Days)
     cerebro.adddata(data_feed, name=code)  # 通过 name 实现数据集与股票的一一对应
 
+    company = Company(code,
+                      name,
+                      len(data),
+                      *sub_st_instance
+                      )
     # 日k整合为周k
     # if resample is False:
     #     cerebro.resampledata(data_feed, name="week", timeframe=bt.TimeFrame.Weeks, compression=1)
