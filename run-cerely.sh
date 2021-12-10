@@ -1,17 +1,18 @@
-# sh run-cerely.sh ~/Work/pem/ironmansre_cdh.pem deveploment dev 2
+# sh run-cerely.sh ~/Work/pem/ironmansre_cdh.pem deveploment dev 4 indicator
 # sh run-cerely.sh ~/Work/pem/jumper.pem deveploment jumper 2
 
 pem=${1}
 env=${2}
 target=${3}
 num=${4}
+route=${5}
 skipCopy=true
 
 
 project=dao-celery
 version=latest
 
-docker build -f ./CerelyDockerfile -t ${project}:${version} .
+docker build --no-cache -f ./CerelyDockerfile -t ${project}:${version} .
 docker save ${project}:${version} > ${project}.tar
 
 
@@ -38,5 +39,6 @@ ansible-playbook \
   -e project=${project} \
   -e version=${version} \
   -e index=${index} \
-  -e skipCopy=${skipCopy}
+  -e skipCopy=${skipCopy} \
+  -e route=${route}
 done

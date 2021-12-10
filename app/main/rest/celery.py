@@ -3,10 +3,12 @@ import logging
 from app.main.stock.dao import board_dao
 from app.main.utils import restful
 from . import rest
+from app.main.utils import date_util
 from app.main.task import demo
 from app.main.task import board_task
 from app.celery_worker import celery
 from app.main.task import board_task,stock_task
+from flask import request
 
 
 @rest.route("/celery/board", methods=['get'])
@@ -24,6 +26,9 @@ def maunlly():
 
 @rest.route("/celery/stock/feature", methods=['get'])
 def get_stock_feature():
-    stock_task.submit_stock_feature()
+    date_str = request.args.get("date")
+    date = date_util.parse_date_time(date_str,"%Y-%m-%d")
+
+    stock_task.submit_stock_feature(date_util.to_timestamp(date))
 
     return restful.response("ok")

@@ -338,7 +338,7 @@ def stock_board_concept_name_em(t=None) -> pd.DataFrame:
     t=2 行业
     t=3 概念
     """
-    fs = "m:90 f:!50"
+    fs = "m:90+f:!50"
     if t is not None:
         fs = fs + " t:{}".format(t)
     url = "http://79.push2.eastmoney.com/api/qt/clist/get"
@@ -635,5 +635,5 @@ def pig_data():
 
 
 if __name__ == "__main__":
-    results = _code_id_map()
+    results = stock_board_concept_name_em()
     print(123)

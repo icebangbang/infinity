@@ -10,8 +10,14 @@ def create_doc():
         # db.k_line_day.create_index({"date":1})
         data_set.remove({})
 
+    if "board_k_line" not in collist:
+        data_set = db["board_k_line"]
+        data_set.remove({})
+
     db.k_line_day.create_index([("code", 1), ("date", 1)])
     db.k_line_day.create_index([("code", 1)])
+    db.board_k_line.create_index([("name", 1), ("date", 1)])
+    db.board_k_line.create_index([("name", 1)])
 
     stock_detail = db["stock_detail"]
 

@@ -80,3 +80,4 @@ class ShortTermFeature(SubST):
         except Exception as e:
             logging.info(e)
         company.set(constant.vol_avg_10, vol_avg)
+        company.set(constant.current_vol, data.volume[0])

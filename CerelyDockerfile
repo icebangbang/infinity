@@ -19,6 +19,7 @@ RUN pip3 install -i https://pypi.douban.com/simple --no-cache-dir -r requirement
 COPY ./app /app
 COPY ./manage.py /
 COPY ./config.py /
+COPY ./celeryconfig.py /
 
 
 RUN mkdir /var/log/whisky
@@ -26,4 +27,4 @@ RUN mkdir /var/log/whisky
 # CMD cd /app && flask run --host=0.0.0.0 --port=${port} --with-threads --no-debugger --no-reload
 #CMD  gunicorn -k gevent -w 4 -b 0.0.0.0:${port} app.run:app -e FLASK_ENV=${profiles}
 #gunicorn -k gevent -w 4 -b 0.0.0.0:20011 app.run:app -e FLASK_ENV=default
-CMD celery -A manage.celery worker -l info -P  gevent -c 500 -n worker${index}.%h
+CMD celery -A manage.celery worker -l info -P  gevent -Q ${route} -c 100 -n worker${index}.%h

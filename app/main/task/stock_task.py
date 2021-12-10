@@ -4,6 +4,7 @@ from app.main.stock.dao import board_dao, stock_dao, task_dao
 import logging
 from datetime import datetime, timedelta
 import time
+from app.main.utils import date_util
 
 from app.main.stock.service import sync_kline_service
 from app.main.stock.stock_pick_filter import stock_filter
@@ -63,11 +64,14 @@ def sync_stock_data(self, codes, task_id):
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
-def submit_stock_feature(self):
+def submit_stock_feature(self,to_date=None):
     stocks = stock_dao.get_all_stock(dict(code=1))
     code_name_map = stock_dao.get_code_name_map()
 
-    to_date = datetime.now()
+    if to_date is None:
+        to_date = datetime.now()
+    else:
+        to_date = date_util.from_timestamp(to_date)
     from_date = to_date - timedelta(days=700)
 
     from_date_timestamp = int(time.mktime(from_date.timetuple()))
@@ -82,7 +86,7 @@ def submit_stock_feature(self):
         sync_stock_feature.apply_async(args=[from_date_timestamp, to_date_timestamp, group, name_dict])
 
 
-@celery.task(bind=True, base=MyTask, expires=180)
+@celery.task(bind=True, base=MyTask, expires=1200)
 def sync_stock_feature(self, from_date, to_date, codes, name_dict):
     if isinstance(from_date,int):
         from_date = datetime.fromtimestamp(int(from_date))

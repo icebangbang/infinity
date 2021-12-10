@@ -11,8 +11,12 @@ from app.celery_worker import celery
 
 celery.conf.beat_schedule = {
     'stock_data_sync': {  # 股票数据同步
-        "task": "app.main.task.board_task.sync_stock_k_line",  # 任务函数所在位置
+        "task": "app.main.task.stock_task.sync_stock_k_line",  # 任务函数所在位置
         "schedule": 300,  # 定时每300秒执行一次
+    },
+    'board_data_sync': {
+        "task": "app.main.task.board_task.sync_board_k_line",  # 任务函数所在位置
+        "schedule": 420,  # 定时每420秒执行一次
     }
 }
 

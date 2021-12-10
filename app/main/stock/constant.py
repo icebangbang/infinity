@@ -23,6 +23,7 @@ ma60 = "ma60"
 ma200 = "ma200"
 ma250 = "ma250"
 vol_avg_10 = "vol_avg_10"
+current_vol = "current_vol"
 
 feature = {
     "close_gte_ma20": "收盘价大于20日均线",
@@ -43,5 +44,6 @@ feature = {
     "ma60": "60日均线",
     "ma200": "200日均线",
     "ma250": "250日均线",
-    "vol_avg_10": "10日均量"
+    "vol_avg_10": "10日均量",
+    "current_vol": "当前成交量"
 }

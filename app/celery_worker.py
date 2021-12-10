@@ -12,12 +12,14 @@ import logging
 
 celery = Celery(
     app.import_name,
-    backend=app.config['RESULT_BACKEND'],
-    broker=app.config['CELERY_BROKER_URL']
+    # backend=app.config['RESULT_BACKEND'],
+    # broker=app.config['CELERY_BROKER_URL']
 )
 
+celery.config_from_object('celeryconfig')
+
 celery.conf.update(
-    result_expires=300,   # Celery结果存在中间件Redis的超时时间[仅针对当前的Celery的App]
+    result_expires=3600,   # Celery结果存在中间件Redis的超时时间[仅针对当前的Celery的App]
     broker_heartbeat=10
 )
 

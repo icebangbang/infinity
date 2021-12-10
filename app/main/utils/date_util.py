@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from datetime import time
 from chinese_calendar import is_workday
+import time as tm
 
 
 def utc_now():
@@ -47,6 +48,19 @@ def get_friday_of_week():
     friday = datetime.now() + timedelta(days=4 - now.weekday())
     return friday
 
+def to_timestamp(dt:datetime):
+    """
+    :param dt:
+    :return:
+    """
+    return int(tm.mktime(dt.timetuple()) * 1000.0 + dt.microsecond / 1000.0)
+
+
+def from_timestamp(timestamp):
+    timeStamp = float(timestamp) / 1000
+    ret_datetime = datetime.fromtimestamp(timeStamp)
+    return ret_datetime
+
 
 def is_weekend(t) -> bool:
     return t.weekday() >= 5
@@ -66,6 +80,10 @@ def get_work_day(now, offset):
 if __name__ == "__main__":
     # d = parse_date_time("20210823212121", fmt="%Y%m%d%H%M%S")
     # d2 = parse_date_time("20210829121212", fmt="%Y%m%d%H%M%S")
-    print(get_friday_of_week())
-    now = datetime.now() - timedelta(days=10)
-    print(now.weekday())
+    # print(get_friday_of_week())
+    # now = datetime.now() - timedelta(days=10)
+    # print(now.weekday())
+    a = to_timestamp(datetime.now())
+    print(a)
+    b = from_timestamp(a)
+    print(b)

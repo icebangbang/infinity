@@ -14,5 +14,6 @@ celery -A manage.celery beat -l info
 ##
 
 ```
- celery -A manage.celery worker -l info -P  eventlet -c 500 -n worker4.%h
+ celery -A manage.celery worker -l info -P  eventlet -Q day_level -c 500 -n worker4.%h
+ celery -A manage.celery worker -l info -P  eventlet -Q indicator -c 500 -n worker5.%h
 ```
