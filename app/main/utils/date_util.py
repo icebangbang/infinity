@@ -16,9 +16,9 @@ def parse_date_time(dt_str, fmt="%Y-%m-%d %H:%M:%S") -> datetime:
     time = datetime.strptime(dt_str, fmt)
     return time
 
-def date_time_to_str(dt:datetime,fmt="%Y-%m-%d %H:%M:%S"):
-    return dt.strftime(fmt)
 
+def date_time_to_str(dt: datetime, fmt="%Y-%m-%d %H:%M:%S"):
+    return dt.strftime(fmt)
 
 
 def get_days_between(end: datetime, start: datetime) -> int:
@@ -48,11 +48,14 @@ def get_friday_of_week():
     friday = datetime.now() + timedelta(days=4 - now.weekday())
     return friday
 
-def to_timestamp(dt:datetime):
+
+def to_timestamp(dt: datetime):
     """
     :param dt:
     :return:
     """
+    if dt is None: return dt
+
     return int(tm.mktime(dt.timetuple()) * 1000.0 + dt.microsecond / 1000.0)
 
 

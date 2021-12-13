@@ -43,8 +43,8 @@ task_routes = (
     },
 
     {'app.main.task.stock_task.submit_stock_feature': {  # 相应的 在 route 配置中写明这个 task 的名字 以便 route 成功识别
-        'queue': 'indicator',
-        'routing_key': 'indicator'
+        'queue': 'default',
+        'routing_key': 'default'
     }
     },
     {'app.main.task.stock_task.sync_stock_feature': {  # 相应的 在 route 配置中写明这个 task 的名字 以便 route 成功识别

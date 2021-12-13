@@ -1,12 +1,12 @@
-# sh run-cerely.sh ~/Work/pem/ironmansre_cdh.pem deveploment dev 4 indicator
-# sh run-cerely.sh ~/Work/pem/ironmansre_cdh.pem deveploment dev 1 default
-# sh run-cerely.sh ~/Work/pem/jumper.pem deveploment jumper 2
+# sh run-cerely.sh ~/Work/pem/ironmansre_cdh.pem deveploment dev 2 5 indicator
+# sh run-cerely.sh ~/Work/pem/ironmansre_cdh.pem deveploment dev 1 1 default
 
 pem=${1}
 env=${2}
 target=${3}
-num=${4}
-route=${5}
+start=${4}
+end=${5}
+route=${6}
 skipCopy=true
 
 
@@ -17,7 +17,7 @@ docker build --no-cache -f ./CerelyDockerfile -t ${project}:${version} .
 docker save ${project}:${version} > ${project}.tar
 
 
-for ((index=1; index<=num; index++))
+for ((index=${start}; index<=${end}; index++))
 do
 
 echo ${index}

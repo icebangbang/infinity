@@ -72,7 +72,7 @@ def submit_stock_feature(self, to_date=None):
     code_name_map = stock_dao.get_code_name_map()
 
     if to_date is None:
-        to_date = datetime.now()
+        to_date = date_util.get_start_of_day(datetime.now())
     else:
         to_date = date_util.from_timestamp(to_date)
     from_date = to_date - timedelta(days=700)

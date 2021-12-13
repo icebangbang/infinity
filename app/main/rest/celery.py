@@ -6,7 +6,7 @@ from . import rest
 from app.main.utils import date_util
 from app.main.task import demo
 from app.main.task import board_task
-from app.celery_worker import celery
+from datetime import datetime
 from app.main.task import board_task,stock_task
 from flask import request
 
@@ -27,7 +27,10 @@ def maunlly():
 @rest.route("/celery/stock/feature", methods=['get'])
 def get_stock_feature():
     date_str = request.args.get("date")
-    date = date_util.parse_date_time(date_str,"%Y-%m-%d")
+    if date_str is not None:
+        date = date_util.parse_date_time(date_str,"%Y-%m-%d")
+    else:
+        date = datetime.now()
 
     stock_task.submit_stock_feature(date_util.to_timestamp(date))
 
