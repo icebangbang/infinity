@@ -11,7 +11,7 @@ import requests
 """
 
 
-def sync_board():
+def sync():
     # myclient = pymongo.MongoClient("mongodb://admin:123456@101.37.24.40:20017/")
     # mydb = myclient["stock"]
     stock_detail = db["stock_detail"]
@@ -82,5 +82,5 @@ def sync_board():
 
     print(x.inserted_ids)
 
-
-sync_board()
+if __name__ == "__main__":
+    sync()

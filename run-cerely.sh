@@ -1,4 +1,5 @@
 # sh run-cerely.sh ~/Work/pem/ironmansre_cdh.pem deveploment dev 4 indicator
+# sh run-cerely.sh ~/Work/pem/ironmansre_cdh.pem deveploment dev 1 default
 # sh run-cerely.sh ~/Work/pem/jumper.pem deveploment jumper 2
 
 pem=${1}

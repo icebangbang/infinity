@@ -1,5 +1,6 @@
 from app.celery_worker import celery, MyTask
 from app.main.db.mongo import db
+from app.main.stock.job import sync_board
 from app.main.stock.dao import board_dao, stock_dao, task_dao
 import logging
 from datetime import datetime
@@ -42,6 +43,16 @@ def sync_data(self, boards):
     for index, board in enumerate(boards):
         # logging.info("同步{}:{}的日k数据,时序{}".format(board['board'], board["code"], index))
         r = sync_kline_service.sync_board_k_line(board['board'], board['type'])
+
+
+@celery.task(bind=True,base=MyTask,expire=1800)
+def sync_board_stock_detail(self):
+    """
+    同步板块和个股详情
+    :param self:
+    :return:
+    """
+    sync_board.sync()
 
 
 

@@ -8,6 +8,7 @@ from app.main.utils import encryption
 from app.main.db.models import TableBase
 from app.application import app
 from flask import request
+from bson import ObjectId
 
 
 def list_file(rootdir, absolute=True):
@@ -306,3 +307,5 @@ class DatetimeJsonEncoder(simplejson.JSONEncoder):
         if isinstance(o, datetime.datetime):
             # return o.isoformat(sep=" ")
             return o.strftime("%Y-%m-%d %H:%M:%S")
+        if isinstance(o,ObjectId):
+            return str(o)

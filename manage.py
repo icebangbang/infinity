@@ -1,5 +1,7 @@
 from app import application
 import os
+from celery.schedules import crontab
+
 
 # 获取环境变量,
 # pycharm启动可以在 RUN/DEBUG Configuration-Environment variables中添加FLASK_ENV
@@ -17,6 +19,10 @@ celery.conf.beat_schedule = {
     'board_data_sync': {
         "task": "app.main.task.board_task.sync_board_k_line",  # 任务函数所在位置
         "schedule": 420,  # 定时每420秒执行一次
+    },
+    'sync_board_stock_detail': {
+        "task": "app.main.task.board_task.sync_board_stock_detail",
+        "schedule": crontab(minute='1',hour='15',day_of_week='1-5')
     }
 }
 

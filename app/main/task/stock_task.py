@@ -56,15 +56,18 @@ def transform_task(self, codes, task_id, deepth):
 @celery.task(bind=True, base=MyTask, expires=180)
 def sync_stock_data(self, codes, task_id):
     # logging.info("开始同步个股,{}".format(len(stocks)))
-    for index, code in enumerate(codes):
-        # logging.info("同步{}:{}的日k数据,时序{}".format(board['board'], board["code"], index))
-        r = sync_kline_service.sync_day_level(code)
+    try:
+        for index, code in enumerate(codes):
+            # logging.info("同步{}:{}的日k数据,时序{}".format(board['board'], board["code"], index))
+            r = sync_kline_service.sync_day_level(code)
+    except Exception as e:
+        raise self.retry(exc=e, countdown=3, max_retries=5)
 
     task_dao.record_task(task_id)
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
-def submit_stock_feature(self,to_date=None):
+def submit_stock_feature(self, to_date=None):
     stocks = stock_dao.get_all_stock(dict(code=1))
     code_name_map = stock_dao.get_code_name_map()
 
@@ -88,9 +91,8 @@ def submit_stock_feature(self,to_date=None):
 
 @celery.task(bind=True, base=MyTask, expires=1200)
 def sync_stock_feature(self, from_date, to_date, codes, name_dict):
-    if isinstance(from_date,int):
+    if isinstance(from_date, int):
         from_date = datetime.fromtimestamp(int(from_date))
         to_date = datetime.fromtimestamp(int(to_date))
     companies = stock_filter.get_stock_status(from_date, to_date, codes=codes, code_name_map=name_dict)
     stock_dao.dump_stock_feature(companies, to_date)
-
