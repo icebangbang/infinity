@@ -30,7 +30,7 @@ class ShortTermFeature(SubST):
         """
 
         length = company.data_size
-        logging.info("{} length is {}".format(company.name, length))
+        # logging.info("{} length is {}".format(company.name, length))
 
         company.setInd("ma250", bt.indicators.SimpleMovingAverage(data, period=250)
         if length > 250 else [None])
@@ -57,19 +57,32 @@ class ShortTermFeature(SubST):
         """
         day = data.buflen() - len(data)
         if day != 0: return  # 只考虑当日触发情况
-
-        ma250 = company.getInd("ma250")
-        ma200 = company.getInd("ma200")
-        ma60 = company.getInd("ma60")
-        ma30 = company.getInd("ma30")
-        ma20 = company.getInd("ma20")
-        ma10 = company.getInd("ma10")
-        ma5 = company.getInd("ma10")
-
-        vol = data.volume.get(ago=-1, size=10)
-        vol_avg = sum(vol) / len(vol)
-
         try:
+            ma250 = company.getInd("ma250")
+            ma200 = company.getInd("ma200")
+            ma60 = company.getInd("ma60")
+            ma30 = company.getInd("ma30")
+            ma20 = company.getInd("ma20")
+            ma10 = company.getInd("ma10")
+            ma5 = company.getInd("ma10")
+            gap = 0
+
+            vol = data.volume.get(ago=-1, size=10)
+            vol_avg = sum(vol) / len(vol)
+
+            close = data.close[0]  # 当日价格
+            open = data.open[0]
+            high = data.high[0]
+            low = data.low[0]
+            close_1 = data.close[-1]  # 昨日价格
+            high_1 = data.high[-1]
+            low_1 = data.high[-1]
+
+            if low > high_1:
+                gap = 1
+            if high < low_1:
+                gap = -1
+
             company.set(constant.ma5, ma5[0])
             company.set(constant.ma10, ma10[0])
             company.set(constant.ma20, ma20[0])
@@ -77,7 +90,14 @@ class ShortTermFeature(SubST):
             company.set(constant.ma60, ma60[0])
             company.set(constant.ma200, ma200[0])
             company.set(constant.ma250, ma250[0])
+
+            company.set(constant.vol_avg_10, vol_avg)
+            company.set(constant.volume, data.volume[0])
+            company.set(constant.close, data.close[0])
+            company.set(constant.rate, round((close - close_1) / close_1 * 100, 2))
+            company.set(constant.gap, gap)
+
+
         except Exception as e:
             logging.info(e)
-        company.set(constant.vol_avg_10, vol_avg)
-        company.set(constant.current_vol, data.volume[0])
+            company.set(constant.close, -1000)

@@ -23,7 +23,13 @@ ma60 = "ma60"
 ma200 = "ma200"
 ma250 = "ma250"
 vol_avg_10 = "vol_avg_10"
-current_vol = "current_vol"
+volume = "volume"
+close = "close"
+rate = "rate"
+gap = "gap"
+up_shadow = "up_shadow"
+down_shadow = "down_shadow"
+entity_length = "entity_length"
 
 feature = {
     "close_gte_ma20": "收盘价大于20日均线",
@@ -45,5 +51,11 @@ feature = {
     "ma200": "200日均线",
     "ma250": "250日均线",
     "vol_avg_10": "10日均量",
-    "current_vol": "当前成交量"
+    "volume": "当前成交量",
+    "close": "当前价格",
+    "rate":"当前涨幅",
+    "gap":"缺口",
+    "up_shadow":"上影线长度",
+    "entity_length":"实体长度",
+    "down_shadow":"下影线长度"
 }

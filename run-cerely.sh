@@ -16,12 +16,12 @@ version=latest
 docker build --no-cache -f ./CerelyDockerfile -t ${project}:${version} .
 docker save ${project}:${version} > ${project}.tar
 
-
+first_loop=1
 for ((index=${start}; index<=${end}; index++))
 do
 
 echo ${index}
-if (( ${index} == 1 ));then
+if (( ${first_loop} == 1 ));then
   skipCopy=false
 #  echo ${skipCopy}
 else
@@ -42,4 +42,6 @@ ansible-playbook \
   -e index=${index} \
   -e skipCopy=${skipCopy} \
   -e route=${route}
+
+first_loop=0
 done

@@ -6,8 +6,8 @@ from . import rest
 from app.main.utils import date_util
 from app.main.task import demo
 from app.main.task import board_task
-from datetime import datetime
-from app.main.task import board_task,stock_task
+from datetime import datetime,timedelta
+from app.main.task import board_task, stock_task
 from flask import request
 
 
@@ -24,14 +24,26 @@ def maunlly():
 
     return restful.response("ok")
 
+
 @rest.route("/celery/stock/feature", methods=['get'])
 def get_stock_feature():
-    date_str = request.args.get("date")
-    if date_str is not None:
-        date = date_util.parse_date_time(date_str,"%Y-%m-%d")
+    date_start_str = request.args.get("start")
+    date_end_str = request.args.get("end")
+    if date_start_str is not None:
+        date_start = date_util.parse_date_time(date_start_str, "%Y-%m-%d")
+        date_end = date_util.parse_date_time(date_end_str, "%Y-%m-%d")
     else:
-        date = datetime.now()
+        date_start = datetime.now()
+        date_end = datetime.now()
 
-    stock_task.submit_stock_feature(date_util.to_timestamp(date))
+    days = date_util.get_days_between(date_end, date_start)
+    if days == 0:
+        logging.info("submit stock feature:{}".format(date_start_str))
+        # stock_task.submit_stock_feature(date_util.to_timestamp(date_start))
+    else:
+        for day in range(days):
+            date = date_start + timedelta(days=1)
+            logging.info("submit stock feature:{}".format(date_util.dt_to_str(date)))
+            # stock_task.submit_stock_feature(date_util.to_timestamp(date))
 
     return restful.response("ok")

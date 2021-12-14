@@ -9,6 +9,7 @@ from app.main.stock.sub_startegy.feature.box_type import BoxType
 from app.main.stock.sub_startegy.feature.box_boundary import BoxBoundary
 from app.main.stock.sub_startegy.feature.base_feature import BaseFeature
 from app.main.stock.sub_startegy.feature.short_term_feature import ShortTermFeature
+from app.main.stock.sub_startegy.feature.shape_feature import ShapeFeature
 from app.main.stock.strategy.strategy_wrapper import StrategyWrapper
 
 """
@@ -34,7 +35,7 @@ def get_stock_status(from_date, to_date, data_list=None, codes=None, code_name_m
     if code_name_map is None:
         code_name_map = stock_dao.get_code_name_map()
 
-    sub_st = [ShortTermFeature]
+    sub_st = [ShortTermFeature,ShapeFeature]
     kwargs = {}
 
     companies = list()

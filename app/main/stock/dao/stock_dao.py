@@ -26,9 +26,13 @@ def get_one_stock(code):
     return my_set.find_one({"code": code})
 
 
-def get_stock_detail_list(codes):
+def get_stock_detail_list(codes, fields=None):
     my_set = db['stock_detail']
-    data_list = list(my_set.find({"code": {"$in": codes}}))
+    if fields is None:
+        fields = {"_id": 0}
+    condition = {"code": {"$in": codes}}
+
+    data_list = list(my_set.find({"code": {"$in": codes}},projection=fields))
     return data_list
 
 

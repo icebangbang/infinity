@@ -89,7 +89,7 @@ def submit_stock_feature(self, to_date=None):
         sync_stock_feature.apply_async(args=[from_date_timestamp, to_date_timestamp, group, name_dict])
 
 
-@celery.task(bind=True, base=MyTask, expires=1200)
+@celery.task(bind=True, base=MyTask, expires=3600)
 def sync_stock_feature(self, from_date, to_date, codes, name_dict):
     if isinstance(from_date, int):
         from_date = datetime.fromtimestamp(int(from_date))
