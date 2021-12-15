@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta,date
 from datetime import time
 from chinese_calendar import is_workday
 import time as tm
@@ -82,13 +82,22 @@ def get_work_day(now, offset):
     return now - timedelta(days=offset), now
 
 
+def if_workday(dt):
+        '''
+        判断是否为工作日
+        '''
+        Y = dt.year
+        M = dt.month
+        D = dt.day
+        april_last = date(Y, M, D)
+        return is_workday(april_last)
+
+
+
 if __name__ == "__main__":
     # d = parse_date_time("20210823212121", fmt="%Y%m%d%H%M%S")
     # d2 = parse_date_time("20210829121212", fmt="%Y%m%d%H%M%S")
     # print(get_friday_of_week())
     # now = datetime.now() - timedelta(days=10)
     # print(now.weekday())
-    a = to_timestamp(datetime.now())
-    print(a)
-    b = from_timestamp(a)
-    print(b)
+    print(is_workday(datetime(2021,10,7)))

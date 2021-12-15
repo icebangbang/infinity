@@ -47,7 +47,7 @@ class ShapeFeature(SubST):
             up_shadow = high - max(open, close)  # 上影的长度
             down_shadow = max(open, close) - low  # 下影的长度
 
-            entity_length = abs(open - close)  # 实体长度
+            entity_length = close - open  # 实体长度
 
             company.set(constant.up_shadow, up_shadow)
             company.set(constant.down_shadow, down_shadow)

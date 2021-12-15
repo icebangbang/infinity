@@ -67,26 +67,34 @@ def sync_stock_data(self, codes, task_id):
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
-def submit_stock_feature(self, to_date=None):
-    stocks = stock_dao.get_all_stock(dict(code=1))
-    code_name_map = stock_dao.get_code_name_map()
-
+def submit_stock_feature(self, to_date=None, codes=None):
     if to_date is None:
         to_date = date_util.get_start_of_day(datetime.now())
     else:
         to_date = date_util.from_timestamp(to_date)
+
+    if date_util.if_workday(to_date) is False:
+        logging.info("the day is not workday:{}".format(date_util.date_time_to_str(to_date)))
+        return
+
+    code_name_map = stock_dao.get_code_name_map()
     from_date = to_date - timedelta(days=700)
 
     from_date_timestamp = int(time.mktime(from_date.timetuple()))
     to_date_timestamp = int(time.mktime(to_date.timetuple()))
 
-    codes = [stock['code'] for stock in stocks]
-    step = int(len(codes) / 400)
+    if codes is None:
+        stocks = stock_dao.get_all_stock(dict(code=1))
+        codes = [stock['code'] for stock in stocks]
+        step = int(len(codes) / 630)
 
-    for i in range(0, len(codes), step):
-        group = codes[i:i + step]
-        name_dict = {code: code_name_map[code] for code in group}
-        sync_stock_feature.apply_async(args=[from_date_timestamp, to_date_timestamp, group, name_dict])
+        for i in range(0, len(codes), step):
+            group = codes[i:i + step]
+            name_dict = {code: code_name_map[code] for code in group}
+            sync_stock_feature.apply_async(args=[from_date_timestamp, to_date_timestamp, group, name_dict])
+    else:
+        name_dict = {code: code_name_map[code] for code in codes}
+        sync_stock_feature.apply_async(args=[from_date_timestamp, to_date_timestamp, codes, name_dict])
 
 
 @celery.task(bind=True, base=MyTask, expires=3600)

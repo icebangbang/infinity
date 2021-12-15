@@ -23,6 +23,7 @@ ma60 = "ma60"
 ma200 = "ma200"
 ma250 = "ma250"
 vol_avg_10 = "vol_avg_10"
+vol_avg_5 = "vol_avg_5"
 volume = "volume"
 close = "close"
 rate = "rate"
@@ -30,6 +31,8 @@ gap = "gap"
 up_shadow = "up_shadow"
 down_shadow = "down_shadow"
 entity_length = "entity_length"
+close_rate_5 = "close_rate_5"
+close_rate_10 = "close_rate_10"
 
 feature = {
     "close_gte_ma20": "收盘价大于20日均线",

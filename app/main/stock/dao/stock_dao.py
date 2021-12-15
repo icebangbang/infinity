@@ -32,7 +32,7 @@ def get_stock_detail_list(codes, fields=None):
         fields = {"_id": 0}
     condition = {"code": {"$in": codes}}
 
-    data_list = list(my_set.find({"code": {"$in": codes}},projection=fields))
+    data_list = list(my_set.find({"code": {"$in": codes}}, projection=fields))
     return data_list
 
 
@@ -51,8 +51,9 @@ def dump_stock_feature(companies: List[Company], date):
 
     for company in companies:
         # features.append(dict(code=company.code, name=company.name, date=start_of_day, features=company.features))
-        update.append(pymongo.UpdateMany({'code': company.code, 'date': start_of_day}, {"$set":{
-            "code":company.code,"name":company.name,"date":start_of_day,"features":company.features
+        update.append(pymongo.UpdateMany({'code': company.code, 'date': start_of_day}, {"$set": {
+            "code": company.code, "name": company.name, "date": start_of_day, "features": company.features,
+            "update": datetime.now()
         }}, True))
     my_set.bulk_write(update)
 

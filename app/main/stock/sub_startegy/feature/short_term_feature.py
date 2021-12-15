@@ -67,8 +67,22 @@ class ShortTermFeature(SubST):
             ma5 = company.getInd("ma10")
             gap = 0
 
-            vol = data.volume.get(ago=-1, size=10)
-            vol_avg = sum(vol) / len(vol)
+            vol_10 = data.volume.get(ago=-1, size=10)
+            vol_10_avg = sum(vol_10) / len(vol_10)
+
+            vol_5 = data.volume.get(ago=-1, size=5)
+            vol_5_avg = sum(vol_5) / len(vol_5)
+
+            close_5 = data.close.get(ago=0,size=5)
+            if len(close_5) >0:
+                close_rate_5 = round((close_5[len(close_5)-1]-close_5[0])/close_5[0]*100,2)
+                company.set(constant.close_rate_5,close_rate_5)
+            close_10 = data.close.get(ago=0,size=10)
+            if len(close_10)>0:
+                close_rate_10 = round((close_10[len(close_10) - 1] - close_10[0]) / close_10[0] * 100, 2)
+                company.set(constant.close_rate_10,close_rate_10)
+
+
 
             close = data.close[0]  # 当日价格
             open = data.open[0]
@@ -91,7 +105,8 @@ class ShortTermFeature(SubST):
             company.set(constant.ma200, ma200[0])
             company.set(constant.ma250, ma250[0])
 
-            company.set(constant.vol_avg_10, vol_avg)
+            company.set(constant.vol_avg_10, vol_10_avg)
+            company.set(constant.vol_avg_5, vol_5_avg)
             company.set(constant.volume, data.volume[0])
             company.set(constant.close, data.close[0])
             company.set(constant.rate, round((close - close_1) / close_1 * 100, 2))

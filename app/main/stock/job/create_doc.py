@@ -19,6 +19,7 @@ def run():
     db.board_k_line.create_index([("name", 1), ("date", 1)])
     db.board_k_line.create_index([("name", 1)])
     db.stock_feature.create_index([("code", 1)])
+    db.stock_feature.create_index([("date", 1),("code", 1)])
     db.stock_detail.create_index([("code", 1)])
 
 
