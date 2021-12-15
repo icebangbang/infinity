@@ -52,10 +52,15 @@ def data_miner():
     results = get_stock_result(params)
     codes = [r['stock_code'] for r in results]
 
+    aim_board = params['custom'].get("aimBoard", None)
+    only_cyb = params['custom'].get("onlyCyb", False)
+    hide_board = params['custom'].get("hideBoard", False)
+
     start = date_util.parse_date_time(params.get("date"), "%Y-%m-%d")
     end = date_util.parse_date_time(params.get("until"), "%Y-%m-%d")
-    aim_board = params.get("aimBoard", None)
-    only_cyb = params.get("onlyCyb", False)
+
+    if date_util.get_days_between(end, start) == 0:
+        start = start - timedelta(days=1)
 
     datas = k_line_dao.get_k_line_by_code(codes, start, end)
     group = {}
@@ -69,7 +74,7 @@ def data_miner():
 
     boards = []
     for result in results:
-        code:str = result['stock_code']
+        code: str = result['stock_code']
         name = result['name']
         board = result['board_list']
         boards.extend(board)
@@ -82,8 +87,9 @@ def data_miner():
         trade_data_list = group[code]
 
         close_list = [trade_data['close'] for trade_data in trade_data_list]
+
         a = close_list[0]
-        b = max(close_list)
+        b = max(close_list[1:]) if len(close_list)>1 else a
         index = close_list.index(b)
         high_date = trade_data_list[index]['date']
         rate = round((b - a) / a * 100, 2)
@@ -93,10 +99,13 @@ def data_miner():
             high_date=high_date,
             board=board
         )
+        if hide_board is True:
+            final[name].__delitem__("board")
 
     counter = collections.Counter(boards)
+    final = OrderedDict(sorted(final.items(), key=lambda item: item[1]['rate'], reverse=True))
 
-    return restful.response(dict(detail=final, counter=counter.most_common(30)))
+    return restful.response(dict(counter=dict(counter.most_common(20)), detail=final, size=len(final)))
 
 
 def get_stock_result(params) -> List[dict]:
@@ -109,7 +118,7 @@ def get_stock_result(params) -> List[dict]:
     rate = params.get("rate", None)  # ["$eq",0]
     close_rate_5 = params.get("close_rate_5", None)  # ["$eq",0]
     entity_length = params.get("entity_length", None)  # ["$gt",0]
-    close = params.get("close", None)  # ["$gt",0]
+    close = params['custom'].get("close", None)  # ["$gt",0]
 
     match = {"date": date, "$expr": {"$and": []}}
 
