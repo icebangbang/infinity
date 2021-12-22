@@ -59,8 +59,8 @@ def data_miner():
     start = date_util.parse_date_time(params.get("date"), "%Y-%m-%d")
     end = date_util.parse_date_time(params.get("until"), "%Y-%m-%d")
 
-    if date_util.get_days_between(end, start) == 0:
-        start = start - timedelta(days=1)
+    # if date_util.get_days_between(end, start) == 0:
+    start = start - timedelta(days=1)
 
     datas = k_line_dao.get_k_line_by_code(codes, start, end)
     group = {}
@@ -108,6 +108,8 @@ def data_miner():
     return restful.response(dict(counter=dict(counter.most_common(20)), detail=final, size=len(final)))
 
 
+
+
 def get_stock_result(params) -> List[dict]:
     stock_feature = db['stock_feature']
 
@@ -122,10 +124,15 @@ def get_stock_result(params) -> List[dict]:
 
     match = {"date": date, "$expr": {"$and": []}}
 
-    volumeUp = params.get("volumeUp", None)
-    if volumeUp is not None:
-        match["$expr"]["$and"].append({"$gt": ["$features.volume", {"$multiply": ["$features.vol_avg_10", volumeUp]}
+    volumeUp10 = params.get("volumeUp10", None)
+    volumeUp5 = params.get("volumeUp5", None)
+    if volumeUp10 is not None:
+        match["$expr"]["$and"].append({"$gt": ["$features.volume", {"$multiply": ["$features.vol_avg_10", volumeUp10]}
                                                ]})
+    if volumeUp5 is not None:
+        match["$expr"]["$and"].append({"$gt": ["$features.volume", {"$multiply": ["$features.vol_avg_5", volumeUp5]}
+                                               ]})
+
     if gap is not None:
         match["features.gap"] = {"$in": gap}
 
