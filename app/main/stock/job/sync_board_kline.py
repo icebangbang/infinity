@@ -29,5 +29,6 @@ def sync_live_data():
 
 
 # sync_history()
-sync_kline_service.sync_board_k_line("虚拟电厂",3)
+if __name__ == "__main__":
+    sync_history()
 

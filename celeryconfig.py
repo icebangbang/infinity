@@ -42,25 +42,35 @@ task_routes = (
     }
     },
 
-    {'app.main.task.stock_task.submit_stock_feature': {  # 相应的 在 route 配置中写明这个 task 的名字 以便 route 成功识别
+    {'app.main.task.stock_task.submit_stock_feature': {
         'queue': 'default',
         'routing_key': 'default'
     }
     },
-    {'app.main.task.stock_task.sync_stock_feature': {  # 相应的 在 route 配置中写明这个 task 的名字 以便 route 成功识别
+    {'app.main.task.stock_task.sync_stock_feature': {
         'queue': 'indicator',
         'routing_key': 'indicator'
     }
     },
-    {'app.main.task.board_task.sync_board_k_line': {  # 相应的 在 route 配置中写明这个 task 的名字 以便 route 成功识别
+    {'app.main.task.board_task.sync_board_k_line': {
         'queue': 'day_level',
         'routing_key': 'day_level'
     }
     },
-    {'app.main.task.board_task.sync_data': {  # 相应的 在 route 配置中写明这个 task 的名字 以便 route 成功识别
+    {'app.main.task.board_task.sync_data': {
         'queue': 'day_level',
         'routing_key': 'day_level'
     }
+    },
+    {'app.main.task.board_task.submit_board_feature': {
+        'queue': 'default',
+        'routing_key': 'default'
+    }
+    },
+    {'app.main.task.stock_task.sync_board_feature': {
+        'queue': 'indicator',
+        'routing_key': 'indicator'
+        }
     },
 )
 

@@ -55,12 +55,14 @@ def data_miner():
     aim_board = params['custom'].get("aimBoard", None)
     only_cyb = params['custom'].get("onlyCyb", False)
     hide_board = params['custom'].get("hideBoard", False)
+    only_code = params['custom'].get("onlyCode", False)
 
     start = date_util.parse_date_time(params.get("date"), "%Y-%m-%d")
     end = date_util.parse_date_time(params.get("until"), "%Y-%m-%d")
 
     # if date_util.get_days_between(end, start) == 0:
-    start = start - timedelta(days=1)
+    start,uesless = date_util.get_work_day(start,2)
+    # start = start - timedelta(days=1)
 
     datas = k_line_dao.get_k_line_by_code(codes, start, end)
     group = {}
@@ -73,14 +75,23 @@ def data_miner():
     final = {}
 
     boards = []
+    area_boards = []
     for result in results:
         code: str = result['stock_code']
         name = result['name']
-        board = result['board_list']
-        boards.extend(board)
+        board_list = result['board_list']
 
+        for board in board_list:
+            if "板块" in board:
+                area_boards.append(board)
+
+            elif board not in ['融资融券','富时罗素','标准普尔',
+                         '深股通','MSCI中国','沪股通','深成500',
+                         '创业板综','中证500','上证380','转债标的','内贸流通','电商概念','机构重仓']:
+
+                boards.append(board)
         if code not in group.keys(): continue
-        if aim_board is not None and aim_board not in board: continue
+        if aim_board is not None and aim_board not in board_list: continue
 
         if only_cyb and code.startswith("300") is False: continue
 
@@ -97,15 +108,21 @@ def data_miner():
         final[name] = dict(
             rate=rate,
             high_date=high_date,
-            board=board
+            board=board_list
         )
         if hide_board is True:
             final[name].__delitem__("board")
 
     counter = collections.Counter(boards)
+    area_counter = collections.Counter(area_boards)
     final = OrderedDict(sorted(final.items(), key=lambda item: item[1]['rate'], reverse=True))
 
-    return restful.response(dict(counter=dict(counter.most_common(20)), detail=final, size=len(final)))
+    if only_code:
+        return restful.response(list(final.keys()))
+
+    return restful.response(dict(counter=dict(counter.most_common(20)),
+                                 area_counter=dict(area_counter.most_common(10)),
+                                 detail=final, size=len(final)))
 
 
 
@@ -119,8 +136,10 @@ def get_stock_result(params) -> List[dict]:
     up_shadow_rate = params.get("up_shadow_rate", None)
     rate = params.get("rate", None)  # ["$eq",0]
     close_rate_5 = params.get("close_rate_5", None)  # ["$eq",0]
-    entity_length = params.get("entity_length", None)  # ["$gt",0]
+    entity_length = params.get("entityLength", None)  # ["$gt",0] k线实体
     close = params['custom'].get("close", None)  # ["$gt",0]
+    sma_down = params.get("smaDown", None) # 均线空头
+    sma_up = params.get("smaUp", None) # 均线空头
 
     match = {"date": date, "$expr": {"$and": []}}
 
@@ -147,6 +166,16 @@ def get_stock_result(params) -> List[dict]:
 
     if entity_length is not None:
         match["$expr"]["$and"].append({entity_length[0]: ["$features.entity_length", entity_length[1]]})
+
+    if sma_down :
+        match["$expr"]["$and"].append({"$gt":["$features.ma60","$features.ma30"]})
+        match["$expr"]["$and"].append({"$gt":["$features.ma30","$features.ma20"]})
+        match["$expr"]["$and"].append({"$gt":["$features.ma20","$features.ma10"]})
+    if sma_up :
+        match["$expr"]["$and"].append({"$lt":["$features.ma60","$features.ma30"]})
+        match["$expr"]["$and"].append({"$lt":["$features.ma30","$features.ma20"]})
+        match["$expr"]["$and"].append({"$lt":["$features.ma20","$features.ma10"]})
+
 
     if close is not None:
         match["$expr"]["$and"].append({close[0]: ["$features.close", close[1]]})

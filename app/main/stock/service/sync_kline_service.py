@@ -83,7 +83,7 @@ def get_kline_of_stock(code, latest_valid_day, time_window=60):
         return None
 
 
-def sync_board_k_line(name, type,base_time=None, time_window=15):
+def sync_board_k_line(name, type,base_time=None, time_window=1095):
     """
     同步15天内的数据
     :param code:

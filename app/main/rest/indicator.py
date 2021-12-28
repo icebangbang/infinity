@@ -9,7 +9,7 @@ from datetime import datetime
 
 @rest.route("/indicator/ppi", methods=['get'])
 def get_ppi():
-    start = datetime(2008, 1, 1)
+    start = datetime(2020, 1, 1)
     ppi = db['ppi']
     ppi_list = list(ppi.find({"date": {"$gte": start}}).sort("_id", -1))
 

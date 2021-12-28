@@ -1,6 +1,11 @@
+import pymongo
+
 from app.main.db.mongo import db
 from typing import List
 from datetime import datetime
+
+from app.main.stock.company import Company
+from app.main.utils import date_util
 
 
 def get_all_board(type=[1,2,3]):
@@ -44,6 +49,21 @@ def get_board_k_line_data_from_db(
         .find(base) \
         .sort("date", 1)
     return list(query)
+
+def dump_board_feature(companies: List[Company], date):
+    start_of_day = date_util.get_start_of_day(date)
+
+    my_set = db['board_feature']
+    features = []
+    update = []
+
+    for company in companies:
+        # features.append(dict(code=company.code, name=company.name, date=start_of_day, features=company.features))
+        update.append(pymongo.UpdateMany({'name': company.name, 'date': start_of_day}, {"$set": {
+            "name": company.name, "date": start_of_day, "features": company.features,
+            "update": datetime.now()
+        }}, True))
+    my_set.bulk_write(update)
 
 
 if __name__ == "__main__":
