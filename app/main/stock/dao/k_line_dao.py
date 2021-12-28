@@ -87,6 +87,26 @@ def get_k_line_by_code(code: List,
         .sort("date", 1)
     return list(query)
 
+def get_board_k_line_by_name(name: List,
+                       start_day: datetime,
+                       end_day: datetime,
+                       level='day'):
+    """
+    获取特定时间和代码的股票走势
+    :param code:
+    :param start_day:
+    :param end_day:
+    :param level:
+    :return:
+    """
+    db_name = "board_k_line"
+    my_set = db[db_name]
+
+    query = my_set.find({"name": {"$in": name},
+                         "date": {"$lte": end_day, "$gte": start_day}}) \
+        .sort("date", 1)
+    return list(query)
+
 
 def get_k_line_data(
         start_day: datetime,

@@ -64,7 +64,7 @@ class ShortTermFeature(SubST):
             ma30 = company.getInd("ma30")
             ma20 = company.getInd("ma20")
             ma10 = company.getInd("ma10")
-            ma5 = company.getInd("ma10")
+            ma5 = company.getInd("ma5")
             gap = 0
 
             vol_10 = data.volume.get(ago=-1, size=10)

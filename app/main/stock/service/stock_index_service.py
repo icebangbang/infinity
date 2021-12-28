@@ -10,7 +10,8 @@ from app.main.stock.dao import k_line_dao
 id_maps = {"sh000001": {"000001": 1, "code": "000001", "belong": "sh", "name": "上证指数"},
            "zs399001": {"399001": 0, "code": "399001", "belong": "sz", "name": "深证指数"},
            "zs399006": {"399006": 0, "code": "399006", "belong": "sz", "name": "创业板指数"},
-           "BDI": {"BDI": 100, "code": "BDI", "belong": "BDI", "name": "波罗的海bdi指数"}}
+           # "BDI": {"BDI": 100, "code": "BDI", "belong": "BDI", "name": "波罗的海bdi指数"}
+           }
 
 
 def sync_index_data(code, start_date, end_date, klt="101"):

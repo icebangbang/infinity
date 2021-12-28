@@ -61,7 +61,7 @@ def data_miner():
     end = date_util.parse_date_time(params.get("until"), "%Y-%m-%d")
 
     # if date_util.get_days_between(end, start) == 0:
-    start,uesless = date_util.get_work_day(start,2)
+    start,uesless = date_util.get_work_day(start,1)
     # start = start - timedelta(days=1)
 
     datas = k_line_dao.get_k_line_by_code(codes, start, end)
@@ -140,16 +140,22 @@ def get_stock_result(params) -> List[dict]:
     close = params['custom'].get("close", None)  # ["$gt",0]
     sma_down = params.get("smaDown", None) # 均线空头
     sma_up = params.get("smaUp", None) # 均线空头
+    volume_up_10 = params.get("volumeUp10", None)
+    volume_up_5 = params.get("volumeUp5", None)
+    volume_down_5 = params.get("volumeDown5",None)
 
     match = {"date": date, "$expr": {"$and": []}}
 
-    volumeUp10 = params.get("volumeUp10", None)
-    volumeUp5 = params.get("volumeUp5", None)
-    if volumeUp10 is not None:
-        match["$expr"]["$and"].append({"$gt": ["$features.volume", {"$multiply": ["$features.vol_avg_10", volumeUp10]}
+
+    if volume_up_10 is not None:
+        match["$expr"]["$and"].append({"$gte": ["$features.volume", {"$multiply": ["$features.vol_avg_10", volume_up_10]}
                                                ]})
-    if volumeUp5 is not None:
-        match["$expr"]["$and"].append({"$gt": ["$features.volume", {"$multiply": ["$features.vol_avg_5", volumeUp5]}
+    if volume_up_5 is not None:
+        match["$expr"]["$and"].append({"$gte": ["$features.volume", {"$multiply": ["$features.vol_avg_5", volume_up_5]}
+                                               ]})
+
+    if volume_down_5 is not None:
+        match["$expr"]["$and"].append({"$lte": ["$features.volume", {"$multiply": ["$features.vol_avg_5", volume_down_5]}
                                                ]})
 
     if gap is not None:
