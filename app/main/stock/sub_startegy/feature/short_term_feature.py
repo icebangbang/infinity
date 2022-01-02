@@ -82,7 +82,27 @@ class ShortTermFeature(SubST):
                 close_rate_10 = round((close_10[len(close_10) - 1] - close_10[0]) / close_10[0] * 100, 2)
                 company.set(constant.close_rate_10,close_rate_10)
 
-
+            ma5_upon_20 = 0
+            ma10_upon_20 = 0
+            ma5_upon_10 = 0
+            ma10_upon_10 = 0
+            ma5_upon_5 = 0
+            ma10_upon_5 = 0
+            for i in range(20):
+                if data.close.get(-i) > ma5.get(-i):
+                    ma5_upon_20 = ma5_upon_20+1
+                if data.close.get(-i) > ma10.get(-i):
+                    ma10_upon_20 = ma10_upon_20+1
+            for i in range(10):
+                if data.close.get(-i) > ma5.get(-i):
+                    ma5_upon_10 = ma5_upon_10+1
+                if data.close.get(-i) > ma10.get(-i):
+                    ma10_upon_10 = ma10_upon_10+1
+            for i in range(5):
+                if data.close.get(-i) > ma5.get(-i):
+                    ma5_upon_5 = ma5_upon_5+1
+                if data.close.get(-i) > ma10.get(-i):
+                    ma10_upon_5 = ma10_upon_5+1
 
             close = data.close[0]  # 当日价格
             open = data.open[0]
@@ -111,6 +131,12 @@ class ShortTermFeature(SubST):
             company.set(constant.close, data.close[0])
             company.set(constant.rate, round((close - close_1) / close_1 * 100, 2))
             company.set(constant.gap, gap)
+            company.set(constant.ma5_upon_20,ma5_upon_20)
+            company.set(constant.ma10_upon_20,ma10_upon_20)
+            company.set(constant.ma5_upon_10, ma5_upon_10)
+            company.set(constant.ma10_upon_10, ma10_upon_10)
+            company.set(constant.ma5_upon_5, ma5_upon_5)
+            company.set(constant.ma10_upon_5, ma10_upon_5)
 
 
         except Exception as e:

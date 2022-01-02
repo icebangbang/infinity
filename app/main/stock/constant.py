@@ -33,6 +33,12 @@ down_shadow = "down_shadow"
 entity_length = "entity_length"
 close_rate_5 = "close_rate_5"
 close_rate_10 = "close_rate_10"
+ma5_upon_20 = "ma5_upon_20"
+ma10_upon_20 = "ma10_upon_20"
+ma5_upon_10 = "ma5_upon_10"
+ma10_upon_10 = "ma10_upon_10"
+ma5_upon_5 = "ma5_upon_5"
+ma10_upon_5 = "ma10_upon_5"
 
 feature = {
     "close_gte_ma20": "收盘价大于20日均线",

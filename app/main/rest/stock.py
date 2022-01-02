@@ -87,7 +87,7 @@ def data_miner():
 
             elif board not in ['融资融券','富时罗素','标准普尔',
                          '深股通','MSCI中国','沪股通','深成500',
-                         '创业板综','中证500','上证380','转债标的','内贸流通','电商概念','机构重仓']:
+                         '创业板综','中证500','上证380','转债标的','内贸流通','电商概念','机构重仓','QFII重仓','长江三角']:
 
                 boards.append(board)
         if code not in group.keys(): continue
@@ -141,8 +141,15 @@ def get_stock_result(params) -> List[dict]:
     sma_down = params.get("smaDown", None) # 均线空头
     sma_up = params.get("smaUp", None) # 均线空头
     volume_up_10 = params.get("volumeUp10", None)
-    volume_up_5 = params.get("volumeUp5", None)
+    volume_gt_5 = params.get("volumeGt5", None)
+    volume_lt_5 = params.get("volumeLt5", None)
     volume_down_5 = params.get("volumeDown5",None)
+    ma5_upon_20 = params.get("ma5Upon20",None)
+    ma10_upon_20 = params.get("ma10Upon20",None)
+    ma5_upon_10 = params.get("ma5Upon10", None)
+    ma10_upon_10 = params.get("ma10Upon10", None)
+    ma5_upon_5 = params.get("ma5Upon5", None)
+    ma10_upon_5 = params.get("ma10Upon5", None)
 
     match = {"date": date, "$expr": {"$and": []}}
 
@@ -150,8 +157,11 @@ def get_stock_result(params) -> List[dict]:
     if volume_up_10 is not None:
         match["$expr"]["$and"].append({"$gte": ["$features.volume", {"$multiply": ["$features.vol_avg_10", volume_up_10]}
                                                ]})
-    if volume_up_5 is not None:
-        match["$expr"]["$and"].append({"$gte": ["$features.volume", {"$multiply": ["$features.vol_avg_5", volume_up_5]}
+    if volume_gt_5 is not None:
+        match["$expr"]["$and"].append({"$gte": ["$features.volume", {"$multiply": ["$features.vol_avg_5", volume_gt_5]}
+                                               ]})
+    if volume_lt_5 is not None:
+        match["$expr"]["$and"].append({"$lte": ["$features.volume", {"$multiply": ["$features.vol_avg_5", volume_lt_5]}
                                                ]})
 
     if volume_down_5 is not None:
@@ -181,7 +191,12 @@ def get_stock_result(params) -> List[dict]:
         match["$expr"]["$and"].append({"$lt":["$features.ma60","$features.ma30"]})
         match["$expr"]["$and"].append({"$lt":["$features.ma30","$features.ma20"]})
         match["$expr"]["$and"].append({"$lt":["$features.ma20","$features.ma10"]})
-
+    if ma5_upon_5:
+        match["$expr"]["$and"].append({ma5_upon_5[0]: ["$features.ma5_upon_5", ma5_upon_5[1]]})
+    if ma5_upon_10:
+        match["$expr"]["$and"].append({ma5_upon_10[0]: ["$features.ma5_upon_10", ma5_upon_10[1]]})
+    if ma5_upon_20:
+        match["$expr"]["$and"].append({ma5_upon_20[0]: ["$features.ma5_upon_20", ma5_upon_20[1]]})
 
     if close is not None:
         match["$expr"]["$and"].append({close[0]: ["$features.close", close[1]]})

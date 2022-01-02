@@ -100,4 +100,4 @@ if __name__ == "__main__":
     # print(get_friday_of_week())
     # now = datetime.now() - timedelta(days=10)
     # print(now.weekday())
-    print(is_workday(datetime(2021,10,7)))
+    print(is_workday(datetime(2022,10,7)))

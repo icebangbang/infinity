@@ -67,7 +67,7 @@ task_routes = (
         'routing_key': 'default'
     }
     },
-    {'app.main.task.stock_task.sync_board_feature': {
+    {'app.main.task.board_task.sync_board_feature': {
         'queue': 'indicator',
         'routing_key': 'indicator'
         }

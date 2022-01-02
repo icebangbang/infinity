@@ -1,5 +1,5 @@
-# sh run-cerely.sh ~/Work/pem/ironmansre_cdh.pem deveploment dev 2 10 indicator
-# sh run-cerely.sh ~/Work/pem/ironmansre_cdh.pem deveploment dev 1 1 default
+# sh run-cerely.sh ~/Work/pem/ironmansre_cdh.pem deveploment dev 2 10 indicator true
+# sh run-cerely.sh ~/Work/pem/ironmansre_cdh.pem deveploment dev 1 1 default false
 
 pem=${1}
 env=${2}
@@ -7,29 +7,24 @@ target=${3}
 start=${4}
 end=${5}
 route=${6}
-skipCopy=true
+skipCopy=${7}
 
 
 project=dao-celery
 version=latest
 
+echo ${skipCopy}
+if [ "${skipCopy}" = false ];then
 docker build --no-cache -f ./CerelyDockerfile -t ${project}:${version} .
 docker save ${project}:${version} > ${project}.tar
+fi
 
-first_loop=1
+first_loop=0
 for ((index=${start}; index<=${end}; index++))
 do
 
 echo ${index}
-if (( ${first_loop} == 1 ));then
-  skipCopy=false
-#  echo ${skipCopy}
-else
-  skipCopy=true
-#  echo ${skipCopy}
-fi
 
-echo ${skipCopy}
 ansible-playbook \
   deploy/celery/site.yml \
   -i deploy/celery/hosts \
