@@ -2,10 +2,10 @@ from backtrader.feeds import PandasData
 import backtrader as bt
 from app.main.stock.company import Company
 from app.main.stock.sub_startegy import SubST
-from app.main.stock.ind.kdj import KDJ
-from app.main.stock.algo import cal
 from app.main.stock import constant
 import logging
+
+from app.main.utils import cal_util
 
 
 class ShortTermFeature(SubST):
@@ -73,39 +73,16 @@ class ShortTermFeature(SubST):
             vol_5 = data.volume.get(ago=-1, size=5)
             vol_5_avg = sum(vol_5) / len(vol_5)
 
-            close_5 = data.close.get(ago=0,size=5)
-            if len(close_5) >0:
-                close_rate_5 = round((close_5[len(close_5)-1]-close_5[0])/close_5[0]*100,2)
-                company.set(constant.close_rate_5,close_rate_5)
-            close_10 = data.close.get(ago=0,size=10)
-            if len(close_10)>0:
+            close_5 = data.close.get(ago=0, size=5)
+            if len(close_5) > 0:
+                close_rate_5 = round((close_5[len(close_5) - 1] - close_5[0]) / close_5[0] * 100, 2)
+                company.set(constant.close_rate_5, close_rate_5)
+            close_10 = data.close.get(ago=0, size=10)
+            if len(close_10) > 0:
                 close_rate_10 = round((close_10[len(close_10) - 1] - close_10[0]) / close_10[0] * 100, 2)
-                company.set(constant.close_rate_10,close_rate_10)
-
-            ma5_upon_20 = 0
-            ma10_upon_20 = 0
-            ma5_upon_10 = 0
-            ma10_upon_10 = 0
-            ma5_upon_5 = 0
-            ma10_upon_5 = 0
-            for i in range(20):
-                if data.close.get(-i) > ma5.get(-i):
-                    ma5_upon_20 = ma5_upon_20+1
-                if data.close.get(-i) > ma10.get(-i):
-                    ma10_upon_20 = ma10_upon_20+1
-            for i in range(10):
-                if data.close.get(-i) > ma5.get(-i):
-                    ma5_upon_10 = ma5_upon_10+1
-                if data.close.get(-i) > ma10.get(-i):
-                    ma10_upon_10 = ma10_upon_10+1
-            for i in range(5):
-                if data.close.get(-i) > ma5.get(-i):
-                    ma5_upon_5 = ma5_upon_5+1
-                if data.close.get(-i) > ma10.get(-i):
-                    ma10_upon_5 = ma10_upon_5+1
+                company.set(constant.close_rate_10, close_rate_10)
 
             close = data.close[0]  # 当日价格
-            open = data.open[0]
             high = data.high[0]
             low = data.low[0]
             close_1 = data.close[-1]  # 昨日价格
@@ -116,6 +93,10 @@ class ShortTermFeature(SubST):
                 gap = 1
             if high < low_1:
                 gap = -1
+
+            self.avg_daily_increase(data, company)
+            self.ma_position(data, company, ma5, ma10)
+            self.high_record(data, company)
 
             company.set(constant.ma5, ma5[0])
             company.set(constant.ma10, ma10[0])
@@ -131,14 +112,90 @@ class ShortTermFeature(SubST):
             company.set(constant.close, data.close[0])
             company.set(constant.rate, round((close - close_1) / close_1 * 100, 2))
             company.set(constant.gap, gap)
-            company.set(constant.ma5_upon_20,ma5_upon_20)
-            company.set(constant.ma10_upon_20,ma10_upon_20)
-            company.set(constant.ma5_upon_10, ma5_upon_10)
-            company.set(constant.ma10_upon_10, ma10_upon_10)
-            company.set(constant.ma5_upon_5, ma5_upon_5)
-            company.set(constant.ma10_upon_5, ma10_upon_5)
-
-
         except Exception as e:
             logging.info(e)
             company.set(constant.close, -1000)
+
+    def avg_daily_increase(self, data: PandasData, company: Company):
+        """
+        日均涨幅
+        :param data:
+        :return:
+        """
+        # 近5日,日均涨幅
+        close_neg_1 = data.close[-1]  # 前一天的收盘价格
+        close_neg_6 = data.close[-6]  # 前6天的收盘价
+        increase_avg_rate_5 = cal_util.get_rate(close_neg_1 - close_neg_6, close_neg_6) / 5
+
+        close_neg_1 = data.close[-1]  # 前一天的收盘价格
+        close_neg_11 = data.close[-11]  # 前11天的收盘价
+        increase_avg_rate_10 = cal_util.get_rate(close_neg_1 - close_neg_11, close_neg_11) / 10
+
+        close_neg_1 = data.close[-1]  # 前一天的收盘价格
+        close_neg_21 = data.close[-21]  # 前21天的收盘价
+        increase_avg_rate_20 = cal_util.get_rate(close_neg_1 - close_neg_21, close_neg_21) / 20
+
+        company.set(constant.increase_avg_rate_5, increase_avg_rate_5)
+        company.set(constant.increase_avg_rate_10, increase_avg_rate_10)
+        company.set(constant.increase_avg_rate_20, increase_avg_rate_20)
+
+    def ma_position(self, data: PandasData, company, ma5, ma10):
+        """
+        价位站上各类均线次数
+        :return:
+        """
+        ma5_upon_20 = 0
+        ma10_upon_20 = 0
+        ma5_upon_10 = 0
+        ma10_upon_10 = 0
+        ma5_upon_5 = 0
+        ma10_upon_5 = 0
+        for i in range(20):
+            if data.close.get(-i) > ma5.get(-i):
+                ma5_upon_20 = ma5_upon_20 + 1
+            if data.close.get(-i) > ma10.get(-i):
+                ma10_upon_20 = ma10_upon_20 + 1
+        for i in range(10):
+            if data.close.get(-i) > ma5.get(-i):
+                ma5_upon_10 = ma5_upon_10 + 1
+            if data.close.get(-i) > ma10.get(-i):
+                ma10_upon_10 = ma10_upon_10 + 1
+        for i in range(5):
+            if data.close.get(-i) > ma5.get(-i):
+                ma5_upon_5 = ma5_upon_5 + 1
+            if data.close.get(-i) > ma10.get(-i):
+                ma10_upon_5 = ma10_upon_5 + 1
+
+        company.set(constant.ma5_upon_20, ma5_upon_20)
+        company.set(constant.ma10_upon_20, ma10_upon_20)
+        company.set(constant.ma5_upon_10, ma5_upon_10)
+        company.set(constant.ma10_upon_10, ma10_upon_10)
+        company.set(constant.ma5_upon_5, ma5_upon_5)
+        company.set(constant.ma10_upon_5, ma10_upon_5)
+
+    def high_record(self, data, company):
+        """
+        近n天的高点 和当前价格距离高点的涨幅预估
+        :return:
+        """
+        close = data.close[0]
+        days = [5, 10, 20, 30, 60, 120, 200, 250]
+        for day in days:
+            highest = max(data.high.get(ago=-1, size=day))
+            company.set("highest_{}".format(day), highest)
+
+            rate = cal_util.get_rate(highest - close, close)
+            company.set("close_away_from_highest_{}".format(day), rate)
+
+    # def limiting(self,data):
+    #     """
+    #     近20日涨跌停表现
+    #     :return:
+    #     """
+    #     # 最近连续触及涨停次数
+    #     cont_touch_limiting_cnt = 0
+    #     touch_limiting_cnt = 0
+    #     for i in range(20):
+    #         close = data.close[-i]
+    #         close_neg_1 = data.close[-i-1]
+            # rate =

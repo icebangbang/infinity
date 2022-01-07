@@ -1,5 +1,9 @@
-# sh run-cerely.sh ~/Work/pem/ironmansre_cdh.pem deveploment dev 2 10 indicator true
-# sh run-cerely.sh ~/Work/pem/ironmansre_cdh.pem deveploment dev 1 1 default false
+# sh run-cerely.sh ~/Work/pem/xzhh.pem deveploment test 6 15 indicator true
+# sh run-cerely.sh ~/Work/pem/xzhh.pem deveploment test 1 1 default true
+
+# sh run-cerely.sh ~/Work/pem/xzhh.pem deveploment test 2 5 day_level false
+
+
 
 pem=${1}
 env=${2}

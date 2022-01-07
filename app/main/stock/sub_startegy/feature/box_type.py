@@ -1,13 +1,9 @@
-from functools import cmp_to_key
-
 from backtrader.feeds import PandasData
 
 from app.main.stock import constant
 from app.main.stock.company import Company
 from app.main.stock.sub_startegy import SubST
-import backtrader as bt
-from typing import List
-from app.main.stock.algo import cal
+from app.main.utils import cal_util
 
 
 def custom_sort(e):
@@ -81,12 +77,12 @@ class BoxType(SubST):
 
         high = data.high.get(ago=-1, size=20)
         high_type: list = self.get_top_type(high)
-        tm, tc, ty, tx = cal.get_top_line(high_type)
+        tm, tc, ty, tx = cal_util.get_top_line(high_type)
         # high_type.sort(reverse=True)
 
         low = data.low.get(ago=-1, size=20)
         low_type: list = self.get_bottom_type(low)
-        bm, bc, by, bx = cal.get_bot_line(low_type)
+        bm, bc, by, bx = cal_util.get_bot_line(low_type)
         # low_type.sort(key=custom_sort)
         # low_type.sort(reverse=False)
 

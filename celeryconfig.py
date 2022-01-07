@@ -3,8 +3,8 @@ from kombu import Exchange, Queue
 # 配置时区
 timezone = 'Asia/Shanghai'
 
-broker_url = 'redis://:ironBackRedis123@172.16.1.184:30004/1'
-RESULT_BACKEND = 'redis://:ironBackRedis123@172.16.1.184:30004/1'
+broker_url = 'redis://:ironBackRedis123@39.105.104.215:30004/1'
+RESULT_BACKEND = 'redis://:ironBackRedis123@39.105.104.215:30004/1'
 # 定义一个默认交换机
 default_exchange = Exchange('default', type='direct')
 

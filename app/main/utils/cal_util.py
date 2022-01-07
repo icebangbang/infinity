@@ -129,6 +129,15 @@ def get_reverse_point(points):
 
     return pos_p, neg_p
 
+def get_rate(numerator,denominator,ndigits=2)->float:
+    """
+    计算涨幅
+    :return:
+    """
+    return round(numerator / denominator * 100, ndigits)
+
+
+
 
 if __name__ == "__main__":
     print(_trace(math.atan(0.55)))

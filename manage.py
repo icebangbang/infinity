@@ -13,7 +13,7 @@ from app.celery_worker import celery
 celery.conf.beat_schedule = {
     'stock_data_sync': {  # 股票数据同步
         "task": "app.main.task.stock_task.sync_stock_k_line",  # 任务函数所在位置
-        "schedule": 300,  # 定时每300秒执行一次
+        "schedule": 100,  # 定时每300秒执行一次
     },
     'board_data_sync': {
         "task": "app.main.task.board_task.sync_board_k_line",
@@ -25,11 +25,11 @@ celery.conf.beat_schedule = {
     },
     'get_stock_feature': {
         "task": "app.main.task.stock_task.submit_stock_feature",
-        "schedule": 300  # 每5分钟执行一次
+        "schedule": 400  # 每5分钟执行一次
     },
     'get_board_feature': {
         "task": "app.main.task.board_task.submit_board_feature",
-        "schedule": 300
+        "schedule": 400
     }
 }
 

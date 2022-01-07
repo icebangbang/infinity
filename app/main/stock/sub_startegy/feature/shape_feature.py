@@ -1,9 +1,6 @@
 from backtrader.feeds import PandasData
-import backtrader as bt
 from app.main.stock.company import Company
 from app.main.stock.sub_startegy import SubST
-from app.main.stock.ind.kdj import KDJ
-from app.main.stock.algo import cal
 from app.main.stock import constant
 import logging
 

@@ -40,6 +40,10 @@ ma10_upon_10 = "ma10_upon_10"
 ma5_upon_5 = "ma5_upon_5"
 ma10_upon_5 = "ma10_upon_5"
 
+increase_avg_rate_5 = "increase_avg_rate_5"
+increase_avg_rate_10 = "increase_avg_rate_10"
+increase_avg_rate_20 = "increase_avg_rate_20"
+
 feature = {
     "close_gte_ma20": "收盘价大于20日均线",
     "close_gte_ma10": "收盘价大于10日均线",
@@ -66,5 +70,8 @@ feature = {
     "gap":"缺口",
     "up_shadow":"上影线长度",
     "entity_length":"实体长度",
-    "down_shadow":"下影线长度"
+    "down_shadow":"下影线长度",
+    "increase_avg_rate_5":"近5日涨幅",
+    "increase_avg_rate_10":"近10日涨幅",
+    "increase_avg_rate_20":"近20日涨幅",
 }

@@ -1,13 +1,8 @@
-from functools import cmp_to_key
-
 from backtrader.feeds import PandasData
 
 from app.main.stock import constant
 from app.main.stock.company import Company
 from app.main.stock.sub_startegy import SubST
-import backtrader as bt
-from typing import List
-from app.main.stock.algo import cal
 
 
 def custom_sort(e):

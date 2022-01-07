@@ -3,7 +3,6 @@ from backtrader.feeds import PandasData
 from app.main.stock.company import Company
 from app.main.stock.sub_startegy import SubST
 import backtrader as bt
-from app.main.stock.algo import cal
 from app.main.stock import constant
 
 

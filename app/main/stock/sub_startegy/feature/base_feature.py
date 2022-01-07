@@ -3,7 +3,7 @@ import backtrader as bt
 from app.main.stock.company import Company
 from app.main.stock.sub_startegy import SubST
 from app.main.stock.ind.kdj import KDJ
-from app.main.stock.algo import cal
+from app.main.utils import cal_util
 from app.main.stock import constant
 
 
@@ -88,8 +88,8 @@ class BaseFeature(SubST):
         # macd柱子近3三天最小
         company.set(constant.macd_histo_smallest_3, macd_histo_smallest_3)
 
-        m1, ignore = cal.get_line([macd.histo[-2], macd.histo[-1]])
-        m2, ignore = cal.get_line([macd.histo[-1], macd.histo[0]])
+        m1, ignore = cal_util.get_line([macd.histo[-2], macd.histo[-1]])
+        m2, ignore = cal_util.get_line([macd.histo[-1], macd.histo[0]])
         macd_histo_incr = bool(m2 > m1)
         # macd 出现上升拐点
         company.set(constant.macd_histo_rise_point, macd_histo_incr)
