@@ -1,10 +1,11 @@
+from celery.schedules import crontab
 from kombu import Exchange, Queue
 
 # 配置时区
 timezone = 'Asia/Shanghai'
 
-broker_url = 'redis://:ironBackRedis123@39.105.104.215:30004/1'
-RESULT_BACKEND = 'redis://:ironBackRedis123@39.105.104.215:30004/1'
+# broker_url = 'redis://:ironBackRedis123@39.105.104.215:30004/1'
+# RESULT_BACKEND = 'redis://:ironBackRedis123@39.105.104.215:30004/1'
 # 定义一个默认交换机
 default_exchange = Exchange('default', type='direct')
 
@@ -73,6 +74,30 @@ task_routes = (
         }
     },
 )
+
+
+beat_schedule = {
+    'stock_data_sync': {  # 股票数据同步
+        "task": "app.main.task.stock_task.sync_stock_k_line",  # 任务函数所在位置
+        "schedule": 100,  # 定时每300秒执行一次
+    },
+    'board_data_sync': {
+        "task": "app.main.task.board_task.sync_board_k_line",
+        "schedule": 420,  # 定时每420秒执行一次
+    },
+    'sync_board_stock_detail': {
+        "task": "app.main.task.board_task.sync_board_stock_detail",
+        "schedule": crontab(minute='1', hour='15', day_of_week='1-5')  # 工作日的15点以后
+    },
+    'get_stock_feature': {
+        "task": "app.main.task.stock_task.submit_stock_feature",
+        "schedule": 400  # 每5分钟执行一次
+    },
+    'get_board_feature': {
+        "task": "app.main.task.board_task.submit_board_feature",
+        "schedule": 400
+    }
+}
 
 # 在出现worker接受到的message出现没有注册的错误时，使用下面一句能解决
 # CELERY_IMPORTS = ("app.main.task.stock_task",)

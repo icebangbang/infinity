@@ -12,8 +12,8 @@ import logging
 
 celery = Celery(
     app.import_name,
-    # backend=app.config['RESULT_BACKEND'],
-    # broker=app.config['CELERY_BROKER_URL']
+    backend=app.config['RESULT_BACKEND'],
+    broker=app.config['BROKER_URL']
 )
 
 celery.config_from_object('celeryconfig')

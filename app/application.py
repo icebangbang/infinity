@@ -1,7 +1,8 @@
 from flask import Flask
 
 from app.log import init_log
-from app.main.db.models import init_db
+from app.main.db import models
+from app.main.db import mongo
 from config import config
 from celery import Celery
 from datetime import timedelta
@@ -25,8 +26,9 @@ def create_app(config_name):
     # 根据config_name选定环境变量
     app.config.from_object(config[config_name])
     config[config_name].init_app(app)
-    init_db(app)
+    models.init_db(app)
     init_log(app)
+    mongo.init_db(app)
 
     # init_all_blueprint(app)
 

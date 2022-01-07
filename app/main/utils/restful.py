@@ -66,6 +66,18 @@ def response(data=None, message=None, success=True, **kwargs):
         "Access-Control-Allow-Headers"] = "token,Origin, X-Requested-With, Content-Type, Accept, Connection, User-Agent,Cookie,Cache-Control"
     return resp
 
+def response_obj(o):
+    resp = make_response(simplejson.dumps(o, ignore_nan=True, ensure_ascii=False, cls=DatetimeJsonEncoder))
+    # 跨域设置
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    resp.headers['Content-Type'] = 'application/json'
+    resp.headers["Access-Control-Allow-Methods"] = "GET,HEAD,OPTIONS,POST,PUT"
+    resp.headers["Access-Control-Request-Headers"] = "token"
+
+    resp.headers[
+        "Access-Control-Allow-Headers"] = "token,Origin, X-Requested-With, Content-Type, Accept, Connection, User-Agent,Cookie,Cache-Control"
+    return resp
+
 
 def response_pandas(response):
     # 跨域设置

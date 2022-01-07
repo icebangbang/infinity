@@ -1,0 +1,47 @@
+- hosts: "{{ target | default('nowhere') }}"
+  gather_facts:  false
+  become: yes
+  tasks:
+    - name: Create temp directory
+      file:
+        path: /tmp/{{project}}
+        state: directory
+    - name: Create log directory
+      file:
+        path: /var/log/{{project}}
+        state: directory
+    - name: Copy {{ image }} to {{ ansible_default_ipv4.address }}
+      synchronize:
+        src: "{{ image }}"
+        dest: /tmp/{{project}}
+        recursive: yes
+        delete: yes
+        links: yes
+        owner: no
+        group: no
+        perms: yes
+      when: skipCopy == "false"
+
+    - name: stop service
+      shell:  |
+        docker stop {{project}}
+      ignore_errors: yes
+
+    - name: remove image
+      shell:  |
+        docker rmi {{project}}:{{version}}
+      ignore_errors: yes
+
+    - name: load service
+      shell:  |
+        docker load < {{project}}.tar
+      args:
+        chdir: /tmp/{{project}}
+
+    - name: start service
+      args:
+        chdir: /tmp/{{project}}
+      shell:  |
+        docker run -d --privileged=true -v /var/log/{{project}}:/var/log/{{project}} -e "profiles={{env}}" --name={{project}} -e "index={{index}}" -e "port={{port}}" --net=host --rm -it {{project}}:{{version}}
+
+
