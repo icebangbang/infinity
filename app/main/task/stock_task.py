@@ -77,6 +77,11 @@ def submit_stock_feature(self, to_date=None, codes=None):
         logging.info("the day is not workday:{}".format(date_util.date_time_to_str(to_date)))
         return
 
+    switch = my_redis.get_bool("sync_after_15")
+    if not switch:
+        logging.info("will not run job after 15")
+        return
+
     code_name_map = stock_dao.get_code_name_map()
     from_date = to_date - timedelta(days=700)
 

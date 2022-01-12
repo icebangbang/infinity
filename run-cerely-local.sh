@@ -1,4 +1,4 @@
-# sh run-local.sh  deveploment 4 day_level
+# sh run-local.sh  development 4 day_level
 
 env=${1}
 num=${2}

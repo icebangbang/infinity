@@ -1,7 +1,7 @@
-# sh run-cerely.sh ~/Work/pem/xzhh.pem deveploment test 6 15 indicator true
-# sh run-cerely.sh ~/Work/pem/xzhh.pem deveploment test 1 1 default true
+# sh run-cerely.sh ~/Work/pem/xzhh.pem development test 6 15 indicator true
+# sh run-cerely.sh ~/Work/pem/xzhh.pem development test 1 1 default true
 
-# sh run-cerely.sh ~/Work/pem/xzhh.pem deveploment test 2 5 day_level false
+# sh run-cerely.sh ~/Work/pem/xzhh.pem development test 2 5 day_level false
 
 
 

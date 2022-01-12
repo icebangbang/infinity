@@ -38,8 +38,8 @@ class DevelopmentConfig(Config):
     REDIS_DB_ID = 1
     REDIS_PASSWORD = 'ironBackRedis123'
 
-    CELERY_BROKER_URL = 'redis://:ironBackRedis123@172.16.1.184:30004/1'
-    RESULT_BACKEND = 'redis://:ironBackRedis123@172.16.1.184:30004/1'
+    BROKER_URL = 'redis://:ironBackRedis123@39.105.104.215:30004/1'
+    RESULT_BACKEND = 'redis://:ironBackRedis123@39.105.104.215:30004/1'
     MONGO_URL = "mongodb://root:whosyourdaddy$879@39.105.104.215:20017/"
 
 class TestConfig(Config):
