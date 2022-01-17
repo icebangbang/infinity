@@ -1,6 +1,6 @@
 
 
-# sh run-cerely-job.sh ~/Work/pem/xzhh.pem development test false
+# sh run-cerely-job.sh ~/Work/pem/xzhh.pem test test false
 
 
 

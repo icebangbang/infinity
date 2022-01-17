@@ -77,7 +77,8 @@ task_routes = (
 
 
 beat_schedule = {
-    'stock_data_sync': {  # 股票数据同步
+    'stock_data_sync':
+        {  # 股票数据同步
         "task": "app.main.task.stock_task.sync_stock_k_line",  # 任务函数所在位置
         "schedule": 100,  # 定时每300秒执行一次
     },
@@ -96,8 +97,12 @@ beat_schedule = {
     'get_board_feature': {
         "task": "app.main.task.board_task.submit_board_feature",
         "schedule": 400
+    },
+    'sync_macrodata': {
+        "task": "app.main.task.macrodata_task.sync",
+        "schedule": 400
     }
 }
 
 # 在出现worker接受到的message出现没有注册的错误时，使用下面一句能解决
-# CELERY_IMPORTS = ("app.main.task.stock_task",)
+imports = ("app.main.task.macrodata_task")
