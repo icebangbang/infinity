@@ -6,13 +6,16 @@ import pandas as pd
 from app.main.stock.dao import stock_dao, k_line_dao
 from app.main.stock.stock_pick_filter import stock_filter
 from app.main.utils import date_util
+from app.main.stock.stock_kline import id_map
+import akshare as ak
+from app.main.db.mongo import db
+from app.main.stock.task_wrapper import TaskWrapper
 
 
-def publish(days=10, slice=30, code_list=None,stock_map={},start=None,end=None):
+def publish(days=10, slice=30, code_list=None, stock_map={}, start=None, end=None):
     if start is None and end is None:
-
         end = date_util.get_start_of_day(datetime.now())
-        start,end = date_util.get_work_day(end,offset=days)
+        start, end = date_util.get_work_day(end, offset=days)
 
     if code_list is None:
         stocks = stock_dao.get_all_stock()
@@ -73,16 +76,32 @@ def publish(days=10, slice=30, code_list=None,stock_map={},start=None,end=None):
 
     print("涨幅前{}是:".format(slice))
     for i in top:
-        print("{} {} {} {}".format(i['code'], i['name'], round(i['rise'] * 100,3),get_concepts(stock_map,i['code'])))
+        print("{} {} {} {}".format(i['code'], i['name'], round(i['rise'] * 100, 3), get_concepts(stock_map, i['code'])))
 
     print("跌幅前{}是:".format(slice))
     for i in bot:
-        print("{} {} {} {}".format(i['code'], i['name'], round(i['rise'] * 100,3),get_concepts(stock_map,i['code'])))
+        print("{} {} {} {}".format(i['code'], i['name'], round(i['rise'] * 100, 3), get_concepts(stock_map, i['code'])))
 
-def get_concepts(stock_map,code):
+
+def get_concepts(stock_map, code):
     if code in stock_map.keys():
         return stock_map[code]['board']
     return ""
+
+
+def sync_stock_ind(codes,task_wrapper:TaskWrapper=None):
+    detail_set = db["stock_detail"]
+    print("code size {}".format(len(codes)))
+    for code in codes:
+        df = ak.stock_ind(code, id_map)
+        ind_dict = df.to_dict("records")[0]
+        ind_dict['MarketValue'] = round(ind_dict['MarketValue'] / 100000000, 2)
+        ind_dict['flowCapitalValue'] = round(ind_dict['flowCapitalValue'] / 100000000, 2)
+        detail_set.update_one({"code": code}, {"$set": ind_dict})
+
+        if task_wrapper is not None:
+            task_wrapper.trigger_count()
+
 
 
 if __name__ == "__main__":
@@ -90,5 +109,5 @@ if __name__ == "__main__":
     code_name_map = stock_dao.get_code_name_map()
     to_time = datetime.now()
     from_time = to_time - timedelta(739)
-    stock_filter.get_stock_status(from_time,to_time)
-    publish(3,100)
+    stock_filter.get_stock_status(from_time, to_time)
+    publish(3, 100)

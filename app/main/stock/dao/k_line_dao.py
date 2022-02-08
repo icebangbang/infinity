@@ -111,7 +111,7 @@ def get_board_k_line_by_name(name: List,
 def get_k_line_data(
         start_day: datetime,
         end_day: datetime,
-        level='day', codes=None) -> List:
+        level='day', codes=None,sort=1) -> List:
     """
     获取特定时间的股票走势
     :param start_day:
@@ -127,14 +127,14 @@ def get_k_line_data(
 
     query = my_set \
         .find(query_set) \
-        .sort("date", 1)
+        .sort("date", sort)
     return list(query)
 
 
 def get_index_kline_data(
         start_day: datetime,
         end_day: datetime,
-        level='day') -> List:
+        level='day',sort=1) -> List:
     """
     获取特定时间的股票走势
     :param start_day:
@@ -147,7 +147,7 @@ def get_index_kline_data(
 
     query = my_set \
         .find({"date": {"$lte": end_day, "$gte": start_day}}) \
-        .sort("date", 1)
+        .sort("date", sort)
     return list(query)
 
 

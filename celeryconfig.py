@@ -1,5 +1,5 @@
-from celery.schedules import crontab
 from kombu import Exchange, Queue
+from celery.schedules import crontab
 
 # 配置时区
 timezone = 'Asia/Shanghai'
@@ -40,10 +40,18 @@ task_routes = (
     {'app.main.task.stock_task.sync_stock_data': {
         'queue': 'day_level',
         'routing_key': 'day_level'
+    }},
+    {'app.main.task.stock_task.sync_stock_ind': {
+        'queue': 'day_level',
+        'routing_key': 'day_level'
     }
     },
-
     {'app.main.task.stock_task.submit_stock_feature': {
+        'queue': 'default',
+        'routing_key': 'default'
+    }
+    },
+    {'app.main.task.stock_task.submit_stock_ind_task': {
         'queue': 'default',
         'routing_key': 'default'
     }
@@ -71,24 +79,27 @@ task_routes = (
     {'app.main.task.board_task.sync_board_feature': {
         'queue': 'indicator',
         'routing_key': 'indicator'
-        }
+    }
     },
 )
-
 
 beat_schedule = {
     'stock_data_sync':
         {  # 股票数据同步
-        "task": "app.main.task.stock_task.sync_stock_k_line",  # 任务函数所在位置
-        "schedule": 100,  # 定时每300秒执行一次
-    },
+            "task": "app.main.task.stock_task.sync_stock_k_line",  # 任务函数所在位置
+            "schedule": 180,  # 定时每300秒执行一次
+        },
     'board_data_sync': {
         "task": "app.main.task.board_task.sync_board_k_line",
         "schedule": 420,  # 定时每420秒执行一次
     },
     'sync_board_stock_detail': {
-        "task": "app.main.task.board_task.sync_board_stock_detail",
+        "task": "app.main.task.board_task.submit_stock_ind_task",
         "schedule": crontab(minute='1', hour='15', day_of_week='1-5')  # 工作日的15点以后
+    },
+    'sync_board_stock_ind': {
+        "task": "app.main.task.stock_task.submit_stock_ind_task",
+        "schedule": 60  # 每20分钟执行一次
     },
     'get_stock_feature': {
         "task": "app.main.task.stock_task.submit_stock_feature",

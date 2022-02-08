@@ -11,4 +11,11 @@ def send_job():
     switch = request.args.get("on","false")
     my_redis.set("sync_after_15",switch)
 
+    return restful.response("ok")\
+
+@rest.route("/task/sync/count", methods=['get'])
+def test_incr():
+    for i in range(1000):
+        print(my_redis.incr("xx", 1))
+
     return restful.response("ok")

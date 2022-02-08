@@ -79,7 +79,7 @@ def get_work_day(now, offset):
             offset = offset + 1
         i = i + 1
 
-    return now - timedelta(days=offset), now
+    return get_start_of_day(now - timedelta(days=offset)), now
 
 
 def if_workday(dt):
@@ -91,6 +91,8 @@ def if_workday(dt):
         D = dt.day
         april_last = date(Y, M, D)
         return is_workday(april_last)
+
+
 
 
 

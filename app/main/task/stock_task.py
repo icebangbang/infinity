@@ -4,12 +4,17 @@ from app.main.stock.dao import board_dao, stock_dao, task_dao
 import logging
 from datetime import datetime, timedelta
 import time
+
+from app.main.stock.job import sync_stock_indicator
+from app.main.stock.task_wrapper import TaskWrapper
+from app.main.task import task_constant
 from app.main.utils import date_util
 
-from app.main.stock.service import sync_kline_service
+from app.main.stock.service import sync_kline_service, stock_service
 from app.main.stock.stock_pick_filter import stock_filter
 from app.main.utils import my_redis, date_util
 import uuid
+import akshare as ak
 
 """
 个股数据同步
@@ -109,3 +114,33 @@ def sync_stock_feature(self, from_date, to_date, codes, name_dict):
         to_date = datetime.fromtimestamp(int(to_date))
     companies = stock_filter.get_stock_status(from_date, to_date, codes=codes, code_name_map=name_dict)
     stock_dao.dump_stock_feature(companies, to_date)
+
+
+@celery.task(bind=True, base=MyTask, expire=1800)
+def submit_stock_ind_task(self):
+    """
+    提交该任务
+    同步市值,PE等指标
+    :param self:
+    :return:
+    """
+    stocks = stock_dao.get_all_stock(dict(code=1))
+    codes = [stock['code'] for stock in stocks]
+    t = datetime.now()
+
+    task_id = str(uuid.uuid1())
+    task_set = db['task_center']
+    task_set.update({"task_id": task_id, "job_name": task_constant.TASK_SYNC_STOCK_IND},
+                    {"$set": {"is_finished": 0, "create_time": t, "update_time": t}}, upsert=True)
+
+    step = int(len(codes) / 100)
+    for i in range(0, len(codes), step):
+        group = codes[i:i + step]
+        logging.info("submit group index {} - {},{},{}".format(i, i + step,task_id,len(stocks)))
+        sync_stock_ind.apply_async(args=[group, task_id, len(stocks)])
+
+
+@celery.task(bind=True, base=MyTask, expire=1800)
+def sync_stock_ind(self, codes, task_id, expect):
+    task_wrapper = TaskWrapper(task_id, task_constant.TASK_SYNC_STOCK_IND, expect)
+    stock_service.sync_stock_ind(codes, task_wrapper)

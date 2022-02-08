@@ -23,6 +23,7 @@ def sync():
         detail_set.update_one({"code":code},{"$set":ind_dict})
 
 
+
 if __name__ == "__main__":
     sync()
 
