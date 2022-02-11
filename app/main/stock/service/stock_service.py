@@ -89,19 +89,29 @@ def get_concepts(stock_map, code):
     return ""
 
 
-def sync_stock_ind(codes,task_wrapper:TaskWrapper=None):
-    detail_set = db["stock_detail"]
+def sync_stock_ind(codes, task_wrapper: TaskWrapper = None):
+    stock_detail_set = db["stock_detail"]
+    stock_value_set = db["stock_value"]
     print("code size {}".format(len(codes)))
     for code in codes:
+        now = datetime.now()
+        start_of_day = date_util.get_start_of_day(now)
         df = ak.stock_ind(code, id_map)
         ind_dict = df.to_dict("records")[0]
         ind_dict['MarketValue'] = round(ind_dict['MarketValue'] / 100000000, 2)
         ind_dict['flowCapitalValue'] = round(ind_dict['flowCapitalValue'] / 100000000, 2)
-        detail_set.update_one({"code": code}, {"$set": ind_dict})
+        ind_dict['update_time'] = now
+        stock_detail_set.update_one({"code": code}, {"$set": ind_dict})
+
+        stock_value_set.update_one({"code": code, "date": start_of_day},
+                                   {"$set": dict(
+                                       MarketValue=ind_dict['MarketValue'],
+                                       flowCapitalValue=ind_dict['flowCapitalValue'],
+                                       update_time=now),
+                                   })
 
         if task_wrapper is not None:
             task_wrapper.trigger_count()
-
 
 
 if __name__ == "__main__":

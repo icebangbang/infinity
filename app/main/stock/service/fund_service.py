@@ -24,7 +24,7 @@ def get_by_board(start: datetime, end: datetime):
 
     query_set = {"date": start}
     stock_value_earliest = list(stock_value.find(query_set))
-    stock_value_earliest = {stock_value['code']:stock_value for stock_value in stock_value_earliest}
+    stock_value_earliest = {stock_value['code']: stock_value for stock_value in stock_value_earliest}
 
     query_set = {"date": end}
     stock_value_latest = list(stock_value.find(query_set))
@@ -39,7 +39,7 @@ def get_by_board(start: datetime, end: datetime):
             if code in stock_value_latest.keys() and code in stock_value_earliest.keys():
                 fcv_latest = stock_value_latest[code]['flowCapitalValue']
                 fcv_earliest = stock_value_earliest[code]['flowCapitalValue']
-                fcv_sum = fcv_sum + fcv_latest-fcv_earliest
+                fcv_sum = fcv_sum + fcv_latest - fcv_earliest
         result[board['board']] = fcv_sum
     return result
 
@@ -85,7 +85,7 @@ def backtrading_stock_value(stocks, days=90):
     :return:
     """
     logging.info("start backtrading stock value,days is {}".format(days))
-    latest, now = date_util.get_work_day(datetime.now(), 1)
+    latest, now = date_util.get_work_day(datetime.now(), 0)
     start = latest - timedelta(days=days)
 
     # data_list = k_line_dao.get_k_line_data(start, now, sort=-1)
@@ -114,6 +114,7 @@ def backtrading_stock_value(stocks, days=90):
 
         for data in data_list:
             date = data['date']
+            # 说明是最近一天的市值,直接更新
             if len(stock_data_list) == 0:
                 stock_data_list.append(dict(date=date, code=code, flowCapitalValue=base_fcv, MarketValue=base_mv))
                 base_close = data['close']
@@ -128,21 +129,25 @@ def backtrading_stock_value(stocks, days=90):
         my_set = db['stock_value']
 
         for stock_data in stock_data_list:
+            update_time = datetime.now()
             date = stock_data['date']
             code = stock_data['code']
             flowCapitalValue = stock_data['flowCapitalValue']
             MarketValue = stock_data['MarketValue']
 
             logging.info("{}-{}".format(date_util.dt_to_str(date), code))
-            my_set.update({"date": date, "code": code},
-                          {"$set": dict(flowCapitalValue=flowCapitalValue, MarketValue=MarketValue)}, upsert=True)
+            my_set.update_one({"date": date, "code": code},
+                              {"$set": dict(flowCapitalValue=flowCapitalValue,
+                                            MarketValue=MarketValue,
+                                            update_time=update_time)}, upsert=True)
     logging.info("finish backtrading stock value")
 
 
 if __name__ == "__main__":
-    # stocks = stock_dao.get_stock_detail_list()
-    # backtrading_stock_value(stocks,1)
-    end = date_util.get_start_of_day(date_util.get_work_day(datetime.now(),1)[0])
-    start = end - timedelta(days=1)
+    stocks = stock_dao.get_stock_detail_list()
+    backtrading_stock_value(stocks, 30)
+    # end = date_util.get_start_of_day(date_util.get_work_day(datetime.now(),0)[0])
+    # start = end - timedelta(days=1)
 
-    results = get_by_board(start, end)
+    # results = get_by_board(start, end)
+    # pass

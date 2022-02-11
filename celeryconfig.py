@@ -81,6 +81,11 @@ task_routes = (
         'routing_key': 'indicator'
     }
     },
+    {'app.main.task.house_task.sync_hangzhou_house': {
+        'queue': 'default',
+        'routing_key': 'default'
+    }
+    },
 )
 
 beat_schedule = {
@@ -112,8 +117,12 @@ beat_schedule = {
     'sync_macrodata': {
         "task": "app.main.task.macrodata_task.sync",
         "schedule": 400
-    }
+    },
+    'sync_hangzhou_house': {
+        "task": "app.main.task.house_task.sync_hangzhou_house",
+        "schedule": 30
+    },
 }
 
 # 在出现worker接受到的message出现没有注册的错误时，使用下面一句能解决
-imports = ("app.main.task.macrodata_task")
+imports = ("app.main.task.macrodata_task","app.main.task.house_task")

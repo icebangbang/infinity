@@ -11,11 +11,11 @@ from app.main.stock.strategy.simple_bs_strategy import SimpleBsStrategy
 from app.main.stock.dao import k_line_dao
 from app.main.stock.strategy.test_startegy import TestStrategy
 
-from_date = datetime(2021, 3, 13)
-to_date = datetime(2021, 10, 4)
+from_date = datetime(2022, 1, 28)
+to_date = datetime(2022, 2, 10)
 
 # daily_price = pd.DataFrame(k_line_dao.get_k_line_data(from_date, to_date))
-daily_price = pd.DataFrame(k_line_dao.get_k_line_by_code(['300763'], from_date, to_date))
+daily_price = pd.DataFrame(k_line_dao.get_k_line_by_code(['603123'], from_date, to_date))
 daily_price = daily_price.set_index("date", drop=False)
 
 count = 1

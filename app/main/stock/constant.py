@@ -11,6 +11,7 @@ macd_histo_rise_point = "macd_histo_rise_point"  #
 kdj_k_prev = "kdj_k_prev"  #
 high_volume_10 = "high_volume_10"
 high_volume_5 = "high_volume_5"
+boll_top_slope = "boll_top_slope"
 
 box_top_formulas = "box_high_formulas"  # 箱体上沿线性公式
 box_bottom_formulas = "box_low_formulas"  # 箱体下沿线性公式
@@ -33,12 +34,15 @@ down_shadow = "down_shadow"
 entity_length = "entity_length"
 close_rate_5 = "close_rate_5"
 close_rate_10 = "close_rate_10"
+
 ma5_upon_20 = "ma5_upon_20"
 ma10_upon_20 = "ma10_upon_20"
 ma5_upon_10 = "ma5_upon_10"
 ma10_upon_10 = "ma10_upon_10"
 ma5_upon_5 = "ma5_upon_5"
 ma10_upon_5 = "ma10_upon_5"
+ma5_upon_max = "ma5_upon_max"
+ma10_upon_max = "ma10_upon_max"
 
 increase_avg_rate_5 = "increase_avg_rate_5"
 increase_avg_rate_10 = "increase_avg_rate_10"
@@ -66,12 +70,111 @@ feature = {
     "vol_avg_10": "10日均量",
     "volume": "当前成交量",
     "close": "当前价格",
-    "rate":"当前涨幅",
-    "gap":"缺口",
-    "up_shadow":"上影线长度",
-    "entity_length":"实体长度",
-    "down_shadow":"下影线长度",
-    "increase_avg_rate_5":"近5日涨幅",
-    "increase_avg_rate_10":"近10日涨幅",
-    "increase_avg_rate_20":"近20日涨幅",
+    "rate": "当前涨幅",
+    "gap": "缺口",
+    "up_shadow": "上影线长度",
+    "entity_length": "实体长度",
+    "down_shadow": "下影线长度",
+    "increase_avg_rate_5": "近5日日均涨幅",
+    "increase_avg_rate_10": "近10日日均涨幅",
+    "increase_avg_rate_20": "近20日日均涨幅",
+    "close_rate_5": "5日内涨幅",
+    "close_rate_10": "10日内涨幅",
+    "ma5_upon_max": "最大连续在5日线之上次数",
+    "ma10_upon_max": "最大连续在10日线之上次数",
+    "boll_top_slope": "布林轨道上沿斜率"
 }
+
+feature_detail = [
+    dict(
+        name="ma5_upon_5",
+        desc="5日内站上5日均线次数",
+        type="int",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=0,
+        category="均线"
+    ),
+    dict(
+        name="ma5_upon_10",
+        desc="10日内站上5日均线次数",
+        type="int",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=0,
+        category="均线"
+    ),
+    dict(
+        name="ma5_upon_20",
+        desc="20日内站上5日均线次数",
+        type="int",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=0,
+        category="均线"
+    ),
+    dict(
+        name="ma10_upon_5",
+        desc="5日内站上10日均线次数",
+        type="int",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=0,
+        category="均线"
+    ),
+    dict(
+        name="ma10_upon_10",
+        desc="10日内站上10日均线次数",
+        type="int",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=0,
+        category="均线"
+    ),
+    dict(
+        name="ma10_upon_20",
+        desc="20日内站上10日均线次数",
+        type="int",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=0,
+        category="均线"
+    ),
+    dict(
+        name="ma5_upon_max",
+        desc="最大连续在5日线之上次数",
+        type="int",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=0,
+        category="均线"
+    ),
+    dict(
+        name="ma10_upon_max",
+        desc="最大连续在10日线之上次数",
+        type="int",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=0,
+        category="均线"
+    ),
+dict(
+        name="volume_gt_5",
+        desc="最大连续在10日线之上次数",
+        type="int",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=0,
+        category="均线"
+    )
+
+]

@@ -10,6 +10,7 @@ from app.main.stock.sub_startegy.feature.box_boundary import BoxBoundary
 from app.main.stock.sub_startegy.feature.base_feature import BaseFeature
 from app.main.stock.sub_startegy.feature.short_term_feature import ShortTermFeature
 from app.main.stock.sub_startegy.feature.shape_feature import ShapeFeature
+from app.main.stock.sub_startegy.feature.boll_feature import BollFeature
 from app.main.stock.strategy.strategy_wrapper import StrategyWrapper
 
 """
@@ -35,7 +36,7 @@ def get_stock_status(from_date, to_date, data_list=None, codes=None, code_name_m
     if code_name_map is None:
         code_name_map = stock_dao.get_code_name_map()
 
-    sub_st = [ShortTermFeature,ShapeFeature]
+    sub_st = [ShortTermFeature,ShapeFeature,BollFeature]
     kwargs = {}
 
     companies = list()
@@ -60,11 +61,11 @@ def get_stock_status(from_date, to_date, data_list=None, codes=None, code_name_m
 
 if __name__ == "__main__":
     code_name_map = stock_dao.get_code_name_map()
-    to_date = datetime(2021, 12, 29)
-    from_date = to_date-timedelta(days=700)
+    to_date = datetime(2022, 2, 4)
+    from_date = to_date-timedelta(days=300)
 
 
-    companies = get_stock_status(from_date, to_date, data_list=None, codes=["688021"],code_name_map=code_name_map)
+    companies = get_stock_status(from_date, to_date, data_list=None, codes=["002487"],code_name_map=code_name_map)
     print()
     # stock_dao.dump_stock_feature(companies, to_date)
 

@@ -16,8 +16,8 @@ def get_ppi():
     cpi = db['cpi']
     cpi_list = list(cpi.find({"date": {"$gte": start}}).sort("_id", -1))
 
-    pmi = db['pmi']
-    pmi_list = list(pmi.find({"date": {"$gte": start}}).sort("_id", -1))
+    # pmi = db['pmi']
+    # pmi_list = list(pmi.find({"date": {"$gte": start}}).sort("_id", -1))
 
     date = []
     current = []

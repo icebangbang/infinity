@@ -150,9 +150,17 @@ class ShortTermFeature(SubST):
         ma10_upon_10 = 0
         ma5_upon_5 = 0
         ma10_upon_5 = 0
+        ma5_upon_max = 0
+        ma10_upon_max = 0
+
         for i in range(20):
             if data.close.get(-i) > ma5.get(-i):
                 ma5_upon_20 = ma5_upon_20 + 1
+                if ma5_upon_max == i:
+                    ma5_upon_max = ma5_upon_max + 1
+                if ma10_upon_max == i:
+                    ma10_upon_max = ma10_upon_max + 1
+
             if data.close.get(-i) > ma10.get(-i):
                 ma10_upon_20 = ma10_upon_20 + 1
         for i in range(10):
@@ -172,6 +180,8 @@ class ShortTermFeature(SubST):
         company.set(constant.ma10_upon_10, ma10_upon_10)
         company.set(constant.ma5_upon_5, ma5_upon_5)
         company.set(constant.ma10_upon_5, ma10_upon_5)
+        company.set(constant.ma5_upon_max, ma5_upon_max)
+        company.set(constant.ma10_upon_max, ma10_upon_max)
 
     def high_record(self, data, company):
         """
@@ -198,4 +208,4 @@ class ShortTermFeature(SubST):
     #     for i in range(20):
     #         close = data.close[-i]
     #         close_neg_1 = data.close[-i-1]
-            # rate =
+    # rate =

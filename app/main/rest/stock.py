@@ -61,7 +61,7 @@ def data_miner():
     end = date_util.parse_date_time(params.get("until"), "%Y-%m-%d")
 
     # if date_util.get_days_between(end, start) == 0:
-    start,uesless = date_util.get_work_day(start,1)
+    start, uesless = date_util.get_work_day(start, 1)
     # start = start - timedelta(days=1)
 
     datas = k_line_dao.get_k_line_by_code(codes, start, end)
@@ -84,10 +84,12 @@ def data_miner():
         for board in board_list:
             if "板块" in board:
                 area_boards.append(board)
+                # 地域板块不加入boards,不会出现在所属板块中
+                continue
 
-            elif board not in ['融资融券','富时罗素','标准普尔',
-                         '深股通','MSCI中国','沪股通','深成500',
-                         '创业板综','中证500','上证380','转债标的','内贸流通','电商概念','机构重仓','QFII重仓','长江三角']:
+            elif board not in ['融资融券', '富时罗素', '标准普尔',
+                               '深股通', 'MSCI中国', '沪股通', '深成500',
+                               '创业板综', '中证500', '上证380', '转债标的', '内贸流通', '电商概念', '机构重仓', 'QFII重仓', '长江三角']:
 
                 boards.append(board)
         if code not in group.keys(): continue
@@ -100,15 +102,17 @@ def data_miner():
         close_list = [trade_data['close'] for trade_data in trade_data_list]
 
         a = close_list[0]
-        b = max(close_list[1:]) if len(close_list)>1 else a
+        b = max(close_list[1:]) if len(close_list) > 1 else a
         index = close_list.index(b)
         high_date = trade_data_list[index]['date']
         rate = round((b - a) / a * 100, 2)
 
         final[name] = dict(
+            name=name,
             rate=rate,
-            high_date=high_date,
-            board=board_list
+            code=code,
+            high_date=high_date.strftime("%Y-%m-%d"),
+            boards=board_list
         )
         if hide_board is True:
             final[name].__delitem__("board")
@@ -119,12 +123,12 @@ def data_miner():
 
     if only_code:
         return restful.response(list(final.keys()))
+    else:
+        final = [item for item in final.values()]
 
     return restful.response(dict(counter=dict(counter.most_common(20)),
                                  area_counter=dict(area_counter.most_common(10)),
                                  detail=final, size=len(final)))
-
-
 
 
 def get_stock_result(params) -> List[dict]:
@@ -136,37 +140,39 @@ def get_stock_result(params) -> List[dict]:
     up_shadow_rate = params.get("up_shadow_rate", None)
     rate = params.get("rate", None)  # ["$eq",0]
     close_rate_5 = params.get("close_rate_5", None)  # ["$eq",0]
-    entity_length = params.get("entityLength", None)  # ["$gt",0] k线实体
+    entity_length = params.get("entity_length", None)  # ["$gt",0] k线实体
     close = params['custom'].get("close", None)  # ["$gt",0]
-    sma_down = params.get("smaDown", None) # 均线空头
-    sma_up = params.get("smaUp", None) # 均线空头
-    volume_up_10 = params.get("volumeUp10", None)
-    volume_gt_5 = params.get("volumeGt5", None)
-    volume_lt_5 = params.get("volumeLt5", None)
-    volume_down_5 = params.get("volumeDown5",None)
-    ma5_upon_20 = params.get("ma5Upon20",None)
-    ma10_upon_20 = params.get("ma10Upon20",None)
-    ma5_upon_10 = params.get("ma5Upon10", None)
-    ma10_upon_10 = params.get("ma10Upon10", None)
-    ma5_upon_5 = params.get("ma5Upon5", None)
-    ma10_upon_5 = params.get("ma10Upon5", None)
+    sma_down = params.get("sma_down", None)  # 均线空头
+    sma_up = params.get("sma_up", None)  # 均线空头
+    volume_up_10 = params.get("volume_up_10", None)
+    volume_gt_5 = params.get("volume_gt_5", None)
+    volume_lt_5 = params.get("volume_lt_5", None)
+    volume_down_5 = params.get("volume_down_5", None)
+    ma5_upon_20 = params.get("ma5_upon_20", None)
+    ma10_upon_20 = params.get("ma10_upon_20", None)
+    ma5_upon_10 = params.get("ma5_upon_10", None)
+    ma10_upon_10 = params.get("ma10_upon_10", None)
+    ma5_upon_5 = params.get("ma5_upon_5", None)
+    ma10_upon_5 = params.get("ma10_upon_5", None)
+    ma5_upon_max = params.get("ma5_upon_max", None)
 
     match = {"date": date, "$expr": {"$and": []}}
 
-
     if volume_up_10 is not None:
-        match["$expr"]["$and"].append({"$gte": ["$features.volume", {"$multiply": ["$features.vol_avg_10", volume_up_10]}
-                                               ]})
+        match["$expr"]["$and"].append(
+            {"$gte": ["$features.volume", {"$multiply": ["$features.vol_avg_10", volume_up_10]}
+                      ]})
     if volume_gt_5 is not None:
         match["$expr"]["$and"].append({"$gte": ["$features.volume", {"$multiply": ["$features.vol_avg_5", volume_gt_5]}
-                                               ]})
+                                                ]})
     if volume_lt_5 is not None:
         match["$expr"]["$and"].append({"$lte": ["$features.volume", {"$multiply": ["$features.vol_avg_5", volume_lt_5]}
-                                               ]})
+                                                ]})
 
     if volume_down_5 is not None:
-        match["$expr"]["$and"].append({"$lte": ["$features.volume", {"$multiply": ["$features.vol_avg_5", volume_down_5]}
-                                               ]})
+        match["$expr"]["$and"].append(
+            {"$lte": ["$features.volume", {"$multiply": ["$features.vol_avg_5", volume_down_5]}
+                      ]})
 
     if gap is not None:
         match["features.gap"] = {"$in": gap}
@@ -183,20 +189,22 @@ def get_stock_result(params) -> List[dict]:
     if entity_length is not None:
         match["$expr"]["$and"].append({entity_length[0]: ["$features.entity_length", entity_length[1]]})
 
-    if sma_down :
-        match["$expr"]["$and"].append({"$gt":["$features.ma60","$features.ma30"]})
-        match["$expr"]["$and"].append({"$gt":["$features.ma30","$features.ma20"]})
-        match["$expr"]["$and"].append({"$gt":["$features.ma20","$features.ma10"]})
-    if sma_up :
-        match["$expr"]["$and"].append({"$lt":["$features.ma60","$features.ma30"]})
-        match["$expr"]["$and"].append({"$lt":["$features.ma30","$features.ma20"]})
-        match["$expr"]["$and"].append({"$lt":["$features.ma20","$features.ma10"]})
+    if sma_down:
+        match["$expr"]["$and"].append({"$gt": ["$features.ma60", "$features.ma30"]})
+        match["$expr"]["$and"].append({"$gt": ["$features.ma30", "$features.ma20"]})
+        match["$expr"]["$and"].append({"$gt": ["$features.ma20", "$features.ma10"]})
+    if sma_up:
+        match["$expr"]["$and"].append({"$lt": ["$features.ma60", "$features.ma30"]})
+        match["$expr"]["$and"].append({"$lt": ["$features.ma30", "$features.ma20"]})
+        match["$expr"]["$and"].append({"$lt": ["$features.ma20", "$features.ma10"]})
     if ma5_upon_5:
         match["$expr"]["$and"].append({ma5_upon_5[0]: ["$features.ma5_upon_5", ma5_upon_5[1]]})
     if ma5_upon_10:
         match["$expr"]["$and"].append({ma5_upon_10[0]: ["$features.ma5_upon_10", ma5_upon_10[1]]})
     if ma5_upon_20:
         match["$expr"]["$and"].append({ma5_upon_20[0]: ["$features.ma5_upon_20", ma5_upon_20[1]]})
+    if ma5_upon_max:
+        match["$expr"]["$and"].append({ma5_upon_max[0]: ["$features.ma5_upon_max", ma5_upon_max[1]]})
 
     if close is not None:
         match["$expr"]["$and"].append({close[0]: ["$features.close", close[1]]})

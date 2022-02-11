@@ -1,4 +1,4 @@
-# sh run-dao.sh ~/Work/pem/xzhh.pem test test true
+# sh run-dao.sh ~/Work/pem/xzhh.pem test test false
 
 
 pem=${1}
