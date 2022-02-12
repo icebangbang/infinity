@@ -26,4 +26,4 @@ COPY ./celeryconfig.py /
 # CMD cd /app && flask run --host=0.0.0.0 --port=${port} --with-threads --no-debugger --no-reload
 #CMD  gunicorn -k gevent -w 4 -b 0.0.0.0:${port} app.run:app -e FLASK_ENV=${profiles}
 #gunicorn -k gevent -w 4 -b 0.0.0.0:20011 app.run:app -e FLASK_ENV=default
-CMD celery -A manage.celery worker -l info -P  gevent -Q ${route} -c 50 -n worker${index}.%h
+CMD celery -A manage.celery worker -l info -P  gevent -Q ${route} -c ${thread} -n worker${index}.%h

@@ -1,6 +1,6 @@
 from app.main.stock.dao import board_dao, k_line_dao, stock_dao
 from app.main.stock.job import bt_runner
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 import pandas as pd
 import logging
 import time
@@ -32,11 +32,11 @@ def get_stock_status(from_date, to_date, data_list=None, codes=None, code_name_m
 
     if data_list is None:
         data_list = k_line_dao.get_k_line_data(from_date, to_date, codes=codes)
-        if len(data_list) ==0:
+        if len(data_list) == 0:
             logging.info("datas from {} to {} of {} is empty".format(
-                         date_util.dt_to_str(from_date),
-                         date_util.dt_to_str(to_date),
-                         codes
+                date_util.dt_to_str(from_date),
+                date_util.dt_to_str(to_date),
+                codes
             ))
             return None
 
@@ -46,13 +46,13 @@ def get_stock_status(from_date, to_date, data_list=None, codes=None, code_name_m
     if code_name_map is None:
         code_name_map = stock_dao.get_code_name_map()
 
-    sub_st = [ShortTermFeature,ShapeFeature,BollFeature]
+    sub_st = [ShortTermFeature, ShapeFeature, BollFeature]
     # sub_st = [BollFeature]
     kwargs = {}
 
     companies = list()
     for code, group in data_df.groupby("code"):
-        logging.info("feed {} to cerebro".format(code))
+        logging.info("feed {} to cerebro: {}".format(code, date_util.dt_to_str(to_date)))
         if code in code_name_map.keys():
             name = code_name_map[code]
         else:
@@ -72,7 +72,7 @@ def get_stock_status(from_date, to_date, data_list=None, codes=None, code_name_m
                 date_util.dt_to_str(to_date),
                 code
             ))
-            logging.error(e,exc_info=1)
+            logging.error(e, exc_info=1)
 
         if company is not None:
             companies.append(company)
@@ -83,10 +83,9 @@ def get_stock_status(from_date, to_date, data_list=None, codes=None, code_name_m
 if __name__ == "__main__":
     code_name_map = stock_dao.get_code_name_map()
     to_date = datetime(2021, 2, 5)
-    from_date = to_date-timedelta(days=600)
+    from_date = to_date - timedelta(days=600)
 
-
-    companies = get_stock_status(from_date, to_date, data_list=None, codes=["300932"],code_name_map=code_name_map)
+    companies = get_stock_status(from_date, to_date, data_list=None, codes=["300932"], code_name_map=code_name_map)
     print()
     # stock_dao.dump_stock_feature(companies, to_date)
 

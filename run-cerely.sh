@@ -1,7 +1,7 @@
 # sh run-cerely.sh ~/Work/pem/xzhh.pem development test 6 15 indicator true
 # sh run-cerely.sh ~/Work/pem/xzhh.pem development test 1 1 default true
 
-# sh run-cerely.sh ~/Work/pem/xzhh.pem development test 2 5 day_level false
+# sh run-cerely.sh ~/Work/pem/xzhh.pem development test 2 5 day_level false 5
 
 
 
@@ -12,6 +12,7 @@ start=${4}
 end=${5}
 route=${6}
 skipCopy=${7}
+thread=${8}
 
 
 project=dao-celery
@@ -40,7 +41,8 @@ ansible-playbook \
   -e version=${version} \
   -e index=${index} \
   -e skipCopy=${skipCopy} \
-  -e route=${route}
+  -e route=${route} \
+  -e thread=${thread}
 
 first_loop=0
 done

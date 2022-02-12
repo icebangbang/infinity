@@ -40,4 +40,4 @@
       args:
         chdir: /tmp/{{project}}
       shell:  |
-        docker run -d --privileged=true  -e "profiles={{env}}" --name={{project}}-{{index}} -e "index={{index}}" -e "route={{route}}" -e "FLASK_ENV={{env}}" --net=host --rm -it {{project}}:{{version}}
+        docker run -d --privileged=true  -e "profiles={{env}}" --name={{project}}-{{index}} -e "index={{index}}" -e "route={{route}}" -e "FLASK_ENV={{env}}" -e "thread={{thread}}" --net=host --rm -it {{project}}:{{version}}
