@@ -108,7 +108,7 @@ beat_schedule = {
     },
     'get_stock_feature': {
         "task": "app.main.task.stock_task.submit_stock_feature",
-        "schedule": 400  # 每5分钟执行一次
+        "schedule": 1800  # 每5分钟执行一次
     },
     'get_board_feature': {
         "task": "app.main.task.board_task.submit_board_feature",

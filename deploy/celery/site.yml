@@ -27,12 +27,14 @@
       shell:  |
         docker rmi {{project}}:{{version}}
       ignore_errors: yes
+      when: skipCopy == "false"
 
     - name: load service
       shell:  |
         docker load < {{project}}.tar
       args:
         chdir: /tmp/{{project}}
+      when: skipCopy == "false"
 
     - name: start service
       args:

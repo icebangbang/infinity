@@ -12,6 +12,7 @@ from app.main.stock.sub_startegy.feature.short_term_feature import ShortTermFeat
 from app.main.stock.sub_startegy.feature.shape_feature import ShapeFeature
 from app.main.stock.sub_startegy.feature.boll_feature import BollFeature
 from app.main.stock.strategy.strategy_wrapper import StrategyWrapper
+from app.main.utils import date_util
 
 """
 跑批获取特征
@@ -30,28 +31,48 @@ def get_stock_status(from_date, to_date, data_list=None, codes=None, code_name_m
     """
 
     if data_list is None:
-        data_list = pd.DataFrame(k_line_dao.get_k_line_data(from_date, to_date, codes=codes))
+        data_list = k_line_dao.get_k_line_data(from_date, to_date, codes=codes)
+        if len(data_list) ==0:
+            logging.info("datas from {} to {} of {} is empty".format(
+                         date_util.dt_to_str(from_date),
+                         date_util.dt_to_str(to_date),
+                         codes
+            ))
+            return None
+
+        data_df = pd.DataFrame(data_list)
         # print(len(data_list),codes)
     # data = data.set_index("date", drop=False)
     if code_name_map is None:
         code_name_map = stock_dao.get_code_name_map()
 
     sub_st = [ShortTermFeature,ShapeFeature,BollFeature]
+    # sub_st = [BollFeature]
     kwargs = {}
 
     companies = list()
-    for code, group in data_list.groupby("code"):
+    for code, group in data_df.groupby("code"):
         logging.info("feed {} to cerebro".format(code))
         if code in code_name_map.keys():
             name = code_name_map[code]
         else:
             name = 'no'
-        company = bt_runner.run(from_date, to_date,
-                                data=group, key="code",
-                                main_st=StrategyWrapper,
-                                sub_st=sub_st,
-                                code=code,
-                                name=name, **kwargs)
+
+        company = None
+        try:
+            company = bt_runner.run(from_date, to_date,
+                                    data=group, key="code",
+                                    main_st=StrategyWrapper,
+                                    sub_st=sub_st,
+                                    code=code,
+                                    name=name, **kwargs)
+        except Exception as e:
+            logging.error("error from {} to {} of {}".format(
+                date_util.dt_to_str(from_date),
+                date_util.dt_to_str(to_date),
+                code
+            ))
+            logging.error(e,exc_info=1)
 
         if company is not None:
             companies.append(company)
@@ -61,11 +82,11 @@ def get_stock_status(from_date, to_date, data_list=None, codes=None, code_name_m
 
 if __name__ == "__main__":
     code_name_map = stock_dao.get_code_name_map()
-    to_date = datetime(2022, 2, 4)
-    from_date = to_date-timedelta(days=300)
+    to_date = datetime(2021, 2, 5)
+    from_date = to_date-timedelta(days=600)
 
 
-    companies = get_stock_status(from_date, to_date, data_list=None, codes=["002487"],code_name_map=code_name_map)
+    companies = get_stock_status(from_date, to_date, data_list=None, codes=["300932"],code_name_map=code_name_map)
     print()
     # stock_dao.dump_stock_feature(companies, to_date)
 

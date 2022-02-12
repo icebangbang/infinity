@@ -28,7 +28,9 @@ class BollFeature(SubST):
         初始化指标
         :return:
         """
-        company.setInd("boll", BollingerBandsWidth())
+        length = company.data_size
+
+        company.setInd("boll", BollingerBandsWidth() if length > 20 else None)
 
     def next(self, data: PandasData, company: Company):
         """
@@ -38,6 +40,7 @@ class BollFeature(SubST):
         if day >= 20: return  # 只考虑当日触发情况
         try:
             boll = company.getInd("boll")
+            if boll is None: return
             # 布林轨道上沿的斜率
             slope, ignore = cal_util.get_line([boll.top[-1], boll.top[0]])
             company.set(constant.boll_top_slope, slope)

@@ -88,7 +88,7 @@ def submit_stock_feature(self, to_date=None, codes=None):
         return
 
     code_name_map = stock_dao.get_code_name_map()
-    from_date = to_date - timedelta(days=700)
+    from_date = to_date - timedelta(days=500)
 
     from_date_timestamp = int(time.mktime(from_date.timetuple()))
     to_date_timestamp = int(time.mktime(to_date.timetuple()))
@@ -113,7 +113,8 @@ def sync_stock_feature(self, from_date, to_date, codes, name_dict):
         from_date = datetime.fromtimestamp(int(from_date))
         to_date = datetime.fromtimestamp(int(to_date))
     companies = stock_filter.get_stock_status(from_date, to_date, codes=codes, code_name_map=name_dict)
-    stock_dao.dump_stock_feature(companies, to_date)
+    if companies is not None:
+        stock_dao.dump_stock_feature(companies, to_date)
 
 
 @celery.task(bind=True, base=MyTask, expire=1800)
