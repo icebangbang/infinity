@@ -71,6 +71,11 @@ task_routes = (
         'routing_key': 'day_level'
     }
     },
+    {'app.main.task.fund_task.backtrading': {
+        'queue': 'day_level',
+        'routing_key': 'day_level'
+    }
+    },
     {'app.main.task.board_task.submit_board_feature': {
         'queue': 'default',
         'routing_key': 'default'
@@ -99,7 +104,7 @@ beat_schedule = {
         "schedule": 420,  # 定时每420秒执行一次
     },
     'sync_board_stock_detail': {
-        "task": "app.main.task.board_task.submit_stock_ind_task",
+        "task": "app.main.task.board_task.sync_board_stock_detail",
         "schedule": crontab(minute='1', hour='15', day_of_week='1-5')  # 工作日的15点以后
     },
     'sync_board_stock_ind': {
@@ -108,7 +113,7 @@ beat_schedule = {
     },
     'get_stock_feature': {
         "task": "app.main.task.stock_task.submit_stock_feature",
-        "schedule": 1800  # 每5分钟执行一次
+        "schedule": 600  # 每5分钟执行一次
     },
     'get_board_feature': {
         "task": "app.main.task.board_task.submit_board_feature",
@@ -122,7 +127,11 @@ beat_schedule = {
         "task": "app.main.task.house_task.sync_hangzhou_house",
         "schedule": 30
     },
+    'sync_fund_flow': {
+        "task": "app.main.task.fund_task.backtrading",
+        "schedule": 1800
+    },
 }
 
 # 在出现worker接受到的message出现没有注册的错误时，使用下面一句能解决
-imports = ("app.main.task.macrodata_task","app.main.task.house_task")
+imports = ("app.main.task.macrodata_task","app.main.task.house_task","app.main.task.fund_task")

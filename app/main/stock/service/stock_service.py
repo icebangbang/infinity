@@ -108,16 +108,24 @@ def sync_stock_ind(codes, task_wrapper: TaskWrapper = None):
                                        MarketValue=ind_dict['MarketValue'],
                                        flowCapitalValue=ind_dict['flowCapitalValue'],
                                        update_time=now),
-                                   })
+                                   }, upsert=True)
 
         if task_wrapper is not None:
             task_wrapper.trigger_count()
 
 
 if __name__ == "__main__":
-    stocks = stock_dao.get_all_stock(dict(code=1))
-    code_name_map = stock_dao.get_code_name_map()
-    to_time = datetime.now()
-    from_time = to_time - timedelta(739)
-    stock_filter.get_stock_status(from_time, to_time)
-    publish(3, 100)
+    # stocks = stock_dao.get_all_stock(dict(code=1))
+    # code_name_map = stock_dao.get_code_name_map()
+    # to_time = datetime.now()
+    # from_time = to_time - timedelta(739)
+    # stock_filter.get_stock_status(from_time, to_time)
+    # publish(3, 100)
+
+    stock_value_set = db["stock_value"]
+    stock_value_set.update_one({"code": "300763", "date": datetime.now()},
+                               {"$set": dict(
+                                   MarketValue=0,
+                                   flowCapitalValue=0,
+                                   update_time=datetime.now()),
+                               }, True)

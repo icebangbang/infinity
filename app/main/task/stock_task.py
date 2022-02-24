@@ -137,7 +137,7 @@ def submit_stock_ind_task(self):
     step = int(len(codes) / 100)
     for i in range(0, len(codes), step):
         group = codes[i:i + step]
-        logging.info("submit group index {} - {},{},{}".format(i, i + step,task_id,len(stocks)))
+        # logging.info("submit group index {} - {},{},{}".format(i, i + step,task_id,len(stocks)))
         sync_stock_ind.apply_async(args=[group, task_id, len(stocks)])
 
 

@@ -32,6 +32,8 @@ def create_app(config_name):
 
     # init_all_blueprint(app)
 
+
+
     from app.main.rest import rest
     app.register_blueprint(rest)
 

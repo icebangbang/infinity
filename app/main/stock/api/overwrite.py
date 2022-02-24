@@ -595,9 +595,6 @@ def pig_data():
     while flag:
         current = current+dateutil.relativedelta.relativedelta(months=1)
         url = "http://www.moa.gov.cn/ztzl/szcpxx/jdsj/"+datetime.strftime(current,"%Y%m")
-
-        print(current)
-
         r = requests.get(url)
 
         if r.status_code == 403:

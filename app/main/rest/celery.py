@@ -40,6 +40,7 @@ def get_stock_feature():
         date_end = datetime.now()
 
     days = date_util.get_days_between(date_end, date_start)
+    logging.info("days span is {}".format(days))
     if days == 0:
         logging.info("submit stock feature:{}".format(date_start_str))
         stock_task.submit_stock_feature(date_util.to_timestamp(date_start),codes)

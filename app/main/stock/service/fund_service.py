@@ -84,9 +84,6 @@ def backtrading_stock_value(stocks, days=90):
     根据k线回溯市值
     :return:
     """
-    logging.info("start backtrading stock value,days is {}".format(days))
-    latest, now = date_util.get_work_day(datetime.now(), 0)
-    start = latest - timedelta(days=days)
 
     # data_list = k_line_dao.get_k_line_data(start, now, sort=-1)
     # k_line_map = {}
@@ -102,6 +99,9 @@ def backtrading_stock_value(stocks, days=90):
     #               for stock in stocks}
 
     for base in stocks:
+        logging.info("start backtrading stock value,days is {}".format(days))
+        latest, update_time = date_util.get_work_day(base['update_time'], 0)
+        start = latest - timedelta(days=days)
 
         data_list = k_line_dao.get_k_line_data(start, latest, codes=[base['code']], sort=-1)
 
@@ -145,7 +145,7 @@ def backtrading_stock_value(stocks, days=90):
 
 if __name__ == "__main__":
     stocks = stock_dao.get_stock_detail_list()
-    backtrading_stock_value(stocks, 30)
+    backtrading_stock_value(stocks, 4)
     # end = date_util.get_start_of_day(date_util.get_work_day(datetime.now(),0)[0])
     # start = end - timedelta(days=1)
 
