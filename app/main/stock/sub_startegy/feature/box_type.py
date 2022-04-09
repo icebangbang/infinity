@@ -124,18 +124,21 @@ class BoxType(SubST):
             # 当前趋势范围点
             current_trend_scope = high_type_list[total_p[-1]:]
             # 最近趋势范围点
-            prev_trend_scope = high_type_list[total_p[-2]:total_p[-1] + 1]
+            if len(total_p) >1:
+                prev_trend_scope = high_type_list[total_p[-2]:total_p[-1] + 1]
+            else:
+                prev_trend_scope = high_type_list[:total_p[-1] + 1]
+            prev_top_type_slope, c = cal_util.get_line([i['value'] for i in prev_trend_scope])
+
 
             inflection_point = current_trend_scope[0]
             inf_h_point_date = data.datetime.datetime(inflection_point['index'] - len(high) + 1)
             current_top_type_slope, c = cal_util.get_line([i['value'] for i in current_trend_scope])
-            prev_top_type_slope, c = cal_util.get_line([i['value'] for i in prev_trend_scope])
 
-            company.set(constant.current_top_type_slope,current_trend_scope)
+            company.set(constant.current_top_type_slope,current_top_type_slope)
             company.set(constant.prev_top_type_slope, prev_top_type_slope)
             company.set(constant.current_top_trend_size,
                         current_trend_scope[-1]['index'] - current_trend_scope[0]['index'])
-            company.set(constant.prev_top_trend_size, prev_trend_scope[-1]['index'] - prev_trend_scope[0]['index'])
             company.set(constant.inf_h_point_date, inf_h_point_date)
 
         low = data.low.get(ago=0, size=len(data))
@@ -152,7 +155,10 @@ class BoxType(SubST):
             # 当前趋势范围点
             current_trend_scope = low_type_list[total_p[-1]:]
             # 最近趋势范围点
-            prev_trend_scope = low_type_list[total_p[-2]:total_p[-1] + 1]
+            if len(total_p) > 1:
+                prev_trend_scope = low_type_list[total_p[-2]:total_p[-1] + 1]
+            else:
+                prev_trend_scope = low_type_list[:total_p[-1] + 1]
 
             inflection_point = current_trend_scope[0]
             inf_l_point_date = data.datetime.datetime(inflection_point['index'] - len(low) + 1)
