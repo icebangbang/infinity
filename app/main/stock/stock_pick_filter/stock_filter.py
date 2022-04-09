@@ -86,7 +86,7 @@ if __name__ == "__main__":
     from_date = to_date - timedelta(days=600)
 
     for key in code_name_map.keys():
-        companies = get_stock_status(from_date, to_date, data_list=None, codes=['688216'], code_name_map=code_name_map)
+        companies = get_stock_status(from_date, to_date, data_list=None, codes=['301102'], code_name_map=code_name_map)
         print(companies)
     # stock_dao.dump_stock_feature(companies, to_date)
 
