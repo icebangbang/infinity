@@ -11,23 +11,23 @@ echo '##################################'
 
 docker build --no-cache -f ./CerelyDockerfile -t dao-celery:latest .
 
-for ((index=1; index<=1; index++))
+for ((index1=1; index1<=1; index1++))
 do
-docker stop dao-celery-${index}
-docker run -d --privileged=true  -e "profiles=test" --name=dao-celery-${index} -e "index=${index}" -e "route=default" -e "FLASK_ENV=test" -e "thread=50" --net=host --rm -it dao-celery:latest
-echo ${index}
+echo ${index1}
+docker stop dao-celery-${index1}
+docker run -d --privileged=true  -e "profiles=test" --name=dao-celery-${index1} -e "index=${index1}" -e "route=default" -e "FLASK_ENV=test" -e "thread=50" --net=host --rm -it dao-celery:latest
 done
 
-for ((index=2; index<=5; index++))
+for ((index2=2; index2<=5; index2++))
 do
-docker stop dao-celery-${index}
-docker run -d --privileged=true  -e "profiles=test" --name=dao-celery-${index} -e "index=${index}" -e "route=day_level" -e "FLASK_ENV=test" -e "thread=50" --net=host --rm -it dao-celery:latest
-echo ${index}
+echo ${index2}
+docker stop dao-celery-${index2}
+docker run -d --privileged=true  -e "profiles=test" --name=dao-celery-${index2} -e "index=${index2}" -e "route=day_level" -e "FLASK_ENV=test" -e "thread=50" --net=host --rm -it dao-celery:latest
 done
 
-for ((index=6; index<=11; index++))
+for ((index3=6; index3<=11; index3++))
 do
-docker stop dao-celery-${index}
-docker run -d --privileged=true  -e "profiles=test" --name=dao-celery-${index} -e "index=${index}" -e "route=indicator" -e "FLASK_ENV=test" -e "thread=20" --net=host --rm -it dao-celery:latest
-echo ${index}
+echo ${index3}
+docker stop dao-celery-${index3}
+docker run -d --privileged=true  -e "profiles=test" --name=dao-celery-${index3} -e "index=${index3}" -e "route=indicator" -e "FLASK_ENV=test" -e "thread=20" --net=host --rm -it dao-celery:latest
 done
