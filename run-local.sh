@@ -5,7 +5,7 @@ docker run -d --privileged=true  -e "index=1"  -e "FLASK_ENV=test" --name=dao-ce
 
 docker build -f ./Dockerfile -t dao:latest .
 docker stop dao
-docker run -d --privileged=true -v /var/log/dao:/var/log/dao -e "profiles=test" --name=dao -e "index=1" -e "port=20500" --net=host --rm -it dao:lattest
+docker run -d --privileged=true -v /var/log/dao:/var/log/dao -e "profiles=test" --name=dao -e "index=1" -e "port=20500" --net=host --rm -it dao:latest
 
 docker build --no-cache -f ./CerelyDockerfile -t dao-celery:latest .
 
