@@ -29,5 +29,6 @@ for ((index3=6; index3<=11; index3++))
 do
 echo ${index3}
 docker stop dao-celery-${index3}
+echo "shutdown dao-celery-${index3}"
 docker run -d --privileged=true  -e "profiles=test" --name=dao-celery-${index3} -e "index=${index3}" -e "route=indicator" -e "FLASK_ENV=test" -e "thread=20" --net=host --rm -it dao-celery:latest
 done
