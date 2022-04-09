@@ -7,7 +7,7 @@ import time
 
 from app.main.stock.sub_startegy.feature.box_type import BoxType
 from app.main.stock.sub_startegy.feature.box_boundary import BoxBoundary
-from app.main.stock.sub_startegy.feature.base_feature import BaseFeature
+from app.main.stock.sub_startegy.feature.earning_rate_feature import EarningRateFeature
 from app.main.stock.sub_startegy.feature.short_term_feature import ShortTermFeature
 from app.main.stock.sub_startegy.feature.shape_feature import ShapeFeature
 from app.main.stock.sub_startegy.feature.boll_feature import BollFeature
@@ -46,8 +46,8 @@ def get_stock_status(from_date, to_date, data_list=None, codes=None, code_name_m
     if code_name_map is None:
         code_name_map = stock_dao.get_code_name_map()
 
-    sub_st = [ShortTermFeature, ShapeFeature, BollFeature]
-    # sub_st = [BollFeature]
+    sub_st = [ShortTermFeature, ShapeFeature, BollFeature,EarningRateFeature,BoxType]
+    # sub_st = [BoxType]
     kwargs = {}
 
     companies = list()
@@ -82,11 +82,12 @@ def get_stock_status(from_date, to_date, data_list=None, codes=None, code_name_m
 
 if __name__ == "__main__":
     code_name_map = stock_dao.get_code_name_map()
-    to_date = datetime(2021, 2, 5)
+    to_date = datetime(2022, 4, 7)
     from_date = to_date - timedelta(days=600)
 
-    companies = get_stock_status(from_date, to_date, data_list=None, codes=["300932"], code_name_map=code_name_map)
-    print()
+    for key in code_name_map.keys():
+        companies = get_stock_status(from_date, to_date, data_list=None, codes=[key], code_name_map=code_name_map)
+        print(companies)
     # stock_dao.dump_stock_feature(companies, to_date)
 
     # codes = ['600058', '600167', '600222', '600227', '600243', '600257', '600299', '600308', '600319', '600354', '600358', '600371', '600406', '600455', '600530', '600540', '600583', '600613', '600678', '600803', '600819', '600956', '600977', '601579', '603079', '603080', '603090', '603168', '603269', '603626', '603696', '603789', '603822', '603838', '603959', '603970', '603983', '603987', '000523', '000529', '000669', '000713', '000798', '000803', '000876', '000990', '000998', '002031', '002100', '002112', '002124', '002237', '002261', '002267', '002290', '002304', '002309', '002321', '002330', '002655', '002665', '002722', '002746', '002779', '002783', '002865', '003003', '300071', '300094', '300119', '300168', '300169', '300179', '300243', '300268', '300288', '300402', '300422', '300423', '300468', '300503', '300511', '300620', '300659', '300830', '300849', '300865', '300886', '300937']

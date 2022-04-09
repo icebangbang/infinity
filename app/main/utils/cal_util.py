@@ -67,7 +67,7 @@ def get_top_line(Y):
     """
     获取顶部支撑线
     :param Y:
-    :return:
+    :return: m 斜率,c常量
     """
     # Y = [1.066, 1.155, 1.251, 1.308, 1.443, 1.648, 1.918, 2.095, 2.157, 2.050, 2.063, 2.182, 2.397, 2.576]
     [m, c] = get_line(Y)
@@ -114,19 +114,26 @@ def get_reverse_point(points):
     三点确定中间点的斜率情况
     获取反转点
     :param point:
-    :return:
+    :return: pos_p  先下后上
+             neg_p  先上后下
     """
     pos_p = []
     neg_p = []
+    total_p = []
 
     for i, point in enumerate(points):
         if i == 0 or i == len(points) - 1: continue
         prev, useless = get_line([points[i - 1], points[i]])
         next, useless = get_line([points[i], points[i + 1]])
-        if prev >= 0 and next < 0:     neg_p.append(i)
-        if prev < 0 and next >= 0:      pos_p.append(i)
+        if prev >= 0 and next < 0:
+            neg_p.append(i)
+            total_p.append(i)
+        if prev < 0 and next >= 0:
+            pos_p.append(i)
+            total_p.append(i)
 
-    return pos_p, neg_p
+
+    return pos_p, neg_p,total_p
 
 def get_rate(numerator,denominator,ndigits=2)->float:
     """
@@ -144,8 +151,11 @@ if __name__ == "__main__":
     d = get_dis(line, [math.sqrt(2), 0])
     print(d)
 
-    a = [1.066, 1.155, 1.251, 1.308, 1.443, 1.648, 1.918, 2.095, 2.157, 2.050, 2.063, 2.182, 2.397, 2.576]
+    a = [1.066, 1.155,1.11, 1.251,1.24, 1.308, 1.443, 1.648, 1.918, 2.095, 2.157, 2.050, 2.063, 2.182, 2.397, 2.576,1]
     get_bot_line(a)
 
-    pos_p, neg_p = get_reverse_point(a)
-    print(pos_p, neg_p)
+    pos_p, neg_p,total = get_reverse_point(a)
+    print(total)
+
+    print(a[total[-1]:])
+    print(a[total[-2]:total[-1]+1])

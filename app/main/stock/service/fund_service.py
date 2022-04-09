@@ -144,7 +144,7 @@ def backtrading_stock_value(stocks, days=90):
 
 
 if __name__ == "__main__":
-    stocks = stock_dao.get_stock_detail_list()
+    stocks = stock_dao.get_stock_detail_list(['300763'])
     backtrading_stock_value(stocks, 4)
     # end = date_util.get_start_of_day(date_util.get_work_day(datetime.now(),0)[0])
     # start = end - timedelta(days=1)

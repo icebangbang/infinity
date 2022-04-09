@@ -68,9 +68,11 @@ def update_board_k_line(name, date, data):
 
 
 def get_k_line_by_code(code: List,
-                       start_day: datetime,
-                       end_day: datetime,
-                       level='day'):
+                       start_day: datetime = None,
+                       end_day: datetime = None,
+                       level='day',
+                       limit=None,
+                       sort=1):
     """
     获取特定时间和代码的股票走势
     :param code:
@@ -82,15 +84,23 @@ def get_k_line_by_code(code: List,
     db_name = "k_line_" + level
     my_set = db[db_name]
 
-    query = my_set.find({"code": {"$in": code},
-                         "date": {"$lte": end_day, "$gte": start_day}}) \
-        .sort("date", 1)
+    filter = {"code": {"$in": code}}
+
+    if start_day is not None and end_day is not None:
+        filter['date'] = {"$lte": end_day, "$gte": start_day}
+
+    query = my_set.find(filter) \
+        .sort("date", sort)
+
+    if limit is not None:
+        query = query.limit(limit)
     return list(query)
 
+
 def get_board_k_line_by_name(name: List,
-                       start_day: datetime,
-                       end_day: datetime,
-                       level='day'):
+                             start_day: datetime,
+                             end_day: datetime,
+                             level='day'):
     """
     获取特定时间和代码的股票走势
     :param code:
@@ -111,7 +121,7 @@ def get_board_k_line_by_name(name: List,
 def get_k_line_data(
         start_day: datetime,
         end_day: datetime,
-        level='day', codes=None,sort=1) -> List:
+        level='day', codes=None, sort=1) -> List:
     """
     获取特定时间的股票走势
     :param start_day:
@@ -134,7 +144,7 @@ def get_k_line_data(
 def get_index_kline_data(
         start_day: datetime,
         end_day: datetime,
-        level='day',sort=1) -> List:
+        level='day', sort=1) -> List:
     """
     获取特定时间的股票走势
     :param start_day:
@@ -177,18 +187,6 @@ def get_board_k_line_data(
 
 
 if __name__ == "__main__":
-    r = get_k_line_data(datetime(2021, 7, 28), datetime(2021, 8, 28),
-                        codes=['300864', '300865', '300866', '300867', '300868', '300869', '300870', '300871', '300872',
-                               '300873', '300875', '300876', '300877', '300878', '300879', '300880', '300881', '300882',
-                               '300883', '300884', '300885', '300886', '300887', '300888', '300889', '300890', '300891',
-                               '300892', '300893', '300894', '300895', '300896', '300897', '300898', '300899', '300900',
-                               '300901', '300902', '300903', '300905', '300906', '300907', '300908', '300909', '300910',
-                               '300911', '300912', '300913', '300915', '300916', '300917', '300918', '300919', '300920',
-                               '300921', '300922', '300923', '300925', '300926', '300927', '300928', '300929', '300930',
-                               '300931', '300932', '300933', '300935', '300936', '300937', '300938', '300939', '300940',
-                               '300941', '300942', '300943', '300945', '300946', '300947', '300948', '300949', '300950',
-                               '300951', '300952', '300953', '300955', '300956', '300957', '300958', '300959', '300960',
-                               '300961', '300962', '300963', '300964', '300965', '300966', '300967', '300968', '300969',
-                               '300970', '300971', '300972', '300973', '300975', '300976', '300977', '300978', '300979',
-                               '300980', '300981', '300982', '300983', '300984', '300985'])
+    r = get_k_line_by_code(['300864'],
+                           limit=1,sort=-1)
     print(r)

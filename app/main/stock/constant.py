@@ -1,20 +1,20 @@
-close_gte_ma20 = "close_gte_ma20"  # 收盘价大于20日均线
-close_gte_ma10 = "close_gte_ma10"  # 收盘价大于20日均线
-ma60_incr = "ma60_incr"  # 60日均线抬升
-ma20_incr = "ma20_incr"  # 20日均线抬升
-macd_diff = "macd_diff"
-kdj_golden_hit_day = "kdj_golden_hit_day"  # 最近kdj触发金叉
-macd_histo = "macd_histo"  #
-macd_histo_smallest_3 = "macd_histo_smallest_3"  #
-macd_histo_incr = "macd_histo_incr"  #
-macd_histo_rise_point = "macd_histo_rise_point"  #
-kdj_k_prev = "kdj_k_prev"  #
-high_volume_10 = "high_volume_10"
-high_volume_5 = "high_volume_5"
 boll_top_slope = "boll_top_slope"
 
-box_top_formulas = "box_high_formulas"  # 箱体上沿线性公式
-box_bottom_formulas = "box_low_formulas"  # 箱体下沿线性公式
+current_top_type_slope = "current_top_type_slope"
+prev_top_type_slope = "prev_top_type_slope"
+
+current_bot_type_slope = "current_bot_type_slope"
+prev_bot_type_slope = "prev_bot_type_slope"
+
+inf_h_point_date = "inf_h_point_date"
+inf_l_point_date = "inf_l_point_date"
+
+current_top_trend_size = "current_top_trend_size"
+prev_top_trend_size = "prev_top_trend_size"
+
+current_bot_trend_size = "current_bot_trend_size"
+prev_bot_trend_size = "prev_bot_trend_size"
+
 box_boundary = "box_boundary"
 ma5 = "ma5"
 ma10 = "ma10"
@@ -48,17 +48,17 @@ increase_avg_rate_5 = "increase_avg_rate_5"
 increase_avg_rate_10 = "increase_avg_rate_10"
 increase_avg_rate_20 = "increase_avg_rate_20"
 
+earning_rate_1 = "earning_rate_1"
+earning_rate_2 = "earning_rate_2"
+earning_rate_3 = "earning_rate_3"
+earning_rate_5 = "earning_rate_5"
+earning_rate_10 = "earning_rate_10"
+earning_rate_15 = "earning_rate_15"
+earning_rate_20 = "earning_rate_20"
+
 feature = {
-    "close_gte_ma20": "收盘价大于20日均线",
-    "close_gte_ma10": "收盘价大于10日均线",
-    "ma60_incr": "60日均线抬升",
-    "ma20_incr": "20日均线抬升",
-    "macd_diff": "macd快线",
-    "kdj_golden_hit_day": "最近kdj触发金叉",
-    "macd_histo": "macd柱值",
-    "macd_histo_smallest_3": "macd柱值最近3天最小",
-    "macd_histo_rise_point": "macd柱上升拐点",
-    "kdj_k_prev": "kdj前一天的k值",
+    "top_type_slope": "顶分型斜率",
+    "bottom_type_slope": "底分型斜率",
     "box_boundary": "箱体周期",
     "ma5": "5日均线",
     "ma10": "10日均线",
@@ -86,6 +86,66 @@ feature = {
 }
 
 feature_detail = [
+    dict(
+        name="inf_h_point_date",
+        desc="顶分型趋势拐点",
+        type="date",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=None,
+        category="趋势"
+    ),
+    dict(
+        name="inf_l_point_date",
+        desc="底分型趋势拐点",
+        type="date",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=None,
+        category="趋势"
+    ),
+    dict(
+        name="current_top_type_slope",
+        desc="当前趋势顶分型斜率",
+        type="float",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=0,
+        category="趋势"
+    ),
+    dict(
+        name="current_bot_type_slope",
+        desc="当前趋势底分型斜率",
+        type="float",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=0,
+        category="趋势"
+    ),
+    dict(
+        name="prev_top_type_slope",
+        desc="先前趋势顶分型斜率",
+        type="float",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=0,
+        category="趋势"
+    ),
+    dict(
+        name="prev_bot_type_slope",
+        desc="先前趋势底分型斜率",
+        type="float",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=0,
+        category="趋势"
+    ),
     dict(
         name="ma5_upon_5",
         desc="5日内站上5日均线次数",
@@ -166,7 +226,7 @@ feature_detail = [
         default_value=0,
         category="均线"
     ),
-dict(
+    dict(
         name="volume_gt_5",
         desc="最大连续在10日线之上次数",
         type="int",

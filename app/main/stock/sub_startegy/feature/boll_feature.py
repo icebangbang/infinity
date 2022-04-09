@@ -10,8 +10,8 @@ import logging
 
 class BollFeature(SubST):
     """
-        k线形态特征
-        """
+    布林轨道相关特征
+    """
 
     def __init__(self, **kwargs):
         """

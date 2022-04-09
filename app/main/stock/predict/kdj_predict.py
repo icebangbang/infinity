@@ -2,14 +2,6 @@ from app.main.stock.dao import board_dao, k_line_dao, stock_dao
 from app.main.stock.job import bt_runner
 from datetime import datetime
 import pandas as pd
-import backtrader as bt
-from app.main.stock.ind.kdj import KDJ
-import backtrader.feeds as btfeeds  # 导入数据模块
-
-from app.main.stock.service import board_service, stock_service, stock_index_service
-from app.main.stock.sub_startegy.up_sma import UpSma
-from app.main.stock.sub_startegy.trend.term import MediumLongTerm, MediumShortUpTerm
-from app.main.stock.sub_startegy.trend.base_feature import BaseFeature
 
 
 def cal_rsv_predict(df,

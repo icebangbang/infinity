@@ -53,6 +53,7 @@ def sync():
     all_stock = stock_dao.get_all_stock()
     if all_stock and len(all_stock) > 0:
         for k, v in stock_dict.items():
+            v["name"] = v['name'].replace(" ","")
             stock = stock_dao.get_one_stock(k)
             if stock is None:
                 log.info("新增 {}".format(k))
@@ -74,13 +75,14 @@ def sync():
                         json=d, headers=headers)
 
     # 清空
-    stock_detail.drop()
+    # stock_detail.drop()
     board_detail.drop()
 
-    x = stock_detail.insert_many(stock_dict.values())
+    for value in stock_dict.values():
+        if value['code'] == "000876":
+            pass
+        stock_detail.update_one({"code":value['code']},{"$set":value},upsert=True)
     board_detail.insert_many(board_list)
-
-    print(x.inserted_ids)
 
 if __name__ == "__main__":
     sync()

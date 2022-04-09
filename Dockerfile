@@ -3,18 +3,18 @@ FROM python:3.8.10-slim
 WORKDIR /
 COPY ./requirements.txt /
 
-RUN sed -i "s/deb.debian.org/mirrors.aliyun.com/g" /etc/apt/sources.list
-RUN sed -i "s/security.debian.org/mirrors.aliyun.com/g" /etc/apt/sources.list
-#
-RUN echo " \
-[global] \n \
-timeout = 5000 \n \
-index-url = http://pypi.douban.com/simple \n \
-trusted-host = pypi.douban.com \n \
-" > /etc/pip.conf
+#RUN sed -i "s/deb.debian.org/mirrors.aliyun.com/g" /etc/apt/sources.list
+#RUN sed -i "s/security.debian.org/mirrors.aliyun.com/g" /etc/apt/sources.list
+##
+#RUN echo " \
+#[global] \n \
+#timeout = 5000 \n \
+#index-url = http://pypi.douban.com/simple \n \
+#trusted-host = pypi.douban.com \n \
+#" > /etc/pip.conf
 
 
-RUN pip3 install -i https://pypi.douban.com/simple --no-cache-dir -r requirements.txt
+RUN pip3 install -i  http://pypi.mirrors.ustc.edu.cn/simple  -r requirements.txt
 
 COPY ./app /app
 COPY ./manage.py /

@@ -95,7 +95,8 @@ def sync_stock_ind(codes, task_wrapper: TaskWrapper = None):
     print("code size {}".format(len(codes)))
     for code in codes:
         now = datetime.now()
-        start_of_day = date_util.get_start_of_day(now)
+        # start_of_day = date_util.get_start_of_day(now)
+        k_line_data_list = k_line_dao.get_k_line_by_code([code],limit=1,sort=-1)
         df = ak.stock_ind(code, id_map)
         ind_dict = df.to_dict("records")[0]
         ind_dict['MarketValue'] = round(ind_dict['MarketValue'] / 100000000, 2)
@@ -103,7 +104,7 @@ def sync_stock_ind(codes, task_wrapper: TaskWrapper = None):
         ind_dict['update_time'] = now
         stock_detail_set.update_one({"code": code}, {"$set": ind_dict})
 
-        stock_value_set.update_one({"code": code, "date": start_of_day},
+        stock_value_set.update_one({"code": code, "date": k_line_data_list[0]['date']},
                                    {"$set": dict(
                                        MarketValue=ind_dict['MarketValue'],
                                        flowCapitalValue=ind_dict['flowCapitalValue'],

@@ -11,8 +11,37 @@ def custom_sort(e):
 
 
 class BoxType(SubST):
+
+    def get_reverse_point(self, points):
+        """
+        三点确定中间点的斜率情况
+        获取反转点
+        :param point:
+        :return: pos_p  先下后上
+                 neg_p  先上后下
+        """
+        pos_p = []
+        neg_p = []
+        total_p = []
+        point_index = []
+
+        for i, point in enumerate(points):
+            if i == 0 or i == len(points) - 1: continue
+            prev, useless = cal_util.get_line([points[i - 1]['value'], points[i]['value']])
+            next, useless = cal_util.get_line([points[i]['value'], points[i + 1]['value']])
+            if prev >= 0 and next < 0:
+                neg_p.append(i)
+                total_p.append(i)
+                point_index.append(point['index'])
+            if prev < 0 and next >= 0:
+                pos_p.append(i)
+                total_p.append(i)
+                point_index.append(point['index'])
+
+        return pos_p, neg_p, total_p, point_index
+
     """
-    箱体判断策略
+    k线趋势判断辅助变量
     """
 
     def get_top_type(self, arrays) -> list:
@@ -25,7 +54,7 @@ class BoxType(SubST):
         for i, item in enumerate(arrays):
             if i == 0 or i == len(arrays) - 1:
                 # results.append(dict(i=i, v=item))
-                results.append(item)
+                results.append(dict(index=i, value=item))
                 continue
             target = item
             pre = arrays[i - 1]
@@ -33,16 +62,21 @@ class BoxType(SubST):
 
             if target > pre and target > next:
                 # results.append(dict(i=i, v=item))
-                results.append(item)
+                results.append(dict(index=i, value=item))
         return results
 
     def get_bottom_type(self, arrays) -> list:
+        """
+        筛选底分型
+        :param arrays:
+        :return:
+        """
         results = []
 
         for i, item in enumerate(arrays):
             if i == 0 or i == len(arrays) - 1:
                 # results.append(dict(i=i, v=item))
-                results.append(item)
+                results.append(dict(index=i, value=item))
                 continue
             target = item
             pre = arrays[i - 1]
@@ -50,7 +84,7 @@ class BoxType(SubST):
 
             if target < pre and target < next:
                 # results.append(dict(i=i, v=item))
-                results.append(item)
+                results.append(dict(index=i, value=item))
 
         return results
 
@@ -75,17 +109,46 @@ class BoxType(SubST):
         day = data.buflen() - len(data)
         if day != 0: return  # 从当日开始统计数据
 
-        high = data.high.get(ago=-1, size=20)
-        high_type: list = self.get_top_type(high)
-        tm, tc, ty, tx = cal_util.get_top_line(high_type)
-        # high_type.sort(reverse=True)
+        high = data.high.get(ago=-1, size=200)
+        high_type_list: list = self.get_top_type(high)
+        pos_p, neg_p, total_p, point_index = self.get_reverse_point(high_type_list)
+        # point_dt_index = [data.datetime.datetime(i - len(high)) for i in point_index]
+        # 当前趋势范围点
+        current_trend_scope = high_type_list[total_p[-1]:]
+        # 最近趋势范围点
+        prev_trend_scope = high_type_list[total_p[-2]:total_p[-1] + 1]
 
-        low = data.low.get(ago=-1, size=20)
-        low_type: list = self.get_bottom_type(low)
-        bm, bc, by, bx = cal_util.get_bot_line(low_type)
-        # low_type.sort(key=custom_sort)
-        # low_type.sort(reverse=False)
+        inflection_point = current_trend_scope[0]
+        inf_h_point_date = data.datetime.datetime(inflection_point['index'] - len(high))
+        current_top_type_slope, c = cal_util.get_line([i['value'] for i in current_trend_scope])
+        prev_top_type_slope, c = cal_util.get_line([i['value'] for i in prev_trend_scope])
 
-        company.set(constant.box_top_formulas, dict(k=tm, c=tc))
-        company.set(constant.box_bottom_formulas, dict(k=bm, c=bc))
+        company.set(constant.current_top_trend_size, len(current_trend_scope))
+        company.set(constant.prev_top_trend_scope, len(prev_trend_scope))
 
+        low = data.low.get(ago=-1, size=200)
+        low_type_list: list = self.get_bottom_type(low)
+        pos_p, neg_p, total_p, point_index = self.get_reverse_point(low_type_list)
+
+        # 当前趋势范围点
+        current_trend_scope = low_type_list[total_p[-1]:]
+        # 最近趋势范围点
+        prev_trend_scope = low_type_list[total_p[-2]:total_p[-1] + 1]
+
+        inflection_point = current_trend_scope[0]
+        inf_l_point_date = data.datetime.datetime(inflection_point['index'] - len(high))
+        current_bot_type_slope, c = cal_util.get_line([i['value'] for i in current_trend_scope])
+        prev_bot_type_slope, c = cal_util.get_line([i['value'] for i in prev_trend_scope])
+
+        company.set(constant.current_top_type_slope,current_top_type_slope)
+        company.set(constant.current_bot_type_slope,current_bot_type_slope)
+        company.set(constant.prev_top_type_slope, prev_top_type_slope)
+        company.set(constant.prev_bot_type_slope, prev_bot_type_slope)
+
+        company.set(constant.current_bot_trend_size, len(current_trend_scope))
+        company.set(constant.prev__bot_trend_size, len(prev_trend_scope))
+
+        company.set(constant.inf_h_point_date, inf_h_point_date)
+        company.set(constant.inf_l_point_date, inf_l_point_date)
+        # company.set(constant.box_top_formulas, dict(k=tm, c=tc))
+        # company.set(constant.box_bottom_formulas, dict(k=bm, c=bc))
