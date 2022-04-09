@@ -2,10 +2,9 @@ import pandas as pd
 import requests
 import akshare as ak
 import json
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 import dateutil
 import logging
-
 
 
 def stock_zh_a_hist(
@@ -522,6 +521,7 @@ def stock_board_concept_cons_em(symbol: str = "车联网", symbol_code=None) -> 
     temp_df["市净率"] = pd.to_numeric(temp_df["市净率"], errors="coerce")
     return temp_df
 
+
 def chinese_ppi():
     """
     工业品出厂价格指数是反映全部工业产品出厂价格总水平的变动趋势和程度的相对数。
@@ -539,8 +539,9 @@ def chinese_ppi():
     }
     r = requests.get(url, params=params)
     content = r.text
-    content = content.replace("(","").replace(")","")
+    content = content.replace("(", "").replace(")", "")
     return json.loads(content)
+
 
 def chinese_cpi():
     """
@@ -559,8 +560,9 @@ def chinese_cpi():
     }
     r = requests.get(url, params=params)
     content = r.text
-    content = content.replace("(","").replace(")","")
+    content = content.replace("(", "").replace(")", "")
     return json.loads(content)
+
 
 def chinese_pmi():
     """
@@ -579,8 +581,9 @@ def chinese_pmi():
     }
     r = requests.get(url, params=params)
     content = r.text
-    content = content.replace("(","").replace(")","")
+    content = content.replace("(", "").replace(")", "")
     return json.loads(content)
+
 
 def pig_data():
     """
@@ -588,23 +591,28 @@ def pig_data():
     :return:
     """
     now = datetime.now()
-    start_time = datetime(2021,3,1)
+    start_time = datetime(2021, 3, 1)
     current = start_time
     flag = True
     results = []
     while flag:
-        current = current+dateutil.relativedelta.relativedelta(months=1)
-        url = "http://www.moa.gov.cn/ztzl/szcpxx/jdsj/"+datetime.strftime(current,"%Y%m")
+        current = current + dateutil.relativedelta.relativedelta(months=1)
+        if current < datetime(2021, 12, 1):
+            url = "http://www.moa.gov.cn/ztzl/szcpxx/jdsj/" + datetime.strftime(current, "%Y%m")
+        else:
+            url = "http://www.moa.gov.cn/ztzl/szcpxx/jdsj/{}/{}".format(current.year,
+                                                                        datetime.strftime(current, "%Y%m"))
         r = requests.get(url)
 
-        if r.status_code == 403:
-            url = "http://www.moa.gov.cn/ztzl/szcpxx/jdsj/"
+        if r.status_code == 404:
+            # url = "http://www.moa.gov.cn/ztzl/szcpxx/jdsj/"
             flag = False
-            r = requests.get(url)
-        text = str(r.content,'utf8')
+            continue
+            # r = requests.get(url)
+        text = str(r.content, 'utf8')
         temp_df = pd.read_html(text)[0]
 
-        keys = ['能繁母猪存栏','生猪存栏','生猪出栏','月份规模以上生猪定点屠宰企业屠宰量','猪肉产量']
+        keys = ['能繁母猪存栏', '生猪存栏', '生猪出栏', '月份规模以上生猪定点屠宰企业屠宰量', '猪肉产量']
 
         for index, row in temp_df.iterrows():
             indicator = row['指标']
@@ -612,7 +620,7 @@ def pig_data():
                 if key in indicator:
                     result = dict(date=current)
                     results.append(result)
-                    result['name']=key
+                    result['name'] = key
                     num = row['数值']
                     if "（" in num:
                         num = num[0:num.index("（")]
@@ -632,5 +640,6 @@ def pig_data():
 
 
 if __name__ == "__main__":
-    results = stock_board_concept_name_em()
+    # results = stock_board_concept_name_em()
+    r = pig_data()
     print(123)
