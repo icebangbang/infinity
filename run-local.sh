@@ -4,7 +4,7 @@ docker stop  dao-celery-schedule-1
 docker run -d --privileged=true  -e "index=1"  -e "FLASK_ENV=test" --name=dao-celery-schedule-1  --net=host --rm -it dao-celery-schedule:latest
 
 docker build -f ./Dockerfile -t dao:latest .
-docker run -d --privileged=true -v /var/log/dao:/var/log/dao -e "profiles=test" --name=dao -e "index=1" -e "port=20500" --net=host --rm -it dao-latest
+docker run -d --privileged=true -v /var/log/dao:/var/log/dao -e "profiles=test" --name=dao -e "index=1" -e "port=20500" --net=host --rm -it dao:lattest
 
 docker build --no-cache -f ./CerelyDockerfile -t dao-celery:latest .
 

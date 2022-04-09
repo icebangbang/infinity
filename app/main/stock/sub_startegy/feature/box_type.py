@@ -124,7 +124,7 @@ class BoxType(SubST):
         prev_top_type_slope, c = cal_util.get_line([i['value'] for i in prev_trend_scope])
 
         company.set(constant.current_top_trend_size, len(current_trend_scope))
-        company.set(constant.prev_top_trend_scope, len(prev_trend_scope))
+        company.set(constant.prev_top_trend_size, len(prev_trend_scope))
 
         low = data.low.get(ago=-1, size=200)
         low_type_list: list = self.get_bottom_type(low)
@@ -146,7 +146,7 @@ class BoxType(SubST):
         company.set(constant.prev_bot_type_slope, prev_bot_type_slope)
 
         company.set(constant.current_bot_trend_size, len(current_trend_scope))
-        company.set(constant.prev__bot_trend_size, len(prev_trend_scope))
+        company.set(constant.prev_bot_trend_size, len(prev_trend_scope))
 
         company.set(constant.inf_h_point_date, inf_h_point_date)
         company.set(constant.inf_l_point_date, inf_l_point_date)
