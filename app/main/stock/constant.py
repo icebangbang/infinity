@@ -57,8 +57,12 @@ earning_rate_15 = "earning_rate_15"
 earning_rate_20 = "earning_rate_20"
 
 feature = {
-    "top_type_slope": "顶分型斜率",
-    "bottom_type_slope": "底分型斜率",
+    "current_top_type_slope": "当前趋势顶分型斜率",
+    "current_bot_type_slope": "当前趋势底分型斜率",
+    "prev_top_type_slope": "先前趋势顶分型斜率",
+    "prev_bot_type_slope": "先前趋势底分型斜率",
+    "inf_h_point_date": "顶分型趋势拐点时间",
+    "inf_l_point_date": "底分型趋势拐点时间",
     "box_boundary": "箱体周期",
     "ma5": "5日均线",
     "ma10": "10日均线",
@@ -238,3 +242,7 @@ feature_detail = [
     )
 
 ]
+
+
+def get_feature_keys():
+    return [f['name'] for f in feature_detail]

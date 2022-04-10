@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 
+from app.main.stock import constant
 from app.main.stock.dao import stock_dao, k_line_dao
 from app.main.stock.stock_pick_filter import stock_filter
 from app.main.utils import date_util
@@ -96,7 +97,7 @@ def sync_stock_ind(codes, task_wrapper: TaskWrapper = None):
     for code in codes:
         now = datetime.now()
         # start_of_day = date_util.get_start_of_day(now)
-        k_line_data_list = k_line_dao.get_k_line_by_code([code],limit=1,sort=-1)
+        k_line_data_list = k_line_dao.get_k_line_by_code([code], limit=1, sort=-1)
         df = ak.stock_ind(code, id_map)
         ind_dict = df.to_dict("records")[0]
         ind_dict['MarketValue'] = round(ind_dict['MarketValue'] / 100000000, 2)
@@ -113,6 +114,60 @@ def sync_stock_ind(codes, task_wrapper: TaskWrapper = None):
 
         if task_wrapper is not None:
             task_wrapper.trigger_count()
+
+
+def stock_search(params):
+    stock_feature = db['stock_feature']
+
+    date = date_util.parse_date_time(params.get("date"), fmt="%Y-%m-%d")
+    date = date if date is not None else date_util.get_start_of_day(datetime.now())
+    match = {"date": date, "$expr": {"$and": []}}
+
+
+    key_list: list = constant.get_feature_keys()
+    # 查看用户自定义的参数是否在特征列表中
+    for name in params.keys():
+        if name not in key_list: continue
+        #参数筛选表达式
+        condition = params[name]
+        # condition[0]: 表达式 $gt,$lt,$eq诸如此类
+        # condition[1]: 所要过滤的值
+        """
+        condition[1]有几种类型:
+        1. float or int
+        2. {"$multiply": ["$features.vol_avg_5", 10]}  放量特征筛选
+        3. $features.ma30 特征自身比较
+        4. 时间字符串
+        """
+        if date_util.is_valid_date(condition[1]):
+            condition[1] = date_util.parse_date_time(condition[1],"%Y-%m-%d")
+        match["$expr"]["$and"].append({condition[0]: ["$features."+name, condition[1]]})
+
+    condition = stock_feature.aggregate([
+        {"$match": match},
+        # stock_feature 和  stock_detail根据code join
+        {
+            "$lookup": {
+                "from": "stock_detail",
+                "localField": "code",
+                'foreignField': "code",
+                "as": "result"
+            },
+        }, {
+            "$project": {"_id": 0, "features": 1, "name": 1, "stock_code": "$result.code",
+                         "board_list": "$result.board"}
+        },
+        {"$unwind": "$stock_code"},
+        {"$unwind": "$board_list"}
+
+    ])
+    results = list(condition)
+
+    return results
+
+
+
+
 
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
 from app.main.stock.dao import stock_dao, k_line_dao
+from app.main.stock.service import stock_service
 from app.main.utils import restful, date_util
 from . import rest
 from flask import request
@@ -49,7 +50,7 @@ def stock_pick():
 @rest.route("/stock/data/miner", methods=['post'])
 def data_miner():
     params: dict = request.json
-    results = get_stock_result(params)
+    results: list = stock_service.stock_search(params)
     codes = [r['stock_code'] for r in results]
 
     aim_board = params['custom'].get("aimBoard", None)
@@ -158,6 +159,7 @@ def get_stock_result(params) -> List[dict]:
 
     match = {"date": date, "$expr": {"$and": []}}
 
+    '''
     if volume_up_10 is not None:
         match["$expr"]["$and"].append(
             {"$gte": ["$features.volume", {"$multiply": ["$features.vol_avg_10", volume_up_10]}
@@ -173,22 +175,7 @@ def get_stock_result(params) -> List[dict]:
         match["$expr"]["$and"].append(
             {"$lte": ["$features.volume", {"$multiply": ["$features.vol_avg_5", volume_down_5]}
                       ]})
-
-    if gap is not None:
-        match["features.gap"] = {"$in": gap}
-
-    if up_shadow_rate is not None:
-        pass
-
-    if rate is not None:
-        match["$expr"]["$and"].append({rate[0]: ["$features.rate", rate[1]]})
-
-    if close_rate_5 is not None:
-        match["$expr"]["$and"].append({close_rate_5[0]: ["$features.close_rate_5", close_rate_5[1]]})
-
-    if entity_length is not None:
-        match["$expr"]["$and"].append({entity_length[0]: ["$features.entity_length", entity_length[1]]})
-
+                      
     if sma_down:
         match["$expr"]["$and"].append({"$gt": ["$features.ma60", "$features.ma30"]})
         match["$expr"]["$and"].append({"$gt": ["$features.ma30", "$features.ma20"]})
@@ -197,17 +184,7 @@ def get_stock_result(params) -> List[dict]:
         match["$expr"]["$and"].append({"$lt": ["$features.ma60", "$features.ma30"]})
         match["$expr"]["$and"].append({"$lt": ["$features.ma30", "$features.ma20"]})
         match["$expr"]["$and"].append({"$lt": ["$features.ma20", "$features.ma10"]})
-    if ma5_upon_5:
-        match["$expr"]["$and"].append({ma5_upon_5[0]: ["$features.ma5_upon_5", ma5_upon_5[1]]})
-    if ma5_upon_10:
-        match["$expr"]["$and"].append({ma5_upon_10[0]: ["$features.ma5_upon_10", ma5_upon_10[1]]})
-    if ma5_upon_20:
-        match["$expr"]["$and"].append({ma5_upon_20[0]: ["$features.ma5_upon_20", ma5_upon_20[1]]})
-    if ma5_upon_max:
-        match["$expr"]["$and"].append({ma5_upon_max[0]: ["$features.ma5_upon_max", ma5_upon_max[1]]})
-
-    if close is not None:
-        match["$expr"]["$and"].append({close[0]: ["$features.close", close[1]]})
+    '''
 
     condition = stock_feature.aggregate([
         {"$match": match},

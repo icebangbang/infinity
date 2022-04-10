@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta,date
+from datetime import datetime, timedelta, date
 from datetime import time
 from chinese_calendar import is_workday
 import time as tm
@@ -83,17 +83,23 @@ def get_work_day(now, offset):
 
 
 def if_workday(dt):
-        '''
-        判断是否为工作日
-        '''
-        Y = dt.year
-        M = dt.month
-        D = dt.day
-        april_last = date(Y, M, D)
-        return is_workday(april_last)
+    '''
+    判断是否为工作日
+    '''
+    Y = dt.year
+    M = dt.month
+    D = dt.day
+    april_last = date(Y, M, D)
+    return is_workday(april_last)
 
 
-
+def is_valid_date(str):
+    '''判断是否是一个有效的日期字符串'''
+    try:
+        datetime.strptime(str, "%Y-%m-%d")
+        return True
+    except:
+        return False
 
 
 if __name__ == "__main__":
@@ -102,4 +108,4 @@ if __name__ == "__main__":
     # print(get_friday_of_week())
     # now = datetime.now() - timedelta(days=10)
     # print(now.weekday())
-    print(is_workday(datetime(2022,10,7)))
+    print(is_workday(datetime(2022, 10, 7)))
