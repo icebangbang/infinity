@@ -82,7 +82,7 @@ def get_stock_status(from_date, to_date, data_list=None, codes=None, code_name_m
 
 if __name__ == "__main__":
     code_name_map = stock_dao.get_code_name_map()
-    to_date = datetime(2022, 4, 7)
+    to_date = datetime(2022, 4, 8)
     from_date = to_date - timedelta(days=600)
 
     for key in code_name_map.keys():

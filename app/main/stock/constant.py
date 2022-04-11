@@ -9,6 +9,9 @@ prev_bot_type_slope = "prev_bot_type_slope"
 inf_h_point_date = "inf_h_point_date"
 inf_l_point_date = "inf_l_point_date"
 
+inf_h_point_value = "inf_h_point_value"
+inf_l_point_value = "inf_l_point_value"
+
 current_top_trend_size = "current_top_trend_size"
 prev_top_trend_size = "prev_top_trend_size"
 

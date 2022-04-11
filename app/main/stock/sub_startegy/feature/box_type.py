@@ -120,6 +120,7 @@ class BoxType(SubST):
             company.set(constant.current_top_trend_size, high_type_list[-1]['index'] - high_type_list[0]['index'])
             company.set(constant.prev_top_trend_size, 0)
             company.set(constant.inf_h_point_date, None)
+            company.set(constant.inf_h_point_value, None)
         else:
             # 当前趋势范围点
             current_trend_scope = high_type_list[total_p[-1]:]
@@ -140,6 +141,7 @@ class BoxType(SubST):
             company.set(constant.current_top_trend_size,
                         current_trend_scope[-1]['index'] - current_trend_scope[0]['index'])
             company.set(constant.inf_h_point_date, inf_h_point_date)
+            company.set(constant.inf_h_point_value, inflection_point['value'])
 
         low = data.low.get(ago=0, size=len(data))
         low_type_list: list = self.get_bottom_type(low)
@@ -151,6 +153,7 @@ class BoxType(SubST):
             company.set(constant.prev_bot_trend_size, 0)
             company.set(constant.current_bot_trend_size, low_type_list[-1]['index'] - low_type_list[0]['index'])
             company.set(constant.inf_l_point_date, None)
+            company.set(constant.inf_l_point_value, None)
         else:
             # 当前趋势范围点
             current_trend_scope = low_type_list[total_p[-1]:]
@@ -173,5 +176,6 @@ class BoxType(SubST):
             company.set(constant.prev_bot_trend_size, prev_trend_scope[-1]['index'] - prev_trend_scope[0]['index'])
 
             company.set(constant.inf_l_point_date, inf_l_point_date)
+            company.set(constant.inf_l_point_value, inflection_point['value'])
         # company.set(constant.box_top_formulas, dict(k=tm, c=tc))
         # company.set(constant.box_bottom_formulas, dict(k=bm, c=bc))
