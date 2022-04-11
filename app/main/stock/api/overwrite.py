@@ -641,5 +641,5 @@ def pig_data():
 
 if __name__ == "__main__":
     # results = stock_board_concept_name_em()
-    r = pig_data()
+    r = chinese_cpi()
     print(123)

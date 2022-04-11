@@ -89,7 +89,7 @@ def sync_pig_data():
 
 
 if __name__ == "__main__":
-    sync_pmi()
-    sync_ppi()
-    sync_pig_data()
+    # sync_pmi()
+    # sync_ppi()
+    # sync_pig_data()
     sync_cpi()

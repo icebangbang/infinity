@@ -93,9 +93,29 @@ feature = {
 }
 
 feature_detail = [
+dict(
+        name="inf_h_point_value",
+        desc="顶分型趋势拐点值",
+        type="float",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=None,
+        category="趋势"
+    ),
+    dict(
+        name="inf_l_point_value",
+        desc="底分型趋势拐点值",
+        type="float",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=None,
+        category="趋势"
+    ),
     dict(
         name="inf_h_point_date",
-        desc="顶分型趋势拐点",
+        desc="顶分型趋势拐点时间",
         type="date",
         filter_style=1,
         comparator=["eq", "lte", "gte"],
@@ -105,7 +125,7 @@ feature_detail = [
     ),
     dict(
         name="inf_l_point_date",
-        desc="底分型趋势拐点",
+        desc="底分型趋势拐点时间",
         type="date",
         filter_style=1,
         comparator=["eq", "lte", "gte"],

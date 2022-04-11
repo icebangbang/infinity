@@ -31,7 +31,10 @@ def get_ppi():
         current.append(float(p['current']))
         grace.append(float(p['grace']))
         accum.append(float(p['accum']))
-        cpi.append(float(cpi_list[i]['country_current']))
+        try:
+            cpi.append(float(cpi_list[i]['country_current']))
+        except:
+            pass
         # pmi.append(float(pmi_list[i]['zzy_value']))
 
     return restful.response(data=dict(date=date, current=current, grace=grace,
