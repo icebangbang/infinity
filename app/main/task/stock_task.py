@@ -74,6 +74,10 @@ def sync_stock_data(self, codes, task_id):
 @celery.task(bind=True, base=MyTask, expires=180)
 def submit_stock_feature(self, to_date=None, codes=None):
     if to_date is None:
+        t = datetime.now()
+        if t.hour >= 15:
+            logging.info("will not run job after 15")
+            return
         to_date = date_util.get_start_of_day(datetime.now())
     else:
         to_date = date_util.from_timestamp(to_date)
@@ -82,10 +86,10 @@ def submit_stock_feature(self, to_date=None, codes=None):
         logging.info("the day is not workday:{}".format(date_util.date_time_to_str(to_date)))
         return
 
-    switch = my_redis.get_bool("sync_after_15")
-    if not switch:
-        logging.info("will not run job after 15")
-        return
+    # switch = my_redis.get_bool("sync_after_15")
+    # if not switch:
+    #     logging.info("will not run job after 15")
+    #     return
 
     code_name_map = stock_dao.get_code_name_map()
     from_date = to_date - timedelta(days=500)
