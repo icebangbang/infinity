@@ -11,7 +11,7 @@ inf_l_point_date = "inf_l_point_date"
 
 inf_h_point_value = "inf_h_point_value"
 inf_l_point_value = "inf_l_point_value"
-current_max_high_type = "current_max_high_type";
+current_max_high_type = "current_max_high_type"
 
 current_top_trend_size = "current_top_trend_size"
 prev_top_trend_size = "prev_top_trend_size"
@@ -31,6 +31,7 @@ vol_avg_10 = "vol_avg_10"
 vol_avg_5 = "vol_avg_5"
 volume = "volume"
 close = "close"
+high = "high"
 rate = "rate"
 gap = "gap"
 up_shadow = "up_shadow"
@@ -79,6 +80,7 @@ feature = {
     "vol_avg_10": "10日均量",
     "volume": "当前成交量",
     "close": "当前价格",
+    "high": "当日最高价",
     "rate": "当前涨幅",
     "gap": "缺口",
     "up_shadow": "上影线长度",

@@ -142,6 +142,7 @@ def stock_search(params):
         if date_util.is_valid_date(condition[1]):
             condition[1] = date_util.parse_date_time(condition[1], "%Y-%m-%d")
         match["$expr"]["$and"].append({condition[0]: ["$features." + name, condition[1]]})
+        match["features." + name] = {"$exists": True}
 
     condition = stock_feature.aggregate([
         {"$match": match},

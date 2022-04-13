@@ -110,6 +110,7 @@ class ShortTermFeature(SubST):
             company.set(constant.vol_avg_5, vol_5_avg)
             company.set(constant.volume, data.volume[0])
             company.set(constant.close, data.close[0])
+            company.set(constant.high, data.high[0])
             company.set(constant.rate, round((close - close_1) / close_1 * 100, 2))
             company.set(constant.gap, gap)
         except Exception as e:
