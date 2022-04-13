@@ -131,7 +131,7 @@ class BoxType(SubST):
                 prev_trend_scope = high_type_list[:total_p[-1] + 1]
             prev_top_type_slope, c = cal_util.get_line([i['value'] for i in prev_trend_scope])
             # 当前顶分型趋势的最大一个点的值
-            current_max_high_type = max([i['value'] for i in current_trend_scope])
+            current_max_high_type = max([i['value'] for i in current_trend_scope[0:-1]])
 
             inflection_point = current_trend_scope[0]
             inf_h_point_date = data.datetime.datetime(inflection_point['index'] - len(high) + 1)
