@@ -130,7 +130,8 @@ class BoxType(SubST):
             else:
                 prev_trend_scope = high_type_list[:total_p[-1] + 1]
             prev_top_type_slope, c = cal_util.get_line([i['value'] for i in prev_trend_scope])
-
+            # 当前顶分型趋势的最大一个点的值
+            current_max_high_type = max([i['value'] for i in current_trend_scope])
 
             inflection_point = current_trend_scope[0]
             inf_h_point_date = data.datetime.datetime(inflection_point['index'] - len(high) + 1)
@@ -142,6 +143,8 @@ class BoxType(SubST):
                         current_trend_scope[-1]['index'] - current_trend_scope[0]['index'])
             company.set(constant.inf_h_point_date, inf_h_point_date)
             company.set(constant.inf_h_point_value, inflection_point['value'])
+            company.set(constant.inf_h_point_value, inflection_point['value'])
+            company.set(constant.current_max_high_type, current_max_high_type)
 
         low = data.low.get(ago=0, size=len(data))
         low_type_list: list = self.get_bottom_type(low)

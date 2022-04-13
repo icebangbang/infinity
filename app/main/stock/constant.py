@@ -11,6 +11,7 @@ inf_l_point_date = "inf_l_point_date"
 
 inf_h_point_value = "inf_h_point_value"
 inf_l_point_value = "inf_l_point_value"
+current_max_high_type = "current_max_high_type";
 
 current_top_trend_size = "current_top_trend_size"
 prev_top_trend_size = "prev_top_trend_size"
@@ -60,6 +61,7 @@ earning_rate_15 = "earning_rate_15"
 earning_rate_20 = "earning_rate_20"
 
 feature = {
+    "current_max_high_type": "当前趋势顶分型最大值",
     "current_top_type_slope": "当前趋势顶分型斜率",
     "current_bot_type_slope": "当前趋势底分型斜率",
     "prev_top_type_slope": "先前趋势顶分型斜率",
@@ -94,6 +96,16 @@ feature = {
 
 feature_detail = [
 dict(
+        name="current_max_high_type",
+        desc="当前趋势顶分型最大值",
+        type="float",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=None,
+        category="趋势"
+    ),
+    dict(
         name="inf_h_point_value",
         desc="顶分型趋势拐点值",
         type="float",

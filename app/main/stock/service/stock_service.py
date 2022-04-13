@@ -11,6 +11,7 @@ from app.main.stock.stock_kline import id_map
 import akshare as ak
 from app.main.db.mongo import db
 from app.main.stock.task_wrapper import TaskWrapper
+import requests
 
 
 def publish(days=10, slice=30, code_list=None, stock_map={}, start=None, end=None):
@@ -123,12 +124,11 @@ def stock_search(params):
     date = date if date is not None else date_util.get_start_of_day(datetime.now())
     match = {"date": date, "$expr": {"$and": []}}
 
-
     key_list: list = constant.get_feature_keys()
     # 查看用户自定义的参数是否在特征列表中
     for name in params.keys():
         if name not in key_list: continue
-        #参数筛选表达式
+        # 参数筛选表达式
         condition = params[name]
         # condition[0]: 表达式 $gt,$lt,$eq诸如此类
         # condition[1]: 所要过滤的值
@@ -140,8 +140,8 @@ def stock_search(params):
         4. 时间字符串
         """
         if date_util.is_valid_date(condition[1]):
-            condition[1] = date_util.parse_date_time(condition[1],"%Y-%m-%d")
-        match["$expr"]["$and"].append({condition[0]: ["$features."+name, condition[1]]})
+            condition[1] = date_util.parse_date_time(condition[1], "%Y-%m-%d")
+        match["$expr"]["$and"].append({condition[0]: ["$features." + name, condition[1]]})
 
     condition = stock_feature.aggregate([
         {"$match": match},
@@ -166,8 +166,37 @@ def stock_search(params):
     return results
 
 
+def stock_remind():
+    query_store = db["ind_query_store"]
+    query_list = list(query_store.find({}))
+    # name,params
+    for query in query_list:
+        name = query['name']  # 指标集名称
+        param = query['params']
 
+        stocks = stock_search(param)
+        msg = ''
+        for stock in stocks:
+            content = "提醒:{}[{}]在出现底部反转{}[{}],当前价格突破前期高位反转点{}[{}],"
 
+            inf_l_point_date = stock['features']['inf_l_point_date']
+            inf_l_point_value = stock['features']['inf_l_point_value']
+            inf_h_point_date = stock['features']['inf_h_point_date']
+            inf_h_point_value = stock['features']['inf_h_point_value']
+            name = stock['name']
+            stock_code = stock['stock_code']
+            msg = msg + content.format(stock_code, name,
+                                       inf_l_point_value, date_util.dt_to_str(inf_l_point_date),
+                                       inf_h_point_value, date_util.dt_to_str(inf_h_point_date)) + '\n'
+
+        headers = {'Content-Type': 'application/json'}
+        d = {"msgtype": "text",
+             "text": {
+                 "content": msg
+             }}
+        requests.post(
+            "https://oapi.dingtalk.com/robot/send?access_token=8d6107691edc8c68957ad9b3b3e16eeccf4fd2ec005c86692fdeb648da6312b4",
+            json=d, headers=headers)
 
 
 if __name__ == "__main__":

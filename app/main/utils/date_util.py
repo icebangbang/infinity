@@ -42,6 +42,7 @@ def day_incr(dt: datetime, days):
 
 
 def dt_to_str(dt: datetime, fmt="%Y%m%d") -> str:
+    if dt is None: return None
     return dt.strftime(fmt)
 
 
