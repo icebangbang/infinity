@@ -51,9 +51,11 @@ def sync():
                     log.info("{}不在字典内".format(mapping['代码']))
 
     all_stock = stock_dao.get_all_stock()
+    template = "提醒:{}新增了新的概念:{}"
+    msg = ""
     if all_stock and len(all_stock) > 0:
         for k, v in stock_dict.items():
-            v["name"] = v['name'].replace(" ","")
+            v["name"] = v['name'].replace(" ", "")
             stock = stock_dao.get_one_stock(k)
             if stock is None:
                 log.info("新增 {}".format(k))
@@ -64,15 +66,16 @@ def sync():
 
             if len((diffs)) > 0:
                 for diff in diffs:
-                    if diff == '融资融券':  continue
-                    headers = {'Content-Type': 'application/json'}
-                    d = {"msgtype": "text",
-                         "text": {
-                             "content": "提醒:{}新增了新的概念:{}".format(k, diff)
-                         }}
-                    requests.post(
-                        "https://oapi.dingtalk.com/robot/send?access_token=8d6107691edc8c68957ad9b3b3e16eeccf4fd2ec005c86692fdeb648da6312b4",
-                        json=d, headers=headers)
+                    if diff in ['融资融券', '昨日涨停', '昨日触板', '昨日涨停_含一字']:  continue
+                    msg = template.format(k, diff) + "\n"
+    headers = {'Content-Type': 'application/json'}
+    d = {"msgtype": "text",
+         "text": {
+             "content": "msg"
+         }}
+    requests.post(
+        "https://oapi.dingtalk.com/robot/send?access_token=8d6107691edc8c68957ad9b3b3e16eeccf4fd2ec005c86692fdeb648da6312b4",
+        json=d, headers=headers)
 
     # 清空
     # stock_detail.drop()
@@ -81,8 +84,9 @@ def sync():
     for value in stock_dict.values():
         if value['code'] == "000876":
             pass
-        stock_detail.update_one({"code":value['code']},{"$set":value},upsert=True)
+        stock_detail.update_one({"code": value['code']}, {"$set": value}, upsert=True)
     board_detail.insert_many(board_list)
+
 
 if __name__ == "__main__":
     sync()
