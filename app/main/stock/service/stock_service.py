@@ -8,6 +8,7 @@ from app.main.stock.dao import stock_dao, k_line_dao
 from app.main.stock.stock_pick_filter import stock_filter
 from app.main.utils import date_util
 from app.main.stock.stock_kline import id_map
+from app.main.stock.service import search_udf_service
 import akshare as ak
 from app.main.db.mongo import db
 from app.main.stock.task_wrapper import TaskWrapper
@@ -117,19 +118,23 @@ def sync_stock_ind(codes, task_wrapper: TaskWrapper = None):
             task_wrapper.trigger_count()
 
 
-def stock_search(params):
+def stock_search(request_body):
     stock_feature = db['stock_feature']
-
-    date = date_util.parse_date_time(params.get("date"), fmt="%Y-%m-%d")
+    params = request_body['params']
+    # 拷贝一份
+    params = params.copy()
+    date = date_util.parse_date_time(request_body.get("date"), fmt="%Y-%m-%d")
     date = date if date is not None else date_util.get_start_of_day(datetime.now())
+    input = dict(date=date)
     match = {"date": date, "$expr": {"$and": []}}
 
     key_list: list = constant.get_feature_keys()
     # 查看用户自定义的参数是否在特征列表中
-    for name in params.keys():
+    for item in params:
+        name = item['name']
         if name not in key_list: continue
         # 参数筛选表达式
-        condition = params[name]
+        condition = item['value']
         # condition[0]: 表达式 $gt,$lt,$eq诸如此类
         # condition[1]: 所要过滤的值
         """
@@ -139,6 +144,7 @@ def stock_search(params):
         3. $features.ma30 特征自身比较
         4. 时间字符串
         """
+        condition[1] = search_udf_service.check(condition[1],input)
         if date_util.is_valid_date(condition[1]):
             condition[1] = date_util.parse_date_time(condition[1], "%Y-%m-%d")
         match["$expr"]["$and"].append({condition[0]: ["$features." + name, condition[1]]})
@@ -173,22 +179,23 @@ def stock_remind():
     # name,params
     for query in query_list:
         name = query['name']  # 指标集名称
-        param = query['params']
+        msg_template = query['msg_template']
 
-        stocks = stock_search(param)
+        stocks = stock_search(query)
         msg = ''
         for stock in stocks:
-            content = "提醒:{}[{}]在出现底部反转{}[{}],当前价格突破前期高位反转点{}[{}],"
 
             inf_l_point_date = stock['features']['inf_l_point_date']
             inf_l_point_value = stock['features']['inf_l_point_value']
             inf_h_point_date = stock['features']['inf_h_point_date']
             inf_h_point_value = stock['features']['inf_h_point_value']
-            name = stock['name']
-            stock_code = stock['stock_code']
-            msg = msg + content.format(stock_code, name,
-                                       inf_l_point_value, date_util.dt_to_str(inf_l_point_date),
-                                       inf_h_point_value, date_util.dt_to_str(inf_h_point_date)) + '\n'
+            current_max_high_type = stock['features']['current_max_high_type']
+            # name = stock['name']
+            # stock_code = stock['stock_code']
+            features = stock['features']
+            features['stock_code'] = stock['stock_code']
+            features['name'] = stock['name']
+            msg = msg + msg_template.format(**stock['features']) + '\n'
 
         headers = {'Content-Type': 'application/json'}
         d = {"msgtype": "text",
@@ -207,6 +214,14 @@ if __name__ == "__main__":
     # from_time = to_time - timedelta(739)
     # stock_filter.get_stock_status(from_time, to_time)
     # publish(3, 100)
+    stock_remind()
+    msg = "提醒:{stock_code}[{code}]在出现底部反转{inf_l_point_value}[{inf_l_point_date}],当前价格突破前期小高位{current_max_high_type},"
+
+    d = {"stock_code": "1", "code": "2",
+            "inf_l_point_value": "3", "inf_l_point_date": "4",
+            "inf_h_point_value": "5","inf_h_point_date":"6",
+            }
+    print(msg.format(**d))
 
     stock_value_set = db["stock_value"]
     stock_value_set.update_one({"code": "300763", "date": datetime.now()},

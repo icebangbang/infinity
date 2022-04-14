@@ -73,6 +73,12 @@ def is_weekend(t) -> bool:
 
 
 def get_work_day(now, offset):
+    """
+    倒推工作日
+    :param now:
+    :param offset:
+    :return:
+    """
     i = 1
     while i <= offset:
         t = now - timedelta(days=i)

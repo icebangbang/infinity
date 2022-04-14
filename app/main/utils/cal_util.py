@@ -147,7 +147,7 @@ def get_rate(numerator,denominator,ndigits=2)->float:
 
 if __name__ == "__main__":
     print(_trace(math.atan(0.55)))
-    line = get_line([1, 2, 3, 4, 5])
+    line = get_line([4.35, 4.48, 4.71, 4.82])
     d = get_dis(line, [math.sqrt(2), 0])
     print(d)
 

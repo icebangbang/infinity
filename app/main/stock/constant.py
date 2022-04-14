@@ -147,6 +147,17 @@ dict(
         default_value=None,
         category="趋势"
     ),
+
+    dict(
+        name="current_bot_trend_size",
+        desc="当前底分型趋势的交易日数",
+        type="float",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=0,
+        category="趋势"
+    ),
     dict(
         name="current_top_type_slope",
         desc="当前趋势顶分型斜率",
@@ -276,6 +287,16 @@ dict(
         default_comparator="gte",
         default_value=0,
         category="均线"
+    ),
+dict(
+        name="rate",
+        desc="涨幅",
+        type="float",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=0,
+        category="基础"
     )
 
 ]

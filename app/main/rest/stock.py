@@ -1,5 +1,5 @@
 from app.main.stock.dao import stock_dao, k_line_dao
-from app.main.stock.service import stock_service
+from app.main.stock.service import stock_service, config_service
 from app.main.utils import restful, date_util
 from . import rest
 from flask import request
@@ -47,19 +47,33 @@ def stock_pick():
     return restful.response(board_group)
 
 
+@rest.route("/stock/data/miner/store", methods=['post'])
+def data_miner_with_store():
+    request_body = request.json
+    key = request_body['key']
+    # 提前设置好的请求参数
+    params = config_service.get_query_param(key)
+    request_body.update(params)
+    resp = data_miner(request_body)
+
+    return resp
+
+
 @rest.route("/stock/data/miner", methods=['post'])
-def data_miner():
-    params: dict = request.json
-    results: list = stock_service.stock_search(params)
+def data_miner(request_body=None):
+    if request_body is None:
+        request_body: dict = request.json
+    # 数据库检索
+    results: list = stock_service.stock_search(request_body)
     codes = [r['stock_code'] for r in results]
 
-    aim_board = params['custom'].get("aimBoard", None)
-    only_cyb = params['custom'].get("onlyCyb", False)
-    hide_board = params['custom'].get("hideBoard", False)
-    only_code = params['custom'].get("onlyCode", False)
+    aim_board = request_body['custom'].get("aimBoard", None)
+    only_cyb = request_body['custom'].get("onlyCyb", False)
+    hide_board = request_body['custom'].get("hideBoard", False)
+    only_code = request_body['custom'].get("onlyCode", False)
 
-    start = date_util.parse_date_time(params.get("date"), "%Y-%m-%d")
-    end = date_util.parse_date_time(params.get("until"), "%Y-%m-%d")
+    start = date_util.parse_date_time(request_body.get("date"), "%Y-%m-%d")
+    end = date_util.parse_date_time(request_body.get("until"), "%Y-%m-%d")
 
     # if date_util.get_days_between(end, start) == 0:
     start, uesless = date_util.get_work_day(start, 1)
@@ -88,9 +102,10 @@ def data_miner():
                 # 地域板块不加入boards,不会出现在所属板块中
                 continue
 
-            elif board not in ['融资融券', '富时罗素', '标准普尔','预盈预增','昨日涨停_含一字','昨日涨停','预亏预减'
-                               '深股通', 'MSCI中国', '沪股通', '深成500','预亏预减','深股通'
-                               '创业板综', '中证500', '上证380', '转债标的', '内贸流通', '电商概念', '机构重仓', 'QFII重仓', '长江三角']:
+            elif board not in ['融资融券', '富时罗素', '标准普尔', '预盈预增', '昨日涨停_含一字', '昨日涨停', '预亏预减'
+                                                                                   '深股通', 'MSCI中国', '沪股通', '深成500',
+                               '预亏预减', '深股通'
+                                       '创业板综', '中证500', '上证380', '转债标的', '内贸流通', '电商概念', '机构重仓', 'QFII重仓', '长江三角']:
 
                 boards.append(board)
         if code not in group.keys(): continue

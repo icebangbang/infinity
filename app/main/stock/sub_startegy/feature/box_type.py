@@ -82,7 +82,7 @@ class BoxType(SubST):
             pre = arrays[i - 1]
             next = arrays[i + 1]
 
-            if target < pre and target < next:
+            if target < pre and target <= next:
                 # results.append(dict(i=i, v=item))
                 results.append(dict(index=i, value=item))
 
