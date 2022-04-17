@@ -178,8 +178,8 @@ def get_board_k_line_data(
             symbol=name,
             beg=start_day,
             end=end_day)
-    data = pd.DataFrame(data[['日期', '开盘', '收盘', '最高', '最低', '成交量']])
-    data.columns = ['date', 'open', 'close', 'high', 'low', 'volume']
+    data = pd.DataFrame(data[['日期', '开盘', '收盘', '最高', '最低', '成交量','成交额']])
+    data.columns = ['date', 'open', 'close', 'high', 'low', 'volume','money']
     data['name'] = str(name)
     data['date'] = pd.to_datetime(data['date'], format='%Y-%m-%d')
     data['create_time'] = datetime.now()
