@@ -3,10 +3,25 @@
 """
 from datetime import datetime, timedelta
 import re
+from typing import Dict
 
 from app.main.utils import date_util
 import inspect
 import sys
+
+def check_and_parse(request_body:Dict):
+    new_dict = {}
+    for key,value in request_body.items():
+        if "#" in value:
+            func_name = value.replace("#","")
+            new_value = func_dict[func_name]()
+            new_dict[key] = new_value
+
+    request_body.update(new_dict)
+
+    return request_body
+
+
 
 
 def check(expr,input):
@@ -42,6 +57,9 @@ def get_work_date(base_time, offset):
 
     return dt
 
+def current_date(**kwargs):
+    return date_util.get_start_of_day(datetime.now())
+
 
 func_dict = {}
 for name, obj in inspect.getmembers(sys.modules[__name__]):
@@ -49,4 +67,4 @@ for name, obj in inspect.getmembers(sys.modules[__name__]):
         func_dict[name] = obj
 
 if __name__ == "__main__":
-    check("#get_work_date(#date,10)",{"date":"2022-02-10"})
+    check("#get_work_date($date,10)",{"date":"2022-02-10"})
