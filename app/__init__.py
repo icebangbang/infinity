@@ -1,8 +1,9 @@
 
 import os, time
 
-os.environ['TZ'] = 'Asia/Shanghai'
-time.tzset()
+if hasattr(time, 'tzset'):
+    os.environ['TZ'] = 'Asia/Shanghai'
+    time.tzset()
 
 
 import logging as log
