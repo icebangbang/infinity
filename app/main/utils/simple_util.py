@@ -11,6 +11,9 @@ from flask import request
 from bson import ObjectId
 
 
+def is_not_empty(b:str):
+    return b != None and b!=''
+
 def list_file(rootdir, absolute=True):
     """
     列出rootdir下的所有文件

@@ -1,6 +1,6 @@
 from app.main.stock.dao import stock_dao, k_line_dao
-from app.main.stock.service import stock_service, config_service
-from app.main.utils import restful, date_util
+from app.main.stock.service import stock_service, config_service,search_udf_service
+from app.main.utils import restful, date_util, simple_util
 from . import rest
 from flask import request
 from app.main.utils import my_redis
@@ -63,6 +63,8 @@ def data_miner_with_store():
 def data_miner(request_body=None):
     if request_body is None:
         request_body: dict = request.json
+    # 处理一下入参
+    request_body = search_udf_service.check_and_parse(request_body)
     # 数据库检索
     results: list = stock_service.stock_search(request_body)
     codes = [r['stock_code'] for r in results]
@@ -75,9 +77,7 @@ def data_miner(request_body=None):
     start = date_util.parse_date_time(request_body.get("date"), "%Y-%m-%d")
     end = date_util.parse_date_time(request_body.get("until"), "%Y-%m-%d")
 
-    # if date_util.get_days_between(end, start) == 0:
-    start, uesless = date_util.get_work_day(start, 1)
-    # start = start - timedelta(days=1)
+    start, useless = date_util.get_work_day(start, 1)
 
     datas = k_line_dao.get_k_line_by_code(codes, start, end)
     group = {}
@@ -109,19 +109,19 @@ def data_miner(request_body=None):
 
                 boards.append(board)
         if code not in group.keys(): continue
-        if aim_board is not None and aim_board not in board_list: continue
+        if simple_util.is_not_empty(aim_board) and aim_board not in board_list: continue
 
         if only_cyb and code.startswith("300") is False: continue
 
         trade_data_list = group[code]
-
+        #
         close_list = [trade_data['close'] for trade_data in trade_data_list]
 
         a = close_list[0]
         b = max(close_list[1:]) if len(close_list) > 1 else a
         index = close_list.index(b)
         high_date = trade_data_list[index]['date']
-        rate = round((b - a) / a * 100, 2)
+        rate = result['features']['rate']
 
         final[name] = dict(
             name=name,

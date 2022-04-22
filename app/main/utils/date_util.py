@@ -14,6 +14,7 @@ def parse_date_time(dt_str, fmt="%Y-%m-%d %H:%M:%S") -> datetime:
     :return:
     """
     if dt_str is None: return dt_str
+    if not isinstance(dt_str,str): return dt_str
 
     time = datetime.strptime(dt_str, fmt)
     return time
