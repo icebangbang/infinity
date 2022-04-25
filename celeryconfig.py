@@ -40,8 +40,15 @@ task_routes = (
     {'app.main.task.stock_task.sync_stock_data': {
         'queue': 'day_level',
         'routing_key': 'day_level'
-    }},
-    {'app.main.task.stock_task.sync_stock_ind': {
+    }
+    },
+    {'app.main.task.stock_task.sync_stock_month_data': {
+        'queue': 'day_level',
+        'routing_key': 'day_level'
+    }
+    },
+
+    {'app.main.task.stock_task.submit_stock_month_task': {
         'queue': 'day_level',
         'routing_key': 'day_level'
     }
@@ -99,6 +106,11 @@ beat_schedule = {
             "task": "app.main.task.stock_task.sync_stock_k_line",  # 任务函数所在位置
             "schedule": 180,  # 定时每300秒执行一次
         },
+    'stock_month_data_sync':
+        {  # 股票月线数据同步
+            "task": "app.main.task.stock_task.submit_stock_month_task",  # 任务函数所在位置
+            "schedule": crontab(minute='1', hour='15', day_of_week='1-5')
+        },
     'board_data_sync': {
         "task": "app.main.task.board_task.sync_board_k_line",
         "schedule": 420,  # 定时每420秒执行一次
@@ -122,6 +134,10 @@ beat_schedule = {
     'sync_macrodata': {
         "task": "app.main.task.macrodata_task.sync",
         "schedule": 400
+    },
+    'sync_baotuan': {
+        "task": "app.main.task.macrodata_task.baotuan_update",
+        "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
     },
     'sync_hangzhou_house': {
         "task": "app.main.task.house_task.sync_hangzhou_house",

@@ -20,6 +20,23 @@ import akshare as ak
 个股数据同步
 """
 
+@celery.task(bind=True, base=MyTask, expires=180)
+def sync_stock_month_data(self, codes):
+    try:
+        for index, code in enumerate(codes):
+            # logging.info("同步{}:{}的日k数据,时序{}".format(board['board'], board["code"], index))
+            r = sync_kline_service.sync_month_level(code)
+    except Exception as e:
+        raise self.retry(exc=e, countdown=3, max_retries=5)
+
+@celery.task(bind=True, base=MyTask, expires=180)
+def submit_stock_month_task(self):
+    stocks = stock_dao.get_all_stock(dict(code=1))
+    codes = [stock['code'] for stock in stocks]
+    step = int(len(codes) / 25)
+    for i in range(0, len(codes), step):
+        group = codes[i:i + step]
+        sync_stock_month_data.apply_async(args=[group])
 
 @celery.task(bind=True, base=MyTask, expires=180)
 def sync_stock_k_line(self):
