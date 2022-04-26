@@ -13,3 +13,7 @@ def sync(self):
 @celery.task(bind=True, base=MyTask)
 def baotuan_update(self):
     report_service.baotuan_analysis()
+
+@celery.task(bind=True, base=MyTask)
+def market_status_analysis(self):
+    report_service.market_status_analysis()

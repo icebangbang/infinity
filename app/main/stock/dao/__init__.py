@@ -53,19 +53,16 @@ if __name__ == "__main__":
                     Decimal(close_2).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP")) == 0:
                 # 20cm
                 up_down_distribution['跌停'] = up_down_distribution['跌停'] + 1
-                print(rate, key)
                 continue
         else:
             if key in st_stock.keys() and Decimal(close_1 * 0.95).quantize(Decimal("0.01"),
                                                                            rounding="ROUND_HALF_UP").compare(
                 Decimal(close_2).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP")) == 0:
                 up_down_distribution['跌停'] = up_down_distribution['跌停'] + 1
-                print(rate,key)
                 continue
             elif Decimal(close_1 * 0.9).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP").compare(
                     Decimal(close_2).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP")) == 0:
                 up_down_distribution['跌停'] = up_down_distribution['跌停'] + 1
-                print(rate, key)
                 continue
 
         # "跌停~8%": 0, "-8%~-6%": 0, "-6%~-4%": 0, "-4%~-2%": 0, "-2%~0%": 0,

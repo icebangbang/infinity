@@ -139,6 +139,10 @@ beat_schedule = {
         "task": "app.main.task.macrodata_task.baotuan_update",
         "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
     },
+    'market_status_analysis': {
+        "task": "app.main.task.macrodata_task.market_status_analysis",
+        "schedule": 10
+    },
     'sync_hangzhou_house': {
         "task": "app.main.task.house_task.sync_hangzhou_house",
         "schedule": 30
@@ -150,4 +154,4 @@ beat_schedule = {
 }
 
 # 在出现worker接受到的message出现没有注册的错误时，使用下面一句能解决
-imports = ("app.main.task.macrodata_task","app.main.task.house_task","app.main.task.fund_task")
+imports = ("app.main.task.macrodata_task", "app.main.task.house_task", "app.main.task.fund_task")
