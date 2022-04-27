@@ -141,7 +141,7 @@ beat_schedule = {
     },
     'market_status_analysis': {
         "task": "app.main.task.macrodata_task.market_status_analysis",
-        "schedule": 10
+        "schedule": 5
     },
     'sync_hangzhou_house': {
         "task": "app.main.task.house_task.sync_hangzhou_house",
