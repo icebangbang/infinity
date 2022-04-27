@@ -156,13 +156,17 @@ def market_status_analysis():
             up_down_distribution['8%~涨停'] = up_down_distribution['8%~涨停'] + 1
             continue
 
+    total = sum(up_down_distribution.values())
+    distribution = {k:dict(count=v,prop=round(v/total*100,2)) for k,v in up_down_distribution.items()}
+
+
     median = numpy.median(rate_list)
     market_status = db['market_status']
     result = {}
     result['date'] = now
     result['update'] = datetime.now()
     result['rate_median'] = float(median)
-    result['distribution'] = up_down_distribution
+    result['distribution'] = distribution
     market_status.update_one({"date": now}, {"$set": result}, upsert=True)
 
 
