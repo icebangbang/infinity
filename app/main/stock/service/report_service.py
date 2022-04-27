@@ -160,10 +160,11 @@ def market_status_analysis():
     market_status = db['market_status']
     result = {}
     result['date'] = now
-    result['rate_median'] = median
+    result['update'] = datetime.now()
+    result['rate_median'] = float(median)
     result['distribution'] = up_down_distribution
     market_status.update_one({"date": now}, {"$set": result}, upsert=True)
 
 
 if __name__ == "__main__":
-    baotuan_analysis()
+    market_status_analysis()
