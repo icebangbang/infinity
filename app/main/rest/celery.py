@@ -1,6 +1,7 @@
 import logging
 
 from app.main.stock.dao import board_dao
+from app.main.stock.job import sync_board
 from app.main.utils import restful
 from . import rest
 from app.main.utils import date_util
@@ -55,4 +56,9 @@ def get_stock_feature():
 @rest.route("/celery/stock/data", methods=['post'])
 def get_stock_feature():
     stock_task.sync_stock_k_line.apply_async(args=[])
+    return restful.response("ok")
+
+@rest.route("/celery/stock/detail", methods=['post'])
+def get_stock_feature():
+    sync_board.sync()
     return restful.response("ok")
