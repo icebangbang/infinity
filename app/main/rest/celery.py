@@ -55,10 +55,18 @@ def get_stock_feature():
 
 @rest.route("/celery/stock/data", methods=['post'])
 def get_stock_feature():
+    """
+    手动同步日k线数据
+    :return:
+    """
     stock_task.sync_stock_k_line.apply_async(args=[])
     return restful.response("ok")
 
 @rest.route("/celery/stock/detail", methods=['post'])
-def get_stock_feature():
+def get_stock_detail():
+    """
+    手动同步个股详情
+    :return:
+    """
     sync_board.sync()
     return restful.response("ok")
