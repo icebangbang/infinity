@@ -5,4 +5,8 @@
     - name: Download code from the GitRepo
       git:
         repo: 'https://{{gituser}}:{{gitpass}}@gitee.com/zz_lf/infinity.git'
-        dest: "~/infinity"
+        dest: "{{dest}}"
+    - name: uncompress
+      shell: sh remote_local_build.sh "{{env}}"
+      args:
+        chdir: "{{dest}}"
