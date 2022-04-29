@@ -5,6 +5,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
     CELERY_CONFIG = "celeryconfig"
+    KLINE_TIME_WINDOW = 1095
 
     @staticmethod
     def init_app(app):
@@ -101,7 +102,9 @@ class Offline(Config):
     BROKER_URL = 'redis://:ironBackRedis123@0.0.0.0:30004/1'
     RESULT_BACKEND = 'redis://:ironBackRedis123@0.0.0.0:30004/1'
     MONGO_URL = "mongodb://root:whosyourdaddy$879@172.16.1.184:20017/"
+
     CELERY_CONFIG = "celeryconfig_offline"
+    KLINE_TIME_WINDOW = 7300
 
 
 config = {

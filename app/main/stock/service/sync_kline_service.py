@@ -3,15 +3,19 @@ from datetime import datetime, timedelta
 from app.main.utils import date_util
 from app.main.stock import stock_kline
 import pandas as pd
+from app.application import app
 
 
-def sync_day_level(code, base_time=None, time_window=1095):
+
+def sync_day_level(code, base_time=None):
     """
     同步60天内的数据
     :param code:
     :return:
     """
     point = k_line_dao.get_oldest_k_line(code)
+    # default 1095
+    time_window = app.config["KLINE_TIME_WINDOW"]
 
     if base_time is None:
         now = datetime.now()

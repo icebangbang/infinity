@@ -20,6 +20,7 @@ import akshare as ak
 个股数据同步
 """
 
+
 @celery.task(bind=True, base=MyTask, expires=180)
 def sync_stock_month_data(self, codes):
     try:
@@ -29,6 +30,7 @@ def sync_stock_month_data(self, codes):
     except Exception as e:
         raise self.retry(exc=e, countdown=3, max_retries=5)
 
+
 @celery.task(bind=True, base=MyTask, expires=180)
 def submit_stock_month_task(self):
     stocks = stock_dao.get_all_stock(dict(code=1))
@@ -37,6 +39,7 @@ def submit_stock_month_task(self):
     for i in range(0, len(codes), step):
         group = codes[i:i + step]
         sync_stock_month_data.apply_async(args=[group])
+
 
 @celery.task(bind=True, base=MyTask, expires=180)
 def sync_stock_k_line(self):
@@ -48,17 +51,14 @@ def sync_stock_k_line(self):
     now = datetime.now()
     # 收盘后,不再同步
 
-    switch = my_redis.get_bool("sync_after_15")
-    logging.info("switch is {}".format(switch))
-    if switch is True:
-        stocks = stock_dao.get_all_stock(dict(code=1))
-        # 获取最近一个交易日
-        codes = [stock['code'] for stock in stocks]
+    stocks = stock_dao.get_all_stock(dict(code=1))
+    # 获取最近一个交易日
+    codes = [stock['code'] for stock in stocks]
 
-        global_task_id = str(uuid.uuid1())
-        task_dao.record_task(global_task_id, now)
+    global_task_id = str(uuid.uuid1())
+    task_dao.record_task(global_task_id, now)
 
-        transform_task.apply_async(args=[codes, global_task_id, 0])
+    transform_task.apply_async(args=[codes, global_task_id, 0])
 
 
 @celery.task(bind=True, base=MyTask, expires=180)

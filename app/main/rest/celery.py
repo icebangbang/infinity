@@ -51,3 +51,8 @@ def get_stock_feature():
             stock_task.submit_stock_feature(date_util.to_timestamp(date_start),codes)
 
     return restful.response("ok")
+
+@rest.route("/celery/stock/data", methods=['post'])
+def get_stock_feature():
+    stock_task.sync_stock_k_line.apply_async(args=[])
+    return restful.response("ok")
