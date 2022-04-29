@@ -98,8 +98,8 @@ class Offline(Config):
     REDIS_DB_ID = 1
     REDIS_PASSWORD = 'ironBackRedis123'
 
-    BROKER_URL = 'redis://:ironBackRedis123@127.0.0.1:30004/1'
-    RESULT_BACKEND = 'redis://:ironBackRedis123@127.0.0.1:30004/1'
+    BROKER_URL = 'redis://:ironBackRedis123@0.0.0.0:30004/1'
+    RESULT_BACKEND = 'redis://:ironBackRedis123@0.0.0.0:30004/1'
     MONGO_URL = "mongodb://root:whosyourdaddy$879@172.16.1.184:20017/"
     CELERY_CONFIG = "celeryconfig_offline"
 
