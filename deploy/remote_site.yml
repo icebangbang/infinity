@@ -1,0 +1,8 @@
+- hosts: "{{ target | default('nowhere') }}"
+  gather_facts:  false
+  become: yes
+  tasks:
+    - name: Download code from the GitRepo
+      git:
+        repo: 'https://{{gituser}}:{{gitpass}}@gitee.com/zz_lf/infinity.git'
+        dest: "~/infinity"

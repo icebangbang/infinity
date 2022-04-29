@@ -1,4 +1,5 @@
 # sh run-local.sh  development 4 day_level
+# 本地启动
 
 env=${1}
 num=${2}
