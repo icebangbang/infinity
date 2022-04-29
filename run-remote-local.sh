@@ -33,8 +33,6 @@ for ((index1=1; index1<=1; index1++))
 do
 docker run -d --privileged=true  -e "profiles=${env}" --name=dao-celery-${index1} -e "index=${index1}" -e "route=default" -e "FLASK_ENV=${env}" -e "thread=50" --net=host --rm -it dao-celery:latest
 done
-docker run --privileged=true  -e "profiles=offline" --name=dao-celery-1 -e "index=1" -e "route=default" -e "FLASK_ENV=offline" -e "thread=50" --net=host --rm -it dao-celery:latest
-
 
 for ((index2=2; index2<=5; index2++))
 do
