@@ -54,7 +54,7 @@ def get_stock_feature():
     return restful.response("ok")
 
 @rest.route("/celery/stock/data", methods=['post'])
-def get_stock_feature():
+def get_stock_data():
     """
     手动同步日k线数据
     :return:
