@@ -11,6 +11,8 @@ COPY ./app /app
 COPY ./manage.py /
 COPY ./config.py /
 COPY ./celeryconfig.py /
+COPY ./celeryconfig_offline.py /
+
 
 #RUN mkdir /var/log/whisky
 

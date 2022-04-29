@@ -7,6 +7,6 @@
         repo: 'https://{{gituser}}:{{gitpass}}@gitee.com/zz_lf/infinity.git'
         dest: "{{dest}}"
     - name: uncompress
-      shell: sh remote_local_build.sh "{{env}}"
+      shell: sh run-remote-local.sh {{env}}
       args:
         chdir: "{{dest}}"
