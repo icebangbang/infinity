@@ -63,13 +63,13 @@ class TestConfig(Config):
     # REDIS_PASSWORD = '123'
     # MACHINE_ID = 0
     # 'sqlite:///' + os.path.join(basedir, 'data-test.sqlite')
-    REDIS_HOST = '127.0.0.1'
+    REDIS_HOST = '172.17.156.159'
     REDIS_PORT = 30004
     REDIS_DB_ID = 1
     REDIS_PASSWORD = 'ironBackRedis123'
 
-    BROKER_URL = 'redis://:ironBackRedis123@127.0.0.1:30004/1'
-    RESULT_BACKEND = 'redis://:ironBackRedis123@127.0.0.1:30004/1'
+    BROKER_URL = 'redis://:ironBackRedis123@172.17.156.159:30004/1'
+    RESULT_BACKEND = 'redis://:ironBackRedis123@172.17.156.159:30004/1'
     MONGO_URL = "mongodb://root:whosyourdaddy$879@172.17.156.159:20017/"
 
 

@@ -2,11 +2,57 @@
   gather_facts:  false
   become: yes
   tasks:
-    - name: Download code from the GitRepo
+    - name: stop schedule
       git:
         repo: 'https://{{gituser}}:{{gitpass}}@gitee.com/zz_lf/infinity.git'
         dest: "{{dest}}"
-    - name: uncompress
-      shell: sh run-remote-local.sh {{env}}
+    - name: stop schedule
+      shell: docker stop dao-celery-schedule-1
       args:
         chdir: "{{dest}}"
+    - name: build schedule tar
+      shell: docker build  -f ./CerelyScheduleDockerfile -t dao-celery-schedule:latest .
+      args:
+        chdir: "{{dest}}"
+    - name: run schedule job
+      shell: docker run -d --privileged=true  -e "index=1"  -e "FLASK_ENV={{env}}" --name=dao-celery-schedule-1  --net=host --rm -it dao-celery-schedule:latest
+      args:
+        chdir: "{{dest}}"
+    - name: stop web servicec
+      shell: docker stop dao
+      args:
+        chdir: "{{dest}}"
+    - name: build web service
+      shell: docker build -f ./Dockerfile -t dao:latest .
+      args:
+        chdir: "{{dest}}"
+    - name: run web service
+      shell: docker run -d --privileged=true -v /var/log/dao:/var/log/dao -e "profiles={{env}}" --name=dao -e "index=1" -e "port=20500" --net=host --rm -it dao:latest
+      args:
+        chdir: "{{dest}}"
+    - name: stop default task service
+      shell: docker stop dao-celery-{{item}}
+      with_items: [1]
+    - name: stop day-level task service
+      shell: docker stop dao-celery-{{item}}
+      with_items: [2,3,4,5]
+    - name: stop indicator task service
+      shell: docker stop dao-celery-{{item}}
+      with_items: [6,7,8,9,10,11]
+
+    - name: start build task service
+      shell: docker build --no-cache -f ./CerelyDockerfile -t dao-celery:latest .
+
+    - name: start default task service
+      shell: docker run -d --privileged=true  -e "profiles={{env}}" --name=dao-celery-{{item}} -e "index={{item}}" -e "route=default" -e "FLASK_ENV={{env}}" -e "thread=50" --net=host --rm -it dao-celery:latest
+      with_items: [1]
+
+    - name: start day-level task service
+      shell: docker run -d --privileged=true  -e "profiles={{env}}" --name=dao-celery-{{item}} -e "index={{item}}" -e "route=day_level" -e "FLASK_ENV={{env}}" -e "thread=50" --net=host --rm -it dao-celery:latest
+      with_items: [2,3,4,5]
+
+    - name: start indicator task service
+      shell: docker run -d --privileged=true  -e "profiles={{env}}" --name=dao-celery-{{item}} -e "index={{item}}" -e "route=indicator" -e "FLASK_ENV={{item}}" -e "thread=20" --net=host --rm -it dao-celery:latest
+      with_items: [6,7,8,9,10,11]
+
+
