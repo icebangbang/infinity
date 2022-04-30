@@ -26,6 +26,8 @@ def stock_zh_a_hist(
     :type end_date: str
     :param adjust: choice of {"qfq": "1", "hfq": "2", "": "不复权"}
     :type adjust: str
+    :param klt: choice of {"月k": "103", "日k": "101", "周k": "102","1分钟":1}
+    :type adjust: str
     :return: 每日行情
     :rtype: pandas.DataFrame
     """
@@ -46,6 +48,8 @@ def stock_zh_a_hist(
     }
     r = requests.get(url, params=params)
     data_json = r.json()
+    data = data_json["data"]
+    prev_k_price = data['preKPrice']
     temp_df = pd.DataFrame([item.split(",") for item in data_json["data"]["klines"]])
     if temp_df.empty: return None
     temp_df.columns = [
@@ -61,6 +65,7 @@ def stock_zh_a_hist(
         "涨跌额",
         "换手率",
     ]
+
     # temp_df.index = pd.to_datetime(temp_df["日期"])
     # temp_df = temp_df[start_date:end_date]
     # temp_df.reset_index(inplace=True, drop=True)
@@ -75,9 +80,12 @@ def stock_zh_a_hist(
             "振幅": float,
             "涨跌幅": float,
             "涨跌额": float,
-            "换手率": float,
+            "换手率": float
         }
     )
+    temp_df['最近收盘'] = temp_df.loc[temp_df['收盘'].shift(-1) > 0, '收盘']
+    temp_df['最近收盘'] = temp_df['最近收盘'].shift()
+    temp_df['最近收盘'][0] = prev_k_price
     return temp_df
 
 

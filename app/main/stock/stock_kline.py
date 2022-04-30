@@ -16,8 +16,8 @@ def fetch_kline_data(code, start_date, end_date, adjust, klt='101'):
                               code_id_dict=id_map)
     # logging.info("字典大小为 {}".format(str(id_map.keys())))
     if data is None: return None
-    data = pd.DataFrame(data[['日期', '开盘', '收盘', '最高', '最低', '成交量','成交额']])
-    data.columns = ['date', 'open', 'close', 'high', 'low', 'volume','money']
+    data = pd.DataFrame(data[['日期', '开盘', '收盘', '最高', '最低', '成交量','成交额',"最近收盘"]])
+    data.columns = ['date', 'open', 'close', 'high', 'low', 'volume','money','prev_close']
     data['klt'] = klt
     data['code'] = str(code)
     data['date'] = pd.to_datetime(data['date'], format='%Y-%m-%d')

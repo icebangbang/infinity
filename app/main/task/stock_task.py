@@ -23,9 +23,15 @@ import akshare as ak
 
 @celery.task(bind=True, base=MyTask, expires=180)
 def sync_stock_month_data(self, codes):
+    """
+    worker驱动
+    开始同步月线数据
+    :param self:
+    :param codes:
+    :return:
+    """
     try:
         for index, code in enumerate(codes):
-            # logging.info("同步{}:{}的日k数据,时序{}".format(board['board'], board["code"], index))
             r = sync_kline_service.sync_month_level(code)
     except Exception as e:
         raise self.retry(exc=e, countdown=3, max_retries=5)
@@ -33,6 +39,12 @@ def sync_stock_month_data(self, codes):
 
 @celery.task(bind=True, base=MyTask, expires=180)
 def submit_stock_month_task(self):
+    """
+    schedule驱动
+    提交同步月线数据任务
+    :param self:
+    :return:
+    """
     stocks = stock_dao.get_all_stock(dict(code=1))
     codes = [stock['code'] for stock in stocks]
     step = int(len(codes) / 25)
@@ -42,9 +54,10 @@ def submit_stock_month_task(self):
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
-def sync_stock_k_line(self):
+def sync_stock_day_k_line(self):
     """
-    同步股票日k线
+    schedule驱动
+    提交同步股票分时k线任务
     :param self:
     :return:
     """
@@ -63,6 +76,15 @@ def sync_stock_k_line(self):
 
 @celery.task(bind=True, base=MyTask, expires=180)
 def transform_task(self, codes, task_id, deepth):
+    """
+    默认worker驱动
+    拆分同步股票日k线任务,然后提交
+    :param self:
+    :param codes:
+    :param task_id:
+    :param deepth:
+    :return:
+    """
     if len(codes) <= 25:
         sync_stock_data.apply_async(args=[codes, task_id])
         return
@@ -77,6 +99,79 @@ def transform_task(self, codes, task_id, deepth):
 
 @celery.task(bind=True, base=MyTask, expires=180)
 def sync_stock_data(self, codes, task_id):
+    """
+    day_level worker驱动
+    正式从第三方网站抓取数据
+    :param self:
+    :param codes:
+    :param task_id:
+    :return:
+    """
+    # logging.info("开始同步个股,{}".format(len(stocks)))
+    try:
+        for index, code in enumerate(codes):
+            # logging.info("同步{}:{}的日k数据,时序{}".format(board['board'], board["code"], index))
+            r = sync_kline_service.sync_day_level(code)
+    except Exception as e:
+        raise self.retry(exc=e, countdown=3, max_retries=5)
+
+    task_dao.record_task(task_id)
+
+
+@celery.task(bind=True, base=MyTask, expires=180)
+def sync_stock_k_line(self):
+    """
+    schedule驱动
+    提交同步股票日k线任务
+    :param self:
+    :return:
+    """
+    now = datetime.now()
+    # 收盘后,不再同步
+
+    stocks = stock_dao.get_all_stock(dict(code=1))
+    # 获取最近一个交易日
+    codes = [stock['code'] for stock in stocks]
+
+    global_task_id = str(uuid.uuid1())
+    task_dao.record_task(global_task_id, now)
+
+    transform_task.apply_async(args=[codes, global_task_id, 0])
+
+
+@celery.task(bind=True, base=MyTask, expires=180)
+def transform_task(self, codes, task_id, deepth):
+    """
+    默认worker驱动
+    拆分同步股票日k线任务,然后提交
+    :param self:
+    :param codes:
+    :param task_id:
+    :param deepth:
+    :return:
+    """
+    if len(codes) <= 25:
+        sync_stock_data.apply_async(args=[codes, task_id])
+        return
+
+    step = int(len(codes) / 25)
+    for i in range(0, len(codes), step):
+        group = codes[i:i + step]
+        print("拆分个股k线任务,时序{}:{},层次:{}".format(i, i + step, deepth))
+
+        transform_task.apply_async(args=[group, task_id, deepth + 1])
+
+
+@celery.task(bind=True, base=MyTask, expires=180)
+def sync_stock_data(self, codes, task_id):
+    """
+    day_level worker驱动
+    正式从第三方网站抓取数据
+    :param self:
+    :param codes:
+    :param task_id:
+    :return:
+    """
     # logging.info("开始同步个股,{}".format(len(stocks)))
     try:
         for index, code in enumerate(codes):
