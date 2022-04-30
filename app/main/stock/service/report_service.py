@@ -67,6 +67,7 @@ def market_status_analysis():
     st_stock = {stock['code']: stock['name'] for stock in stocks if "ST" in stock['name']}
     start, end = date_util.get_work_day(now, 1)
     trade_data_list = k_line_dao.get_k_line_data(start, end)
+    if len(trade_data_list) == 0: return
     groups = {}
     for trade_data in trade_data_list:
         code = trade_data['code']
@@ -157,8 +158,7 @@ def market_status_analysis():
             continue
 
     total = sum(up_down_distribution.values())
-    distribution = {k:dict(count=v,prop=round(v/total*100,2)) for k,v in up_down_distribution.items()}
-
+    distribution = {k: dict(count=v, prop=round(v / total * 100, 2)) for k, v in up_down_distribution.items()}
 
     median = numpy.median(rate_list)
     market_status = db['market_status']

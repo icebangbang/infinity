@@ -2,7 +2,7 @@
   gather_facts:  false
   become: yes
   tasks:
-    - name: stop schedule
+    - name: clone project
       git:
         repo: 'https://{{gituser}}:{{gitpass}}@gitee.com/zz_lf/infinity.git'
         dest: "{{dest}}"
@@ -10,18 +10,27 @@
       shell: docker stop dao-celery-schedule-1
       args:
         chdir: "{{dest}}"
+      when: target == "test"
+      ignore_errors: yes
+
     - name: build schedule tar
       shell: docker build  -f ./CerelyScheduleDockerfile -t dao-celery-schedule:latest .
       args:
         chdir: "{{dest}}"
+      when: target == "test"
+
     - name: run schedule job
       shell: docker run -d --privileged=true  -e "index=1"  -e "FLASK_ENV={{env}}" --name=dao-celery-schedule-1  --net=host --rm -it dao-celery-schedule:latest
       args:
         chdir: "{{dest}}"
+      when: target == "test"
+
     - name: stop web servicec
       shell: docker stop dao
       args:
         chdir: "{{dest}}"
+      ignore_errors: yes
+
     - name: build web service
       shell: docker build -f ./Dockerfile -t dao:latest .
       args:
@@ -33,15 +42,20 @@
     - name: stop default task service
       shell: docker stop dao-celery-{{item}}
       with_items: [1]
+      ignore_errors: yes
     - name: stop day-level task service
       shell: docker stop dao-celery-{{item}}
       with_items: [2,3,4,5]
+      ignore_errors: yes
     - name: stop indicator task service
       shell: docker stop dao-celery-{{item}}
       with_items: [6,7,8,9,10,11]
+      ignore_errors: yes
 
     - name: start build task service
       shell: docker build --no-cache -f ./CerelyDockerfile -t dao-celery:latest .
+      args:
+        chdir: "{{dest}}"
 
     - name: start default task service
       shell: docker run -d --privileged=true  -e "profiles={{env}}" --name=dao-celery-{{item}} -e "index={{item}}" -e "route=default" -e "FLASK_ENV={{env}}" -e "thread=50" --net=host --rm -it dao-celery:latest

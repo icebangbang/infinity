@@ -5,6 +5,9 @@
 
 # sh remote_local_build.sh ~/Work/pem/ironmansre_cdh.pem offline offline /home/ironmansre zz_lf Gitee158,
 
+# sh remote_local_build.sh ~/Work/pem/xzhh.pem test test2 ~/infinity zz_lf Gitee158,
+# sh remote_local_build.sh ~/Work/pem/xzhh.pem test test1 ~/infinity zz_lf Gitee158,
+
 
 
 
