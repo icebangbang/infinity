@@ -66,7 +66,7 @@
       with_items: [2,3,4,5]
 
     - name: start indicator task service
-      shell: docker run -d --privileged=true  -e "profiles={{env}}" --name=dao-celery-{{item}} -e "index={{item}}" -e "route=indicator" -e "FLASK_ENV={{item}}" -e "thread=20" --net=host --rm -it dao-celery:latest
+      shell: docker run -d --privileged=true  -e "profiles={{env}}" --name=dao-celery-{{item}} -e "index={{item}}" -e "route=indicator" -e "FLASK_ENV={{env}}" -e "thread=20" --net=host --rm -it dao-celery:latest
       with_items: [6,7,8,9,10,11]
 
 
