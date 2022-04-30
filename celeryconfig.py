@@ -109,7 +109,7 @@ beat_schedule = {
     'stock_month_data_sync':
         {  # 股票月线数据同步
             "task": "app.main.task.stock_task.submit_stock_month_task",  # 任务函数所在位置
-            "schedule": crontab(minute='1', hour='15', day_of_week='1-5')
+            "schedule": 600,  # 定时每10分钟执行一次
         },
     'board_data_sync': {
         "task": "app.main.task.board_task.sync_board_k_line",
