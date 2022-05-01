@@ -3,7 +3,7 @@ from app.main.db.mongo import db
 from app.main.stock.service import stock_service
 import requests
 """
-板块数据同步
+个股提醒
 """
 
 

@@ -9,6 +9,10 @@ from datetime import datetime
 
 @rest.route("/indicator/ppi", methods=['get'])
 def get_ppi():
+    """
+    ppi 数据展示
+    :return:
+    """
     start = datetime(2020, 1, 1)
     ppi = db['ppi']
     ppi_list = list(ppi.find({"date": {"$gte": start}}).sort("_id", -1))
@@ -42,6 +46,10 @@ def get_ppi():
 
 @rest.route("/indicator/pmi", methods=['get'])
 def get_pmi():
+    """
+    pmi数据展示
+    :return:
+    """
     start = datetime(2006, 1, 1)
     ppi = db['pmi']
     ppi_list = list(ppi.find({"date": {"$gte": start}}).sort("_id", -1))
@@ -61,6 +69,10 @@ def get_pmi():
 
 @rest.route("/indicator/sow", methods=['get'])
 def get_sow_data():
+    """
+    母猪数据展示
+    :return:
+    """
     pig_data = db['pig_data']
     sow_data_list = list(pig_data.find({"name": "能繁母猪存栏"}).sort("_id", 1))
 

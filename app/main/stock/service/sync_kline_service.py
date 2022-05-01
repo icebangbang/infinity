@@ -3,15 +3,19 @@ from datetime import datetime, timedelta
 from app.main.utils import date_util
 from app.main.stock import stock_kline
 import pandas as pd
+from app.application import app
 
 
-def sync_day_level(code, base_time=None, time_window=1095):
+
+def sync_day_level(code, base_time=None):
     """
     同步60天内的数据
     :param code:
     :return:
     """
     point = k_line_dao.get_oldest_k_line(code)
+    # default 1095
+    time_window = app.config["KLINE_TIME_WINDOW"]
 
     if base_time is None:
         now = datetime.now()
@@ -19,7 +23,7 @@ def sync_day_level(code, base_time=None, time_window=1095):
     if len(point) == 0:
         before = now - timedelta(days=time_window)
     else:
-        before = point[0]['date']+timedelta(days=1)
+        before = point[0]['date'] + timedelta(days=1)
 
     if date_util.get_days_between(now, before) <= 0:
         before = now
@@ -32,12 +36,41 @@ def sync_day_level(code, base_time=None, time_window=1095):
     data = df.to_dict(orient='records')
 
     if date_util.get_days_between(now, before) == 0:
-        k_line_dao.update_k_line(code,data)
+        k_line_dao.update_k_line(code, data)
     else:
         k_line_dao.dump_k_line(data)
 
 
+def sync_month_level(code, base_time=None, time_window=6000):
+    """
+    同步60天内的数据
+    :param code:
+    :return:
+    """
+    point = k_line_dao.get_oldest_k_line(code,level="month")
 
+    if base_time is None:
+        now = datetime.now()
+
+    if len(point) == 0:
+        before = now - timedelta(days=time_window)
+    else:
+        before = point[0]['date'] + timedelta(days=1)
+
+    if date_util.get_days_between(now, before) <= 0:
+        before = now
+
+    df = stock_kline.fetch_kline_data(code,
+                                      date_util.dt_to_str(before),
+                                      date_util.dt_to_str(now), 'qfq','103')
+    if df is None: return None
+
+    data = df.to_dict(orient='records')
+
+    if date_util.get_days_between(now, before) == 0:
+        k_line_dao.update_k_line(code, data,level='month')
+    else:
+        k_line_dao.dump_k_line(data,level='month')
 
 
     return data
@@ -55,7 +88,7 @@ def sync_week_level(code, start):
                                       date_util.dt_to_str(start),
                                       date_util.dt_to_str(now), 'qfq')
     data = df.to_dict(orient='records')
-    k_line_dao.dump_k_line(data,level="week")
+    k_line_dao.dump_k_line(data, level="week")
     return data
 
 
@@ -83,7 +116,7 @@ def get_kline_of_stock(code, latest_valid_day, time_window=60):
         return None
 
 
-def sync_board_k_line(name, type,base_time=None, time_window=1095):
+def sync_board_k_line(name, type, base_time=None, time_window=1095):
     """
     同步15天内的数据
     :param code:
@@ -94,12 +127,10 @@ def sync_board_k_line(name, type,base_time=None, time_window=1095):
     if base_time is None:
         now = datetime.now()
 
-
-
     if len(point) == 0:
-        before = now - timedelta(days=time_window)
+       before = now - timedelta(days=time_window)
     else:
-        before = point[0]['date']+timedelta(days=1)
+        before = point[0]['date'] + timedelta(days=1)
     if date_util.get_days_between(now, before) <= 0:
         before = now
     # if date_util.get_days_between(now, before) == 0:
@@ -117,25 +148,17 @@ def sync_board_k_line(name, type,base_time=None, time_window=1095):
     data = df.to_dict(orient='records')
 
     if date_util.get_days_between(now, before) == 0:
-        k_line_dao.update_board_k_line(name,datetime(now.year,now.month,now.day),data)
+        k_line_dao.update_board_k_line(name, datetime(now.year, now.month, now.day), data)
     else:
         k_line_dao.dump_board_k_line(data)
     return data
 
 
-def get_stock_k_line(from_date, to_date, codes=None):
-    if codes is None:
-        daily_price = pd.DataFrame(k_line_dao.get_k_line_data(from_date, to_date))
-    else:
-        daily_price = pd.DataFrame(k_line_dao.get_k_line_by_code(codes, from_date, to_date))
-
-    return daily_price
-
-
 if __name__ == "__main__":
+    # df = stock_kline.fetch_kline_data("600997",
+    #                                   "20060101",
+    #                                   "20070101", 'qfq')
+    # data = df.to_dict(orient='records')
+    # k_line_dao.dump_k_line(data)
 
-    df = stock_kline.fetch_kline_data("600997",
-                                      "20060101",
-                                      "20070101", 'qfq')
-    data = df.to_dict(orient='records')
-    k_line_dao.dump_k_line(data)
+    sync_month_level("300763")

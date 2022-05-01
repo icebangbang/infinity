@@ -1,6 +1,7 @@
 import logging
 
 from app.main.stock.dao import board_dao
+from app.main.stock.job import sync_board
 from app.main.utils import restful
 from . import rest
 from app.main.utils import date_util
@@ -50,4 +51,22 @@ def get_stock_feature():
             logging.info("submit stock feature:{}".format(date_util.dt_to_str(date_start)))
             stock_task.submit_stock_feature(date_util.to_timestamp(date_start),codes)
 
+    return restful.response("ok")
+
+@rest.route("/celery/stock/data", methods=['post'])
+def get_stock_data():
+    """
+    手动同步日k线数据
+    :return:
+    """
+    stock_task.sync_stock_k_line.apply_async(args=[])
+    return restful.response("ok")
+
+@rest.route("/celery/stock/detail", methods=['post'])
+def get_stock_detail():
+    """
+    手动同步个股详情
+    :return:
+    """
+    sync_board.sync()
     return restful.response("ok")

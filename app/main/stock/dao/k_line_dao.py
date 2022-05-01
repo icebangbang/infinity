@@ -35,8 +35,8 @@ def dump_k_line(data, level='day'):
     return my_set.insert(data)
 
 
-def update_k_line(code, data):
-    db_name = "k_line_day"
+def update_k_line(code, data,level="day"):
+    db_name = "k_line_"+level
     my_set = db[db_name]
 
     for d in data:

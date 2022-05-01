@@ -16,7 +16,7 @@ celery = Celery(
     broker=app.config['BROKER_URL']
 )
 
-celery.config_from_object('celeryconfig')
+celery.config_from_object(app.config['CELERY_CONFIG'])
 
 celery.conf.update(
     result_expires=3600,   # Celery结果存在中间件Redis的超时时间[仅针对当前的Celery的App]

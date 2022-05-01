@@ -104,12 +104,12 @@ beat_schedule = {
     'stock_data_sync':
         {  # 股票数据同步
             "task": "app.main.task.stock_task.sync_stock_k_line",  # 任务函数所在位置
-            "schedule": 180,  # 定时每300秒执行一次
+            "schedule": 180,  # 线下定时
         },
     'stock_month_data_sync':
         {  # 股票月线数据同步
             "task": "app.main.task.stock_task.submit_stock_month_task",  # 任务函数所在位置
-            "schedule": 600,  # 定时每10分钟执行一次
+            "schedule": crontab(minute='1', hour='15', day_of_week='1-5')
         },
     'board_data_sync': {
         "task": "app.main.task.board_task.sync_board_k_line",
