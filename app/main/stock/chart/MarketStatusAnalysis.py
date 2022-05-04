@@ -11,7 +11,7 @@ class MarketStatusAnalysis(Line):
 
     def generate(self):
         market_status = db['market_status']
-        latest_point = market_status.find({}).sort("date", -1).limit(1)
+        latest_point = market_status.find_one({},sort=[('date',-1)])
         if latest_point is None:
             now = datetime.now()
         else:
