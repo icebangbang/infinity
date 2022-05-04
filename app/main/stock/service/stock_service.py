@@ -127,7 +127,7 @@ def stock_remind():
         name = query['name']  # 指标集名称
         msg_template = query['msg_template']
         request_body = json.loads(query['body'])
-        # request_body['date'] = '2022-04-29'
+        request_body['date'] = '2022-04-29'
 
         result = stock_search_service.comprehensive_search(request_body)
         if result['size'] == 0: return
@@ -155,7 +155,7 @@ def stock_remind():
 
                 boards_of_stock = stock_detail['boards']
                 if board in boards_of_stock:
-                    stocks_in_front.append(stock_detail['name'])
+                    stocks_in_front.append("{}({})".format(stock_detail['name'],stock_detail['rate']))
                     count = count + 1
             msg = '[个股提醒]{}前十个股:{}'.format(board, ",".join(stocks_in_front[0:10]))
             time.sleep(6)
