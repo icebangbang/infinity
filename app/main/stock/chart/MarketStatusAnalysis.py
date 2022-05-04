@@ -10,8 +10,8 @@ class MarketStatusAnalysis(Line):
     """
 
     def generate(self):
-        # now = datetime.now()
-        now = datetime(2022, 4, 29)
+        now = datetime.now()
+        # now = datetime(2022, 4, 29)
         start = date_util.get_start_of_day(now)
         end = date_util.get_end_of_day(now)
         market_status = db['market_status']
@@ -44,7 +44,7 @@ class MarketStatusAnalysis(Line):
                 data_y_array[index]['name'] = key
                 index = index + 1
 
-        data_y_array.append(dict(name="中位数", y=median_value, yAxisIndex=1))
+        data_y_array.append(dict(name="涨幅中位数", y=median_value, yAxisIndex=1))
 
         return dict(x=data_x, y_array=data_y_array, desc="个股涨跌走势", multiSerie=True,
                     yAxis_array=yAxis_array)
