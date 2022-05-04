@@ -90,7 +90,8 @@ def get_sow_data():
 
 @rest.route("/indicator/chart", methods=['get'])
 def chart_display():
-    chart_instance = chart_instance_dict['BaotuanAnalysis']
+    name = request.args.get("name")
+    chart_instance = chart_instance_dict[name]
     data = chart_instance.generate()
 
     return restful.response(data=data)

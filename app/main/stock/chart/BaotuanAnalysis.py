@@ -13,6 +13,13 @@ class BaotuanAnalysis(Line):
         # 获取所有数据点位
         data_list = list(baotuan_analysis.find({}))
         data_x = [date_util.date_time_to_str(data['date'], "%Y-%m") for data in data_list]
-        data_y = [data['percent'] for data in data_list]
+        y = [data['percent'] for data in data_list]
+        data_y_array = [dict(name="资金集中度比例", y=y,
+                             markPoint={"data": [{"type": 'max', "name": "max"}]},
+                             markLine={"data": [{"type": 'average', "name": "average"}]})]
 
-        return dict(x=data_x, y=data_y,desc="资金集中度分析")
+        return dict(x=data_x,
+                    y_array=data_y_array,
+                    desc="a股资金集中度分析",
+
+                    )
