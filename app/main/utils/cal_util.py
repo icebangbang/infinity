@@ -143,6 +143,15 @@ def get_rate(numerator,denominator,ndigits=2)->float:
     return round(numerator / denominator * 100, ndigits)
 
 
+def get_williams(highest, lowest, close):
+    """
+    计算威廉指标
+    :param highest: n日内最高价
+    :param lowest: n日内最低价
+    :param close: 当前价格
+    :return: 威廉指标
+    """
+    return (highest - close) / (highest - lowest) * 100
 
 
 if __name__ == "__main__":

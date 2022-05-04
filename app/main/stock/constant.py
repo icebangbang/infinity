@@ -49,6 +49,11 @@ ma10_upon_5 = "ma10_upon_5"
 ma5_upon_max = "ma5_upon_max"
 ma10_upon_max = "ma10_upon_max"
 
+# W&R
+# 威廉指标
+wr_6 = "wr_6"
+wr_10 = "wr_10"
+
 increase_avg_rate_5 = "increase_avg_rate_5"
 increase_avg_rate_10 = "increase_avg_rate_10"
 increase_avg_rate_20 = "increase_avg_rate_20"
