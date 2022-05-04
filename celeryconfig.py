@@ -151,7 +151,14 @@ beat_schedule = {
         "task": "app.main.task.fund_task.backtrading",
         "schedule": 1800
     },
+    'send_remind_msg': {
+        "task": "app.main.task.remind_task.stock_remind",
+        "schedule": 90
+    }
 }
 
 # 在出现worker接受到的message出现没有注册的错误时，使用下面一句能解决
-imports = ("app.main.task.macrodata_task", "app.main.task.house_task", "app.main.task.fund_task")
+imports = ("app.main.task.macrodata_task",
+           "app.main.task.house_task",
+           "app.main.task.fund_task",
+           "app.main.task.remind_task")

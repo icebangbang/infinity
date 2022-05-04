@@ -1,5 +1,5 @@
 from app.main.stock.dao import stock_dao, k_line_dao
-from app.main.stock.service import stock_service, config_service,search_udf_service
+from app.main.stock.service import stock_service, config_service,search_udf_service,stock_search_service
 from app.main.utils import restful, date_util, simple_util
 from . import rest
 from flask import request
@@ -64,87 +64,8 @@ def data_miner(request_body=None):
     if request_body is None:
         request_body: dict = request.json
     # 处理一下入参
-    request_body = search_udf_service.check_and_parse(request_body)
-    # 数据库检索
-    results: list = stock_service.stock_search(request_body)
-    codes = [r['stock_code'] for r in results]
-
-    aim_board = request_body['custom'].get("aimBoard", None)
-    only_cyb = request_body['custom'].get("onlyCyb", False)
-    hide_board = request_body['custom'].get("hideBoard", False)
-    only_code = request_body['custom'].get("onlyCode", False)
-
-    start = date_util.parse_date_time(request_body.get("date"), "%Y-%m-%d")
-    end = date_util.parse_date_time(request_body.get("until"), "%Y-%m-%d")
-
-    start, useless = date_util.get_work_day(start, 1)
-
-    datas = k_line_dao.get_k_line_by_code(codes, start, end)
-    group = {}
-    for data in datas:
-        code = data['code']
-        array = group.get(code, [])
-        array.append(data)
-        group[code] = array
-
-    final = {}
-
-    boards = []
-    area_boards = []
-    for result in results:
-        code: str = result['stock_code']
-        name = result['name']
-        board_list = result['board_list']
-
-        for board in board_list:
-            if "板块" in board:
-                area_boards.append(board)
-                # 地域板块不加入boards,不会出现在所属板块中
-                continue
-
-            elif board not in ['融资融券', '富时罗素', '标准普尔', '预盈预增', '昨日涨停_含一字', '昨日涨停', '预亏预减'
-                                                                                   '深股通', 'MSCI中国', '沪股通', '深成500',
-                               '预亏预减', '深股通'
-                                       '创业板综', '中证500', '上证380', '转债标的', '内贸流通', '电商概念', '机构重仓', 'QFII重仓', '长江三角']:
-
-                boards.append(board)
-        if code not in group.keys(): continue
-        if simple_util.is_not_empty(aim_board) and aim_board not in board_list: continue
-
-        if only_cyb and code.startswith("300") is False: continue
-
-        trade_data_list = group[code]
-        #
-        close_list = [trade_data['close'] for trade_data in trade_data_list]
-
-        a = close_list[0]
-        b = max(close_list[1:]) if len(close_list) > 1 else a
-        index = close_list.index(b)
-        high_date = trade_data_list[index]['date']
-        rate = result['features']['rate']
-
-        final[name] = dict(
-            name=name,
-            rate=rate,
-            code=code,
-            high_date=high_date.strftime("%Y-%m-%d"),
-            boards=board_list
-        )
-        if hide_board is True:
-            final[name].__delitem__("board")
-
-    counter = collections.Counter(boards)
-    area_counter = collections.Counter(area_boards)
-    final = OrderedDict(sorted(final.items(), key=lambda item: item[1]['rate'], reverse=True))
-
-    if only_code:
-        return restful.response(list(final.keys()))
-    else:
-        final = [item for item in final.values()]
-
-    return restful.response(dict(counter=dict(counter.most_common(20)),
-                                 area_counter=dict(area_counter.most_common(10)),
-                                 detail=final, size=len(final)))
+    result = stock_search_service.comprehensive_search(request_body)
+    return restful.response(result)
 
 
 def get_stock_result(params) -> List[dict]:

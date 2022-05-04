@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime, timedelta
-
 import pandas as pd
 
 from app.main.stock import constant
@@ -8,11 +7,13 @@ from app.main.stock.dao import stock_dao, k_line_dao
 from app.main.stock.stock_pick_filter import stock_filter
 from app.main.utils import date_util
 from app.main.stock.stock_kline import id_map
-from app.main.stock.service import search_udf_service
+from app.main.stock.service import search_udf_service, stock_search_service
 import akshare as ak
 from app.main.db.mongo import db
 from app.main.stock.task_wrapper import TaskWrapper
-import requests
+import json
+from app.main.utils import dingtalk_util
+import time
 
 
 def publish(days=10, slice=30, code_list=None, stock_map={}, start=None, end=None):
@@ -118,93 +119,68 @@ def sync_stock_ind(codes, task_wrapper: TaskWrapper = None):
             task_wrapper.trigger_count()
 
 
-def stock_search(request_body):
-    stock_feature = db['stock_feature']
-    params = request_body['params']
-    # 拷贝一份
-    params = params.copy()
-    date = date_util.parse_date_time(request_body.get("date"), fmt="%Y-%m-%d")
-    date = date if date is not None else date_util.get_start_of_day(datetime.now())
-    input = dict(date=date)
-    match = {"date": date, "$expr": {"$and": []}}
-
-    key_list: list = constant.get_feature_keys()
-    # 查看用户自定义的参数是否在特征列表中
-    for item in params:
-        name = item['name']
-        if name not in key_list: continue
-        # 参数筛选表达式
-        condition = item['value']
-        # condition[0]: 表达式 $gt,$lt,$eq诸如此类
-        # condition[1]: 所要过滤的值
-        """
-        condition[1]有几种类型:
-        1. float or int
-        2. {"$multiply": ["$features.vol_avg_5", 10]}  放量特征筛选
-        3. $features.ma30 特征自身比较
-        4. 时间字符串
-        """
-        condition[1] = search_udf_service.check(condition[1],input)
-        if date_util.is_valid_date(condition[1]):
-            condition[1] = date_util.parse_date_time(condition[1], "%Y-%m-%d")
-        match["$expr"]["$and"].append({condition[0]: ["$features." + name, condition[1]]})
-        match["features." + name] = {"$exists": True}
-
-    condition = stock_feature.aggregate([
-        {"$match": match},
-        # stock_feature 和  stock_detail根据code join
-        {
-            "$lookup": {
-                "from": "stock_detail",
-                "localField": "code",
-                'foreignField': "code",
-                "as": "result"
-            },
-        }, {
-            "$project": {"_id": 0, "features": 1, "name": 1, "stock_code": "$result.code",
-                         "board_list": "$result.board"}
-        },
-        {"$unwind": "$stock_code"},
-        {"$unwind": "$board_list"}
-
-    ])
-    results = list(condition)
-
-    return results
-
-
 def stock_remind():
     query_store = db["ind_query_store"]
-    query_list = list(query_store.find({}))
+    query_list = list(query_store.find({"in_use": 1}))
     # name,params
     for query in query_list:
         name = query['name']  # 指标集名称
         msg_template = query['msg_template']
+        request_body = json.loads(query['body'])
+        # request_body['date'] = '2022-04-29'
 
-        stocks = stock_search(query)
-        msg = ''
-        for stock in stocks:
+        result = stock_search_service.comprehensive_search(request_body)
+        if result['size'] == 0: return
+        board_counter = result['counter']
+        boards_in_front = list(board_counter.keys())[0:10]
+        boards_in_front_fmt = []
 
-            inf_l_point_date = stock['features']['inf_l_point_date']
-            inf_l_point_value = stock['features']['inf_l_point_value']
-            inf_h_point_date = stock['features']['inf_h_point_date']
-            inf_h_point_value = stock['features']['inf_h_point_value']
-            current_max_high_type = stock['features']['current_max_high_type']
-            # name = stock['name']
-            # stock_code = stock['stock_code']
-            features = stock['features']
-            features['stock_code'] = stock['stock_code']
-            features['name'] = stock['name']
-            msg = msg + msg_template.format(**stock['features']) + '\n'
+        msg = '提醒-------------------------开始一轮推送--------------------------'
+        dingtalk_util.send_msg(msg)
 
-        headers = {'Content-Type': 'application/json'}
-        d = {"msgtype": "text",
-             "text": {
-                 "content": msg
-             }}
-        requests.post(
-            "https://oapi.dingtalk.com/robot/send?access_token=8d6107691edc8c68957ad9b3b3e16eeccf4fd2ec005c86692fdeb648da6312b4",
-            json=d, headers=headers)
+        for board in boards_in_front:
+            count = board_counter[board]
+            content = "{}({})".format(board, count)
+            boards_in_front_fmt.append(content)
+        msg = '[板块提醒]前十板块:{}'.format(",".join(boards_in_front_fmt))
+
+        dingtalk_util.send_msg(msg)
+        for board in boards_in_front:
+            stock_detail_list = result['detail']
+            stocks_in_front = []
+            count = 0
+            for stock_detail in stock_detail_list:
+                if count >= 10:
+                    break
+
+                boards_of_stock = stock_detail['boards']
+                if board in boards_of_stock:
+                    stocks_in_front.append(stock_detail['name'])
+                    count = count + 1
+            msg = '[个股提醒]{}前十个股:{}'.format(board, ",".join(stocks_in_front[0:10]))
+            time.sleep(6)
+            resp = dingtalk_util.send_msg(msg)
+
+        msg = '提醒-------------------------结束一轮推送--------------------------'
+        dingtalk_util.send_msg(msg)
+
+        # for stock in stocks:
+        #
+        #     # name = stock['name']
+        #     # stock_code = stock['stock_code']
+        #     features = stock['features']
+        #     features['stock_code'] = stock['stock_code']
+        #     features['name'] = stock['name']
+        #     msg = msg + msg_template.format(**stock['features']) + '\n'
+        #
+        # headers = {'Content-Type': 'application/json'}
+        # d = {"msgtype": "text",
+        #      "text": {
+        #          "content": msg
+        #      }}
+        # requests.post(
+        #     "https://oapi.dingtalk.com/robot/send?access_token=8d6107691edc8c68957ad9b3b3e16eeccf4fd2ec005c86692fdeb648da6312b4",
+        #     json=d, headers=headers)
 
 
 if __name__ == "__main__":
@@ -217,16 +193,16 @@ if __name__ == "__main__":
     stock_remind()
     msg = "提醒:{stock_code}[{code}]在出现底部反转{inf_l_point_value}[{inf_l_point_date}],当前价格突破前期小高位{current_max_high_type},"
 
-    d = {"stock_code": "1", "code": "2",
-            "inf_l_point_value": "3", "inf_l_point_date": "4",
-            "inf_h_point_value": "5","inf_h_point_date":"6",
-            }
-    print(msg.format(**d))
+    # d = {"stock_code": "1", "code": "2",
+    #         "inf_l_point_value": "3", "inf_l_point_date": "4",
+    #         "inf_h_point_value": "5","inf_h_point_date":"6",
+    #         }
+    # print(msg.format(**d))
 
-    stock_value_set = db["stock_value"]
-    stock_value_set.update_one({"code": "300763", "date": datetime.now()},
-                               {"$set": dict(
-                                   MarketValue=0,
-                                   flowCapitalValue=0,
-                                   update_time=datetime.now()),
-                               }, True)
+    # stock_value_set = db["stock_value"]
+    # stock_value_set.update_one({"code": "300763", "date": datetime.now()},
+    #                            {"$set": dict(
+    #                                MarketValue=0,
+    #                                flowCapitalValue=0,
+    #                                update_time=datetime.now()),
+    #                            }, True)
