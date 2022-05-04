@@ -19,7 +19,7 @@ def baotuan_analysis():
     包团分析
     :return:
     """
-    start_time = datetime(2020, 1, 1)
+    start_time = datetime(2019, 1, 1)
     end_time = date_util.get_start_of_day(datetime.now())
     storage = []
     while (start_time < end_time):
@@ -56,35 +56,33 @@ def baotuan_analysis():
     set.insert_many(storage)
 
 
-def market_status_analysis():
+def market_status_analysis(date=datetime.now()):
     """
     涨跌情况分析
     :return:
     """
-    now = datetime.now()
-    if date_util.is_workday(now) is False: return
-    now = date_util.get_start_of_day(now)
+    if date_util.is_workday(date) is False: return
+    now = date_util.get_start_of_day(date)
     stocks = stock_dao.get_all_stock(dict(code=1, name=1, _id=0))
     st_stock = {stock['code']: stock['name'] for stock in stocks if "ST" in stock['name']}
-    start, end = date_util.get_work_day(now, 1)
-    trade_data_list = k_line_dao.get_k_line_data(start, end)
-    groups = {}
-    for trade_data in trade_data_list:
-        code = trade_data['code']
-        items = groups.get(code)
-        if items is None:
-            items = []
-        items.append(trade_data)
-        groups[code] = items
+    # start, end = date_util.get_work_day(now, 1)
+    trade_data_list = k_line_dao.get_k_line_data(now, now)
+    groups = {trade_data['code']: trade_data for trade_data in trade_data_list}
+    # for trade_data in trade_data_list:
+    #     code = trade_data['code']
+    #     items = groups.get(code)
+    #     items.append(trade_data)
+    #     groups[code] = items
     rate_list = []
 
     up_down_distribution = {"跌停": 0, "跌停~8%": 0, "-8%~-6%": 0, "-6%~-4%": 0, "-4%~-2%": 0, "-2%~0%": 0,
                             "0%~2%": 0, "2%~4%": 0,
                             "4%~6%": 0, "6%~8%": 0, "8%~涨停": 0, "涨停": 0}
-    for key, trade_data_list in groups.items():
-        if len(trade_data_list) < 2: continue
-        close_1 = trade_data_list[0]['close']
-        close_2 = trade_data_list[1]['close']
+    for key, trade_data in groups.items():
+        # close_1 = trade_data_list[0]['close']
+        # close_2 = trade_data_list[1]['close']
+        close_2 = trade_data['close']
+        close_1 = trade_data['prev_close']
         rate = Decimal((close_2 - close_1) / close_1 * 100).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP")
         rate_list.append(rate)
 
@@ -167,8 +165,12 @@ def market_status_analysis():
     result['update'] = datetime.now()
     result['rate_median'] = float(median)
     result['distribution'] = distribution
-    market_status.update_one({"date": now}, {"$set": result}, upsert=True)
+
+    min = date.minute if date.minute % 5 == 0 else (int(date.minute / 5) + 1) * 5
+    dt = datetime(date.year,date.month,date.day,date.hour,min,0)
+    market_status.update_one({"date": dt}, {"$set": result}, upsert=True)
 
 
 if __name__ == "__main__":
-    market_status_analysis()
+    baotuan_analysis()
+    # market_status_analysis(datetime(2022, 4, 29,23,37,0))

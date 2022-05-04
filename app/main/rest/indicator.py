@@ -5,6 +5,7 @@ from app.main.utils import simple_util
 from flask import request
 from app.main.db.mongo import db
 from datetime import datetime
+from app.main.stock.chart import chart_instance_dict
 
 
 @rest.route("/indicator/ppi", methods=['get'])
@@ -86,3 +87,10 @@ def get_sow_data():
         hb.append(sow["hb"].strip('%'))
         date.append(date_util.date_time_to_str(sow['date'], fmt='%Y-%m'))
     return restful.response(data=dict(date=date, num=num, tb=tb, hb=hb))
+
+@rest.route("/indicator/chart", methods=['get'])
+def chart_display():
+    chart_instance = chart_instance_dict['BaotuanAnalysis']
+    data = chart_instance.generate()
+
+    return restful.response(data=data)

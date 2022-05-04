@@ -1,3 +1,5 @@
+## 在目标服务器中执行用
+
 env=${1}
 docker stop  dao-celery-schedule-1
 docker build  -f ./CerelyScheduleDockerfile -t dao-celery-schedule:latest .
