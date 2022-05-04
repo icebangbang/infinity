@@ -10,11 +10,15 @@ class MarketStatusAnalysis(Line):
     """
 
     def generate(self):
-        now = datetime.now()
+        market_status = db['market_status']
+        latest_point = market_status.find({}).sort("date", -1).limit(1)
+        if latest_point is None:
+            now = datetime.now()
+        else:
+            now = latest_point['date']
         # now = datetime(2022, 4, 29)
         start = date_util.get_start_of_day(now)
         end = date_util.get_end_of_day(now)
-        market_status = db['market_status']
         # 获取所有数据点位
         data_list = list(market_status.find({"date": {"$lte": end, "$gte": start}}))
         data_x = [date_util.date_time_to_str(data['date'], "%H/%M") for data in data_list]

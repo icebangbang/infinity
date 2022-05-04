@@ -9,7 +9,7 @@ def get_oldest_k_line(code, level='day'):
     db_name = "k_line_" + level
     my_set = db[db_name]
 
-    return list(my_set.find({"code": code}).sort("date", -1).limit(1))
+    return list(my_set.find({"code": code})`.sort("date", -1).limit(1))`
 
 
 def get_concept_oldest_k_line(name):
