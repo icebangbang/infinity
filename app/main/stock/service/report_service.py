@@ -161,16 +161,17 @@ def market_status_analysis(date=datetime.now()):
     median = numpy.median(rate_list)
     market_status = db['market_status']
     result = {}
-    result['date'] = now
     result['update'] = datetime.now()
     result['rate_median'] = float(median)
     result['distribution'] = distribution
 
     min = date.minute if date.minute % 5 == 0 else (int(date.minute / 5) + 1) * 5
     dt = datetime(date.year,date.month,date.day,date.hour,min,0)
+
+    result['date'] = dt
     market_status.update_one({"date": dt}, {"$set": result}, upsert=True)
 
 
 if __name__ == "__main__":
-    baotuan_analysis()
+    market_status_analysis()
     # market_status_analysis(datetime(2022, 4, 29,23,37,0))
