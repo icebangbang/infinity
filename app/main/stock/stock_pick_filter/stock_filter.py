@@ -8,6 +8,7 @@ import time
 from app.main.stock.sub_startegy.feature.box_type import BoxType
 from app.main.stock.sub_startegy.feature.box_boundary import BoxBoundary
 from app.main.stock.sub_startegy.feature.earning_rate_feature import EarningRateFeature
+from app.main.stock.sub_startegy.feature.price_movement_feaure import PriceMovementFeature
 from app.main.stock.sub_startegy.feature.short_term_feature import ShortTermFeature
 from app.main.stock.sub_startegy.feature.shape_feature import ShapeFeature
 from app.main.stock.sub_startegy.feature.boll_feature import BollFeature
@@ -47,7 +48,7 @@ def get_stock_status(from_date, to_date, data_list=None, codes=None, code_name_m
     if code_name_map is None:
         code_name_map = stock_dao.get_code_name_map()
 
-    sub_st = [ShortTermFeature, ShapeFeature, BollFeature,EarningRateFeature,BoxType, WilliamsFeature]
+    sub_st = [PriceMovementFeature,ShortTermFeature, ShapeFeature, BollFeature,EarningRateFeature,BoxType, WilliamsFeature]
     # sub_st = [BoxType]
     kwargs = {}
 
@@ -87,7 +88,7 @@ if __name__ == "__main__":
     from_date = to_date - timedelta(days=600)
 
     for key in code_name_map.keys():
-        companies = get_stock_status(from_date, to_date, data_list=None, codes=['600199'], code_name_map=code_name_map)
+        companies = get_stock_status(from_date, to_date, data_list=None, codes=['601398'], code_name_map=code_name_map)
         print(companies)
     # stock_dao.dump_stock_feature(companies, to_date)
 

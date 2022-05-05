@@ -54,6 +54,10 @@ ma10_upon_max = "ma10_upon_max"
 wr_6 = "wr_6"
 wr_10 = "wr_10"
 
+# 涨跌中位数
+up_median = "up_median"
+down_median = "down_median"
+
 increase_avg_rate_5 = "increase_avg_rate_5"
 increase_avg_rate_10 = "increase_avg_rate_10"
 increase_avg_rate_20 = "increase_avg_rate_20"

@@ -14,7 +14,7 @@ from app.main.stock.dao import k_line_dao
 """
 
 
-def run(from_date, to_date, data, main_st,sub_st, code, name, **kwargs):
+def run(from_date, to_date, data, main_st, sub_st, code, name, **kwargs):
     """
 
     :param from_date: 开始时间
@@ -32,21 +32,20 @@ def run(from_date, to_date, data, main_st,sub_st, code, name, **kwargs):
     count = 1
     sub_st_instance = [st(**kwargs) for st in sub_st]
 
-
     timeline_limit = kwargs.get("timeline_limit", 10)
 
     if isinstance(data, btfeeds.PandasData):
         data_feed = data
     else:
         original = pd.DataFrame(data)
-        df = original[['date', 'open', 'high', 'low', 'close', 'volume']]
+        df = original[['date', 'open', 'high', 'low', 'close', 'volume', 'prev_close']]
         df = df.set_index("date", drop=True)
 
         if len(df) <= timeline_limit:
             logging.info("{} may not have sma5".format(kwargs.get("timeline_limit", 10), code))
             # return None
 
-        data_feed = btfeeds.PandasData(dataname=df, timeframe=bt.TimeFrame.Days)
+        data_feed = PandasData_more(dataname=df, timeframe=bt.TimeFrame.Days)
     cerebro.adddata(data_feed, name=code)  # 通过 name 实现数据集与股票的一一对应
 
     company = Company(code,
@@ -61,8 +60,17 @@ def run(from_date, to_date, data, main_st,sub_st, code, name, **kwargs):
     # 实例化 cerebro
     # print('开始拥有的金额为: %.2f' % cerebro.broker.getvalue())
 
-    cerebro.addstrategy(main_st,from_date=from_date,to_date=to_date, company=company,code=code,name=name, sub_st=sub_st, **kwargs)
+    cerebro.addstrategy(main_st, from_date=from_date, to_date=to_date, company=company, code=code, name=name,
+                        sub_st=sub_st, **kwargs)
     cerebro.run()
     # cerebro.plot(style='bar')
     # [k for k, v in house.items() if v['sma5_up_count'] >= 2]
     return company
+
+
+class PandasData_more(bt.feeds.PandasData):
+    lines = ('prev_close',)  # 要添加的线
+    # 设置 line 在数据源上的列位置
+    params = (
+        ('prev_close', -1),
+    )
