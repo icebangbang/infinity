@@ -56,11 +56,12 @@ def baotuan_analysis():
     set.insert_many(storage)
 
 
-def market_status_analysis(date=datetime.now()):
+def market_status_analysis(date=None):
     """
     涨跌情况分析
     :return:
     """
+    date = datetime.now() if date is None else date
     if date_util.is_workday(date) is False: return
     now = date_util.get_start_of_day(date)
     stocks = stock_dao.get_all_stock(dict(code=1, name=1, _id=0))
