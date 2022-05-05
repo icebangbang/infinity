@@ -63,6 +63,7 @@ def market_status_analysis(date=None):
     """
     date = datetime.now() if date is None else date
     if date_util.is_workday(date) is False: return
+    if date.hour >=15: return
     now = date_util.get_start_of_day(date)
     stocks = stock_dao.get_all_stock(dict(code=1, name=1, _id=0))
     st_stock = {stock['code']: stock['name'] for stock in stocks if "ST" in stock['name']}
