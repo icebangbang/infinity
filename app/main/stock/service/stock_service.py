@@ -127,7 +127,7 @@ def stock_remind():
         name = query['name']  # 指标集名称
         msg_template = query['msg_template']
         request_body = json.loads(query['body'])
-        request_body['date'] = '2022-04-29'
+        # request_body['date'] = '2022-04-29'
 
         result = stock_search_service.comprehensive_search(request_body)
         if result['size'] == 0: return
