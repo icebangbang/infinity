@@ -121,6 +121,9 @@ def sync_stock_ind(codes, task_wrapper: TaskWrapper = None):
 
 
 def stock_remind():
+    now = datetime.now()
+    if now.hour >=15 and now.minute >=30:
+        return
     query_store = db["ind_query_store"]
     query_list = list(query_store.find({"in_use": 1}))
     day_span = 5
