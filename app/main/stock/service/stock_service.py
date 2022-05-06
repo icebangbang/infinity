@@ -165,7 +165,7 @@ def stock_remind():
         dingtalk_util.send_msg(msg)
 
         for board in boards_in_front:
-            in_time = 0
+            in_time = 1
             base = start
             for i in range(day_span):
                 base = date_util.add_and_get_work_day(base, 1)
