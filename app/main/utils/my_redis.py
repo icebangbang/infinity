@@ -12,10 +12,10 @@ class RedisDBConfig:
         DBID = app.config['REDIS_DB_ID']
         PASSWORD = app.config['REDIS_PASSWORD']
     else:
-        HOST = '10.10.10.200'
-        PORT = 16379
-        DBID = 13
-        PASSWORD = '123'
+        HOST = '39.105.104.215'
+        PORT = 30004
+        DBID = 1
+        PASSWORD = 'ironBackRedis123'
 
 
 def operator_status(func):
@@ -72,6 +72,13 @@ class RedisCache(object):
         set data with (key, value)
         """
         return self._connection.hgetall(key)
+
+    @operator_status
+    def hget(self, key, skey):
+        """
+        set data with (key, value)
+        """
+        return self._connection.hget(key, skey)
 
     @operator_status
     def get_data(self, key):
@@ -163,6 +170,7 @@ class RedisCache(object):
 def get(key):
     return RedisCache().get_data(key)
 
+
 def get_bool(key):
     r = RedisCache().get_data(key)
     if r is not None: return json.loads(r.lower())
@@ -184,6 +192,10 @@ def hset(key, hkey, value):
 
 def hget_all(key):
     return RedisCache().hget_all(key)
+
+
+def hget(key, skey):
+    return RedisCache().hget(key, skey)
 
 
 def delete(*key):

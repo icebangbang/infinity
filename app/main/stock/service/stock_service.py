@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 import pandas as pd
+from app.main.utils import my_redis
 
 from app.main.stock import constant
 from app.main.stock.dao import stock_dao, k_line_dao
@@ -122,13 +123,38 @@ def sync_stock_ind(codes, task_wrapper: TaskWrapper = None):
 def stock_remind():
     query_store = db["ind_query_store"]
     query_list = list(query_store.find({"in_use": 1}))
+    day_span = 5
     # name,params
     for query in query_list:
         name = query['name']  # 指标集名称
         msg_template = query['msg_template']
         request_body = json.loads(query['body'])
-        # request_body['date'] = '2022-04-29'
+        origin_date = request_body['date']
+        origin_until = request_body['until']
+        start, now = date_util.get_work_day(datetime.now(), day_span+1)
+        latest_day, now = date_util.get_work_day(now, 1)
+        # 回溯前几天的行情概览,将出现的板块加入缓存中
 
+        latest_boards = None
+        my_redis.delete("good_board_in_history")
+        # latest_boards = my_redis.hget("good_board_in_history", date_util.date_time_to_str(start, "%Y-%m-%d"), )
+
+        if latest_boards is None:
+            base = start
+            for i in range(day_span):
+                base = date_util.add_and_get_work_day(base,1)
+                dt = date_util.date_time_to_str(base, "%Y-%m-%d")
+                request_body['date'] = dt
+                request_body['until'] = dt
+                result = stock_search_service.comprehensive_search(request_body)
+                board_counter = result['counter']
+                boards_in_front = list(board_counter.keys())[0:10]
+                my_redis.hset("good_board_in_history", dt, json.dumps(boards_in_front, ensure_ascii=False))
+                # n 天过期
+                my_redis.expire("good_board_in_history", day_span * 24 * 60 * 60 * 1000)
+
+        request_body['date'] = origin_date
+        request_body['until'] = origin_until
         result = stock_search_service.comprehensive_search(request_body)
         if result['size'] == 0: return
         board_counter = result['counter']
@@ -139,8 +165,17 @@ def stock_remind():
         dingtalk_util.send_msg(msg)
 
         for board in boards_in_front:
+            in_time = 0
+            base = start
+            for i in range(day_span):
+                base = date_util.add_and_get_work_day(base, 1)
+                boards_json = my_redis.hget("good_board_in_history",
+                                            date_util.date_time_to_str(base, "%Y-%m-%d"))
+                boards_of_history = json.loads(boards_json)
+                if board in boards_of_history:
+                    in_time = in_time + 1
             count = board_counter[board]
-            content = "{}({})".format(board, count)
+            content = "{}({})({})".format(board, count,in_time)
             boards_in_front_fmt.append(content)
         msg = '[板块提醒]前十板块:{}'.format(",".join(boards_in_front_fmt))
 
@@ -149,14 +184,17 @@ def stock_remind():
             stock_detail_list = result['detail']
             stocks_in_front = []
             count = 0
+            # 历史出现次数
+            in_time = 0
             for stock_detail in stock_detail_list:
                 if count >= 10:
                     break
 
                 boards_of_stock = stock_detail['boards']
                 if board in boards_of_stock:
-                    stocks_in_front.append("{}({})".format(stock_detail['name'],stock_detail['rate']))
                     count = count + 1
+                    stocks_in_front.append("{}({})".format(stock_detail['name'], stock_detail['rate']))
+
             msg = '[个股提醒]{}前十个股:{}'.format(board, ",".join(stocks_in_front[0:10]))
             time.sleep(6)
             resp = dingtalk_util.send_msg(msg)

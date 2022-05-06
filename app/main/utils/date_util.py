@@ -89,6 +89,22 @@ def get_work_day(now, offset):
 
     return get_start_of_day(now - timedelta(days=offset)), now
 
+def add_and_get_work_day(now, offset):
+    """
+    正推工作日
+    :param now:
+    :param offset:
+    :return:
+    """
+    i = 1
+    while i <= offset:
+        t = now + timedelta(days=i)
+        if is_workday(t) is False or is_weekend(t):
+            offset = offset + 1
+        i = i + 1
+
+    return get_start_of_day(now + timedelta(days=offset))
+
 
 def if_workday(dt):
     '''
