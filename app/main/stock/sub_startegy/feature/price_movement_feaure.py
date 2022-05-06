@@ -34,13 +34,17 @@ class PriceMovementFeature(SubST):
         try:
             prev_close = data.prev_close.get(ago=0, size=len(data))
             close = data.close.get(ago=0, size=len(data))
+            volume = data.volume.get(ago=0, size=len(data))
+
             rate_list = list(map(lambda x: round((x[0] - x[1]) / x[1] * 100, 2), zip(close, prev_close)))
             up_rate = [ rate for rate in rate_list if rate >=0]
             down_rate = [ rate for rate in rate_list if rate <0]
             up_median = numpy.median(up_rate)
             down_median = numpy.median(down_rate)
+            vol_median = numpy.median(volume)
 
             company.set(constant.up_median,up_median)
             company.set(constant.down_median,down_median)
+            company.set(constant.vol_median,vol_median)
         except Exception as e:
             logging.info(e, exc_info=1)

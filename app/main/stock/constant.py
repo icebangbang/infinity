@@ -58,6 +58,8 @@ wr_10 = "wr_10"
 up_median = "up_median"
 down_median = "down_median"
 
+vol_median = "vol_median"
+
 increase_avg_rate_5 = "increase_avg_rate_5"
 increase_avg_rate_10 = "increase_avg_rate_10"
 increase_avg_rate_20 = "increase_avg_rate_20"
