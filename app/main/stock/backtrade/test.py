@@ -144,8 +144,6 @@ class test_two_ma_strategy(bt.Strategy):
 
 cerebro = bt.Cerebro()
 # cerebro.broker = bt.brokers.BackBroker(shortcash=True)  # 0.5%
-data_root = "/home/yun/data/stock/day/"
-file_list = sorted(os.listdir(data_root))
 params = dict(
 
     fromdate=datetime.datetime(2005, 1, 4),
