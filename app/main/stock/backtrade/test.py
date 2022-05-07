@@ -133,7 +133,7 @@ cerebro = bt.Cerebro()
 #     openinterest=-1)
 
 data_list = k_line_dao.get_k_line_data(datetime.datetime(2005, 1, 4),
-                                       datetime.datetime(2020, 7, 31), codes=['300763'])
+                                       datetime.datetime(2021, 9, 7), codes=['300763'])
 code_name_map = stock_dao.get_code_name_map()
 data_df = pd.DataFrame(data_list)
 
@@ -164,7 +164,8 @@ returns, positions, transactions, gross_lev = portfolio_stats.get_pf_items()
 returns.index = returns.index.tz_convert(None)
 
 import quantstats
-# quantstats.reports.html(returns, output='stats.html', title='锦浪科技')
-quantstats.reports.plots(returns)
+# benchmark 指定为沪指,该数据从雅虎上拉取
+quantstats.reports.html(returns, benchmark='000001.SS', output='stats.html', title='锦浪科技')
+# quantstats.reports.plots(returns)
 
 
