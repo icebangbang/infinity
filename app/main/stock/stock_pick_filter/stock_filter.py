@@ -53,6 +53,7 @@ def get_stock_status(base_date, offset, data_list=None, codes=None, code_name_ma
     # data = data.set_index("date", drop=False)
 
     data_df = pd.DataFrame(input)
+    data_df = data_df.set_index("date", drop=False)
 
     sub_st = [PriceMovementFeature,ShortTermFeature, ShapeFeature, BollFeature,EarningRateFeature,BoxType, WilliamsFeature]
     # sub_st = [BoxType]
