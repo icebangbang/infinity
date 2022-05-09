@@ -154,7 +154,7 @@ def stock_remind():
                 request_body['until'] = dt
                 result = stock_search_service.comprehensive_search(request_body)
                 board_counter = result['counter']
-                boards_in_front = list(board_counter.keys())[0:10]
+                boards_in_front = list(board_counter.keys())[0:20]
                 my_redis.hset("good_board_in_history", dt, json.dumps(boards_in_front, ensure_ascii=False))
                 # n 天过期
                 my_redis.expire("good_board_in_history", day_span * 24 * 60 * 60 * 1000)
@@ -164,7 +164,7 @@ def stock_remind():
         result = stock_search_service.comprehensive_search(request_body)
         if result['size'] == 0: return
         board_counter = result['counter']
-        boards_in_front = list(board_counter.keys())[0:10]
+        boards_in_front = list(board_counter.keys())[0:20]
         boards_in_front_fmt = []
 
         msg = '提醒-------------------------开始一轮推送--------------------------'
@@ -183,7 +183,7 @@ def stock_remind():
             count = board_counter[board]
             content = "{}({})({})".format(board, count,in_time)
             boards_in_front_fmt.append(content)
-        msg = '[板块提醒]前十板块:{}'.format(",".join(boards_in_front_fmt))
+        msg = '[板块提醒]前二十板块:{}'.format(",".join(boards_in_front_fmt))
 
         dingtalk_util.send_msg(msg)
         for board in boards_in_front:
