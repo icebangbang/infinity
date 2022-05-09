@@ -54,7 +54,7 @@ def get_stock_status(base_date, offset, data_list=None, codes=None, code_name_ma
 
     companies = list()
     for code, group in data_df.groupby("code"):
-        logging.info("feed {} to cerebro: {}".format(code, date_util.dt_to_str(base_date)))
+        logging.info("feed {} to cerebro: {}, size: {}".format(code, date_util.dt_to_str(base_date),len(data_list)))
         if code in code_name_map.keys():
             name = code_name_map[code]
         else:
@@ -84,11 +84,11 @@ def get_stock_status(base_date, offset, data_list=None, codes=None, code_name_ma
 
 if __name__ == "__main__":
     code_name_map = stock_dao.get_code_name_map()
-    base_date = datetime(2009, 3, 4)
+    base_date = datetime(2022, 5, 9)
     offset = -252
 
     for key in code_name_map.keys():
-        companies = get_stock_status(base_date, offset, data_list=None, codes=['600556'], code_name_map=code_name_map)
+        companies = get_stock_status(base_date, offset, data_list=None, codes=['300763'], code_name_map=code_name_map)
         print(companies)
     # stock_dao.dump_stock_feature(companies, to_date)
 
