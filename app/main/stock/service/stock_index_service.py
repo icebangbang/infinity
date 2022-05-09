@@ -9,8 +9,9 @@ from app.main.stock.dao import k_line_dao
 
 id_maps = {"sh000001": {"000001": 1, "code": "000001", "belong": "sh", "name": "上证指数"},
            "zs399001": {"399001": 0, "code": "399001", "belong": "sz", "name": "深证指数"},
+           "zs399106": {"399106": 0, "code": "399106", "belong": "sz", "name": "深证综指"},
            "zs399006": {"399006": 0, "code": "399006", "belong": "sz", "name": "创业板指数"},
-           # "BDI": {"BDI": 100, "code": "BDI", "belong": "BDI", "name": "波罗的海bdi指数"}
+           "BDI": {"BDI": 100, "code": "BDI", "belong": "BDI", "name": "波罗的海bdi指数"}
            }
 
 
@@ -48,3 +49,4 @@ def clear_index_data():
 def get_index_k_line(from_date, to_date):
     daily_price = pd.DataFrame(k_line_dao.get_index_kline_data(from_date, to_date))
     return daily_price
+

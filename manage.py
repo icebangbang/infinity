@@ -12,4 +12,4 @@ from app.celery_worker import celery
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8191, debug=True, use_reloader=False, threaded=True)
+    app.run(host='0.0.0.0', port=8192, debug=True, use_reloader=False, threaded=True)

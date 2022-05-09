@@ -4,7 +4,6 @@ from datetime import datetime
 
 from app.main.stock.service import board_service, stock_service, stock_index_service
 from app.main.stock.sub_startegy.up_sma import UpSma
-from app.main.stock.sub_startegy.trend.term import MediumLongTerm
 
 """
 中长期(Medium&LongTerm)指数强弱判断
@@ -15,7 +14,7 @@ to_date = datetime(2021, 9, 13)
 data = stock_index_service.get_index_k_line(from_date, to_date)
 data = data.set_index("date", drop=False)
 
-sub_st = [MediumLongTerm]
+sub_st = []
 kwargs = {"ma_period": 17,
           "ma_match_num": 17,
           "up_mid_bolling_period": 1}

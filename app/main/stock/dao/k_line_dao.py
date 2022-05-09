@@ -144,7 +144,7 @@ def get_k_line_data(
 def get_k_line_data_by_offset(
         base_day: datetime,
         offset: int,
-        level='day', code=None) -> List:
+        level='day', code=None,reverse_result=True) -> List:
     """
     因为有工作日,停牌等无法交易的日期,所以用时间范围筛选,可能会使得筛选的数据无法达到预期
     :param start_day:
@@ -171,7 +171,7 @@ def get_k_line_data_by_offset(
 
     result = list(query)
 
-    if sort == -1:
+    if reverse_result:
         result.reverse()
 
     return result

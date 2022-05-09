@@ -15,8 +15,8 @@ def fetch_index_day_level(symbol, start_date, end_date, klt="101",id_map=None):
                            klt=klt,
                            code_id_dict=id_map)
 
-    data = pd.DataFrame(data[['日期', '开盘', '收盘', '最高', '最低', '成交量']])
-    data.columns = ['date', 'open', 'close', 'high', 'low', 'volume']
+    data = pd.DataFrame(data[['日期', '开盘', '收盘', '最高', '最低', '成交量','最近收盘']])
+    data.columns = ['date', 'open', 'close', 'high', 'low', 'volume','prev_close']
     data['klt'] = klt
     data['code'] = symbol
     data['date'] = pd.to_datetime(data['date'], format='%Y-%m-%d')

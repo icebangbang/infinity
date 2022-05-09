@@ -12,6 +12,13 @@ from typing import List
 from itertools import groupby
 import collections
 
+@rest.route("/stock/deviation", methods=['get'])
+def offset_cal():
+    code = request.args.get("code")
+    result =  stock_service.cal_stock_deviation(code,10)
+
+    return restful.response(result)
+
 
 @rest.route("/stock/sync/filter", methods=['post'])
 def stock_pick():
@@ -73,54 +80,8 @@ def get_stock_result(params) -> List[dict]:
 
     date = date_util.parse_date_time(params.get("date"), fmt="%Y-%m-%d")
     date = date if date is not None else date_util.get_start_of_day(datetime.now())
-    gap = params.get("gap", None)
-    up_shadow_rate = params.get("up_shadow_rate", None)
-    rate = params.get("rate", None)  # ["$eq",0]
-    close_rate_5 = params.get("close_rate_5", None)  # ["$eq",0]
-    entity_length = params.get("entity_length", None)  # ["$gt",0] k线实体
-    close = params['custom'].get("close", None)  # ["$gt",0]
-    sma_down = params.get("sma_down", None)  # 均线空头
-    sma_up = params.get("sma_up", None)  # 均线空头
-    volume_up_10 = params.get("volume_up_10", None)
-    volume_gt_5 = params.get("volume_gt_5", None)
-    volume_lt_5 = params.get("volume_lt_5", None)
-    volume_down_5 = params.get("volume_down_5", None)
-    ma5_upon_20 = params.get("ma5_upon_20", None)
-    ma10_upon_20 = params.get("ma10_upon_20", None)
-    ma5_upon_10 = params.get("ma5_upon_10", None)
-    ma10_upon_10 = params.get("ma10_upon_10", None)
-    ma5_upon_5 = params.get("ma5_upon_5", None)
-    ma10_upon_5 = params.get("ma10_upon_5", None)
-    ma5_upon_max = params.get("ma5_upon_max", None)
 
     match = {"date": date, "$expr": {"$and": []}}
-
-    '''
-    if volume_up_10 is not None:
-        match["$expr"]["$and"].append(
-            {"$gte": ["$features.volume", {"$multiply": ["$features.vol_avg_10", volume_up_10]}
-                      ]})
-    if volume_gt_5 is not None:
-        match["$expr"]["$and"].append({"$gte": ["$features.volume", {"$multiply": ["$features.vol_avg_5", volume_gt_5]}
-                                                ]})
-    if volume_lt_5 is not None:
-        match["$expr"]["$and"].append({"$lte": ["$features.volume", {"$multiply": ["$features.vol_avg_5", volume_lt_5]}
-                                                ]})
-
-    if volume_down_5 is not None:
-        match["$expr"]["$and"].append(
-            {"$lte": ["$features.volume", {"$multiply": ["$features.vol_avg_5", volume_down_5]}
-                      ]})
-                      
-    if sma_down:
-        match["$expr"]["$and"].append({"$gt": ["$features.ma60", "$features.ma30"]})
-        match["$expr"]["$and"].append({"$gt": ["$features.ma30", "$features.ma20"]})
-        match["$expr"]["$and"].append({"$gt": ["$features.ma20", "$features.ma10"]})
-    if sma_up:
-        match["$expr"]["$and"].append({"$lt": ["$features.ma60", "$features.ma30"]})
-        match["$expr"]["$and"].append({"$lt": ["$features.ma30", "$features.ma20"]})
-        match["$expr"]["$and"].append({"$lt": ["$features.ma20", "$features.ma10"]})
-    '''
 
     condition = stock_feature.aggregate([
         {"$match": match},

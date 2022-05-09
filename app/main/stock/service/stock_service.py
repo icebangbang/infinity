@@ -1,14 +1,16 @@
 import logging
 from datetime import datetime, timedelta
+from decimal import Decimal
+
 import pandas as pd
 from app.main.utils import my_redis
 
 from app.main.stock import constant
-from app.main.stock.dao import stock_dao, k_line_dao
+from app.main.stock.dao import stock_dao, k_line_dao, index_dao
 from app.main.stock.stock_pick_filter import stock_filter
 from app.main.utils import date_util
 from app.main.stock.stock_kline import id_map
-from app.main.stock.service import search_udf_service, stock_search_service
+from app.main.stock.service import search_udf_service, stock_search_service, stock_index_service
 import akshare as ak
 from app.main.db.mongo import db
 from app.main.stock.task_wrapper import TaskWrapper
@@ -122,7 +124,7 @@ def sync_stock_ind(codes, task_wrapper: TaskWrapper = None):
 
 def stock_remind():
     now = datetime.now()
-    if now.hour >=15 and now.minute >=30:
+    if now.hour >= 15 and now.minute >= 30:
         return
     if date_util.is_workday(now) is False or date_util.is_weekend(now):
         return
@@ -137,7 +139,7 @@ def stock_remind():
         request_body = json.loads(query['body'])
         origin_date = request_body['date']
         origin_until = request_body['until']
-        start, now = date_util.get_work_day(datetime.now(), day_span+1)
+        start, now = date_util.get_work_day(datetime.now(), day_span + 1)
         latest_day, now = date_util.get_work_day(now, 1)
         # 回溯前几天的行情概览,将出现的板块加入缓存中
 
@@ -148,7 +150,7 @@ def stock_remind():
         if latest_boards is None:
             base = start
             for i in range(day_span):
-                base = date_util.add_and_get_work_day(base,1)
+                base = date_util.add_and_get_work_day(base, 1)
                 dt = date_util.date_time_to_str(base, "%Y-%m-%d")
                 request_body['date'] = dt
                 request_body['until'] = dt
@@ -181,7 +183,7 @@ def stock_remind():
                 if board in boards_of_history:
                     in_time = in_time + 1
             count = board_counter[board]
-            content = "{}({})({})".format(board, count,in_time)
+            content = "{}({})({})".format(board, count, in_time)
             boards_in_front_fmt.append(content)
         msg = '[板块提醒]前二十板块:{}'.format(",".join(boards_in_front_fmt))
 
@@ -202,7 +204,7 @@ def stock_remind():
                     stocks_in_front.append("{}({})".format(stock_detail['name'], stock_detail['rate']))
 
             msg = '[个股提醒]{}前十个股:{}'.format(board, ",".join(stocks_in_front[0:10]))
-            time.sleep(6)
+            time.sleep(3.5)
             resp = dingtalk_util.send_msg(msg)
 
         msg = '提醒-------------------------结束一轮推送--------------------------'
@@ -227,6 +229,42 @@ def stock_remind():
         #     json=d, headers=headers)
 
 
+def cal_stock_deviation(code, offset_day):
+    """
+    计算个股n日内偏离值
+    :param code:
+    :param offset_day: n日内偏离
+    :return:
+    """
+    now = datetime.now()
+    start_time = date_util.get_start_of_day(now)
+    k_line_list = k_line_dao.get_k_line_data_by_offset(start_time, -offset_day, code=code,reverse_result=False)
+    deviation_value = 0
+
+    result = {}
+    for index,k_line in enumerate(k_line_list):
+        close = k_line['close']
+        prev_close = k_line['prev_close']
+        rate = Decimal((close - prev_close) / prev_close * 100).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP")
+
+        index_k_line = index_dao.get_index_data_by_offset(k_line['date'],-1,'day',"399106")[0]
+
+        index_close = index_k_line['close']
+        index_prev_close = index_k_line['prev_close']
+        index_rate = Decimal((index_close - index_prev_close) / index_prev_close * 100).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP")
+
+        current_day_deviation = rate - index_rate
+        deviation_value = current_day_deviation+deviation_value
+
+        if index == len(k_line_list)-2:
+            result['近{}日偏离值'.format(index+1)] = deviation_value
+    result['近{}日偏离值'.format(offset_day)] = deviation_value
+
+    return result
+
+
+
+
 if __name__ == "__main__":
     # stocks = stock_dao.get_all_stock(dict(code=1))
     # code_name_map = stock_dao.get_code_name_map()
@@ -234,8 +272,8 @@ if __name__ == "__main__":
     # from_time = to_time - timedelta(739)
     # stock_filter.get_stock_status(from_time, to_time)
     # publish(3, 100)
-    stock_remind()
-    msg = "提醒:{stock_code}[{code}]在出现底部反转{inf_l_point_value}[{inf_l_point_date}],当前价格突破前期小高位{current_max_high_type},"
+    # stock_remind()
+    cal_stock_offset("000722",10)
 
     # d = {"stock_code": "1", "code": "2",
     #         "inf_l_point_value": "3", "inf_l_point_date": "4",
