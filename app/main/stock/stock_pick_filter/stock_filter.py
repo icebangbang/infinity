@@ -32,21 +32,27 @@ def get_stock_status(base_date, offset, data_list=None, codes=None, code_name_ma
     :return:
     """
 
-    if data_list is None:
-        data_list = k_line_dao.get_k_line_data_by_offset(base_date, offset, codes=codes)
-        if len(data_list) == 0:
-            logging.info("datas from {} offset {} of {} is empty".format(
-                date_util.dt_to_str(base_date),
-                offset,
-                codes
-            ))
-            return None
-
-        data_df = pd.DataFrame(data_list)
-        # print(len(data_list),codes)
-    # data = data.set_index("date", drop=False)
     if code_name_map is None:
         code_name_map = stock_dao.get_code_name_map()
+
+    input = []
+    if data_list is None:
+        for code in codes:
+            data_list = k_line_dao.get_k_line_data_by_offset(base_date, offset, code=code)
+            if len(data_list) == 0:
+                logging.info("datas from {} offset {} of {} is empty".format(
+                    date_util.dt_to_str(base_date),
+                    offset,
+                    code
+                ))
+                continue
+            input.extend(data_list)
+    else:
+        input = data_list
+        # print(len(data_list),codes)
+    # data = data.set_index("date", drop=False)
+
+    data_df = pd.DataFrame(input)
 
     sub_st = [PriceMovementFeature,ShortTermFeature, ShapeFeature, BollFeature,EarningRateFeature,BoxType, WilliamsFeature]
     # sub_st = [BoxType]

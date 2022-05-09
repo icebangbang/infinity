@@ -144,7 +144,7 @@ def get_k_line_data(
 def get_k_line_data_by_offset(
         base_day: datetime,
         offset: int,
-        level='day', codes=None) -> List:
+        level='day', code=None) -> List:
     """
     因为有工作日,停牌等无法交易的日期,所以用时间范围筛选,可能会使得筛选的数据无法达到预期
     :param start_day:
@@ -162,8 +162,8 @@ def get_k_line_data_by_offset(
     if offset < 0:
         query_set["date"]={"$lte": base_day}
         sort=-1
-    if codes is not None:
-        query_set['code'] = {"$in": codes}
+    if code is not None:
+        query_set['code'] = code
 
     query = my_set \
         .find(query_set) \

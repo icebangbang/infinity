@@ -5,8 +5,8 @@
 
 # sh remote_local_build.sh ~/Work/pem/ironmansre_cdh.pem offline offline /home/ironmansre/infinity [6,7,8,9,10,11,12,13,14,15,16] zz_lf x
 
-# sh remote_local_build.sh ~/Work/pem/xzhh.pem test test2 ~/infinity [6,7,8,9,10,11] zz_lf xxx
-# sh remote_local_build.sh ~/Work/pem/xzhh.pem test test ~/infinity [6,7,8,9,10,11] zz_lf xxx
+# sh remote_local_build.sh ~/Work/pem/xzhh.pem test test2 /root/infinity [6,7,8,9,10,11] zz_lf xxx
+# sh remote_local_build.sh ~/Work/pem/xzhh.pem test test /root/infinity [6,7,8,9,10,11] zz_lf xxx
 
 
 
