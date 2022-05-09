@@ -106,6 +106,11 @@ beat_schedule = {
             "task": "app.main.task.stock_task.sync_stock_k_line",  # 任务函数所在位置
             "schedule": 180,  # 定时每300秒执行一次
         },
+    'sync_index_data':
+        {  # 股票数据同步
+            "task": "app.main.task.stock_task.sync_index_data",  # 任务函数所在位置
+            "schedule": 30,  # 定时每300秒执行一次
+        },
     'stock_month_data_sync':
         {  # 股票月线数据同步
             "task": "app.main.task.stock_task.submit_stock_month_task",  # 任务函数所在位置

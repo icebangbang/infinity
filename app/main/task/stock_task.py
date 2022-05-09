@@ -5,7 +5,7 @@ import logging
 from datetime import datetime, timedelta
 import time
 
-from app.main.stock.job import sync_stock_indicator
+from app.main.stock.job import sync_stock_indicator, sync_index_kline
 from app.main.stock.task_wrapper import TaskWrapper
 from app.main.task import task_constant
 from app.main.utils import date_util
@@ -262,3 +262,15 @@ def submit_stock_ind_task(self):
 def sync_stock_ind(self, codes, task_id, expect):
     task_wrapper = TaskWrapper(task_id, task_constant.TASK_SYNC_STOCK_IND, expect)
     stock_service.sync_stock_ind(codes, task_wrapper)
+
+@celery.task(bind=True, base=MyTask, expire=1800)
+def sync_index_data(self):
+    """
+    同步大盘指标
+    :param self:
+    :param codes:
+    :param task_id:
+    :param expect:
+    :return:
+    """
+    sync_index_kline.sync()

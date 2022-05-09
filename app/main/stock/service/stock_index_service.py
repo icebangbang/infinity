@@ -38,6 +38,7 @@ def sync_index_data(code, start_date, end_date, klt="101"):
 
 def _dump_index_data(records: List):
     my_set = db['stock_index_k_line_day']
+    my_set.drop()
     my_set.insert_many(records)
 
 
