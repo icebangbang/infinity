@@ -208,7 +208,7 @@ def submit_stock_feature(self, to_date=None, codes=None):
 
     # from_date_timestamp = int(time.mktime(from_date.timetuple()))
     base_timestamp = int(time.mktime(to_date.timetuple()))
-    offset = -252
+    offset = "-252"
 
     if codes is None:
         stocks = stock_dao.get_all_stock(dict(code=1))
@@ -229,7 +229,7 @@ def sync_stock_feature(self, base_date, offset, codes, name_dict):
     if isinstance(base_date, int):
         # from_date = datetime.fromtimestamp(int(from_date))
         base_date = datetime.fromtimestamp(int(base_date))
-    companies = stock_filter.get_stock_status(base_date, offset, codes=codes, code_name_map=name_dict)
+    companies = stock_filter.get_stock_status(base_date, int(offset), codes=codes, code_name_map=name_dict)
     if companies is not None:
         stock_dao.dump_stock_feature(companies, base_date)
 
