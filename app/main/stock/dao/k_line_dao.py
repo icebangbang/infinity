@@ -35,8 +35,8 @@ def dump_k_line(data, level='day'):
     return my_set.insert(data)
 
 
-def update_k_line(code, data,level="day"):
-    db_name = "k_line_"+level
+def update_k_line(code, data, level="day"):
+    db_name = "k_line_" + level
     my_set = db[db_name]
 
     for d in data:
@@ -141,6 +141,42 @@ def get_k_line_data(
     return list(query)
 
 
+def get_k_line_data_by_offset(
+        base_day: datetime,
+        offset: int,
+        level='day', codes=None) -> List:
+    """
+    因为有工作日,停牌等无法交易的日期,所以用时间范围筛选,可能会使得筛选的数据无法达到预期
+    :param start_day:
+    :param end_day:
+    :param level:
+    :return:
+    """
+    db_name = "k_line_" + level
+    my_set = db[db_name]
+    query_set = {}
+    sort = -1
+    if offset >= 0:
+        query_set["date"]={"$gte": base_day}
+        sort=1
+    if offset < 0:
+        query_set["date"]={"$lte": base_day}
+        sort=-1
+    if codes is not None:
+        query_set['code'] = {"$in": codes}
+
+    query = my_set \
+        .find(query_set) \
+        .sort("date", sort).limit(abs(offset))
+
+    result = list(query)
+
+    if sort == -1:
+        result.reverse()
+
+    return result
+
+
 def get_index_kline_data(
         start_day: datetime,
         end_day: datetime,
@@ -178,8 +214,8 @@ def get_board_k_line_data(
             symbol=name,
             beg=start_day,
             end=end_day)
-    data = pd.DataFrame(data[['日期', '开盘', '收盘', '最高', '最低', '成交量','成交额']])
-    data.columns = ['date', 'open', 'close', 'high', 'low', 'volume','money']
+    data = pd.DataFrame(data[['日期', '开盘', '收盘', '最高', '最低', '成交量', '成交额']])
+    data.columns = ['date', 'open', 'close', 'high', 'low', 'volume', 'money']
     data['name'] = str(name)
     data['date'] = pd.to_datetime(data['date'], format='%Y-%m-%d')
     data['create_time'] = datetime.now()
@@ -187,6 +223,6 @@ def get_board_k_line_data(
 
 
 if __name__ == "__main__":
-    r = get_k_line_by_code(['300864'],
-                           limit=1,sort=-1)
+    r = get_k_line_data_by_offset(datetime(2009,3,4),
+                           offset=-251,codes=['600556'])
     print(r)

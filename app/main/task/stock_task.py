@@ -204,10 +204,11 @@ def submit_stock_feature(self, to_date=None, codes=None):
     #     return
 
     code_name_map = stock_dao.get_code_name_map()
-    from_date = to_date - timedelta(days=500)
+    # from_date = to_date - timedelta(days=500)
 
-    from_date_timestamp = int(time.mktime(from_date.timetuple()))
-    to_date_timestamp = int(time.mktime(to_date.timetuple()))
+    # from_date_timestamp = int(time.mktime(from_date.timetuple()))
+    base_timestamp = int(time.mktime(to_date.timetuple()))
+    offset = -252
 
     if codes is None:
         stocks = stock_dao.get_all_stock(dict(code=1))
@@ -217,20 +218,20 @@ def submit_stock_feature(self, to_date=None, codes=None):
         for i in range(0, len(codes), step):
             group = codes[i:i + step]
             name_dict = {code: code_name_map[code] for code in group}
-            sync_stock_feature.apply_async(args=[from_date_timestamp, to_date_timestamp, group, name_dict])
+            sync_stock_feature.apply_async(args=[base_timestamp, offset, group, name_dict])
     else:
         name_dict = {code: code_name_map[code] for code in codes}
-        sync_stock_feature.apply_async(args=[from_date_timestamp, to_date_timestamp, codes, name_dict])
+        sync_stock_feature.apply_async(args=[base_timestamp, offset, codes, name_dict])
 
 
 @celery.task(bind=True, base=MyTask, expires=36000)
-def sync_stock_feature(self, from_date, to_date, codes, name_dict):
-    if isinstance(from_date, int):
-        from_date = datetime.fromtimestamp(int(from_date))
-        to_date = datetime.fromtimestamp(int(to_date))
-    companies = stock_filter.get_stock_status(from_date, to_date, codes=codes, code_name_map=name_dict)
+def sync_stock_feature(self, base_date, offset, codes, name_dict):
+    if isinstance(base_date, int):
+        # from_date = datetime.fromtimestamp(int(from_date))
+        base_date = datetime.fromtimestamp(int(base_date))
+    companies = stock_filter.get_stock_status(base_date, offset, codes=codes, code_name_map=name_dict)
     if companies is not None:
-        stock_dao.dump_stock_feature(companies, to_date)
+        stock_dao.dump_stock_feature(companies, base_date)
 
 
 @celery.task(bind=True, base=MyTask, expire=1800)

@@ -14,7 +14,7 @@ from app.main.stock.dao import k_line_dao
 """
 
 
-def run(from_date, to_date, data, main_st, sub_st, code, name, **kwargs):
+def run(base_date, offset, data, main_st, sub_st, code, name, **kwargs):
     """
 
     :param from_date: 开始时间
@@ -60,7 +60,7 @@ def run(from_date, to_date, data, main_st, sub_st, code, name, **kwargs):
     # 实例化 cerebro
     # print('开始拥有的金额为: %.2f' % cerebro.broker.getvalue())
 
-    cerebro.addstrategy(main_st, from_date=from_date, to_date=to_date, company=company, code=code, name=name,
+    cerebro.addstrategy(main_st, base_date=base_date, offset=offset, company=company, code=code, name=name,
                         sub_st=sub_st, **kwargs)
     cerebro.run()
     # cerebro.plot(style='bar')

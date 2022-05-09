@@ -190,8 +190,11 @@ class ShortTermFeature(SubST):
         :return:
         """
         close = data.close[0]
+        size = len(data)
         days = [5, 10, 20, 30, 60, 120, 200, 250]
         for day in days:
+            # 数据量不足,不再计算
+            if size < day: continue
             highest = max(data.high.get(ago=-1, size=day))
             company.set("highest_{}".format(day), highest)
 

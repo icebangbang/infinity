@@ -125,7 +125,7 @@ beat_schedule = {
     },
     'get_stock_feature': {
         "task": "app.main.task.stock_task.submit_stock_feature",
-        "schedule": 360  # 每5分钟执行一次
+        "schedule": 120  # 每5分钟执行一次
     },
     'get_board_feature': {
         "task": "app.main.task.board_task.submit_board_feature",

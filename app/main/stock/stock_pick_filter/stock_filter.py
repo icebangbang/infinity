@@ -21,7 +21,7 @@ from app.main.utils import date_util
 """
 
 
-def get_stock_status(from_date, to_date, data_list=None, codes=None, code_name_map=None):
+def get_stock_status(base_date, offset, data_list=None, codes=None, code_name_map=None):
     """
 
     :param from_date: 开始时间
@@ -33,11 +33,11 @@ def get_stock_status(from_date, to_date, data_list=None, codes=None, code_name_m
     """
 
     if data_list is None:
-        data_list = k_line_dao.get_k_line_data(from_date, to_date, codes=codes)
+        data_list = k_line_dao.get_k_line_data_by_offset(base_date, offset, codes=codes)
         if len(data_list) == 0:
-            logging.info("datas from {} to {} of {} is empty".format(
-                date_util.dt_to_str(from_date),
-                date_util.dt_to_str(to_date),
+            logging.info("datas from {} offset {} of {} is empty".format(
+                date_util.dt_to_str(base_date),
+                offset,
                 codes
             ))
             return None
@@ -54,7 +54,7 @@ def get_stock_status(from_date, to_date, data_list=None, codes=None, code_name_m
 
     companies = list()
     for code, group in data_df.groupby("code"):
-        logging.info("feed {} to cerebro: {}".format(code, date_util.dt_to_str(to_date)))
+        logging.info("feed {} to cerebro: {}".format(code, date_util.dt_to_str(base_date)))
         if code in code_name_map.keys():
             name = code_name_map[code]
         else:
@@ -62,16 +62,16 @@ def get_stock_status(from_date, to_date, data_list=None, codes=None, code_name_m
 
         company = None
         try:
-            company = bt_runner.run(from_date, to_date,
+            company = bt_runner.run(base_date, offset,
                                     data=group, key="code",
                                     main_st=StrategyWrapper,
                                     sub_st=sub_st,
                                     code=code,
                                     name=name, **kwargs)
         except Exception as e:
-            logging.error("error from {} to {} of {}".format(
-                date_util.dt_to_str(from_date),
-                date_util.dt_to_str(to_date),
+            logging.error("error from {} offset {} of {}".format(
+                date_util.dt_to_str(base_date),
+                offset,
                 code
             ))
             logging.error(e, exc_info=1)
@@ -84,11 +84,11 @@ def get_stock_status(from_date, to_date, data_list=None, codes=None, code_name_m
 
 if __name__ == "__main__":
     code_name_map = stock_dao.get_code_name_map()
-    to_date = datetime(2022, 5, 6)
-    from_date = to_date - timedelta(days=600)
+    base_date = datetime(2009, 3, 4)
+    offset = -252
 
     for key in code_name_map.keys():
-        companies = get_stock_status(from_date, to_date, data_list=None, codes=['002474'], code_name_map=code_name_map)
+        companies = get_stock_status(base_date, offset, data_list=None, codes=['600556'], code_name_map=code_name_map)
         print(companies)
     # stock_dao.dump_stock_feature(companies, to_date)
 

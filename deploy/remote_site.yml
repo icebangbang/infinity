@@ -10,20 +10,20 @@
       shell: docker stop dao-celery-schedule-1
       args:
         chdir: "{{dest}}"
-      when: target == "test"
+      when: target != "test2"
       ignore_errors: yes
 
     - name: build schedule tar
       shell: docker build  -f ./CerelyScheduleDockerfile -t dao-celery-schedule:latest .
       args:
         chdir: "{{dest}}"
-      when: target == "test"
+      when: target != "test2"
 
     - name: run schedule job
       shell: docker run -d --privileged=true  -e "index=1"  -e "FLASK_ENV={{env}}" --name=dao-celery-schedule-1  --net=host --rm -it dao-celery-schedule:latest
       args:
         chdir: "{{dest}}"
-      when: target == "test"
+      when: target != "test2"
 
     - name: stop web servicec
       shell: docker stop dao
@@ -49,7 +49,7 @@
       ignore_errors: yes
     - name: stop indicator task service
       shell: docker stop dao-celery-{{item}}
-      with_items: [6,7,8,9,10,11]
+      with_items: "{{ind_item}}"
       ignore_errors: yes
 
     - name: start build task service
@@ -67,6 +67,6 @@
 
     - name: start indicator task service
       shell: docker run -d --privileged=true  -e "profiles={{env}}" --name=dao-celery-{{item}} -e "index={{item}}" -e "route=indicator" -e "FLASK_ENV={{env}}" -e "thread=20" --net=host --rm -it dao-celery:latest
-      with_items: [6,7,8,9,10,11]
+      with_items: "{{ind_item}}"
 
 
