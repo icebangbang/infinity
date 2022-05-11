@@ -54,7 +54,8 @@ class PriceMovementFeature(SubST):
         company.set(constant.vol_median, vol_median)
 
     def trade_money_median(self,data,company):
-        money = data.money.get(ago=0, size=len(data))
+        # 近十日成交金额中位数
+        money = data.money.get(ago=-1, size=10)
 
         money_median = numpy.median(money)
 

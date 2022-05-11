@@ -309,6 +309,26 @@ dict(
         default_comparator="gte",
         default_value=0,
         category="基础"
+    ),
+dict(
+        name="up_median",
+        desc="近一年涨幅中位数",
+        type="float",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=0,
+        category="基础"
+    ),
+dict(
+        name="money_median",
+        desc="近十日成交额中位数",
+        type="float",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=0,
+        category="基础"
     )
 
 ]
