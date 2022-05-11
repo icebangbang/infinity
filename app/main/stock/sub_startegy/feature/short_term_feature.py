@@ -96,7 +96,7 @@ class ShortTermFeature(SubST):
 
             self.avg_daily_increase(data, company)
             self.ma_position(data, company, ma5, ma10)
-            self.high_record(data, company)
+            # self.high_record(data, company)
 
             company.set(constant.ma5, ma5[0])
             company.set(constant.ma10, ma10[0])

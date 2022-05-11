@@ -57,6 +57,7 @@ wr_10 = "wr_10"
 # 涨跌中位数
 up_median = "up_median"
 down_median = "down_median"
+money_median = "money_median"
 
 vol_median = "vol_median"
 

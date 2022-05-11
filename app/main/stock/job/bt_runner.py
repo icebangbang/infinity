@@ -38,7 +38,7 @@ def run(base_date, offset, data, main_st, sub_st, code, name, **kwargs):
         data_feed = data
     else:
         original = pd.DataFrame(data)
-        df = original[['date', 'open', 'high', 'low', 'close', 'volume', 'prev_close']]
+        df = original[['date', 'open', 'high', 'low', 'close', 'volume','money','prev_close']]
         df = df.set_index("date", drop=True)
 
         if len(df) <= timeline_limit:
@@ -69,8 +69,9 @@ def run(base_date, offset, data, main_st, sub_st, code, name, **kwargs):
 
 
 class PandasData_more(bt.feeds.PandasData):
-    lines = ('prev_close',)  # 要添加的线
+    lines = ('prev_close','money')  # 要添加的线
     # 设置 line 在数据源上的列位置
     params = (
         ('prev_close', -1),
+        ('money', -1),
     )

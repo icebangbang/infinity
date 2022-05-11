@@ -29,4 +29,4 @@ if __name__ == "__main__":
     new_store['key'] = "trend_reversal"
     new_store['in_use'] = 1
 
-    ind_query_store.insert(new_store)
+    ind_query_store.update_one({"key": "trend_reversal"}, {"$set": new_store}, upsert=True)
