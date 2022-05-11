@@ -58,5 +58,5 @@ class PriceMovementFeature(SubST):
 
         money_median = numpy.median(money)
 
-        company.set(constant.money_median, money_median)
+        company.set(constant.money_median, float(money_median))
 
