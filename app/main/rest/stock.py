@@ -61,12 +61,13 @@ def stock_pick():
 def data_miner_with_store():
     request_body = request.json
     key = request_body['key']
+    now = datetime.now()
     # 提前设置好的请求参数
-    params = config_service.get_query_param(key)
-    request_body.update(params)
-    resp = data_miner(request_body)
+    stock_remind_record = db['stock_remind_record']
 
-    return resp
+    r = stock_remind_record.find({"date":date_util.get_start_of_day(now),"key":key})
+
+    return restful.response(r)
 
 
 @rest.route("/stock/data/miner", methods=['post'])

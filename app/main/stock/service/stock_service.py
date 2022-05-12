@@ -219,12 +219,13 @@ def stock_remind():
 
         matched_result["boards"] = list(board_dict.values())
         matched_result["date"] = date_util.get_start_of_day(now)
+        matched_result["update"] = now
 
         msg = '提醒-------------------------结束一轮推送--------------------------'
         # dingtalk_util.send_msg(msg)
 
         stock_remind_record = db["stock_remind_record"]
-        stock_remind_record.update_one({"date":now},{"$set": matched_result}, upsert=True)
+        stock_remind_record.update_one({"date":date_util.get_start_of_day(now)},{"$set": matched_result}, upsert=True)
         # for stock in stocks:
         #
         #     # name = stock['name']
