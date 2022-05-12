@@ -33,16 +33,16 @@ class PriceMovementFeature(SubST):
             return  # 只考虑当日触发情况
         try:
             self.price_movement_median(data,company)
-            self.trade_money_median(data,company)
         except Exception as e:
             logging.info(e, exc_info=1)
+        self.trade_money_median(data, company)
 
     def price_movement_median(self,data,company):
         prev_close = data.prev_close.get(ago=0, size=len(data))
         close = data.close.get(ago=0, size=len(data))
         volume = data.volume.get(ago=0, size=len(data))
 
-        rate_list = list(map(lambda x: round((x[0] - x[1]) / x[1] * 100, 2), zip(close, prev_close)))
+        rate_list = list(map(lambda x: self._get_rate(x[0],x[1]), zip(close, prev_close)))
         up_rate = [rate for rate in rate_list if rate >= 0]
         down_rate = [rate for rate in rate_list if rate < 0]
         up_median = numpy.median(up_rate)
@@ -60,4 +60,8 @@ class PriceMovementFeature(SubST):
         money_median = numpy.median(money)
 
         company.set(constant.money_median, float(money_median))
+
+    def _get_rate(self,v2,v1):
+        if v1 ==0: return 0
+        return round((v2 - v1) / v1 * 100, 2)
 

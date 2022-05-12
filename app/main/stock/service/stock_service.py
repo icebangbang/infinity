@@ -124,18 +124,21 @@ def sync_stock_ind(codes, task_wrapper: TaskWrapper = None):
 
 def stock_remind():
     now = datetime.now()
-    if now.hour >= 15 and now.minute >= 30:
-        return
-    if date_util.is_workday(now) is False or date_util.is_weekend(now):
-        return
+    # if now.hour >= 16:
+    #     return
+    # if date_util.is_workday(now) is False or date_util.is_weekend(now):
+    #     return
 
     query_store = db["ind_query_store"]
     query_list = list(query_store.find({"in_use": 1}))
     day_span = 5
     # name,params
+    matched_result =  {}
     for query in query_list:
+        result = {}
         name = query['name']  # 指标集名称
-        msg_template = query['msg_template']
+        key = query['key']  # 指标集名称
+
         request_body = json.loads(query['body'])
         origin_date = request_body['date']
         origin_until = request_body['until']
@@ -169,9 +172,13 @@ def stock_remind():
         boards_in_front = list(board_counter.keys())[0:20]
         boards_in_front_fmt = []
 
-        msg = '提醒-------------------------开始一轮推送--------------------------'
-        dingtalk_util.send_msg(msg)
+        matched_result["name"] = name
+        matched_result["key"] = key
 
+
+        # msg = '提醒-------------------------开始一轮推送--------------------------'
+        # dingtalk_util.send_msg(msg)
+        board_dict = {}
         for board in boards_in_front:
             in_time = 1
             base = start
@@ -184,32 +191,40 @@ def stock_remind():
                     in_time = in_time + 1
             count = board_counter[board]
             content = "{}({})({})".format(board, count, in_time)
+            board_dict[board] = dict(board=board,count=count,inTime=in_time)
             boards_in_front_fmt.append(content)
         msg = '[板块提醒]前二十板块:{}'.format(",".join(boards_in_front_fmt))
 
-        dingtalk_util.send_msg(msg)
+        # dingtalk_util.send_msg(msg)
         for board in boards_in_front:
+            board_dict[board]['stocks'] = []
             stock_detail_list = result['detail']
             stocks_in_front = []
             count = 0
             # 历史出现次数
             in_time = 0
             for stock_detail in stock_detail_list:
-                if count >= 10:
-                    break
+                # if count >= 10:
+                #     break
 
                 boards_of_stock = stock_detail['boards']
                 if board in boards_of_stock:
-                    count = count + 1
+                    # count = count + 1
                     stocks_in_front.append("{}({})".format(stock_detail['name'], stock_detail['rate']))
+                    board_dict[board]['stocks'].append(dict(name=stock_detail['name'],rate=stock_detail['rate'],money=stock_detail['money_median']))
 
             msg = '[个股提醒]{}前十个股:{}'.format(board, ",".join(stocks_in_front[0:10]))
-            time.sleep(3.5)
-            resp = dingtalk_util.send_msg(msg)
+            # time.sleep(3.5)
+            # resp = dingtalk_util.send_msg(msg)
+
+        matched_result["boards"] = list(board_dict.values())
+        matched_result["date"] = date_util.get_start_of_day(now)
 
         msg = '提醒-------------------------结束一轮推送--------------------------'
-        dingtalk_util.send_msg(msg)
+        # dingtalk_util.send_msg(msg)
 
+        stock_remind_record = db["stock_remind_record"]
+        stock_remind_record.update_one({"date":now},{"$set": matched_result}, upsert=True)
         # for stock in stocks:
         #
         #     # name = stock['name']
@@ -272,8 +287,8 @@ if __name__ == "__main__":
     # from_time = to_time - timedelta(739)
     # stock_filter.get_stock_status(from_time, to_time)
     # publish(3, 100)
-    # stock_remind()
-    cal_stock_offset("000722",10)
+    stock_remind()
+    # cal_stock_offset("000722",10)
 
     # d = {"stock_code": "1", "code": "2",
     #         "inf_l_point_value": "3", "inf_l_point_date": "4",

@@ -78,10 +78,16 @@ def comprehensive_search(request_body):
         index = close_list.index(b)
         high_date = trade_data_list[index]['date']
         rate = result['features']['rate']
+        try:
+            money_median = result['features']['money_median'] / 10000
+        except Exception as e:
+            print()
+
 
         final[name] = dict(
             name=name,
             rate=rate,
+            money_median=money_median,
             code=code,
             high_date=high_date.strftime("%Y-%m-%d"),
             boards=board_list

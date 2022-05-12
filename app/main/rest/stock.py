@@ -14,6 +14,9 @@ import collections
 
 @rest.route("/stock/deviation", methods=['get'])
 def offset_cal():
+    """
+    股市偏离值计算
+    """
     code = request.args.get("code")
     result =  stock_service.cal_stock_deviation(code,10)
 
