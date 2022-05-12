@@ -133,7 +133,7 @@ def stock_remind():
     query_list = list(query_store.find({"in_use": 1}))
     day_span = 5
     # name,params
-    matched_result =  {}
+    matched_result = {}
     for query in query_list:
         result = {}
         name = query['name']  # 指标集名称

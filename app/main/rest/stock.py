@@ -65,7 +65,7 @@ def data_miner_with_store():
     # 提前设置好的请求参数
     stock_remind_record = db['stock_remind_record']
 
-    r = stock_remind_record.find({"date":date_util.get_start_of_day(now),"key":key})
+    r = stock_remind_record.find_one({"date":date_util.get_start_of_day(now),"key":key})
 
     return restful.response(r)
 
