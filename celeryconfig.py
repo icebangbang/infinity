@@ -158,7 +158,7 @@ beat_schedule = {
     },
     'send_remind_msg': {
         "task": "app.main.task.remind_task.stock_remind",
-        "schedule": 150
+        "schedule": 20
     }
 }
 

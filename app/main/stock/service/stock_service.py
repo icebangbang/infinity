@@ -124,10 +124,10 @@ def sync_stock_ind(codes, task_wrapper: TaskWrapper = None):
 
 def stock_remind():
     now = datetime.now()
-    # if now.hour >= 16:
-    #     return
-    # if date_util.is_workday(now) is False or date_util.is_weekend(now):
-    #     return
+    if now.hour >= 16:
+        return
+    if date_util.is_workday(now) is False or date_util.is_weekend(now):
+        return
 
     query_store = db["ind_query_store"]
     query_list = list(query_store.find({"in_use": 1}))
