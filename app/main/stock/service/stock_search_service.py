@@ -30,7 +30,7 @@ def comprehensive_search(request_body):
     start = date_util.parse_date_time(request_body.get("date"), "%Y-%m-%d")
     end = date_util.parse_date_time(request_body.get("until"), "%Y-%m-%d")
 
-    start, useless = date_util.get_work_day(start, 1)
+    start = date_util.get_work_day(start, 1)
 
     datas = k_line_dao.get_k_line_by_code(codes, start, end)
     group = {}

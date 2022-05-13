@@ -87,7 +87,7 @@ def get_work_day(now, offset):
             offset = offset + 1
         i = i + 1
 
-    return get_start_of_day(now - timedelta(days=offset)), now
+    return get_start_of_day(now - timedelta(days=offset))
 
 def add_and_get_work_day(now, offset):
     """

@@ -99,8 +99,9 @@ def backtrading_stock_value(stocks, days=90):
     #               for stock in stocks}
 
     for base in stocks:
+        update_time = base['update_time']
         logging.info("start backtrading stock value,days is {}".format(days))
-        latest, update_time = date_util.get_work_day(base['update_time'], 0)
+        latest = date_util.get_work_day(base['update_time'], 0)
         start = latest - timedelta(days=days)
 
         data_list = k_line_dao.get_k_line_data(start, latest, codes=[base['code']], sort=-1)

@@ -12,6 +12,7 @@ from app.main.stock.dao import k_line_dao, stock_dao
 from app.main.utils import date_util
 import numpy
 from app.main.db.mongo import db
+import pandas as pd
 
 
 def baotuan_analysis():
@@ -48,7 +49,7 @@ def baotuan_analysis():
         sorted_values = sorted(money_group.values(), reverse=True)
         top_5 = sorted_values[0:int(len(sorted_values) * 0.05)]
         percent = round(sum(top_5) / total_money, 3)
-        storage.append(dict(date=start_time, percent=percent))
+        storage.append(dict(date=start_time, percent=percent,update=datetime.now()))
         logging.info("[baotuan analysis] start month:{}:".format(date_util.dt_to_str(start_time), percent))
         start_time = next
     set = db['baotuan_analysis']
@@ -198,5 +199,5 @@ def market_status_analysis(date=None):
 
 
 if __name__ == "__main__":
-    market_status_analysis(datetime(2022, 5, 12,0,37,0))
-    # market_status_analysis(datetime(2022, 4, 29,23,37,0))
+    # up_down_limit_analysis()
+    market_status_analysis(datetime(2022, 4, 29,23,37,0))

@@ -12,8 +12,8 @@ from app.main.stock.dao import k_line_dao
 def stock_info():
     now = datetime.now()
     now = now - timedelta(days=1)
-    start, end = date_util.get_work_day(now, 1)
-    k_line_dao.get_k_line_data(start, end)
+    start = date_util.get_work_day(now, 1)
+    k_line_dao.get_k_line_data(start, now)
 
     return restful.response("ok")
 

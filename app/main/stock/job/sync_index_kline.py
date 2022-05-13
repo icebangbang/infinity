@@ -8,7 +8,7 @@ def sync():
     id_list = ["sh000001", "zs399001", "zs399006","BDI","zs399106"]
 
     now = datetime.now()
-    start, now = date_util.get_work_day(now, 250)
+    start = date_util.get_work_day(now, 250)
 
     for code in id_list:
         print("同步{}".format(code))

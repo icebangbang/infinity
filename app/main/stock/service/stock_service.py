@@ -22,7 +22,7 @@ import time
 def publish(days=10, slice=30, code_list=None, stock_map={}, start=None, end=None):
     if start is None and end is None:
         end = date_util.get_start_of_day(datetime.now())
-        start, end = date_util.get_work_day(end, offset=days)
+        start = date_util.get_work_day(end, offset=days)
 
     if code_list is None:
         stocks = stock_dao.get_all_stock()
@@ -142,8 +142,8 @@ def stock_remind():
         request_body = json.loads(query['body'])
         origin_date = request_body['date']
         origin_until = request_body['until']
-        start, now = date_util.get_work_day(datetime.now(), day_span + 1)
-        latest_day, now = date_util.get_work_day(now, 1)
+        start = date_util.get_work_day(datetime.now(), day_span + 1)
+        latest_day = date_util.get_work_day(now, 1)
         # 回溯前几天的行情概览,将出现的板块加入缓存中
 
         latest_boards = None

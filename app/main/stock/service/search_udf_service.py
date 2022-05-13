@@ -53,7 +53,7 @@ def get_work_date(base_time, offset):
         base_time = date_util.parse_date_time(base_time,"%Y-%m-%d")
     if isinstance(offset,str):
         offset = int(offset)
-    dt, base_time = date_util.get_work_day(base_time, offset)
+    dt = date_util.get_work_day(base_time, offset)
 
     return dt
 

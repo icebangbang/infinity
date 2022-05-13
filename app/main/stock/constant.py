@@ -61,6 +61,8 @@ money_median = "money_median"
 
 vol_median = "vol_median"
 
+continuous_up_limit_count = "cont_up_limit_count"
+
 increase_avg_rate_5 = "increase_avg_rate_5"
 increase_avg_rate_10 = "increase_avg_rate_10"
 increase_avg_rate_20 = "increase_avg_rate_20"
@@ -109,7 +111,7 @@ feature = {
 }
 
 feature_detail = [
-dict(
+    dict(
         name="current_max_high_type",
         desc="当前趋势顶分型最大值",
         type="float",
@@ -300,7 +302,7 @@ dict(
         default_value=0,
         category="均线"
     ),
-dict(
+    dict(
         name="rate",
         desc="涨幅",
         type="float",
@@ -310,7 +312,7 @@ dict(
         default_value=0,
         category="基础"
     ),
-dict(
+    dict(
         name="up_median",
         desc="近一年涨幅中位数",
         type="float",
@@ -320,10 +322,19 @@ dict(
         default_value=0,
         category="基础"
     ),
-dict(
+    dict(
         name="money_median",
         desc="近十日成交额中位数",
         type="float",
+        filter_style=1,
+        comparator=["eq", "lte", "gte"],
+        default_comparator="gte",
+        default_value=0,
+        category="基础"
+    ),dict(
+        name="cont_up_limit_count",
+        desc="连续涨停次数",
+        type="int",
         filter_style=1,
         comparator=["eq", "lte", "gte"],
         default_comparator="gte",

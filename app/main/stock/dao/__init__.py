@@ -9,7 +9,7 @@ if __name__ == "__main__":
     now = date_util.get_start_of_day(now)
     stocks = stock_dao.get_all_stock(dict(code=1, name=1, _id=0))
     st_stock = {stock['code']: stock['name'] for stock in stocks if "ST" in stock['name']}
-    start, end = date_util.get_work_day(now, 1)
+    start = date_util.get_work_day(now, 1)
     trade_data_list = k_line_dao.get_k_line_data(start, end)
     groups = {}
     for trade_data in trade_data_list:

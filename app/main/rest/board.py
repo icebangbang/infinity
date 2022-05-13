@@ -63,7 +63,7 @@ def board_miner():
     end = date_util.parse_date_time(params.get("until"), "%Y-%m-%d")
 
     # if date_util.get_days_between(end, start) == 0:
-    start, uesless = date_util.get_work_day(start, 1)
+    start = date_util.get_work_day(start, 1)
     # start = start - timedelta(days=1)
 
     datas = k_line_dao.get_board_k_line_by_name(names, start, end)

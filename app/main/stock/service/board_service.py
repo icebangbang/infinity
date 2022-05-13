@@ -17,7 +17,7 @@ def publish(days=10, slice=30, code_list=None,stock_map={},start=None,end=None):
     if start is None and end is None:
 
         end = date_util.get_start_of_day(datetime.now())
-        start,end = date_util.get_work_day(end,offset=days)
+        start = date_util.get_work_day(end,offset=days)
 
     boards = board_dao.get_all_board(type=[2])
 
