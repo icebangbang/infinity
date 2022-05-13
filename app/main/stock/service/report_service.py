@@ -63,10 +63,15 @@ def market_status_analysis(date=None):
     """
     date = datetime.now() if date is None else date
     if date_util.is_workday(date) is False: return
-    if date.hour >=15: return
+    if date.hour >= 15: return
+    if date > datetime(date.year, date.month, date.day, 11, 30, 00) and \
+            date < datetime(date.year, date.month, date.day, 13, 00, 00):
+        return
+
     now = date_util.get_start_of_day(date)
     stocks = stock_dao.get_all_stock(dict(code=1, name=1, _id=0))
     st_stock = {stock['code']: stock['name'] for stock in stocks if "ST" in stock['name']}
+    stock_dict = {stock['code']: stock['name'] for stock in stocks}
     # start, end = date_util.get_work_day(now, 1)
     trade_data_list = k_line_dao.get_k_line_data(now, now)
     groups = {trade_data['code']: trade_data for trade_data in trade_data_list}
@@ -80,29 +85,39 @@ def market_status_analysis(date=None):
     up_down_distribution = {"跌停": 0, "跌停~8%": 0, "-8%~-6%": 0, "-6%~-4%": 0, "-4%~-2%": 0, "-2%~0%": 0,
                             "0%~2%": 0, "2%~4%": 0,
                             "4%~6%": 0, "6%~8%": 0, "8%~涨停": 0, "涨停": 0}
+    limit_up_stock = []
+    limit_down_stock = []
+
     for key, trade_data in groups.items():
         # close_1 = trade_data_list[0]['close']
         # close_2 = trade_data_list[1]['close']
+        code = trade_data['code']
         close_2 = trade_data['close']
         close_1 = trade_data['prev_close']
         rate = Decimal((close_2 - close_1) / close_1 * 100).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP")
         rate_list.append(rate)
 
-        if key.startswith("3") or key.startswith("688"):
+        if key.startswith("3") or key.startswith("68"):
             if Decimal(close_1 * 1.2).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP").compare(
                     Decimal(close_2).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP")) == 0:
                 # 20cm
                 up_down_distribution['涨停'] = up_down_distribution['涨停'] + 1
+                limit_up_stock.append(
+                    dict(name=stock_dict[code], type='cyb' if key.startswith("3") else 'kcb'))
                 continue
         else:
             if key in st_stock.keys() and Decimal(close_1 * 1.05).quantize(Decimal("0.01"),
                                                                            rounding="ROUND_HALF_UP").compare(
                 Decimal(close_2).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP")) == 0:
                 up_down_distribution['涨停'] = up_down_distribution['涨停'] + 1
+                limit_up_stock.append(
+                    dict(name=stock_dict[code], type='sh' if key.startswith("60") else 'sz'))
                 continue
             elif Decimal(close_1 * 1.1).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP").compare(
                     Decimal(close_2).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP")) == 0:
                 up_down_distribution['涨停'] = up_down_distribution['涨停'] + 1
+                limit_up_stock.append(
+                    dict(name=stock_dict[code], type='sz' if key.startswith("00") else 'sh'))
                 continue
 
         if key.startswith("3") or key.startswith("688"):
@@ -110,16 +125,22 @@ def market_status_analysis(date=None):
                     Decimal(close_2).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP")) == 0:
                 # 20cm
                 up_down_distribution['跌停'] = up_down_distribution['跌停'] + 1
+                limit_down_stock.append(
+                    dict(name=stock_dict[code], rate=float(rate), type='cyb' if key.startswith("3") else 'kcb'))
                 continue
         else:
             if key in st_stock.keys() and Decimal(close_1 * 0.95).quantize(Decimal("0.01"),
                                                                            rounding="ROUND_HALF_UP").compare(
                 Decimal(close_2).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP")) == 0:
                 up_down_distribution['跌停'] = up_down_distribution['跌停'] + 1
+                limit_down_stock.append(
+                    dict(name=stock_dict[code], type='sh' if key.startswith("60") else 'sz'))
                 continue
             elif Decimal(close_1 * 0.9).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP").compare(
                     Decimal(close_2).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP")) == 0:
                 up_down_distribution['跌停'] = up_down_distribution['跌停'] + 1
+                limit_down_stock.append(
+                    dict(name=stock_dict[code], type='sh' if key.startswith("60") else 'sz'))
                 continue
 
         # "跌停~8%": 0, "-8%~-6%": 0, "-6%~-4%": 0, "-4%~-2%": 0, "-2%~0%": 0,
@@ -166,14 +187,16 @@ def market_status_analysis(date=None):
     result['update'] = datetime.now()
     result['rate_median'] = float(median)
     result['distribution'] = distribution
+    result['limit_up_stock'] = limit_up_stock
+    result['limit_down_stock'] = limit_down_stock
 
     min = date.minute if date.minute % 5 == 0 else (int(date.minute / 5) + 1) * 5
-    dt = datetime(date.year,date.month,date.day,date.hour,min,0)
+    dt = datetime(date.year, date.month, date.day, date.hour, min, 0)
 
     result['date'] = dt
     market_status.update_one({"date": dt}, {"$set": result}, upsert=True)
 
 
 if __name__ == "__main__":
-    market_status_analysis()
+    market_status_analysis(datetime(2022, 5, 12,0,37,0))
     # market_status_analysis(datetime(2022, 4, 29,23,37,0))

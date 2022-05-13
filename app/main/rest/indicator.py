@@ -90,8 +90,25 @@ def get_sow_data():
 
 @rest.route("/indicator/chart", methods=['get'])
 def chart_display():
+    """
+    抽象图表展示层,根据名字定位到具体业务
+    :return:
+    """
     name = request.args.get("name")
     chart_instance = chart_instance_dict[name]
     data = chart_instance.generate()
 
     return restful.response(data=data)
+
+@rest.route("/indicator/marketStatus/current", methods=['get'])
+def current_market_status():
+    """
+    当前市场情况展示
+    """
+    market_status = db['market_status']
+    latest_point = market_status.find_one({}, sort=[('date', -1)])
+    result = latest_point['distribution']
+    result['rateMedian'] = latest_point['rate_median']
+
+
+    return restful.response(data=result)

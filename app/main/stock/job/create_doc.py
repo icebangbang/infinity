@@ -23,6 +23,7 @@ def run():
     db.stock_feature.create_index([("date", 1), ("code", 1)])
     db.stock_detail.create_index([("code", 1)])
     db.stock_value.create_index([("date", 1), ("code", 1)])
+    db.market_status.create_index([("date", 1)])
 
 
 if __name__ == "__main__":

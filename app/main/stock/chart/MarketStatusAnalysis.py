@@ -6,7 +6,7 @@ from datetime import datetime
 
 class MarketStatusAnalysis(Line):
     """
-    抱团分析图标
+    市场涨跌情况分析图表
     """
 
     def generate(self):
@@ -21,7 +21,7 @@ class MarketStatusAnalysis(Line):
         end = date_util.get_end_of_day(now)
         # 获取所有数据点位
         data_list = list(market_status.find({"date": {"$lte": end, "$gte": start}}))
-        data_x = [date_util.date_time_to_str(data['date'], "%H/%M") for data in data_list]
+        data_x = [date_util.date_time_to_str(data['date'], "%H:%M") for data in data_list]
         data_y_array = [dict(name="", y=[], yAxisIndex=0) for i in range(12)]
 
         # y轴组合
