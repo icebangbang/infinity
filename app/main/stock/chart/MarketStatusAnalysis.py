@@ -48,7 +48,7 @@ class MarketStatusAnalysis(Line):
                 data_y_array[index]['name'] = key
                 index = index + 1
 
-        data_y_array.append(dict(name="涨幅中位数", y=median_value, yAxisIndex=1))
+        data_y_array.append(dict(name="涨幅中位数", y=median_value, yAxisIndex=1,lineStyle="dashed"))
 
         return dict(x=data_x, y_array=data_y_array, desc="个股涨跌走势", multiSerie=True,
                     yAxis_array=yAxis_array)
