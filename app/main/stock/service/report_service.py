@@ -22,10 +22,15 @@ def up_down_limit_analysis(date):
     date = datetime.now() if date is None else date
     start = date_util.get_start_of_day(date)
     stock_feature = db['stock_feature']
-    stocks = stock_feature.find({"features.cont_up_limit_count":{"$gte":1},
-                                 "date":start})
-    result = list(stocks)
-    pass
+    results = list(stock_feature.find({"features.cont_up_limit_count":{"$gte":1},
+                                 "date":start}))
+
+    stocks = [dict(name=result['name'],
+                   cont_up_limit_count=result['features']['cont_up_limit_count']) for result in results]
+    df = pd.DataFrame(stocks)
+    df['cut'] = pd.cut(df.cont_up_limit_count,bins=[0,1,2,3,4,5,100],labels=["1","2","3","4","5",">=6"],include_lowest=False)
+
+    group_result = {cut: [ r['name'] for r in group.to_dict('records')] for cut, group in df.groupby('cut')}
     #     total = list(set.find({"date": {"$lte": date, "$gte": date - timedelta(days=1)}, "type": board_type}))
 
 def baotuan_analysis():

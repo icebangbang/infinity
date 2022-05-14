@@ -6,7 +6,7 @@ from flask import request
 from app.main.db.mongo import db
 from datetime import datetime
 from app.main.stock.chart import chart_instance_dict
-
+import pandas as pd
 
 @rest.route("/indicator/ppi", methods=['get'])
 def get_ppi():
@@ -112,3 +112,26 @@ def current_market_status():
 
 
     return restful.response(data=result)
+
+@rest.route("/indicator/upLimit", methods=['get'])
+def upLimit_detail():
+    """
+    当前涨停情况展示
+    """
+
+    date = date_util.get_latest_work_day()
+    stock_feature = db['stock_feature']
+    results = list(stock_feature.find({"features.cont_up_limit_count": {"$gte": 1},
+                                 "date": date}))
+
+    stocks = [dict(name=result['name'],
+                   cont_up_limit_count=result['features']['cont_up_limit_count']) for result in results]
+    df = pd.DataFrame(stocks)
+    df['cut'] = pd.cut(df.cont_up_limit_count, bins=[0, 1, 2, 3, 4, 5, 100], labels=["1", "2", "3", "4", "5", ">=6"],
+                       include_lowest=False)
+
+    # group_result = {cut: group.to_dict('records') for cut, group in df.groupby('cut')}
+    group_result = [dict(time=cut, stocks= [ r['name'] for r in group.to_dict('records')]) for cut, group in df.groupby('cut')]
+
+    return restful.response(data=group_result)
+
