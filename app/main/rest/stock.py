@@ -61,7 +61,7 @@ def stock_pick():
 def data_miner_with_store():
     request_body = request.json
     key = request_body['key']
-    now = datetime.now()
+    now = date_util.get_latest_work_day()
     # 提前设置好的请求参数
     stock_remind_record = db['stock_remind_record']
 
