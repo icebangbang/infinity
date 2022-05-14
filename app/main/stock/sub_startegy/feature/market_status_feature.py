@@ -66,12 +66,16 @@ class MarketStatusFeature(SubST):
                     continue
                 up_limit_str = up_limit_str+"0"
             cont_up_limit_group = up_limit_str.split("0")
-            if cont_up_limit_group[0] is not '':
+            # 连板数获取
+            if cont_up_limit_group[0] != '':
                 company.set(constant.continuous_up_limit_count,len(cont_up_limit_group[0]))
+
+            up_limit_str_20 = up_limit_str[0:20]
+            company.set(constant.up_limit_count_20, up_limit_str_20.count("1"))
         except Exception as e:
             logging.info(e)
 
 if __name__ == "__main__":
-    s = "00000"
-    print(s.split("0"))
+    s = "1010111110"
+    print(s.count("1"))
 

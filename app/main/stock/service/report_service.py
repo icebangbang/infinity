@@ -14,7 +14,6 @@ import numpy
 from app.main.db.mongo import db
 import pandas as pd
 
-
 def baotuan_analysis():
     """
     包团分析

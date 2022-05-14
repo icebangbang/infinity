@@ -62,6 +62,7 @@ money_median = "money_median"
 vol_median = "vol_median"
 
 continuous_up_limit_count = "cont_up_limit_count"
+up_limit_count_20 = "up_limit_count_20"
 
 increase_avg_rate_5 = "increase_avg_rate_5"
 increase_avg_rate_10 = "increase_avg_rate_10"
