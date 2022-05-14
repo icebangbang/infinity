@@ -52,19 +52,23 @@ class MarketStatusFeature(SubST):
                             Decimal(close_2).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP")) == 0:
                         # 20cm
                         up_limit_str = up_limit_str+"1"
-                        continue
+                    else:
+                        up_limit_str = up_limit_str + "0"
+                    continue
 
                 if "ST" in company.name:
                     if Decimal(close_1 * 1.05).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP").compare(
                             Decimal(close_2).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP")) == 0:
                         up_limit_str = up_limit_str+"1"
+                    else:
+                        up_limit_str = up_limit_str + "0"
                     continue
 
                 if Decimal(close_1 * 1.1).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP").compare(
                         Decimal(close_2).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP")) == 0:
                     up_limit_str = up_limit_str+"1"
-                    continue
-                up_limit_str = up_limit_str+"0"
+                else:
+                    up_limit_str = up_limit_str + "0"
             cont_up_limit_group = up_limit_str.split("0")
             # 连板数获取
             if cont_up_limit_group[0] != '':

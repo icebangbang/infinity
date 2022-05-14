@@ -14,6 +14,20 @@ import numpy
 from app.main.db.mongo import db
 import pandas as pd
 
+def up_down_limit_analysis(date):
+    """
+
+    :return:
+    """
+    date = datetime.now() if date is None else date
+    start = date_util.get_start_of_day(date)
+    stock_feature = db['stock_feature']
+    stocks = stock_feature.find({"features.cont_up_limit_count":{"$gte":1},
+                                 "date":start})
+    result = list(stocks)
+    pass
+    #     total = list(set.find({"date": {"$lte": date, "$gte": date - timedelta(days=1)}, "type": board_type}))
+
 def baotuan_analysis():
     """
     包团分析
@@ -198,5 +212,5 @@ def market_status_analysis(date=None):
 
 
 if __name__ == "__main__":
-    # up_down_limit_analysis()
-    market_status_analysis(datetime(2022, 4, 29,23,37,0))
+    up_down_limit_analysis(datetime(2022,5,13))
+    # market_status_analysis(datetime(2022, 4, 29,23,37,0))

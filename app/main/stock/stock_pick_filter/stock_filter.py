@@ -96,7 +96,7 @@ if __name__ == "__main__":
     offset = -252
 
     for key in code_name_map.keys():
-        companies = get_stock_status(base_date, offset, data_list=None, codes=['000756'], code_name_map=code_name_map)
+        companies = get_stock_status(base_date, offset, data_list=None, codes=['000005'], code_name_map=code_name_map)
         print(companies)
     # stock_dao.dump_stock_feature(companies, to_date)
 
