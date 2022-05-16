@@ -56,13 +56,13 @@ def comprehensive_search(request_body):
                 continue
 
             elif board not in ['融资融券', '富时罗素', '标准普尔', '预盈预增',
-                               '昨日涨停_含一字', '昨日涨停', '预亏预减','深股通',
-                               'MSCI中国', '沪股通', '深成500','预亏预减', '深股通',
-                               '创业板综','创业板综', '中证500', '上证380', '转债标的',
-                               '内贸流通', '机构重仓', 'QFII重仓', '长江三角','上证180_',
-                               '基金重仓','HS300_','国企改革','股权激励','证金持股','昨日触板',
-                               '深圳特区','创业成分','百元股','次新股','注册制次新股','AH股']:
-
+                               '昨日涨停_含一字', '昨日涨停', '预亏预减', '深股通',
+                               'MSCI中国', '沪股通', '深成500', '预亏预减', '深股通',
+                               '创业板综', '创业板综', '中证500', '上证380', '转债标的',
+                               '内贸流通', '机构重仓', 'QFII重仓', '长江三角', '上证180_',
+                               "创业成分", "深证100R",
+                               '基金重仓', 'HS300_', '国企改革', '股权激励', '证金持股', '昨日触板',
+                               '深圳特区', '创业成分', '百元股', '次新股', '注册制次新股', 'AH股']:
                 boards.append(board)
         if code not in group.keys(): continue
         if simple_util.is_not_empty(aim_board) and aim_board not in board_list: continue
@@ -82,7 +82,6 @@ def comprehensive_search(request_body):
             money_median = result['features']['money_median'] / 10000
         except Exception as e:
             print()
-
 
         final[name] = dict(
             name=name,
@@ -105,8 +104,9 @@ def comprehensive_search(request_body):
         final = [item for item in final.values()]
 
     return dict(counter=dict(counter.most_common(20)),
-                                 area_counter=dict(area_counter.most_common(10)),
-                                 detail=final, size=len(final))
+                area_counter=dict(area_counter.most_common(10)),
+                detail=final, size=len(final))
+
 
 def stock_search(request_body):
     """
@@ -139,7 +139,7 @@ def stock_search(request_body):
         3. $features.ma30 特征自身比较
         4. 时间字符串
         """
-        condition[1] = search_udf_service.check(condition[1],input)
+        condition[1] = search_udf_service.check(condition[1], input)
         if date_util.is_valid_date(condition[1]):
             condition[1] = date_util.parse_date_time(condition[1], "%Y-%m-%d")
         match["$expr"]["$and"].append({condition[0]: ["$features." + name, condition[1]]})
@@ -166,6 +166,7 @@ def stock_search(request_body):
     results = list(condition)
 
     return results
+
 
 if __name__ == "__main__":
     a = ['上证180_']
