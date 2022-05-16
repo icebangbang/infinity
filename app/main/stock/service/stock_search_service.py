@@ -60,9 +60,8 @@ def comprehensive_search(request_body):
                                'MSCI中国', '沪股通', '深成500', '预亏预减', '深股通',
                                '创业板综', '创业板综', '中证500', '上证380', '转债标的',
                                '内贸流通', '机构重仓', 'QFII重仓', '长江三角', '上证180_',
-                               "创业成分", "深证100R",
-                               '基金重仓', 'HS300_', '国企改革', '股权激励', '证金持股', '昨日触板',
-                               '深圳特区', '创业成分', '百元股', '次新股', '注册制次新股', 'AH股']:
+                               "创业成分", "深证100R","低价股",'基金重仓', 'HS300_', '国企改革', '股权激励', '证金持股', '昨日触板',
+                               '深圳特区', '百元股', '次新股', '注册制次新股', 'AH股']:
                 boards.append(board)
         if code not in group.keys(): continue
         if simple_util.is_not_empty(aim_board) and aim_board not in board_list: continue
