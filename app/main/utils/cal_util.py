@@ -1,7 +1,11 @@
 import numpy as np
 import pandas as pd
 import math
+from decimal import Decimal
 
+
+def get_rate(a1,a2):
+    return Decimal((a2 - a1) / a1 * 100).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP")
 
 def get_line(Y=None, X=None):
     """
@@ -140,7 +144,7 @@ def get_rate(numerator,denominator,ndigits=2)->float:
     计算涨幅
     :return:
     """
-    return round(numerator / denominator * 100, ndigits)
+    return float(Decimal(numerator / denominator * 100).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP"))
 
 
 def get_williams(highest, lowest, close):

@@ -40,13 +40,23 @@ def sync():
 
             log.info("正在获取:{} {}".format(label, str(index)))
             mappings = stock_board.get_board_mapping(symbol_code=code)
+
             for mapping in mappings:
-                if mapping['代码'] == '暂无成份股数据':
-                    log.info("{} 暂无成分股数据".format(mapping['代码']))
+                code = mapping['代码']
+                if code == '暂无成份股数据':
+                    log.info("{} 暂无成分股数据".format(code))
                     continue
-                if mapping['代码'] in stock_dict.keys():
-                    board_dict["codes"].append(mapping['代码'])
-                    stock_dict[mapping['代码']].get('board').append(label)
+                if code in stock_dict.keys():
+                    board_dict["codes"].append(code)
+                    stock_dict[code].get('board').append(label)
+                    # try:
+                    #     web = stock_info.get_stock_web(stock_dict[code])
+                    #     if web is not None:
+                    #         stock_dict[code]['web'] = web
+                    #     else:
+                    #         print(code)
+                    # except Exception as e:
+                    #     print(e)
                 else:
                     log.info("{}不在字典内".format(mapping['代码']))
 
@@ -71,7 +81,7 @@ def sync():
     headers = {'Content-Type': 'application/json'}
     d = {"msgtype": "text",
          "text": {
-             "content": "msg"
+             "content": msg
          }}
     requests.post(
         "https://oapi.dingtalk.com/robot/send?access_token=8d6107691edc8c68957ad9b3b3e16eeccf4fd2ec005c86692fdeb648da6312b4",
@@ -82,8 +92,6 @@ def sync():
     board_detail.drop()
 
     for value in stock_dict.values():
-        if value['code'] == "000876":
-            pass
         stock_detail.update_one({"code": value['code']}, {"$set": value}, upsert=True)
     board_detail.insert_many(board_list)
 

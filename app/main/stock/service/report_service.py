@@ -13,25 +13,65 @@ from app.main.utils import date_util
 import numpy
 from app.main.db.mongo import db
 import pandas as pd
+from app.main.utils import cal_util
+import numpy as np
+
+
+def rps_analysis(date=None):
+    """
+    个股强弱排名
+    :param date:
+    :return:
+    """
+    offset = -250
+    end = datetime.now() if date is None else date
+    rate_250_list = []
+
+    stocks = stock_dao.get_all_stock(fields=dict(code=1,_id=0))
+    for index,stock in enumerate(stocks):
+        code = stock['code']
+        logging.info("{},{}".format(index,code))
+
+        data_list = k_line_dao.get_k_line_data_by_offset(end, offset, code=code)
+        if len(data_list) >= abs(offset):
+            k_start_prev = data_list[0]['prev_close'] if data_list[0]['prev_close'] != 0 else data_list[0]['close']
+            k_end_close = data_list[0]['close']
+            rate = cal_util.get_rate(k_end_close - k_start_prev, k_start_prev)
+            rate_250_list.append(dict(code=code, rate=rate))
+
+    results = sorted(rate_250_list, key=lambda x: x['rate'], reverse=True)
+    split_100_list = np.array_split(results, 100)
+    results = []
+    for index, groups in enumerate(split_100_list):
+        for sub_index, item in enumerate(groups):
+            item['rps'] = 100 - index - round(1 / len(groups) * sub_index, 2)
+            item['date'] = date_util.get_start_of_day(end)
+            item['span'] = abs(offset)
+            results.append(item)
+    for result in results:
+        db['rps_anslysis'].update({"code": result['code'], 'date': result['date']}, {"$set": result}, upsert=True)
+
 
 def up_down_limit_analysis(date):
     """
-
+    这跌停情况分析
     :return:
     """
     date = datetime.now() if date is None else date
     start = date_util.get_start_of_day(date)
     stock_feature = db['stock_feature']
-    results = list(stock_feature.find({"features.cont_up_limit_count":{"$gte":1},
-                                 "date":start}))
+    results = list(stock_feature.find({"features.cont_up_limit_count": {"$gte": 1},
+                                       "date": start}))
 
     stocks = [dict(name=result['name'],
                    cont_up_limit_count=result['features']['cont_up_limit_count']) for result in results]
     df = pd.DataFrame(stocks)
-    df['cut'] = pd.cut(df.cont_up_limit_count,bins=[0,1,2,3,4,5,100],labels=["1","2","3","4","5",">=6"],include_lowest=False)
+    df['cut'] = pd.cut(df.cont_up_limit_count, bins=[0, 1, 2, 3, 4, 5, 100], labels=["1", "2", "3", "4", "5", ">=6"],
+                       include_lowest=False)
 
-    group_result = {cut: [ r['name'] for r in group.to_dict('records')] for cut, group in df.groupby('cut')}
+    group_result = {cut: [r['name'] for r in group.to_dict('records')] for cut, group in df.groupby('cut')}
     #     total = list(set.find({"date": {"$lte": date, "$gte": date - timedelta(days=1)}, "type": board_type}))
+
 
 def baotuan_analysis():
     """
@@ -67,7 +107,7 @@ def baotuan_analysis():
         sorted_values = sorted(money_group.values(), reverse=True)
         top_5 = sorted_values[0:int(len(sorted_values) * 0.05)]
         percent = round(sum(top_5) / total_money, 3)
-        storage.append(dict(date=start_time, percent=percent,update=datetime.now()))
+        storage.append(dict(date=start_time, percent=percent, update=datetime.now()))
         logging.info("[baotuan analysis] start month:{}:".format(date_util.dt_to_str(start_time), percent))
         start_time = next
     set = db['baotuan_analysis']
@@ -217,5 +257,6 @@ def market_status_analysis(date=None):
 
 
 if __name__ == "__main__":
-    up_down_limit_analysis(datetime(2022,5,13))
+    rps_analysis()
+    # up_down_limit_analysis(datetime(2022, 5, 13))
     # market_status_analysis(datetime(2022, 4, 29,23,37,0))

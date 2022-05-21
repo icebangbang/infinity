@@ -1,3 +1,4 @@
+from app.main.stock.api import stock_info
 from app.main.stock.dao import stock_dao, k_line_dao
 from app.main.stock.service import stock_service, config_service,search_udf_service,stock_search_service
 from app.main.utils import restful, date_util, simple_util
@@ -11,6 +12,20 @@ from collections import OrderedDict
 from typing import List
 from itertools import groupby
 import collections
+
+@rest.route("/stock/detail", methods=['get'])
+def stock_detail():
+    """
+    股市偏离值计算
+    """
+    code = request.args.get("code")
+    detail = stock_dao.get_single_stock_detail(code)
+    web = stock_info.get_stock_web(detail)
+    detail['web'] = web
+    if detail.get('custom') is None:
+        detail['custom'] = []
+
+    return restful.response(detail)
 
 @rest.route("/stock/deviation", methods=['get'])
 def offset_cal():

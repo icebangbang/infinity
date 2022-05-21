@@ -5,6 +5,7 @@ import json
 from datetime import datetime, timedelta
 import dateutil
 import logging
+from lxml import etree
 
 
 def stock_zh_a_hist(
@@ -647,7 +648,20 @@ def pig_data():
     return results
 
 
+def get_stock_web(stock):
+    belong = stock['belong']
+    code = stock['code']
+    url =  "https://emweb.securities.eastmoney.com/PC_HSF10/CompanySurvey/PageAjax?code={}{}".format(belong,code)
+    r = requests.get(url)
+    json_data = r.json()
+    web = json_data['jbzl'][0]['ORG_WEB']
+    if web is None:
+        return None
+    return "http://{}".format(web.split('/')[0])
+
+
 if __name__ == "__main__":
     # results = stock_board_concept_name_em()
-    r = chinese_cpi()
+    # r = chinese_cpi()
+    r = get_stock_web(dict(code="300763",belong="sz"))
     print(123)

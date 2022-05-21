@@ -26,6 +26,8 @@ def run():
     db.stock_value.create_index([("date", 1), ("code", 1)])
     db.market_status.create_index([("date", 1)])
 
+    db.rps_anslysis.create_index([("code", 1), ("date", 1)])
+
 
 if __name__ == "__main__":
     run()

@@ -59,14 +59,15 @@ def get_best(origin,industry):
     codes = selected['代码'].to_list()
     details = stock_dao.get_stock_detail(codes)
 
-def stock_changes():
-    import akshare as ak
-    stock_changes_em_df = ak.stock_changes_em(symbol="大笔买入")
-    print(stock_changes_em_df)
+def get_stock_web(stock):
+    return ak.get_stock_web(stock)
+
+
 
 
 if __name__ == "__main__":
     # get_stock_indicator("","")
     # stock_changes()
-    origin,industry = get_zt_pool()
-    get_best(origin,industry)
+    # origin,industry = get_zt_pool()
+    # get_best(origin,industry)
+    print(get_stock_web("300763"))

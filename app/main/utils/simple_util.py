@@ -14,6 +14,10 @@ from bson import ObjectId
 def is_not_empty(b:str):
     return b != None and b!=''
 
+def is_empty(b:str):
+    if b is None: return True
+    return b==''
+
 def list_file(rootdir, absolute=True):
     """
     列出rootdir下的所有文件
