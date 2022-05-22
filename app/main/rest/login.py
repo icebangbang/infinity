@@ -76,7 +76,7 @@ def login():
         return restful.response_obj(r)
     return restful.response_obj(dict(status='fail'))
 
-@rest.route("/login/outlogin", methods=['post'])
+@rest.route("/login/outLogin", methods=['post'])
 def out_login():
     return restful.response_obj(dict(
       data={},
