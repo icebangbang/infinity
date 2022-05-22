@@ -29,17 +29,18 @@ def rps_analysis(date=None,offset=-250):
     if date_util.is_workday(end) is False or date_util.is_weekend(end):
         return
 
-    stocks = stock_dao.get_all_stock(fields=dict(code=1,_id=0))
+    stocks = stock_dao.get_all_stock(fields=dict(code=1,name=1,_id=0))
     for index,stock in enumerate(stocks):
         code = stock['code']
+        name = stock['name']
         logging.info("{},{}".format(index,code))
 
         data_list = k_line_dao.get_k_line_data_by_offset(end, offset, code=code)
         if len(data_list) >= abs(offset):
             k_start_prev = data_list[0]['prev_close'] if data_list[0]['prev_close'] != 0 else data_list[0]['close']
-            k_end_close = data_list[0]['close']
+            k_end_close = data_list[len(data_list)-1]['close']
             rate = cal_util.get_rate(k_end_close - k_start_prev, k_start_prev)
-            rate_250_list.append(dict(code=code, rate=rate))
+            rate_250_list.append(dict(code=code, rate=rate,name=name))
 
     results = sorted(rate_250_list, key=lambda x: x['rate'], reverse=True)
     split_100_list = np.array_split(results, 100)
@@ -259,6 +260,9 @@ def market_status_analysis(date=None):
 
 
 if __name__ == "__main__":
-    rps_analysis()
+    rps_analysis(datetime(2022, 5, 20),-250)
+    rps_analysis(datetime(2022, 5, 20),-120)
+    rps_analysis(datetime(2022, 5, 20),-60)
+    rps_analysis(datetime(2022, 5, 20),-30)
     # up_down_limit_analysis(datetime(2022, 5, 13))
     # market_status_analysis(datetime(2022, 4, 29,23,37,0))
