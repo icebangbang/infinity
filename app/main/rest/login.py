@@ -75,3 +75,10 @@ def login():
         r = dict(currentAuthority="admin", status='ok', type='account',token=encryption.aes_encrypt("{}_{}".format(username,type)))
         return restful.response_obj(r)
     return restful.response_obj(dict(status='fail'))
+
+@rest.route("/login/outlogin", methods=['post'])
+def out_login():
+    return restful.response_obj(dict(
+      data={},
+      success=True,
+    ))
