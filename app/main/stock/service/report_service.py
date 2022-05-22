@@ -17,15 +17,17 @@ from app.main.utils import cal_util
 import numpy as np
 
 
-def rps_analysis(date=None):
+def rps_analysis(date=None,offset=-250):
     """
     个股强弱排名
     :param date:
     :return:
     """
-    offset = -250
     end = datetime.now() if date is None else date
     rate_250_list = []
+
+    if date_util.is_workday(end) is False or date_util.is_weekend(end):
+        return
 
     stocks = stock_dao.get_all_stock(fields=dict(code=1,_id=0))
     for index,stock in enumerate(stocks):

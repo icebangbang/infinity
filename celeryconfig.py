@@ -156,10 +156,20 @@ beat_schedule = {
         "task": "app.main.task.fund_task.backtrading",
         "schedule": 1800
     },
-    'send_remind_msg': {
-        "task": "app.main.task.remind_task.stock_remind",
-        "schedule": 20
+    'rps_analysis_250': {  # 个股
+        "task": "app.main.task.stock_task.sync_rps_analysis_250",
+        "schedule": 1200
+    }, 'rps_analysis_120': {  # 个股
+        "task": "app.main.task.stock_task.sync_rps_analysis_120",
+        "schedule": 1000
+    }, 'rps_analysis_60': {  # 个股
+        "task": "app.main.task.stock_task.sync_rps_analysis_60",
+        "schedule": 800
+    }, 'rps_analysis_30': {  # 个股
+        "task": "app.main.task.stock_task.sync_rps_analysis_30",
+        "schedule": 600
     }
+
 }
 
 # 在出现worker接受到的message出现没有注册的错误时，使用下面一句能解决

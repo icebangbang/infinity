@@ -10,7 +10,7 @@ from app.main.stock.task_wrapper import TaskWrapper
 from app.main.task import task_constant
 from app.main.utils import date_util
 
-from app.main.stock.service import sync_kline_service, stock_service
+from app.main.stock.service import sync_kline_service, stock_service, report_service
 from app.main.stock.stock_pick_filter import stock_filter
 from app.main.utils import my_redis, date_util
 import uuid
@@ -273,4 +273,22 @@ def sync_index_data(self):
     :param expect:
     :return:
     """
-    sync_index_kline.sync()
+    sync_index_kline.sync()\
+
+@celery.task(bind=True, base=MyTask, expire=1800)
+def sync_rps_analysis_250(self):
+    report_service.rps_analysis(offset=-250)
+
+@celery.task(bind=True, base=MyTask, expire=1800)
+def sync_rps_analysis_120(self):
+    report_service.rps_analysis(offset=-120)
+
+@celery.task(bind=True, base=MyTask, expire=1800)
+def sync_rps_analysis_60(self):
+    report_service.rps_analysis(offset=-60)
+
+@celery.task(bind=True, base=MyTask, expire=1800)
+def sync_rps_analysis_30(self):
+    report_service.rps_analysis(offset=-30)
+
+
