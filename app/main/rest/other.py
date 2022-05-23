@@ -6,6 +6,7 @@ from app.main.db.mongo import db
 from app.main.utils.my_collections import OrderedSet
 from boltons.setutils import IndexedSet
 from datetime import datetime
+import json
 
 
 @rest.route("/stock/custom/definition", methods=['post'])
@@ -129,8 +130,10 @@ def get_work_info():
     tag_size = len(tag_list)
 
     edited_stock = set()
+    edited_stock_name = dict()
     for tag in tag_list:
         edited_stock.update(tag['relate_code'])
+        edited_stock_name.update({name: 1 for name in tag['relate_name']})
     edited_stock_size = len(edited_stock)
 
     definition_work['tag_size'] = tag_size
@@ -141,11 +144,16 @@ def get_work_info():
     tag_table = [{tag['name']: len(tag['relate_code'])} for tag in tag_list]
     definition_work['table'] = tag_table
 
-    recommend_list= list(db['rps_anslysis'].find({"date": date_util.get_start_day_of_new(),
-                                             "span":250,
-                                            "rps": {"$gte": 50},
-                                            "code": {"$nin":list(edited_stock)}
-                                            }).sort("rps", 1).limit(5))
+    now = date_util.get_latest_work_day()
+    # 提前设置好的请求参数
+    stock_remind_record = db['stock_remind_record']
 
-    definition_work['recommend'] = [recommend['name'] for recommend in recommend_list]
+    result = stock_remind_record.find_one({"date": date_util.get_start_of_day(now), "key": "trend_reversal"})
+    recommend_stock_set = set()
+    for r in result['boards']:
+        recommend_stock_set.update([stock['name'] for stock in r['stocks']])
+
+    recommend = [name for name in list(recommend_stock_set) if name not in edited_stock_name.keys()]
+
+    definition_work['recommend'] = recommend[0:5]
     return restful.response(definition_work)
