@@ -1,4 +1,4 @@
-from app.main.utils import restful
+from app.main.utils import restful, date_util
 from . import rest
 from flask import request
 from app.main.utils import my_redis
@@ -141,4 +141,11 @@ def get_work_info():
     tag_table = [{tag['name']: len(tag['relate_code'])} for tag in tag_list]
     definition_work['table'] = tag_table
 
+    recommend_list= list(db['rps_anslysis'].find({"date": date_util.get_start_day_of_new(),
+                                             "span":250,
+                                            "rps": {"$gte": 50},
+                                            "code": {"$nin":list(edited_stock)}
+                                            }).sort("rps", 1).limit(5))
+
+    definition_work['recommend'] = [recommend['name'] for recommend in recommend_list]
     return restful.response(definition_work)

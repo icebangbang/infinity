@@ -29,6 +29,9 @@ def get_days_between(end: datetime, start: datetime) -> int:
 
     return int(secokds / (24 * 60 * 60))
 
+def get_start_day_of_new():
+    now = datetime.now()
+    return datetime(now.year, now.month, now.day)
 
 def get_start_of_day(dt: datetime) -> datetime:
     return datetime(dt.year, dt.month, dt.day)
