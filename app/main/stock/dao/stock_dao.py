@@ -25,7 +25,7 @@ def get_stock_detail(codes:list):
     data_list = list(my_set.find({"code": {"$in": codes}}))
     return {data['code']: data for data in data_list}
 
-def get_single_stock_detail(code):
+def get_stock_detail_by_code(code):
     """
     获取单独个股详情
     :param code:
@@ -33,6 +33,16 @@ def get_single_stock_detail(code):
     """
     my_set = db['stock_detail']
     data = my_set.find_one({"code": code})
+    return data
+
+def get_stock_detail_by_name(name):
+    """
+    获取单独个股详情
+    :param code:
+    :return:
+    """
+    my_set = db['stock_detail']
+    data = my_set.find_one({"name": name})
     return data
 
 def get_one_stock(code):

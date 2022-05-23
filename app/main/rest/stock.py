@@ -17,10 +17,16 @@ import collections
 @rest.route("/stock/detail", methods=['get'])
 def stock_detail():
     """
-    股市偏离值计算
+    个股详情查询
     """
     code = request.args.get("code")
-    detail = stock_dao.get_single_stock_detail(code)
+    name = request.args.get("name")
+
+    detail = None
+    if simple_util.is_not_empty(code):
+        detail = stock_dao.get_stock_detail_by_code(code)
+    if simple_util.is_not_empty(name):
+        detail = stock_dao.get_stock_detail_by_name(name)
     if detail is None:
         return restful.response(dict(name="个股不存在"))
     web = stock_info.get_stock_web(detail)
