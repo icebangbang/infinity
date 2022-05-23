@@ -156,6 +156,10 @@ beat_schedule = {
         "task": "app.main.task.fund_task.backtrading",
         "schedule": 1800
     },
+    'send_remind_msg': {
+        "task": "app.main.task.remind_task.stock_remind",
+        "schedule": 20
+    },
     'rps_analysis_250': {  # 个股
         "task": "app.main.task.stock_task.sync_rps_analysis_250",
         "schedule": 1200
