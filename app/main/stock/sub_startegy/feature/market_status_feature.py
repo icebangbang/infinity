@@ -71,10 +71,20 @@ class MarketStatusFeature(SubST):
                     up_limit_str = up_limit_str + "0"
             cont_up_limit_group = up_limit_str.split("0")
             # 连板数获取
-            if cont_up_limit_group[0] != '':
-                company.set(constant.continuous_up_limit_count,len(cont_up_limit_group[0]))
+            status_of_current = cont_up_limit_group[0]
+            status_of_latest = cont_up_limit_group[1]
+            if status_of_current != '':
+                # 最新连板数
+                company.set(constant.continuous_up_limit_count,len(status_of_current))
+
+            if status_of_current == '' and status_of_latest !='' :
+                # 昨日之前连板数
+                company.set(constant.continuous_up_limit_count_before,len(status_of_latest))
+                # 是否还未涨停
+                company.set(constant.continuous_up_limit_stop,True)
 
             up_limit_str_20 = up_limit_str[0:20]
+            # 20日内涨停板数
             company.set(constant.up_limit_count_20, up_limit_str_20.count("1"))
         except Exception as e:
             logging.info(e)

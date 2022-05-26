@@ -62,7 +62,12 @@ money_median = "money_median"
 vol_median = "vol_median"
 
 continuous_up_limit_count = "cont_up_limit_count"
+continuous_up_limit_count_before = "continuous_up_limit_count_before"
+continuous_up_limit_stop = "continuous_up_limit_stop"
 up_limit_count_20 = "up_limit_count_20"
+
+yi_zi_ban = "yi_zi_ban"
+kai_ban = "kai_ban"
 
 increase_avg_rate_5 = "increase_avg_rate_5"
 increase_avg_rate_10 = "increase_avg_rate_10"

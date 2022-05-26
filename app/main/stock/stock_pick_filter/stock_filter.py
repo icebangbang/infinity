@@ -9,6 +9,7 @@ from app.main.stock.sub_startegy.feature.box_type import BoxType
 from app.main.stock.sub_startegy.feature.box_boundary import BoxBoundary
 from app.main.stock.sub_startegy.feature.earning_rate_feature import EarningRateFeature
 from app.main.stock.sub_startegy.feature.market_status_feature import MarketStatusFeature
+from app.main.stock.sub_startegy.feature.stock_status_feature import StockStatusFeature
 from app.main.stock.sub_startegy.feature.price_movement_feaure import PriceMovementFeature
 from app.main.stock.sub_startegy.feature.short_term_feature import ShortTermFeature
 from app.main.stock.sub_startegy.feature.shape_feature import ShapeFeature
@@ -56,7 +57,9 @@ def get_stock_status(base_date, offset, data_list=None, codes=None, code_name_ma
     data_df = pd.DataFrame(input)
     data_df = data_df.set_index("date", drop=False)
 
-    sub_st = [MarketStatusFeature,PriceMovementFeature,ShortTermFeature, ShapeFeature, BollFeature,EarningRateFeature,BoxType, WilliamsFeature]
+    sub_st = [StockStatusFeature,MarketStatusFeature,PriceMovementFeature,
+              ShortTermFeature, ShapeFeature, BollFeature,
+              EarningRateFeature,BoxType, WilliamsFeature]
     # sub_st = [BoxType]
     kwargs = {}
 
@@ -92,11 +95,11 @@ def get_stock_status(base_date, offset, data_list=None, codes=None, code_name_ma
 
 if __name__ == "__main__":
     code_name_map = stock_dao.get_code_name_map()
-    base_date = datetime(2022, 5, 13)
+    base_date = datetime(2022, 5, 20)
     offset = -252
 
     for key in code_name_map.keys():
-        companies = get_stock_status(base_date, offset, data_list=None, codes=['000005'], code_name_map=code_name_map)
+        companies = get_stock_status(base_date, offset, data_list=None, codes=['600734'], code_name_map=code_name_map)
         print(companies)
     # stock_dao.dump_stock_feature(companies, to_date)
 
