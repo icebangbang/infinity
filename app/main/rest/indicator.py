@@ -135,3 +135,26 @@ def upLimit_detail():
 
     return restful.response(data=group_result)
 
+@rest.route("/indicator/upLimitBack", methods=['get'])
+def upLimit_back_detail():
+    """
+    涨停预备队
+    """
+
+    date = date_util.get_latest_work_day()
+    stock_feature = db['stock_feature']
+    results = list(stock_feature.find({"features.continuous_up_limit_stop": True,
+                                       "features.continuous_up_limit_count_before":{"$gte":1},
+                                 "date": date}))
+
+    stocks = [dict(name=result['name'],
+                   continuous_up_limit_count_before=result['features']['continuous_up_limit_count_before']) for result in results]
+    df = pd.DataFrame(stocks)
+    df['cut'] = pd.cut(df.continuous_up_limit_count_before, bins=[0, 1, 2, 3, 4, 5, 100], labels=["1", "2", "3", "4", "5", ">=6"],
+                       include_lowest=False)
+
+    # group_result = {cut: group.to_dict('records') for cut, group in df.groupby('cut')}
+    group_result = [dict(time=cut, stocks= [ r['name'] for r in group.to_dict('records')]) for cut, group in df.groupby('cut')]
+
+    return restful.response(data=group_result)
+
