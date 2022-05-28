@@ -34,6 +34,9 @@ def stock_detail():
     if detail.get('custom') is None:
         detail['custom'] = []
 
+    trade_info =stock_info.get_stock_business(detail)
+    detail['trade_info'] = trade_info
+
     return restful.response(detail)
 
 

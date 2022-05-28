@@ -1,3 +1,6 @@
+import datetime
+import time
+
 import akshare as ak
 import json
 import pymongo
@@ -62,7 +65,23 @@ def get_best(origin,industry):
 def get_stock_web(stock):
     return ak.get_stock_web(stock)
 
+def get_stock_business(stock):
+    def parse_time(df):
+        t = time.strptime(str(df["time"]), '%H%M%S')
 
+        return t
+    business = ak.get_stock_business(stock)
+    zygcfx = business['zygcfx']
+    df = pd.DataFrame(zygcfx)
+
+    for REPORT_DATE, group in df.groupby("REPORT_DATE",sort=False):
+        group = group[['REPORT_DATE','MAINOP_TYPE',"ITEM_NAME","MBI_RATIO"]]
+        group["MBI_RATIO"] = group.apply(lambda a:
+                          round(a["MBI_RATIO"]* 100,2),axis=1)
+        group["REPORT_DATE"] = pd.to_datetime(df["REPORT_DATE"],format='%Y-%m-%d %H:%M:%S')
+        group["REPORT_DATE"] = group["REPORT_DATE"].apply(lambda x: x.strftime("%Y-%m-%d"))
+
+        return group.to_dict(orient="records")
 
 
 if __name__ == "__main__":
@@ -70,4 +89,4 @@ if __name__ == "__main__":
     # stock_changes()
     # origin,industry = get_zt_pool()
     # get_best(origin,industry)
-    print(get_stock_web("300763"))
+    print(get_stock_business(dict(code="300763",belong="sz")))

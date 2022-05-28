@@ -659,6 +659,23 @@ def get_stock_web(stock):
         return None
     return "http://{}".format(web.split('/')[0])
 
+def get_stock_business(stock):
+    """
+    获取个股竟经营分析情况
+    :param stock:
+    :return:
+    """
+    belong = stock['belong']
+    code = stock['code']
+    url =  "https://emweb.securities.eastmoney.com/PC_HSF10/BusinessAnalysis/PageAjax?code={}{}".format(belong,code)
+    r = requests.get(url)
+    json_data = r.json()
+    # 经营评述
+    jyps = json_data['jyps'][0]['BUSINESS_REVIEW']
+    zygcfx = json_data['zygcfx']
+
+    return dict(jyps=jyps,zygcfx=zygcfx)
+
 
 if __name__ == "__main__":
     # results = stock_board_concept_name_em()
