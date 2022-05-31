@@ -8,6 +8,20 @@ from boltons.setutils import IndexedSet
 from datetime import datetime
 import json
 
+@rest.route("/stock/custom/desc", methods=['post'])
+def stock_desc():
+    """
+    自定义描述
+    :return:
+    """
+    stock_detail_set = db["stock_detail"]
+    params: dict = request.json
+    desc = params['desc']
+    code = params['code']
+    stock_detail_set.update_one({"code": code}, {"$set": {"desc":desc}}, upsert=True)
+    return restful.response("ok")
+
+
 
 @rest.route("/stock/custom/definition", methods=['post'])
 def stock_definition():

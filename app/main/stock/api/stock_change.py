@@ -94,5 +94,5 @@ def get_stock_changes(code:str, date: datetime, market:int):
 
 
 if __name__ == '__main__':
-    changes = get_stock_changes("300821", "20210910")
+    changes = get_stock_changes("600313", datetime(2022,5,27),1)
     print(changes)

@@ -22,8 +22,7 @@ for index, stock in enumerate(stocks):
         if date_util.is_weekend(t): continue
         if now == t and t.hour < 15: continue
 
-        if belong == 'sh': market = 1
-        if belong == 'sz': market = 0
+        market = 1 if belong == 'sh' else 0
 
         df = stock_change.get_stock_changes(code, t, market)
         if df is None: continue
