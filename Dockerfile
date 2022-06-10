@@ -18,7 +18,7 @@ COPY ./requirements.txt /
 #" > /etc/pip.conf
 
 
-RUN pip3 install -i  https://pypi.douban.com/simple  -r requirements.txt
+RUN pip3 install --user -i  https://pypi.douban.com/simple  -r requirements.txt
 
 COPY ./app /app
 COPY ./manage.py /
