@@ -10,7 +10,7 @@ COPY ./requirements.txt /
 
 
 
-RUN pip3 install -i https://pypi.douban.com/simple --no-cache-dir -r requirements.txt
+RUN pip3 install --user -i https://pypi.douban.com/simple --no-cache-dir -r requirements.txt
 
 COPY ./app /app
 COPY ./manage.py /
