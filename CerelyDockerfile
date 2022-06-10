@@ -10,7 +10,8 @@ COPY ./requirements.txt /
 
 
 
-RUN pip3 install --user -i https://mirrors.aliyun.com/pypi/simple --no-cache-dir -r requirements.txt
+#RUN pip3 install --user -i https://mirrors.aliyun.com/pypi/simple --no-cache-dir -r requirements.txt
+RUN pip3 install --user -i https://mirrors.cloud.aliyuncs.com/pypi/simple --no-cache-dir -r requirements.txt
 
 COPY ./app /app
 COPY ./manage.py /
