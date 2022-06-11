@@ -31,7 +31,7 @@ def get_board_status(base_date, offset, names=None):
     data_df = pd.DataFrame(input)
     data_df = data_df.set_index("date", drop=False)
 
-    sub_st = [StockStatusFeature, MarketStatusFeature, PriceMovementFeature,
+    sub_st = [MarketStatusFeature, PriceMovementFeature,
               ShortTermFeature, ShapeFeature, BollFeature,
               EarningRateFeature, BoxType, WilliamsFeature]
 
