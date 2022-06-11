@@ -53,6 +53,7 @@ def get_stock_feature():
 
     return restful.response("ok")
 
+
 @rest.route("/celery/stock/data", methods=['post'])
 def get_stock_data():
     """
@@ -69,4 +70,30 @@ def get_stock_detail():
     :return:
     """
     sync_board.sync()
+    return restful.response("ok")
+
+@rest.route("/celery/board/feature", methods=['post'])
+def get_stock_feature():
+    body = request.json
+    date_start_str = body.get("start",None)
+    date_end_str = body.get("end",None)
+
+    if date_start_str is not None:
+        date_start = date_util.parse_date_time(date_start_str, "%Y-%m-%d")
+        date_end = date_util.parse_date_time(date_end_str, "%Y-%m-%d")
+    else:
+        date_start = datetime.now()
+        date_end = datetime.now()
+
+    days = date_util.get_days_between(date_end, date_start)
+    logging.info("days span is {}".format(days))
+    if days == 0:
+        logging.info("submit stock feature:{}".format(date_start_str))
+        board_task.submit_board_feature(date_util.to_timestamp(date_start))
+    else:
+        for day in range(days):
+            date_start = date_start + timedelta(days=1)
+            logging.info("submit stock feature:{}".format(date_util.dt_to_str(date_start)))
+            board_task.submit_board_feature(date_util.to_timestamp(date_start))
+
     return restful.response("ok")

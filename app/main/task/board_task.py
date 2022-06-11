@@ -92,4 +92,4 @@ def sync_board_feature(self, base_timestamp, offset, names):
         # to_date = datetime.fromtimestamp(int(to_date))
         base_date = datetime.fromtimestamp(int(base_timestamp))
     companies = board_filter.get_board_status(base_date, offset, names)
-    board_dao.dump_board_feature(companies, to_date)
+    board_dao.dump_board_feature(companies, base_date)

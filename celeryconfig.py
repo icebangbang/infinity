@@ -126,7 +126,7 @@ beat_schedule = {
     },
     'sync_board_stock_ind': {
         "task": "app.main.task.stock_task.submit_stock_ind_task",
-        "schedule": 120  # 每20分钟执行一次
+        "schedule": 600  # 每20分钟执行一次
     },
     'get_stock_feature': {
         "task": "app.main.task.stock_task.submit_stock_feature",
@@ -134,7 +134,7 @@ beat_schedule = {
     },
     'get_board_feature': {
         "task": "app.main.task.board_task.submit_board_feature",
-        "schedule": 600
+        "schedule": 120
     },
     'sync_macrodata': {
         "task": "app.main.task.macrodata_task.sync",
