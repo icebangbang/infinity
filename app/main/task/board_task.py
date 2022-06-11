@@ -27,17 +27,17 @@ def sync_board_k_line(self):
     now = datetime.now()
     # 收盘后,不再同步
 
-    switch = my_redis.get_bool("sync_after_15")
-    logging.info("switch is {}".format(switch))
-    if switch is True:
-        boards = board_dao.get_all_board()
-        # 获取最近一个交易日
+    # switch = my_redis.get_bool("sync_after_15")
+    # logging.info("switch is {}".format(switch))
+    # if switch is True:
+    boards = board_dao.get_all_board(type=[1, 2])
+    # 获取最近一个交易日
 
-        step = int(len(boards) / 50)
-        boards_group = [boards[i:i + step] for i in range(0, len(boards), step)]
-        for index, boards in enumerate(boards_group):
-            logging.info("提交同步任务,时序{}".format(index))
-            sync_data.apply_async(args=[boards])
+    step = int(len(boards) / 50)
+    boards_group = [boards[i:i + step] for i in range(0, len(boards), step)]
+    for index, boards in enumerate(boards_group):
+        logging.info("提交同步任务,时序{}".format(index))
+        sync_data.apply_async(args=[boards])
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
