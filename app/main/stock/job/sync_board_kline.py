@@ -8,7 +8,7 @@ import logging
 """
 
 def sync_history():
-    boards = board_dao.get_all_board()
+    boards = board_dao.get_all_board(type=[2])
     # 获取最近一个交易日
 
     for index,board in enumerate(boards):

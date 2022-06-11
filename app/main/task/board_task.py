@@ -76,7 +76,7 @@ def submit_board_feature(self, to_date=None, codes=None):
     base_timestamp = int(time.mktime(to_date.timetuple()))
     offset = -252
 
-    boards = board_dao.get_all_board()
+    boards = board_dao.get_all_board(type=[2])
     names = [board['board'] for board in boards]
     step = int(len(names) / 30)
 

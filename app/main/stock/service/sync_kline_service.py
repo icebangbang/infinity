@@ -133,8 +133,9 @@ def sync_board_k_line(name, type, base_time=None, time_window=1095):
         before = point[0]['date'] + timedelta(days=1)
     if date_util.get_days_between(now, before) <= 0:
         before = now
-    # if date_util.get_days_between(now, before) == 0:
-    #     return None
+
+    if before == now and not date_util.is_workday(before):
+        return None
 
     df = k_line_dao.get_board_k_line_data(name,
                                           date_util.dt_to_str(before),
