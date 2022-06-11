@@ -70,10 +70,11 @@ def submit_board_feature(self, to_date=None, codes=None):
         return
 
     # code_name_map = stock_dao.get_code_name_map()
-    from_date = to_date - timedelta(days=700)
+    # from_date = to_date - timedelta(days=700)
 
-    from_date_timestamp = int(time.mktime(from_date.timetuple()))
-    to_date_timestamp = int(time.mktime(to_date.timetuple()))
+    # from_date_timestamp = int(time.mktime(from_date.timetuple()))
+    base_timestamp = int(time.mktime(to_date.timetuple()))
+    offset = -252
 
     boards = board_dao.get_all_board()
     names = [board['board'] for board in boards]
@@ -81,13 +82,14 @@ def submit_board_feature(self, to_date=None, codes=None):
 
     for i in range(0, len(names), step):
         group = names[i:i + step]
-        sync_board_feature.apply_async(args=[from_date_timestamp, to_date_timestamp, group])
+        sync_board_feature.apply_async(args=[base_timestamp, offset, group])
 
 
 @celery.task(bind=True, base=MyTask, expires=3600)
-def sync_board_feature(self, from_date, to_date, names):
-    if isinstance(from_date, int):
-        from_date = datetime.fromtimestamp(int(from_date))
-        to_date = datetime.fromtimestamp(int(to_date))
-    companies = board_filter.get_board_status(from_date, to_date, names)
+def sync_board_feature(self, base_timestamp, offset, names):
+    if isinstance(base_timestamp, int):
+        # from_date = datetime.fromtimestamp(int(from_date))
+        # to_date = datetime.fromtimestamp(int(to_date))
+        base_date = datetime.fromtimestamp(int(base_timestamp))
+    companies = board_filter.get_board_status(base_date, offset, names)
     board_dao.dump_board_feature(companies, to_date)

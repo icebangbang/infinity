@@ -161,4 +161,10 @@ if __name__ == "__main__":
     # data = df.to_dict(orient='records')
     # k_line_dao.dump_k_line(data)
 
-    sync_month_level("300763")
+    df = k_line_dao.get_board_k_line_data('塑料制品',
+                                          "20220601",
+                                          "20220610")
+
+    pass
+
+    # sync_month_level("300763")

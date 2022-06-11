@@ -15,7 +15,7 @@ import re
 
 @rest.route("/board/rank", methods=['get'])
 def get_board():
-    set = db["board_k_line"]
+    set = db["board_k_line_day"]
     board_type = int(request.args.get("type", 2))
 
     latest = set.find_one({}, sort=[("date", -1)])

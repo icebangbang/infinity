@@ -293,6 +293,8 @@ def stock_board_concept_hist_em(symbol: str = "数字货币", adjust: str = "qfq
     }
     r = requests.get(url, params=params)
     data_json = r.json()
+    data = data_json["data"]
+    prev_k_price = data['preKPrice']
     temp_df = pd.DataFrame([item.split(",") for item in data_json["data"]["klines"]])
     temp_df.columns = [
         "日期",
@@ -332,6 +334,10 @@ def stock_board_concept_hist_em(symbol: str = "数字货币", adjust: str = "qfq
     temp_df["成交额"] = pd.to_numeric(temp_df["成交额"])
     temp_df["振幅"] = pd.to_numeric(temp_df["振幅"])
     temp_df["换手率"] = pd.to_numeric(temp_df["换手率"])
+
+    temp_df['最近收盘'] = temp_df.loc[temp_df['收盘'].shift(-1) > 0, '收盘']
+    temp_df['最近收盘'] = temp_df['最近收盘'].shift()
+    temp_df['最近收盘'][0] = prev_k_price
     return temp_df
 
 

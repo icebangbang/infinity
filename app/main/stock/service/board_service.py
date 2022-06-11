@@ -5,9 +5,13 @@ import pandas as pd
 from app.main.stock.dao import k_line_dao,board_dao
 from app.main.utils import date_util
 import logging
+from app.main.db.mongo import db
 
 
-def get_board_k_line(from_date, to_date, concept_names=None):
+def get_board_k_line_by_offset(from_date, to_date, concept_name,level='day'):
+    db_name = "k_line_" + level
+    my_set = db[db_name]
+    board_dao.get_board_k_line_data_from_db(from_date, to_date, concept_name)
     daily_price = pd.DataFrame(board_dao.get_board_k_line_data_from_db(from_date, to_date,concept_names))
 
     daily_price = daily_price.set_index("date", drop=False)

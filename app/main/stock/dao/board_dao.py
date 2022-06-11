@@ -38,7 +38,7 @@ def get_board_k_line_data_from_db(
     :param level:
     :return:
     """
-    db_name = 'board_k_line'
+    db_name = 'board_k_line_day'
     my_set = db[db_name]
 
     base = {"date": {"$lte": end_day, "$gte": start_day}}
