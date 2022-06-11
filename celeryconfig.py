@@ -118,7 +118,7 @@ beat_schedule = {
         },
     'board_data_sync': {
         "task": "app.main.task.board_task.sync_board_k_line",
-        "schedule": 420,  # 定时每420秒执行一次
+        "schedule": 60,  # 定时每120秒执行一次
     },
     'sync_board_stock_detail': {
         "task": "app.main.task.board_task.sync_board_stock_detail",
