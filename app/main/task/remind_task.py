@@ -9,4 +9,4 @@ import requests
 
 @celery.task(bind=True, base=MyTask, expires=180)
 def stock_remind(self):
-    stock_service.stock_remind()
+    stock_service.stock_remind_v2()

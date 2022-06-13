@@ -44,25 +44,28 @@ def comprehensive_search(request_body):
 
     boards = []
     area_boards = []
+    industries = []
     for result in results:
         code: str = result['stock_code']
         name = result['name']
         board_list = result['board_list']
+        industry = result['industry']
 
-        for board in board_list:
-            if "板块" in board:
-                area_boards.append(board)
-                # 地域板块不加入boards,不会出现在所属板块中
-                continue
-
-            elif board not in ['融资融券', '富时罗素', '标准普尔', '预盈预增',
-                               '昨日涨停_含一字', '昨日涨停', '预亏预减', '深股通',
-                               'MSCI中国', '沪股通', '深成500', '预亏预减', '深股通',
-                               '创业板综', '创业板综', '中证500', '上证380', '转债标的',
-                               '内贸流通', '机构重仓', 'QFII重仓', '长江三角', '上证180_',
-                               "创业成分", "深证100R","低价股",'基金重仓', 'HS300_', '国企改革', '股权激励', '证金持股', '昨日触板',
-                               '深圳特区', '百元股', '次新股', '注册制次新股', 'AH股']:
-                boards.append(board)
+        industries.append(industry)
+        # for board in board_list:
+        #     if "板块" in board:
+        #         area_boards.append(board)
+        #         # 地域板块不加入boards,不会出现在所属板块中
+        #         continue
+        #
+        #     elif board not in ['融资融券', '富时罗素', '标准普尔', '预盈预增',
+        #                        '昨日涨停_含一字', '昨日涨停', '预亏预减', '深股通',
+        #                        'MSCI中国', '沪股通', '深成500', '预亏预减', '深股通',
+        #                        '创业板综', '创业板综', '中证500', '上证380', '转债标的',
+        #                        '内贸流通', '机构重仓', 'QFII重仓', '长江三角', '上证180_',
+        #                        "创业成分", "深证100R","低价股",'基金重仓', 'HS300_', '国企改革', '股权激励', '证金持股', '昨日触板',
+        #                        '深圳特区', '百元股', '次新股', '注册制次新股', 'AH股']:
+        #         boards.append(board)
         if code not in group.keys(): continue
         if simple_util.is_not_empty(aim_board) and aim_board not in board_list: continue
 
@@ -88,13 +91,13 @@ def comprehensive_search(request_body):
             money_median=money_median,
             code=code,
             high_date=high_date.strftime("%Y-%m-%d"),
-            boards=board_list
+            industry=industry
         )
         if hide_board is True:
             final[name].__delitem__("board")
 
-    counter = collections.Counter(boards)
-    area_counter = collections.Counter(area_boards)
+    counter = collections.Counter(industries)
+    # area_counter = collections.Counter(area_boards)
     final = OrderedDict(sorted(final.items(), key=lambda item: item[1]['rate'], reverse=True))
 
     if only_code:
@@ -102,8 +105,8 @@ def comprehensive_search(request_body):
     else:
         final = [item for item in final.values()]
 
-    return dict(counter=dict(counter.most_common(20)),
-                area_counter=dict(area_counter.most_common(10)),
+    return dict(counter=dict(counter.most_common(30)),
+                # area_counter=dict(area_counter.most_common(10)),
                 detail=final, size=len(final))
 
 
@@ -156,10 +159,11 @@ def stock_search(request_body):
             },
         }, {
             "$project": {"_id": 0, "features": 1, "name": 1, "stock_code": "$result.code",
-                         "board_list": "$result.board"}
+                         "board_list": "$result.board","industry":"$result.industry"}
         },
         {"$unwind": "$stock_code"},
-        {"$unwind": "$board_list"}
+        {"$unwind": "$board_list"},
+        {"$unwind": "$industry"}
 
     ])
     results = list(condition)
