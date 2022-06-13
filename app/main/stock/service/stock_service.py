@@ -271,7 +271,7 @@ def stock_remind_v2():
         # 回溯前几天的行情概览,将出现的板块加入缓存中
 
         latest_boards = None
-        my_redis.delete("good_board_in_history")
+        # my_redis.delete("good_board_in_history")
         # latest_boards = my_redis.hget("good_board_in_history", date_util.date_time_to_str(start, "%Y-%m-%d"), )
 
         if latest_boards is None:
