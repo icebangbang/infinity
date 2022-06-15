@@ -374,6 +374,7 @@ def sync_bellwether():
     data_list = ak.get_bellwether()
     for data in data_list:
         data['date'] = date_util.get_start_of_day(datetime.now())
+        data['update'] = datetime.now()
 
     special_stock = db['special_stock']
     for data in data_list:
