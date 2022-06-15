@@ -657,13 +657,14 @@ def pig_data():
 def get_stock_web(stock):
     belong = stock['belong']
     code = stock['code']
-    url =  "https://emweb.securities.eastmoney.com/PC_HSF10/CompanySurvey/PageAjax?code={}{}".format(belong,code)
+    url = "https://emweb.securities.eastmoney.com/PC_HSF10/CompanySurvey/PageAjax?code={}{}".format(belong, code)
     r = requests.get(url)
     json_data = r.json()
     web = json_data['jbzl'][0]['ORG_WEB']
     if web is None:
         return None
     return "http://{}".format(web.split('/')[0])
+
 
 def get_stock_business(stock):
     """
@@ -673,18 +674,53 @@ def get_stock_business(stock):
     """
     belong = stock['belong']
     code = stock['code']
-    url =  "https://emweb.securities.eastmoney.com/PC_HSF10/BusinessAnalysis/PageAjax?code={}{}".format(belong,code)
+    url = "https://emweb.securities.eastmoney.com/PC_HSF10/BusinessAnalysis/PageAjax?code={}{}".format(belong, code)
     r = requests.get(url)
     json_data = r.json()
     # 经营评述
     jyps = json_data['jyps'][0]['BUSINESS_REVIEW']
     zygcfx = json_data['zygcfx']
 
-    return dict(jyps=jyps,zygcfx=zygcfx)
+    return dict(jyps=jyps, zygcfx=zygcfx)
+
+
+def get_bellwether():
+    """
+    获取龙头和领头羊
+    :return:
+    """
+    url = "https://66.push2.eastmoney.com/api/qt/clist/get"
+    params = dict(
+        pn=1,
+        pz=20,
+        po=1,
+        np=1,
+        ut="bd1d9ddb04089700cf9c27f6f7426281",
+        fltt=2,
+        invt=2,
+        wbp2u="| 0 | 0 | 0 | web",
+        fid="f3",
+        fs="m:90",
+        t=2,
+        f="!50",
+        # fields="f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f12,f13,f14,f15,f16,f17,f18,f20,f21,f23,f24,f25,f26,f22,f33,f11,f62,f128,f136,f115,f152,f124,f107,f104,f105,f140,f141,f207,f208,f209,f222"
+        fields="f14,f128,f136,f140"
+    )
+    resp = requests.get(url, params)
+    result = resp.json()
+    data_list = result['data']['diff']
+    data_list = [dict(
+        industry=data['f14'],
+        bellwether=data['f128'],
+        bellwether_rate=data['f136'],
+        bellwhther_code = data['f140']
+    ) for data in data_list]
+    return data_list
 
 
 if __name__ == "__main__":
     # results = stock_board_concept_name_em()
     # r = chinese_cpi()
-    r = get_stock_web(dict(code="300763",belong="sz"))
+    # r = get_stock_web(dict(code="300763",belong="sz"))
+    r = get_bellwether()
     print(123)

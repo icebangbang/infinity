@@ -246,6 +246,10 @@ def stock_remind():
 
 
 def stock_remind_v2():
+    """
+    筛选个股结果存储
+    :return:
+    """
     now = datetime.now()
     # now = datetime(2022, 6, 10)
     if now.hour >= 16:
@@ -320,49 +324,15 @@ def stock_remind_v2():
         # 历史出现次数
         in_time = 0
         for stock_detail in stock_detail_list:
-            # if count >= 10:
-            #     break
-
-            # boards_of_stock = stock_detail['boards']
-            # if board in boards_of_stock:
-            #     # count = count + 1
-            #     stocks_in_front.append("{}({})".format(stock_detail['name'], stock_detail['rate']))
-            #     board_dict[board]['stocks'].append(dict(name=stock_detail['name'],rate=stock_detail['rate'],money=stock_detail['money_median']))
-
             industry = stock_detail['industry']
             if industry in board_dict.keys():
                 board_dict[industry]['stocks'].append(
                     dict(name=stock_detail['name'], rate=stock_detail['rate'], money=stock_detail['money_median']))
-
-        # time.sleep(3.5)
-        # resp = dingtalk_util.send_msg(msg)
-
         matched_result["boards"] = list(board_dict.values())
         matched_result["date"] = date_util.get_start_of_day(now)
         matched_result["update"] = now
-
-        msg = '提醒-------------------------结束一轮推送--------------------------'
-        # dingtalk_util.send_msg(msg)
-
         stock_remind_record = db["stock_remind_record"]
         stock_remind_record.update_one({"date": date_util.get_start_of_day(now)}, {"$set": matched_result}, upsert=True)
-        # for stock in stocks:
-        #
-        #     # name = stock['name']
-        #     # stock_code = stock['stock_code']
-        #     features = stock['features']
-        #     features['stock_code'] = stock['stock_code']
-        #     features['name'] = stock['name']
-        #     msg = msg + msg_template.format(**stock['features']) + '\n'
-        #
-        # headers = {'Content-Type': 'application/json'}
-        # d = {"msgtype": "text",
-        #      "text": {
-        #          "content": msg
-        #      }}
-        # requests.post(
-        #     "https://oapi.dingtalk.com/robot/send?access_token=8d6107691edc8c68957ad9b3b3e16eeccf4fd2ec005c86692fdeb648da6312b4",
-        #     json=d, headers=headers)
 
 
 def cal_stock_deviation(code, offset_day):
@@ -398,6 +368,16 @@ def cal_stock_deviation(code, offset_day):
     result['近{}日偏离值'.format(offset_day)] = deviation_value
 
     return result
+
+
+def sync_bellwether():
+    data_list = ak.get_bellwether()
+    for data in data_list:
+        data['date'] = date_util.get_start_of_day(datetime.now())
+
+    special_stock = db['special_stock']
+    for data in data_list:
+        special_stock.update_one(dict(industry=data['industry'], date=data['date']), {"$set": data}, upsert=True)
 
 
 if __name__ == "__main__":

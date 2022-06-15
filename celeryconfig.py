@@ -172,6 +172,9 @@ beat_schedule = {
     }, 'rps_analysis_30': {  # 个股
         "task": "app.main.task.stock_task.sync_rps_analysis_30",
         "schedule": 600
+    },'sync_bellwether': {  # 个股
+        "task": "app.main.task.stock_task.sync_bellwether",
+        "schedule": 30
     }
 
 }

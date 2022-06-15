@@ -291,4 +291,9 @@ def sync_rps_analysis_60(self):
 def sync_rps_analysis_30(self):
     report_service.rps_analysis(offset=-30)
 
+@celery.task(bind=True, base=MyTask, expire=1800)
+def sync_bellwether(self):
+    stock_service.sync_bellwether()
+
+
 
