@@ -14,9 +14,9 @@ from bson import ObjectId
 def group(targets: list, k):
     g = {}
     for target in targets:
-        collection = g.get(target['name'], [])
+        collection = g.get(target[k], [])
         collection.append(target)
-        g[target['name']] = collection
+        g[target[k]] = collection
     return g
 
 def is_not_empty(b: str):

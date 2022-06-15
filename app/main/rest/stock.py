@@ -92,29 +92,37 @@ def data_miner_with_store():
     now = date_util.get_latest_work_day()
     # 提前设置好的请求参数
     stock_remind_record = db['stock_remind_record']
+    special_stock = db['special_stock']
 
-    r = stock_remind_record.find_one({"date": date_util.get_start_of_day(now), "key": key})
+    dt = date_util.get_start_of_day(now)
+    r = stock_remind_record.find_one({"date": dt, "key": key})
 
     boards = r['boards']
     board_names = [board['board'] for board in boards]
     board_k_line_day = db['board_k_line_day']
     start = date_util.get_work_day(datetime.now(), 30)
-    # 获取所有数据点位
+    # 获取行业板块所有数据点位
     data_list = list(board_k_line_day.find({"name": {"$in": board_names}, "date": {
         "$gte": start,
         "$lte": datetime.now()
     }}))
 
+    stock_data_list = list(special_stock.find({"date":dt}))
+
     group = simple_util.group(data_list, "name")
+    special_stock_group = simple_util.group(stock_data_list,"industry")
 
     for board in boards:
         group_data = group[board['board']]
+        bellwether_detail = special_stock_group[board['board']][0]
 
         data_x = [date_util.date_time_to_str(data['date'], "%Y-%m-%d") for data in group_data]
         y = [[data['open'], data['close'], data['low'], data['high']] for data in group_data]
         high_list = [data['high'] for data in group_data]
         low_list = [data['low'] for data in group_data]
 
+        board['bellwether'] = bellwether_detail['bellwether']
+        board['bellwether_rate'] = bellwether_detail['bellwether_rate']
         board['option'] = dict(
             xAxis={
                 "show": False,
