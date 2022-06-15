@@ -8,7 +8,7 @@ class BaotuanAnalysis(Line):
     抱团分析图标
     """
 
-    def generate(self):
+    def generate(self,**kwargs):
         baotuan_analysis = db['baotuan_analysis']
         # 获取所有数据点位
         data_list = list(baotuan_analysis.find({}))

@@ -10,7 +10,7 @@ class StockListedAnalysis(Line):
     市场涨跌情况分析图表
     """
 
-    def generate(self):
+    def generate(self,**kwargs):
 
         stocks = stock_dao.get_all_stock(dict(code=1, name=1, _id=0,date=1),
                                          filter={"date":{"$gte":"2008-01-01"}})

@@ -9,7 +9,7 @@ class MarketStatusAnalysis(Line):
     市场涨跌情况分析图表
     """
 
-    def generate(self):
+    def generate(self,**kwargs):
         market_status = db['market_status']
         latest_point = market_status.find_one({},sort=[('date',-1)])
         if latest_point is None:
