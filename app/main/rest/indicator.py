@@ -176,15 +176,33 @@ def upLimit_back_detail():
                                        "date": date}))
 
     stocks = [dict(name=result['name'],
+                   code=result['code'],
                    continuous_up_limit_count_before=result['features']['continuous_up_limit_count_before']) for result
               in results]
+
+    codes = [result['code'] for result in results]
+
+    stock_map = stock_dao.get_stock_detail(codes)
+
     df = pd.DataFrame(stocks)
-    df['cut'] = pd.cut(df.continuous_up_limit_count_before, bins=[0, 1, 2, 3, 4, 5, 100],
-                       labels=["1", "2", "3", "4", "5", ">=6"],
+    df['cut'] = pd.cut(df.continuous_up_limit_count_before, bins=[0, 1, 2, 3, 4, 5, 100], labels=["1", "2", "3", "4", "5", ">=6"],
                        include_lowest=False)
 
-    # group_result = {cut: group.to_dict('records') for cut, group in df.groupby('cut')}
-    group_result = [dict(time=cut, stocks=[r['name'] for r in group.to_dict('records')]) for cut, group in
-                    df.groupby('cut')]
+    group_result = []
+    for cut, group in df.groupby('cut'):
+        records = group.to_dict('records')
+
+        industries = []
+        for record in records:
+            stock = stock_map[record['code']]
+
+            if "industry" in stock.keys():
+                industries.append(stock['industry'])
+        counter = collections.Counter(industries)
+
+        item = dict(time=cut, stocks=[r['name'] for r in records],
+                    industries=counter.most_common(len(counter)))
+
+        group_result.append(item)
 
     return restful.response(data=group_result)

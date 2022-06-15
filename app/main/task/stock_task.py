@@ -187,7 +187,7 @@ def sync_stock_data(self, codes, task_id):
 def submit_stock_feature(self, to_date=None, codes=None):
     if to_date is None:
         t = datetime.now()
-        if t.hour >= 19:
+        if t.hour >= 20:
             logging.info("will not run job after 16")
             return
         to_date = date_util.get_start_of_day(datetime.now())
