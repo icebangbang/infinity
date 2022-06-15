@@ -34,7 +34,7 @@ def stock_detail():
     if detail.get('custom') is None:
         detail['custom'] = []
 
-    trade_info =stock_info.get_stock_business(detail)
+    trade_info = stock_info.get_stock_business(detail)
     detail['trade_info'] = trade_info
 
     return restful.response(detail)
@@ -94,6 +94,43 @@ def data_miner_with_store():
     stock_remind_record = db['stock_remind_record']
 
     r = stock_remind_record.find_one({"date": date_util.get_start_of_day(now), "key": key})
+
+    boards = r['boards']
+    board_names = [board['board'] for board in boards]
+    board_k_line_day = db['board_k_line_day']
+    start = date_util.get_work_day(datetime.now(), 30)
+    # 获取所有数据点位
+    data_list = list(board_k_line_day.find({"name": {"$in": board_names}, "date": {
+        "$gte": start,
+        "$lte": datetime.now()
+    }}))
+
+    group = simple_util.group(data_list, "name")
+
+    for board in boards:
+        group_data = group[board['board']]
+
+        data_x = [date_util.date_time_to_str(data['date'], "%Y-%m-%d") for data in group_data]
+        y = [[data['open'], data['close'], data['low'], data['high']] for data in group_data]
+        high_list = [data['high'] for data in group_data]
+        low_list = [data['low'] for data in group_data]
+
+        board['option'] = dict(
+            xAxis={
+                "show": False,
+                "data": data_x
+            },
+            yAxis={
+                "max":max(high_list),
+                "min":min(low_list),
+                "show": False,
+            },
+            series=[
+                {
+                    "type": 'candlestick',
+                    "data": y}
+            ]
+        )
 
     return restful.response(r)
 

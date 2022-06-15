@@ -96,7 +96,7 @@ def chart_display():
     """
     name = request.args.get("name")
     chart_instance = chart_instance_dict[name]
-    data = chart_instance.generate()
+    data = chart_instance.generate(**request.args)
 
     return restful.response(data=data)
 

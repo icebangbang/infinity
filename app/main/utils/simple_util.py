@@ -11,12 +11,22 @@ from flask import request
 from bson import ObjectId
 
 
-def is_not_empty(b:str):
-    return b != None and b!=''
+def group(targets: list, k):
+    g = {}
+    for target in targets:
+        collection = g.get(target['name'], [])
+        collection.append(target)
+        g[target['name']] = collection
+    return g
 
-def is_empty(b:str):
+def is_not_empty(b: str):
+    return b != None and b != ''
+
+
+def is_empty(b: str):
     if b is None: return True
-    return b==''
+    return b == ''
+
 
 def list_file(rootdir, absolute=True):
     """
@@ -314,5 +324,5 @@ class DatetimeJsonEncoder(simplejson.JSONEncoder):
         if isinstance(o, datetime.datetime):
             # return o.isoformat(sep=" ")
             return o.strftime("%Y-%m-%d %H:%M:%S")
-        if isinstance(o,ObjectId):
+        if isinstance(o, ObjectId):
             return str(o)
