@@ -387,7 +387,8 @@ if __name__ == "__main__":
     # from_time = to_time - timedelta(739)
     # stock_filter.get_stock_status(from_time, to_time)
     # publish(3, 100)
-    stock_remind_v2()
+    # stock_remind_v2()
+    sync_bellwether()
     # stock_remind()
     # cal_stock_offset("000722",10)
 
