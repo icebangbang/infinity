@@ -1,7 +1,7 @@
 from app.main.stock.api import stock_info
 from app.main.stock.dao import stock_dao, k_line_dao
 from app.main.stock.service import stock_service, config_service, search_udf_service, stock_search_service
-from app.main.utils import restful, date_util, simple_util
+from app.main.utils import restful, date_util, simple_util, cal_util
 from . import rest
 from flask import request
 from app.main.utils import my_redis
@@ -93,6 +93,7 @@ def data_miner_with_store():
     # 提前设置好的请求参数
     stock_remind_record = db['stock_remind_record']
     special_stock = db['special_stock']
+    board_detail = db['board_detail']
 
     dt = date_util.get_start_of_day(now)
     r = stock_remind_record.find_one({"date": dt, "key": key})
@@ -106,21 +107,28 @@ def data_miner_with_store():
         "$gte": start,
         "$lte": datetime.now()
     }}))
-
+    board_detail_list = list(board_detail.find({"board":{"$in":board_names}}))
     stock_data_list = list(special_stock.find({"date":dt}))
 
     group = simple_util.group(data_list, "name")
     special_stock_group = simple_util.group(stock_data_list,"industry")
+    board_detail_group = simple_util.group(board_detail_list,"board")
 
     for board in boards:
         group_data = group[board['board']]
         bellwether_detail = special_stock_group[board['board']][0]
+        board_detail = board_detail_group[board['board']][0]
+        # 板块构成
+        stock_of_board_size = len(board_detail['codes'])
 
         data_x = [date_util.date_time_to_str(data['date'], "%Y-%m-%d") for data in group_data]
         y = [[data['open'], data['close'], data['low'], data['high']] for data in group_data]
         high_list = [data['high'] for data in group_data]
         low_list = [data['low'] for data in group_data]
 
+        # 计算比例
+
+        board['hit_rate'] = cal_util.get_rate(len(board['historyStocks']),stock_of_board_size)
         board['bellwether'] = bellwether_detail['bellwether']
         board['bellwether_rate'] = bellwether_detail['bellwether_rate']
         board['option'] = dict(
