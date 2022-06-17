@@ -259,7 +259,7 @@ def stock_remind_v2():
 
     query_store = db["ind_query_store"]
     query_list = list(query_store.find({"in_use": 1}))
-    day_span = 10
+    day_span = 20
     # name,params
     matched_result = {}
     for query in query_list:
@@ -274,22 +274,22 @@ def stock_remind_v2():
         latest_day = date_util.get_work_day(now, 1)
         # 回溯前几天的行情概览,将出现的板块加入缓存中
 
-        latest_boards = my_redis.hget_all("good_board_in_history")
+        latest_results = my_redis.hget_all("good_board_in_history2")
 
-        if len(latest_boards) < day_span:
+        if len(latest_results) < day_span:
             base = start
-            my_redis.delete("good_board_in_history")
+            my_redis.delete("good_board_in_history2")
             for i in range(day_span):
                 base = date_util.add_and_get_work_day(base, 1)
                 dt = date_util.date_time_to_str(base, "%Y-%m-%d")
                 request_body['date'] = dt
                 request_body['until'] = dt
                 result = stock_search_service.comprehensive_search(request_body)
-                board_counter = result['counter']
-                boards_in_front = list(board_counter.keys())[0:15]
-                my_redis.hset("good_board_in_history", dt, json.dumps(boards_in_front, ensure_ascii=False))
+                # board_counter = result['counter']
+                # boards_in_front = list(board_counter.keys())[0:15]
+                my_redis.hset("good_board_in_history2", dt, json.dumps(result, ensure_ascii=False))
                 # # n 天过期
-                # my_redis.expire("good_board_in_history", day_span * 24 * 60 * 60 * 1000)
+                # my_redis.expire("good_board_in_history2", day_span * 24 * 60 * 60 * 1000)
 
         request_body['date'] = origin_date
         request_body['until'] = origin_until
@@ -297,25 +297,35 @@ def stock_remind_v2():
         if result['size'] == 0: return
         board_counter = result['counter']
         boards_in_front = list(board_counter.keys())[0:15]
-        boards_in_front_fmt = []
 
         matched_result["name"] = name
         matched_result["key"] = key
 
+        # 需要展示的板块
         board_dict = {}
         for board in boards_in_front:
             in_time = 1
             base = start
+            stocks_set = set()
             for i in range(day_span):
                 base = date_util.add_and_get_work_day(base, 1)
-                boards_json = my_redis.hget("good_board_in_history",
+                # 历史搜索结果
+                search_result_json = my_redis.hget("good_board_in_history2",
                                             date_util.date_time_to_str(base, "%Y-%m-%d"))
-                boards_of_history = json.loads(boards_json)
-                if board in boards_of_history:
+                search_result = json.loads(search_result_json)
+                history_counter = search_result['counter']
+
+                stock_detail_list_history = [stock['name'] for stock in search_result['detail'] if stock['industry'] == board]
+                # 历史前20天命中的个股的结果
+                stocks_set.update(stock_detail_list_history)
+
+                # 排名前列的板块
+                front = list(history_counter.keys())[0:15]
+                if board in front:
                     in_time = in_time + 1
+
             count = board_counter[board]
-            content = "{}({})({})".format(board, count, in_time)
-            board_dict[board] = dict(board=board, count=count, inTime=in_time, stocks=[])
+            board_dict[board] = dict(board=board, count=count, inTime=in_time, stocks=[],historyStocks=list(stocks_set))
 
         stock_detail_list = result['detail']
 
@@ -328,7 +338,7 @@ def stock_remind_v2():
         matched_result["date"] = date_util.get_start_of_day(now)
         matched_result["update"] = now
         stock_remind_record = db["stock_remind_record"]
-        stock_remind_record.update_one({"date": date_util.get_start_of_day(now)}, {"$set": matched_result}, upsert=True)
+        stock_remind_record.update_one({"date": date_util.get_start_of_day(now),"key":key}, {"$set": matched_result}, upsert=True)
 
 
 def cal_stock_deviation(code, offset_day):
