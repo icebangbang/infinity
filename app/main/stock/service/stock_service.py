@@ -296,7 +296,7 @@ def stock_remind_v2():
         result = stock_search_service.comprehensive_search(request_body)
         if result['size'] == 0: return
         board_counter = result['counter']
-        boards_in_front = list(board_counter.keys())
+        boards_in_front = list(board_counter.keys())[0:15]
         boards_in_front_fmt = []
 
         matched_result["name"] = name
