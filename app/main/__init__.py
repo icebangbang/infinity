@@ -1,6 +1,3 @@
-from interval3 import Interval
-import pandas as pd
-import pickle
 
 
 def parse(condition_str):
@@ -14,6 +11,10 @@ def parse(condition_str):
     return start, end, f1, f2
 
 def run():
+    from interval3 import Interval
+    import pandas as pd
+    import pickle
+
     df = pd.read_excel("/Users/lifeng/Downloads/含钒-最佳值和操作范围0613.xls")
 
     rule_set = {}
