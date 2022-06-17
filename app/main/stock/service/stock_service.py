@@ -406,7 +406,7 @@ def get_full_stock_detail(name):
     # stock_detail = stock_dao.get_stock_detail_by_code(code)
     stock_detail = stock_dao.get_stock_detail_by_name(name)
     # 获取近30日k线图
-    now = date_util.get_start_of_day(datetime.now())
+    now = date_util.get_latest_work_day()
     code = stock_detail['code']
     k_line_data = k_line_dao.get_k_line_data_by_offset(now, -30, code=stock_detail['code'])
 
