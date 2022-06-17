@@ -129,6 +129,8 @@ def data_miner_with_store():
         # 计算比例
 
         board['hit_rate'] = cal_util.get_rate(len(board['historyStocks']),stock_of_board_size)
+        board['hit'] = len(board['historyStocks'])
+        board['total'] = stock_of_board_size
         board['bellwether'] = bellwether_detail['bellwether']
         board['bellwether_rate'] = bellwether_detail['bellwether_rate']
         board['option'] = dict(
