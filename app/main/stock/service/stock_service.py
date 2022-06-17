@@ -259,7 +259,7 @@ def stock_remind_v2():
 
     query_store = db["ind_query_store"]
     query_list = list(query_store.find({"in_use": 1}))
-    day_span = 5
+    day_span = 10
     # name,params
     matched_result = {}
     for query in query_list:
@@ -274,12 +274,11 @@ def stock_remind_v2():
         latest_day = date_util.get_work_day(now, 1)
         # 回溯前几天的行情概览,将出现的板块加入缓存中
 
-        latest_boards = None
-        # my_redis.delete("good_board_in_history")
-        # latest_boards = my_redis.hget("good_board_in_history", date_util.date_time_to_str(start, "%Y-%m-%d"), )
+        latest_boards = my_redis.hget_all("good_board_in_history")
 
-        if latest_boards is None:
+        if len(latest_boards) < day_span:
             base = start
+            my_redis.delete("good_board_in_history")
             for i in range(day_span):
                 base = date_util.add_and_get_work_day(base, 1)
                 dt = date_util.date_time_to_str(base, "%Y-%m-%d")
@@ -287,10 +286,10 @@ def stock_remind_v2():
                 request_body['until'] = dt
                 result = stock_search_service.comprehensive_search(request_body)
                 board_counter = result['counter']
-                boards_in_front = list(board_counter.keys())[0:30]
+                boards_in_front = list(board_counter.keys())[0:15]
                 my_redis.hset("good_board_in_history", dt, json.dumps(boards_in_front, ensure_ascii=False))
-                # n 天过期
-                my_redis.expire("good_board_in_history", day_span * 24 * 60 * 60 * 1000)
+                # # n 天过期
+                # my_redis.expire("good_board_in_history", day_span * 24 * 60 * 60 * 1000)
 
         request_body['date'] = origin_date
         request_body['until'] = origin_until
@@ -319,10 +318,7 @@ def stock_remind_v2():
             board_dict[board] = dict(board=board, count=count, inTime=in_time, stocks=[])
 
         stock_detail_list = result['detail']
-        stocks_in_front = []
-        count = 0
-        # 历史出现次数
-        in_time = 0
+
         for stock_detail in stock_detail_list:
             industry = stock_detail['industry']
             if industry in board_dict.keys():
@@ -388,8 +384,8 @@ if __name__ == "__main__":
     # from_time = to_time - timedelta(739)
     # stock_filter.get_stock_status(from_time, to_time)
     # publish(3, 100)
-    # stock_remind_v2()
-    sync_bellwether()
+    stock_remind_v2()
+    # sync_bellwether()
     # stock_remind()
     # cal_stock_offset("000722",10)
 
