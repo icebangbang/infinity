@@ -20,7 +20,6 @@ class Company:
     @classmethod
     def load(cls, code, name, features):
         instance = cls(code=code, name=name)
-        instance.features = features
 
         return instance
 

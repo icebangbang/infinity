@@ -105,9 +105,9 @@ def get_company_feature(code, date):
     """
     my_set = db['stock_feature']
     result = my_set.find_one({"code": code, "date": date})
-    if result is None: return None
-    company = Company.load(code, result['name'], result['features'])
-    return company
+    if result is None: return {}
+    # company = Company.load(code, result['name'], result['features'])
+    return result['features']
 
 
 def add_event(record):

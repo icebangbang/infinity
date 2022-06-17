@@ -56,20 +56,11 @@ def get_zt_pool():
 
     return df,industry
 
-def get_best(origin,industry):
-    name = industry.iloc[0].industry
-    selected = origin[origin['所属行业'] == name]
-    codes = selected['代码'].to_list()
-    details = stock_dao.get_stock_detail(codes)
 
 def get_stock_web(stock):
     return ak.get_stock_web(stock)
 
 def get_stock_business(stock):
-    def parse_time(df):
-        t = time.strptime(str(df["time"]), '%H%M%S')
-
-        return t
     business = ak.get_stock_business(stock)
     zygcfx = business['zygcfx']
     df = pd.DataFrame(zygcfx)
@@ -81,6 +72,7 @@ def get_stock_business(stock):
         group["REPORT_DATE"] = pd.to_datetime(df["REPORT_DATE"],format='%Y-%m-%d %H:%M:%S')
         group["REPORT_DATE"] = group["REPORT_DATE"].apply(lambda x: x.strftime("%Y-%m-%d"))
 
+        # 获取最新的报告,所以在第一重遍历中直接返回
         return group.to_dict(orient="records")
 
 

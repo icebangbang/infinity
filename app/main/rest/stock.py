@@ -40,6 +40,18 @@ def stock_detail():
     return restful.response(detail)
 
 
+@rest.route("/stock/full/detail", methods=['get'])
+def stock_full_detail():
+    """
+    个股详情查询
+    """
+    name = request.args.get("name")
+
+    full_detail = stock_service.get_full_stock_detail(name)
+
+    return restful.response(full_detail)
+
+
 @rest.route("/stock/deviation", methods=['get'])
 def offset_cal():
     """

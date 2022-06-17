@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 
 import pandas as pd
+
+from app.main.stock.api import stock_info
 from app.main.utils import my_redis
 
 from app.main.stock import constant
@@ -311,11 +313,12 @@ def stock_remind_v2():
                 base = date_util.add_and_get_work_day(base, 1)
                 # 历史搜索结果
                 search_result_json = my_redis.hget("good_board_in_history2",
-                                            date_util.date_time_to_str(base, "%Y-%m-%d"))
+                                                   date_util.date_time_to_str(base, "%Y-%m-%d"))
                 search_result = json.loads(search_result_json)
                 history_counter = search_result['counter']
 
-                stock_detail_list_history = [stock['name'] for stock in search_result['detail'] if stock['industry'] == board]
+                stock_detail_list_history = [stock['name'] for stock in search_result['detail'] if
+                                             stock['industry'] == board]
                 # 历史前20天命中的个股的结果
                 stocks_set.update(stock_detail_list_history)
 
@@ -325,7 +328,8 @@ def stock_remind_v2():
                     in_time = in_time + 1
 
             count = board_counter[board]
-            board_dict[board] = dict(board=board, count=count, inTime=in_time, stocks=[],historyStocks=list(stocks_set))
+            board_dict[board] = dict(board=board, count=count, inTime=in_time, stocks=[],
+                                     historyStocks=list(stocks_set))
 
         stock_detail_list = result['detail']
 
@@ -338,7 +342,8 @@ def stock_remind_v2():
         matched_result["date"] = date_util.get_start_of_day(now)
         matched_result["update"] = now
         stock_remind_record = db["stock_remind_record"]
-        stock_remind_record.update_one({"date": date_util.get_start_of_day(now),"key":key}, {"$set": matched_result}, upsert=True)
+        stock_remind_record.update_one({"date": date_util.get_start_of_day(now), "key": key}, {"$set": matched_result},
+                                       upsert=True)
 
 
 def cal_stock_deviation(code, offset_day):
@@ -377,6 +382,10 @@ def cal_stock_deviation(code, offset_day):
 
 
 def sync_bellwether():
+    """
+    同步行业板块领头羊数据
+    :return:
+    """
     data_list = ak.get_bellwether()
     for data in data_list:
         data['date'] = date_util.get_start_of_day(datetime.now())
@@ -387,6 +396,67 @@ def sync_bellwether():
         special_stock.update_one(dict(industry=data['industry'], date=data['date']), {"$set": data}, upsert=True)
 
 
+def get_full_stock_detail(name):
+    """
+    组合个股的详细情况
+    :return:
+    """
+    detail = {}
+    # 个股详情
+    # stock_detail = stock_dao.get_stock_detail_by_code(code)
+    stock_detail = stock_dao.get_stock_detail_by_name(name)
+    # 获取近30日k线图
+    now = date_util.get_start_of_day(datetime.now())
+    code = stock_detail['code']
+    k_line_data = k_line_dao.get_k_line_data_by_offset(now, -30, code=stock_detail['code'])
+
+    x = [date_util.date_time_to_str(data['date'], "%Y-%m-%d") for data in k_line_data]
+    y = [[data['open'], data['close'], data['low'], data['high'],1] for data in k_line_data]
+
+    high_list = [data['high'] for data in k_line_data]
+    low_list = [data['low'] for data in k_line_data]
+
+    # stock_feature
+    stock_business = stock_info.get_stock_business(stock_detail)
+
+    features = stock_dao.get_company_feature(code,now)
+
+    # 涨幅中位数
+    up_median = features['up_median']
+    # 跌幅中位数
+    down_median = features['down_median']
+
+    detail['up_median'] = up_median
+    detail['down_median'] = down_median
+    detail['stock_business'] = stock_business
+    detail['code'] = code
+
+    detail['option'] = dict(
+        grid={
+            "top": "0px",
+            "left": "0px",
+            "right": "0px",
+            "bottom": '0px',
+        },
+        xAxis={
+            "show": True,
+            "data": x
+        },
+        yAxis={
+            "max": max(high_list),
+            "min": min(low_list),
+            "show": True,
+        },
+        series=[
+            {
+                "type": 'candlestick',
+                "data": y}
+        ]
+    )
+
+    return detail
+
+
 if __name__ == "__main__":
     # stocks = stock_dao.get_all_stock(dict(code=1))
     # code_name_map = stock_dao.get_code_name_map()
@@ -394,7 +464,9 @@ if __name__ == "__main__":
     # from_time = to_time - timedelta(739)
     # stock_filter.get_stock_status(from_time, to_time)
     # publish(3, 100)
-    stock_remind_v2()
+    # stock_remind_v2()
+    detail = get_full_stock_detail("300763")
+    pass
     # sync_bellwether()
     # stock_remind()
     # cal_stock_offset("000722",10)
