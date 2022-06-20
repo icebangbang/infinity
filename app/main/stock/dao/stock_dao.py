@@ -72,7 +72,6 @@ def dump_stock_feature(companies: List[Company], date):
     start_of_day = date_util.get_start_of_day(date)
 
     my_set = db['stock_feature']
-    features = []
     update = []
 
     for company in companies:

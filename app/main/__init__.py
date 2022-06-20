@@ -16,7 +16,6 @@ def run():
     import pickle
 
     df = pd.read_excel("/Users/lifeng/Downloads/含钒-最佳值和操作范围0613.xls")
-
     rule_set = {}
     columns = list(df.columns)
     for index, row in df.iterrows():
@@ -26,7 +25,6 @@ def run():
                      upper_closed=end == "]")
         for column in columns:
             if column.startswith("CG"):
-                print(column)
                 inner_rule = rule_set.get(column, {})
 
                 start, end, f1, f2 = parse(row[column])
@@ -38,7 +36,15 @@ def run():
                 rule_set[column] = inner_rule
                 pass
 
-    a = rule_set
-    interval = rule_set['CG_LT_GL_GL04_CO2ZXFX'][list(rule_set['CG_LT_GL_GL04_CO2ZXFX'].keys())[0]]
-    interval > Interval(upper_bound=3)
-# pickle.dump(rule_set, open("./dist_dict.pk", "wb"))
+            if column == 'best_value':
+                inner_rule = rule_set.get(column, {})
+                inner_rule[i] = row[column]
+                rule_set[column] = inner_rule
+
+    # a = rule_set
+    # interval = rule_set['CG_LT_GL_GL04_CO2ZXFX'][list(rule_set['CG_LT_GL_GL04_CO2ZXFX'].keys())[0]]
+    # interval > Interval(upper_bound=3)
+    pickle.dump(rule_set, open("./dist_dict.pk", "wb"))
+
+if __name__ == "__main__":
+    run()

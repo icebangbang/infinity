@@ -226,6 +226,15 @@ def submit_stock_feature(self, to_date=None, codes=None):
 
 @celery.task(bind=True, base=MyTask, expires=36000)
 def sync_stock_feature(self, base_date, offset, codes, name_dict):
+    """
+    同步
+    :param self:
+    :param base_date: 基准时间
+    :param offset:
+    :param codes:
+    :param name_dict:
+    :return:
+    """
     if isinstance(base_date, int):
         # from_date = datetime.fromtimestamp(int(from_date))
         base_date = datetime.fromtimestamp(int(base_date))

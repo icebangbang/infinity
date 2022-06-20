@@ -83,11 +83,13 @@ task_routes = (
         'routing_key': 'day_level'
     }
     },
+    # 提交特征任务,做任务拆分
     {'app.main.task.board_task.submit_board_feature': {
         'queue': 'default',
         'routing_key': 'default'
     }
     },
+    # 拆分任务具体执行者
     {'app.main.task.board_task.sync_board_feature': {
         'queue': 'indicator',
         'routing_key': 'indicator'
@@ -160,19 +162,19 @@ beat_schedule = {
         "task": "app.main.task.remind_task.stock_remind",
         "schedule": 20
     },
-    'rps_analysis_250': {  # 个股
-        "task": "app.main.task.stock_task.sync_rps_analysis_250",
+    'rps_analysis_250': {  # 250日30日rps统计
+        "task": "app.main.task.st`ock_task.sync_rps_analysis_250",
         "schedule": 1200
-    }, 'rps_analysis_120': {  # 个股
+    }, 'rps_analysis_120': {  # 120日30日rps统计
         "task": "app.main.task.stock_task.sync_rps_analysis_120",
         "schedule": 1000
-    }, 'rps_analysis_60': {  # 个股
+    }, 'rps_analysis_60': {  # 60日rps统计
         "task": "app.main.task.stock_task.sync_rps_analysis_60",
         "schedule": 800
-    }, 'rps_analysis_30': {  # 个股
+    }, 'rps_analysis_30': {  # 30日rps统计
         "task": "app.main.task.stock_task.sync_rps_analysis_30",
         "schedule": 600
-    },'sync_bellwether': {  # 个股
+    },'sync_bellwether': {  # 同步领头羊
         "task": "app.main.task.stock_task.sync_bellwether",
         "schedule": 30
     }

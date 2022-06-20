@@ -254,7 +254,7 @@ def stock_remind_v2():
     """
     now = datetime.now()
     # now = datetime(2022, 6, 10)
-    if now.hour >= 16:
+    if now.hour >= 22:
         return
     if date_util.is_workday(now) is False or date_util.is_weekend(now):
         return
@@ -310,10 +310,11 @@ def stock_remind_v2():
             base = start
             stocks_set = set()
             for i in range(day_span):
-                base = date_util.add_and_get_work_day(base, 1)
                 # 历史搜索结果
                 search_result_json = my_redis.hget("good_board_in_history2",
                                                    date_util.date_time_to_str(base, "%Y-%m-%d"))
+                if search_result_json is None:
+                    print(123)
                 search_result = json.loads(search_result_json)
                 history_counter = search_result['counter']
 
@@ -326,6 +327,7 @@ def stock_remind_v2():
                 front = list(history_counter.keys())[0:15]
                 if board in front:
                     in_time = in_time + 1
+                base = date_util.add_and_get_work_day(base, 1)
 
             count = board_counter[board]
             board_dict[board] = dict(board=board, count=count, inTime=in_time, stocks=[],
@@ -464,8 +466,8 @@ if __name__ == "__main__":
     # from_time = to_time - timedelta(739)
     # stock_filter.get_stock_status(from_time, to_time)
     # publish(3, 100)
-    # stock_remind_v2()
-    detail = get_full_stock_detail("300763")
+    stock_remind_v2()
+    # detail = get_full_stock_detail("300763")
     pass
     # sync_bellwether()
     # stock_remind()

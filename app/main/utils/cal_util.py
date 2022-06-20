@@ -159,16 +159,20 @@ def get_williams(highest, lowest, close):
 
 
 if __name__ == "__main__":
-    print(_trace(math.atan(0.55)))
-    line = get_line([4.35, 4.48, 4.71, 4.82])
-    d = get_dis(line, [math.sqrt(2), 0])
-    print(d)
+    # print(_trace(math.atan(0.55)))
+    # line = get_line([4.35, 4.48, 4.71, 4.82])
+    # d = get_dis(line, [math.sqrt(2), 0])
+    # print(d)
+    #
+    # a = [1.066, 1.155,1.11, 1.251,1.24, 1.308, 1.443, 1.648, 1.918, 2.095, 2.157, 2.050, 2.063, 2.182, 2.397, 2.576,1]
+    # get_bot_line(a)
+    #
+    # pos_p, neg_p,total = get_reverse_point(a)
+    # print(total)
+    #
+    # print(a[total[-1]:])
+    # print(a[total[-2]:total[-1]+1])
 
-    a = [1.066, 1.155,1.11, 1.251,1.24, 1.308, 1.443, 1.648, 1.918, 2.095, 2.157, 2.050, 2.063, 2.182, 2.397, 2.576,1]
-    get_bot_line(a)
-
-    pos_p, neg_p,total = get_reverse_point(a)
-    print(total)
-
-    print(a[total[-1]:])
-    print(a[total[-2]:total[-1]+1])
+    c = [1,2,3,4,5,6,7,8,9]
+    [m,c] = get_line(c)
+    print(_trace(math.atan(1)))
