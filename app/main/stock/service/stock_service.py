@@ -277,8 +277,9 @@ def stock_remind_v2():
         # 回溯前几天的行情概览,将出现的板块加入缓存中
 
         latest_results = my_redis.hget_all("good_board_in_history2")
+        data_of_yesterday = date_util.add_and_get_work_day(now, 1)
 
-        if len(latest_results) < day_span:
+        if my_redis.hget("good_board_in_history2", data_of_yesterday) is None:
             base = start
             my_redis.delete("good_board_in_history2")
             for i in range(day_span):
@@ -310,6 +311,7 @@ def stock_remind_v2():
             base = start
             stocks_set = set()
             for i in range(day_span):
+                base = date_util.add_and_get_work_day(base, 1)
                 # 历史搜索结果
                 search_result_json = my_redis.hget("good_board_in_history2",
                                                    date_util.date_time_to_str(base, "%Y-%m-%d"))
@@ -327,7 +329,6 @@ def stock_remind_v2():
                 front = list(history_counter.keys())[0:15]
                 if board in front:
                     in_time = in_time + 1
-                base = date_util.add_and_get_work_day(base, 1)
 
             count = board_counter[board]
             board_dict[board] = dict(board=board, count=count, inTime=in_time, stocks=[],
@@ -413,7 +414,7 @@ def get_full_stock_detail(name):
     k_line_data = k_line_dao.get_k_line_data_by_offset(now, -30, code=stock_detail['code'])
 
     x = [date_util.date_time_to_str(data['date'], "%Y-%m-%d") for data in k_line_data]
-    y = [[data['open'], data['close'], data['low'], data['high'],1] for data in k_line_data]
+    y = [[data['open'], data['close'], data['low'], data['high'], 1] for data in k_line_data]
 
     high_list = [data['high'] for data in k_line_data]
     low_list = [data['low'] for data in k_line_data]
@@ -421,7 +422,7 @@ def get_full_stock_detail(name):
     # stock_feature
     stock_business = stock_info.get_stock_business(stock_detail)
 
-    features = stock_dao.get_company_feature(code,now)
+    features = stock_dao.get_company_feature(code, now)
 
     # 涨幅中位数
     up_median = features['up_median']
