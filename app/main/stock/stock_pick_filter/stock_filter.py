@@ -101,7 +101,7 @@ if __name__ == "__main__":
     now = datetime.now()
 
     while  base_date <= now:
-        companies = get_stock_status(base_date, offset, data_list=None, codes=['002594'], code_name_map=code_name_map)
+        companies = get_stock_status(base_date, offset, data_list=None, codes=['300026'], code_name_map=code_name_map)
         for company in companies:
             trend_service.save_stock_trend_with_company(company, base_date)
         print(companies)
