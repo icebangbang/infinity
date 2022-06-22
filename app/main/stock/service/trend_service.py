@@ -38,7 +38,9 @@ def save_stock_trend_with_company(company: Company, start_of_day: datetime):
     # 底分型趋势
     # 任何趋势变化,就新增一条记录
     trend_change_scope = []
-    trade_point_list = list(trade_point_set.find({"code": code}, sort=[("date", -1)]).limit(1))
+    trade_point_list = list(trade_point_set.find({"code": code,
+                                                  "date":{"$lte":start_of_day}},
+                                                 sort=[("date", -1)]).limit(1))
     trade_point = None
     # 历史记录不为空,就要做更新
     if len(trade_point_list) > 0:
@@ -64,13 +66,13 @@ def save_stock_trend_with_company(company: Company, start_of_day: datetime):
     if current_bot_type_slope > 0 and current_top_type_slope > 0:
         trend = "up"
     # 下行
-    if current_bot_type_slope > 0 and current_top_type_slope < 0:
+    if current_bot_type_slope >= 0 and current_top_type_slope <= 0:
         trend = "convergence"
     # 收敛
     if current_bot_type_slope < 0 and current_top_type_slope < 0:
         trend = "down"
     # 放大 这个案例应该会比较少
-    if current_bot_type_slope < 0 and current_top_type_slope >0:
+    if current_bot_type_slope <= 0 and current_top_type_slope >=0:
         trend = "enlarge"
 
     entity = dict(
@@ -78,6 +80,8 @@ def save_stock_trend_with_company(company: Company, start_of_day: datetime):
         is_in_use=1,
         current_bot_trend_size=current_bot_trend_size,
         current_top_trend_size=current_top_trend_size,
+        current_top_type_slope = current_top_type_slope,
+        current_bot_type_slope = current_bot_type_slope,
         trend=trend,  # 当前总体趋势
         prev_trend=0,  # 之前总体趋势
         inf_l_point_date=inf_l_point_date,  # 底分型趋势成立时间
