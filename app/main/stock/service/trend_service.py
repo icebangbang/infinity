@@ -83,7 +83,7 @@ def save_stock_trend_with_company(company: Company, start_of_day: datetime):
         current_top_type_slope = current_top_type_slope,
         current_bot_type_slope = current_bot_type_slope,
         trend=trend,  # 当前总体趋势
-        prev_trend=0,  # 之前总体趋势
+        prev_trend=trade_point['trend'] if trade_point is not None else None,  # 之前总体趋势
         inf_l_point_date=inf_l_point_date,  # 底分型趋势成立时间
         inf_h_point_date=inf_h_point_date,  # 顶分型趋势成立时间
         trend_change_scope=trend_change_scope,  # 趋势变化记录
