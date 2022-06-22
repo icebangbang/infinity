@@ -10,7 +10,7 @@ from app.main.stock.task_wrapper import TaskWrapper
 from app.main.task import task_constant
 from app.main.utils import date_util
 
-from app.main.stock.service import sync_kline_service, stock_service, report_service
+from app.main.stock.service import sync_kline_service, stock_service, report_service,trend_service
 from app.main.stock.stock_pick_filter import stock_filter
 from app.main.utils import my_redis, date_util
 import uuid
@@ -241,6 +241,7 @@ def sync_stock_feature(self, base_date, offset, codes, name_dict):
     companies = stock_filter.get_stock_status(base_date, int(offset), codes=codes, code_name_map=name_dict)
     if companies is not None:
         stock_dao.dump_stock_feature(companies, base_date)
+        trend_service.save_stock_trend_with_company(companies, base_date)
 
 
 @celery.task(bind=True, base=MyTask, expire=1800)

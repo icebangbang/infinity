@@ -5,6 +5,7 @@ import pandas as pd
 import logging
 import time
 
+from app.main.stock.service import trend_service
 from app.main.stock.sub_startegy.feature.box_type import BoxType
 from app.main.stock.sub_startegy.feature.box_boundary import BoxBoundary
 from app.main.stock.sub_startegy.feature.earning_rate_feature import EarningRateFeature
@@ -57,15 +58,15 @@ def get_stock_status(base_date, offset, data_list=None, codes=None, code_name_ma
     data_df = pd.DataFrame(input)
     data_df = data_df.set_index("date", drop=False)
 
-    sub_st = [StockStatusFeature,MarketStatusFeature,PriceMovementFeature,
+    sub_st = [StockStatusFeature, MarketStatusFeature, PriceMovementFeature,
               ShortTermFeature, ShapeFeature, BollFeature,
-              EarningRateFeature,BoxType, WilliamsFeature]
+              EarningRateFeature, BoxType, WilliamsFeature]
     # sub_st = [BoxType]
     kwargs = {}
 
     companies = list()
     for code, group in data_df.groupby("code"):
-        logging.info("feed {} to cerebro: {}, size: {}".format(code, date_util.dt_to_str(base_date),len(group)))
+        logging.info("feed {} to cerebro: {}, size: {}".format(code, date_util.dt_to_str(base_date), len(group)))
         if code in code_name_map.keys():
             name = code_name_map[code]
         else:
@@ -95,12 +96,16 @@ def get_stock_status(base_date, offset, data_list=None, codes=None, code_name_ma
 
 if __name__ == "__main__":
     code_name_map = stock_dao.get_code_name_map()
-    base_date = datetime(2022, 5, 20)
+    base_date = datetime(2022, 4, 20)
     offset = -252
+    now = datetime.now()
 
-    for key in code_name_map.keys():
-        companies = get_stock_status(base_date, offset, data_list=None, codes=['600734'], code_name_map=code_name_map)
+    while  base_date <= now:
+        companies = get_stock_status(base_date, offset, data_list=None, codes=['002594'], code_name_map=code_name_map)
+        for company in companies:
+            trend_service.save_stock_trend_with_company(company, base_date)
         print(companies)
+        base_date = date_util.add_and_get_work_day(base_date, 1)
     # stock_dao.dump_stock_feature(companies, to_date)
 
     # codes = ['600058', '600167', '600222', '600227', '600243', '600257', '600299', '600308', '600319', '600354', '600358', '600371', '600406', '600455', '600530', '600540', '600583', '600613', '600678', '600803', '600819', '600956', '600977', '601579', '603079', '603080', '603090', '603168', '603269', '603626', '603696', '603789', '603822', '603838', '603959', '603970', '603983', '603987', '000523', '000529', '000669', '000713', '000798', '000803', '000876', '000990', '000998', '002031', '002100', '002112', '002124', '002237', '002261', '002267', '002290', '002304', '002309', '002321', '002330', '002655', '002665', '002722', '002746', '002779', '002783', '002865', '003003', '300071', '300094', '300119', '300168', '300169', '300179', '300243', '300268', '300288', '300402', '300422', '300423', '300468', '300503', '300511', '300620', '300659', '300830', '300849', '300865', '300886', '300937']

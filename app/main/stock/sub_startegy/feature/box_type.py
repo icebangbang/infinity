@@ -52,10 +52,16 @@ class BoxType(SubST):
         results = []
 
         for i, item in enumerate(arrays):
-            if i == 0 or i == len(arrays) - 1:
+            if i == 0:
                 # results.append(dict(i=i, v=item))
                 results.append(dict(index=i, value=item))
                 continue
+            if i == len(arrays) - 1:
+                # pre = arrays[i - 1]
+                # if item >= pre:
+                #     results.append(dict(index=i, value=item))
+                continue
+
             target = item
             pre = arrays[i - 1]
             next = arrays[i + 1]
@@ -74,9 +80,14 @@ class BoxType(SubST):
         results = []
 
         for i, item in enumerate(arrays):
-            if i == 0 or i == len(arrays) - 1:
+            if i == 0:
                 # results.append(dict(i=i, v=item))
                 results.append(dict(index=i, value=item))
+                continue
+            if i == len(arrays) - 1:
+                # pre = arrays[i - 1]
+                # if item <= pre:
+                #     results.append(dict(index=i, value=item))
                 continue
             target = item
             pre = arrays[i - 1]
@@ -133,6 +144,8 @@ class BoxType(SubST):
             # 当前顶分型趋势的最大一个点的值
             current_max_high_type = max([i['value'] for i in current_trend_scope[0:-1]])
 
+            t = data.datetime.date(0).strftime("%Y-%m-%d")
+            print(t)
             inflection_point = current_trend_scope[0]
             inf_h_point_date = data.datetime.datetime(inflection_point['index'] - len(high) + 1)
             current_top_type_slope, c = cal_util.get_line([i['value'] for i in current_trend_scope])
