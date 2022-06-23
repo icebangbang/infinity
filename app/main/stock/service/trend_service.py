@@ -17,7 +17,7 @@ def save_stock_trend_with_company(company: Company, start_of_day: datetime):
     code = company.code
     features = company.features
 
-    trade_point_set = db['trade_point']
+    trade_point_set = db['trade_point2']
 
     stock_detail = stock_dao.get_stock_detail_by_name(name)
 
@@ -40,7 +40,7 @@ def save_stock_trend_with_company(company: Company, start_of_day: datetime):
     trend_change_scope = []
     trade_point_list = list(trade_point_set.find({"code": code,
                                                   "date":{"$lte":start_of_day}},
-                                                 sort=[("date", -1)]).limit(1))
+                                                 sort=[("date", -1),("_id",-1)]).limit(1))
     trade_point = None
     # 历史记录不为空,就要做更新
     if len(trade_point_list) > 0:
@@ -56,6 +56,7 @@ def save_stock_trend_with_company(company: Company, start_of_day: datetime):
         trade_point['current_bot_trend_size'] = current_bot_trend_size
         trade_point['current_top_trend_size'] = current_top_trend_size
         trade_point['update'] = start_of_day
+        trade_point['update_time'] = datetime.now()
         trade_point_set.update_one({"_id": trade_point["_id"]}, {"$set": trade_point})
         return
     elif trade_point is None:
@@ -91,6 +92,7 @@ def save_stock_trend_with_company(company: Company, start_of_day: datetime):
         name=name,
         code=code,
         update= start_of_day,
+        update_time = datetime.now(),
         inf_l_point_value=inf_l_point_value,
         inf_h_point_value=inf_h_point_value
     )
