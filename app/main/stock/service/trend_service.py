@@ -17,7 +17,7 @@ def save_stock_trend_with_company(company: Company, start_of_day: datetime):
     code = company.code
     features = company.features
 
-    trade_point_set = db['trade_point2']
+    trade_point_set = db['trade_point']
 
     stock_detail = stock_dao.get_stock_detail_by_name(name)
 
