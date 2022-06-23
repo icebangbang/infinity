@@ -153,7 +153,7 @@ class BoxType(SubST):
             company.set(constant.current_top_type_slope,current_top_type_slope)
             company.set(constant.prev_top_type_slope, prev_top_type_slope)
             company.set(constant.current_top_trend_size,
-                        current_trend_scope[-1]['index'] - current_trend_scope[0]['index'])
+                        len(high)-1 - current_trend_scope[0]['index'])
             company.set(constant.inf_h_point_date, inf_h_point_date)
             company.set(constant.inf_h_point_value, inflection_point['value'])
             company.set(constant.inf_h_point_value, inflection_point['value'])
@@ -189,7 +189,7 @@ class BoxType(SubST):
 
             company.set(constant.current_bot_trend_size,
                         current_trend_scope[-1]['index'] - current_trend_scope[0]['index'])
-            company.set(constant.prev_bot_trend_size, prev_trend_scope[-1]['index'] - prev_trend_scope[0]['index'])
+            company.set(constant.prev_bot_trend_size, len(low)-1 - prev_trend_scope[0]['index'])
 
             company.set(constant.inf_l_point_date, inf_l_point_date)
             company.set(constant.inf_l_point_value, inflection_point['value'])

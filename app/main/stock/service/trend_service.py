@@ -109,9 +109,24 @@ def save_stock_trend_with_company(company: Company, start_of_day: datetime):
         trade_point_set.update_one({"_id": trade_point["_id"]}, {"$set": {"is_in_use": 0}})
 
 
-def save_stock_trend(code, name, ):
-    """
-    保存当前和过去的趋势
-    :return:
-    """
-    pass
+if __name__ == "__main__":
+    import pandas as pd
+
+    now = datetime.now()
+    start_of_day = date_util.get_start_of_day(now)
+    trade_point_set = db['trade_point']
+    trade_point_list = list(trade_point_set.find({"update":start_of_day,"trend":"up","prev_trend":"convergence"}))
+
+
+    df = pd.DataFrame(trade_point_list)
+
+    for industry, group in df.groupby("industry"):
+        l = len(group)
+        if l >=10:
+            print(industry,group.to_dict())
+        # print(industry,len(group))
+
+
+
+
+
