@@ -94,6 +94,7 @@ def get_stock_status(base_date, offset, data_list=None, codes=None, code_name_ma
     return companies
 
 
+
 if __name__ == "__main__":
     code_name_map = stock_dao.get_code_name_map()
     base_date = datetime(2022, 4, 20)

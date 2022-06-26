@@ -58,6 +58,11 @@ task_routes = (
         'routing_key': 'default'
     }
     },
+    {'app.main.task.trend_task.submit_trend_task': {
+        'queue': 'default',
+        'routing_key': 'default'
+    }
+    },
     {'app.main.task.stock_task.submit_stock_ind_task': {
         'queue': 'default',
         'routing_key': 'default'
@@ -67,6 +72,10 @@ task_routes = (
         'queue': 'indicator',
         'routing_key': 'indicator'
     }
+    },
+    {'app.main.task.trend_task.sync_trend_task': {
+        'queue': 'indicator',
+        'routing_key': 'indicator'}
     },
     {'app.main.task.board_task.sync_board_k_line': {
         'queue': 'day_level',

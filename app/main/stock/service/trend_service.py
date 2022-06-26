@@ -9,16 +9,7 @@ from datetime import datetime
 
 from app.main.utils import date_util
 
-
-def save_stock_trend_with_company(company: Company, start_of_day: datetime):
-    """
-    保存当前和过去的趋势数据
-    :return:
-    """
-    name = company.name
-    code = company.code
-    features = company.features
-
+def save_stock_trend_with_features(code, name, features, start_of_day:datetime):
     trade_point_set = db['trade_point']
 
     stock_detail = stock_dao.get_stock_detail_by_name(name)
@@ -29,6 +20,8 @@ def save_stock_trend_with_company(company: Company, start_of_day: datetime):
     current_top_type_slope = features[constant.current_top_type_slope]
     # 当前底分型趋势的交易日数
     current_bot_trend_size = features[constant.current_bot_trend_size]
+    prev_top_type_slope = features[constant.prev_top_type_slope]
+    prev_bot_type_slope = features[constant.prev_bot_type_slope]
     current_top_trend_size = features[constant.current_top_trend_size]
     inf_l_point_date = features[constant.inf_l_point_date]
     inf_h_point_date = features[constant.inf_h_point_date]
@@ -91,6 +84,8 @@ def save_stock_trend_with_company(company: Company, start_of_day: datetime):
         current_top_trend_size=current_top_trend_size,
         current_top_type_slope=current_top_type_slope,
         current_bot_type_slope=current_bot_type_slope,
+        prev_top_type_slope=prev_top_type_slope,
+        prev_bot_type_slope=prev_bot_type_slope,
         trend=trend,  # 当前总体趋势
         prev_trend=trade_point['trend'] if trade_point is not None else None,  # 之前总体趋势
         inf_l_point_date=inf_l_point_date,  # 底分型趋势成立时间
@@ -109,24 +104,29 @@ def save_stock_trend_with_company(company: Company, start_of_day: datetime):
         trade_point_set.update_one({"_id": trade_point["_id"]}, {"$set": {"is_in_use": 0}})
 
 
+def save_stock_trend_with_company(company: Company, start_of_day: datetime):
+    """
+    保存当前和过去的趋势数据
+    :return:
+    """
+    name = company.name
+    code = company.code
+    features = company.features
+
+    save_stock_trend_with_features(name,code,features,start_of_day)
+
 if __name__ == "__main__":
     import pandas as pd
 
     now = datetime.now()
     start_of_day = date_util.get_start_of_day(now)
     trade_point_set = db['trade_point']
-    trade_point_list = list(trade_point_set.find({"update":start_of_day,"trend":"up","prev_trend":"convergence"}))
-
+    trade_point_list = list(trade_point_set.find({"update": start_of_day, "trend": "up", "prev_trend": "convergence"}))
 
     df = pd.DataFrame(trade_point_list)
 
     for industry, group in df.groupby("industry"):
         l = len(group)
-        if l >=10:
-            print(industry,group.to_dict())
+        if l >= 10:
+            print(industry, group.to_dict())
         # print(industry,len(group))
-
-
-
-
-
