@@ -27,7 +27,7 @@ def maunlly():
 
 
 @rest.route("/celery/stock/trend", methods=['post'])
-def get_stock_feature():
+def get_stock_trend():
     body = request.json
     date_start_str = body.get("start",None)
     date_end_str = body.get("end",None)
