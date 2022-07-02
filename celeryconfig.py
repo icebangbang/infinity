@@ -143,8 +143,12 @@ beat_schedule = {
         "task": "app.main.task.stock_task.submit_stock_feature",
         "schedule": 300  # 每5分钟执行一次
     },
-    'get_board_feature': {
-        "task": "app.main.task.board_task.submit_board_feature",
+    'get_trend_point': { # 趋势数据收集
+        "task": "app.main.task.trend_task.submit_trend_task",
+        "schedule": 600  # 每10分钟执行一次
+    },
+    'get_trend_data': { # 趋势数据聚合
+        "task": "app.main.task.trend_task.get_trend_data_task",
         "schedule": 120
     },
     'sync_macrodata': {

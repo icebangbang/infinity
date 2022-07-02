@@ -6,7 +6,7 @@ import pandas as pd
 
 
 def run_day():
-    r = db.trade_point.find(
+    r = db.trend_point.find(
         {"update": date_util.get_latest_work_day()})
 
     result = list(r)
@@ -21,7 +21,7 @@ def run_week():
     week_start = date_util.get_week_start(now)
     week_end = date_util.get_week_end(now)
 
-    r = db.trade_point.find(
+    r = db.trend_point.find(
         {"update": {
             "$gt": week_start,
             "$lt": week_end
@@ -33,7 +33,7 @@ def run_week():
 
 
 def run_another():
-    r = db.trade_point.find(
+    r = db.trend_point.find(
         {"update": datetime(2022, 6, 30, 0, 0, 0)})
     result = list(r)
     df = pd.DataFrame(result)
@@ -74,7 +74,7 @@ def get_industry_composition(df):
 
 if __name__ == "__main__":
     # run_another()
-    r = db.trade_point.find(
+    r = db.trend_point.find(
         {"date": {"$lte": datetime(2022, 6, 30, 0, 0, 0)},
          "update": {"$gte": datetime(2022, 6, 30, 0, 0, 0)}}
        )

@@ -29,7 +29,20 @@ def submit_trend_task(self,date):
         codes_group = codes[i:i + step]
         name_dict = {code: code_name_map[code] for code in codes_group}
         timestamp = int(time.mktime(date.timetuple()))
-        sync_trend_task.apply_async(args=[timestamp, codes_group, name_dict])
+        sync_trend_task.apply_async(args=[timestamp, codes_group, name_dict])\
+
+
+@celery.task(bind=True, base=MyTask, expires=180)
+def get_trend_data_task(self,date):
+    """
+    将趋势变化数据聚合
+    :param self:
+    :param date:
+    :return:
+    """
+    date = datetime.now()
+    trend_service.get_trend_size_info(date,date)
+
 
 
 # 同步趋势线

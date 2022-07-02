@@ -21,13 +21,13 @@ class TrendAnaysis(Line):
         boards = board_detail.find({"type": 2}).sort("size",-1).skip(industryStart).limit(industryEnd - industryStart)
         industrys = [ board['board'] for board in boards]
 
-        trade_data = db['trade_data']
+        trend_data = db['trend_data']
         end = date_util.get_latest_work_day()
         start = date_util.get_work_day(end, 30)
 
         data_x = [date_util.date_time_to_str(date, "%m-%d") for date in WorkDayIterator(start, end)]
 
-        trend_data_list = list(trade_data.find({"industry": {"$in": industrys},
+        trend_data_list = list(trend_data.find({"industry": {"$in": industrys},
                                                 "date": {"$gte": start, "$lte": end},
                                                 "trend": trend
                                                 }))
@@ -37,7 +37,7 @@ class TrendAnaysis(Line):
         for key, group in df.groupby(['industry']):
             data_y_array[index]['name'] = key
             for point in group.to_dict("records"):
-                data_y_array[index]['y'].append(point['size'])
+                data_y_array[index]['y'].append(point['rate'])
             index = index + 1
         # y轴组合
         yAxis_array = [
