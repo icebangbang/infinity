@@ -58,7 +58,7 @@ class BoxType(SubST):
                 continue
             if i == len(arrays) - 1:
                 pre = results[-1]['value']
-                if item >= pre:
+                if item > pre:
                     results.append(dict(index=i, value=item))
                 continue
 
@@ -86,7 +86,7 @@ class BoxType(SubST):
                 continue
             if i == len(arrays) - 1:
                 pre = results[-1]['value']
-                if item <= pre:
+                if item < pre:
                     results.append(dict(index=i, value=item))
                 continue
             target = item

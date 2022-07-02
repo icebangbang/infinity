@@ -93,6 +93,8 @@ def sync():
 
     for value in stock_dict.values():
         stock_detail.update_one({"code": value['code']}, {"$set": value}, upsert=True)
+    for board in board_list:
+        board['size'] = len(board['codes'])
     board_detail.insert_many(board_list)
 
 

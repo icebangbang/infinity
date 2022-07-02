@@ -8,11 +8,13 @@ from app.main.stock.dao import stock_dao
 from datetime import datetime
 
 from app.main.utils import date_util
+from app.main.utils.date_util import WorkDayIterator
 
-def save_stock_trend_with_features(code, name, features, start_of_day:datetime):
+
+def save_stock_trend_with_features(code, name, features, start_of_day: datetime):
     trade_point_set = db['trade_point']
 
-    stock_detail = stock_dao.get_stock_detail_by_name(name)
+    stock_detail = stock_dao.get_stock_detail_by_code(code)
 
     # 当前底分型趋势的斜率
     current_bot_type_slope = features[constant.current_bot_type_slope]
@@ -113,20 +115,47 @@ def save_stock_trend_with_company(company: Company, start_of_day: datetime):
     code = company.code
     features = company.features
 
-    save_stock_trend_with_features(name,code,features,start_of_day)
+    save_stock_trend_with_features(code, name, features, start_of_day)
+
+
+def get_trend_size_info(start, end):
+    """
+    获取各个趋势分组数据
+    :return:
+    """
+    for date in WorkDayIterator(start, end):
+        trade_point_set = db['trade_point']
+        r = list(trade_point_set.find(
+            {"date": {"$lte": date},
+             "update": {"$gte": date}}))
+
+        df = pd.DataFrame(r)
+        series = df.groupby(['industry', 'trend']).size()
+        series_to_dict = series.to_dict()
+        result_list = [dict(industry=k[0], trend=k[1], size=v, date=date) for k, v in series_to_dict.items()]
+
+        for result in result_list:
+            print(result)
+            db.trade_data.update_one(
+                {"industry": result["industry"], "trend": result["trend"],
+                 "date": result['date']}, {"$set": result},
+                upsert=True)
+
+
 
 if __name__ == "__main__":
     import pandas as pd
 
-    now = datetime.now()
-    start_of_day = date_util.get_start_of_day(now)
-    trade_point_set = db['trade_point']
-    trade_point_list = list(trade_point_set.find({"update": start_of_day, "trend": "up", "prev_trend": "convergence"}))
-
-    df = pd.DataFrame(trade_point_list)
-
-    for industry, group in df.groupby("industry"):
-        l = len(group)
-        if l >= 10:
-            print(industry, group.to_dict())
-        # print(industry,len(group))
+    # now = datetime.now()
+    # start_of_day = date_util.get_start_of_day(now)
+    # trade_point_set = db['trade_point']
+    # trade_point_list = list(trade_point_set.find({"update": start_of_day, "trend": "up", "prev_trend": "convergence"}))
+    #
+    # df = pd.DataFrame(trade_point_list)
+    #
+    # for industry, group in df.groupby("industry"):
+    #     l = len(group)
+    #     if l >= 10:
+    #         print(industry, group.to_dict())
+    # print(industry,len(group))
+    get_trend_size_info(datetime(2022, 5, 9),datetime(2022,7,1))

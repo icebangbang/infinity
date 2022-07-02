@@ -97,12 +97,12 @@ def get_stock_status(base_date, offset, data_list=None, codes=None, code_name_ma
 
 if __name__ == "__main__":
     code_name_map = stock_dao.get_code_name_map()
-    base_date = datetime(2022, 4, 20)
+    base_date = datetime(2022, 6, 22)
     offset = -252
     now = datetime.now()
 
     while  base_date <= now:
-        companies = get_stock_status(base_date, offset, data_list=None, codes=['300857'], code_name_map=code_name_map)
+        companies = get_stock_status(base_date, offset, data_list=None, codes=['002492'], code_name_map=code_name_map)
         for company in companies:
             trend_service.save_stock_trend_with_company(company, base_date)
         print(companies)

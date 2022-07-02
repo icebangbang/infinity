@@ -14,7 +14,7 @@ def parse_date_time(dt_str, fmt="%Y-%m-%d %H:%M:%S") -> datetime:
     :return:
     """
     if dt_str is None: return dt_str
-    if not isinstance(dt_str,str): return dt_str
+    if not isinstance(dt_str, str): return dt_str
 
     time = datetime.strptime(dt_str, fmt)
     return time
@@ -29,9 +29,11 @@ def get_days_between(end: datetime, start: datetime) -> int:
 
     return int(secokds / (24 * 60 * 60))
 
+
 def get_start_day_of_new():
     now = datetime.now()
     return datetime(now.year, now.month, now.day)
+
 
 def get_start_of_day(dt: datetime) -> datetime:
     return datetime(dt.year, dt.month, dt.day)
@@ -92,6 +94,7 @@ def get_work_day(now, offset):
 
     return get_start_of_day(now - timedelta(days=offset))
 
+
 def get_latest_work_day():
     """
     倒推工作日
@@ -102,10 +105,11 @@ def get_latest_work_day():
     d = get_start_of_day(datetime.now())
     while True:
         if is_workday(d) is False or is_weekend(d):
-            d = d-timedelta(days=1)
+            d = d - timedelta(days=1)
         else:
             break
     return d
+
 
 def add_and_get_work_day(now, offset):
     """
@@ -144,10 +148,61 @@ def is_valid_date(str):
         return False
 
 
+def get_week_start(t: datetime):
+    """
+    判断一周开始的时间
+    :param t:
+    :return:
+    """
+    index = t.weekday()
+    span = index - 0
+    start = t - timedelta(span)
+    return get_start_of_day(start)
+
+
+def get_week_end(t: datetime, if_work_day: bool = True):
+    """
+
+    :param t:
+    :param if_work_day:
+    :return:
+    """
+    i = 4 if if_work_day else 6
+
+    index = t.weekday()
+
+    span = index - i
+    start = t - timedelta(span)
+    return get_end_of_day(start)
+
+
+class WorkDayIterator(object):
+    def __init__(self,start,end):
+        self.date = start
+        self.end = end
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.date <= self.end:
+            val = self.date
+            self.date = add_and_get_work_day(val,1)
+            return val
+        else:
+            raise StopIteration
+
+
+
 if __name__ == "__main__":
     # d = parse_date_time("20210823212121", fmt="%Y%m%d%H%M%S")
     # d2 = parse_date_time("20210829121212", fmt="%Y%m%d%H%M%S")
     # print(get_friday_of_week())
     # now = datetime.now() - timedelta(days=10)
     # print(now.weekday())
-    print(is_workday(datetime(2022, 10, 7)))
+    # print(is_workday(datetime(2022, 10, 7)))
+    # print(get_week_start(datetime.now()))
+
+    values = WorkDayIterator(datetime(2022, 6, 1),datetime(2022, 6, 2))
+    for v in values:
+        print(v, end=' ')
