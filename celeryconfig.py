@@ -63,6 +63,11 @@ task_routes = (
         'routing_key': 'default'
     }
     },
+    {'app.main.task.trend_task.get_trend_data_task': {
+        'queue': 'day_level',
+        'routing_key': 'day_level'
+    }
+    },
     {'app.main.task.stock_task.submit_stock_ind_task': {
         'queue': 'default',
         'routing_key': 'default'
@@ -143,11 +148,11 @@ beat_schedule = {
         "task": "app.main.task.stock_task.submit_stock_feature",
         "schedule": 300  # 每5分钟执行一次
     },
-    'get_trend_point': { # 趋势数据收集
+    'get_trend_point': {  # 趋势数据收集
         "task": "app.main.task.trend_task.submit_trend_task",
         "schedule": 600  # 每10分钟执行一次
     },
-    'get_trend_data': { # 趋势数据聚合
+    'get_trend_data': {  # 趋势数据聚合
         "task": "app.main.task.trend_task.get_trend_data_task",
         "schedule": 120
     },
@@ -187,7 +192,7 @@ beat_schedule = {
     }, 'rps_analysis_30': {  # 30日rps统计
         "task": "app.main.task.stock_task.sync_rps_analysis_30",
         "schedule": 600
-    },'sync_bellwether': {  # 同步领头羊
+    }, 'sync_bellwether': {  # 同步领头羊
         "task": "app.main.task.stock_task.sync_bellwether",
         "schedule": 30
     }
