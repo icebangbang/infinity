@@ -14,7 +14,7 @@ from app.main.utils import date_util
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
-def submit_trend_task(self,date):
+def submit_trend_task(self,date=None):
     stocks = stock_dao.get_all_stock(dict(code=1))
     codes = [stock['code'] for stock in stocks]
     code_name_map = stock_dao.get_code_name_map()
@@ -33,7 +33,7 @@ def submit_trend_task(self,date):
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
-def get_trend_data_task(self,date):
+def get_trend_data_task(self):
     """
     将趋势变化数据聚合
     :param self:
