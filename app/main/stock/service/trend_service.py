@@ -132,7 +132,7 @@ def get_trend_size_info(start, end):
         r = list(trend_point_set.find(
             {"date": {"$lte": date},
              "update": {"$gte": date}}))
-
+        if len(r) is None: continue
         df = pd.DataFrame(r)
         series = df.groupby(['industry', 'trend']).size()
         series_to_dict = series.to_dict()
