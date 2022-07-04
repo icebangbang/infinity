@@ -39,16 +39,8 @@ def get_stock_trend():
         date_start = datetime.now()
         date_end = datetime.now()
 
-    days = date_util.get_days_between(date_end, date_start)
-    logging.info("days span is {}".format(days))
-    if days == 0:
-        logging.info("submit trend task:{}".format(date_start_str))
-        trend_task.submit_trend_task(date_util.to_timestamp(date_start))
-    else:
-        for day in range(days):
-            date_start = date_start + timedelta(days=1)
-            logging.info("submit trend task:{}".format(date_util.dt_to_str(date_start)))
-            trend_task.submit_trend_task(date_util.to_timestamp(date_start))
+    trend_task.submit_trend_task(date_util.to_timestamp(date_start),date_util.to_timestamp(date_end))
+
 
     return restful.response("ok")
 
