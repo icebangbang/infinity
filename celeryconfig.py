@@ -150,7 +150,7 @@ beat_schedule = {
     },
     'get_trend_point': {  # 趋势数据收集
         "task": "app.main.task.trend_task.submit_trend_task",
-        "schedule": 6000  # 每10分钟执行一次
+        "schedule": 600000  # 每10分钟执行一次
     },
     'get_trend_data': {  # 趋势数据聚合
         "task": "app.main.task.trend_task.get_trend_data_task",
