@@ -15,6 +15,9 @@ def sync():
 
     for i,stock in enumerate(stocks):
         code = stock["code"]
+
+        if code != "600091":continue
+
         logging.info("code {}:{}".format(code,i))
         df = ak.stock_ind(code, code_map)
         ind_dict = df.to_dict("records")[0]

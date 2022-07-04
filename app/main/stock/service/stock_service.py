@@ -279,7 +279,8 @@ def stock_remind_v2():
         latest_results = my_redis.hget_all("good_board_in_history2")
         data_of_yesterday = date_util.add_and_get_work_day(now, 1)
 
-        if my_redis.hget("good_board_in_history2", data_of_yesterday) is None:
+        if my_redis.hget("good_board_in_history2",
+                         date_util.date_time_to_str(data_of_yesterday, "%Y-%m-%d")) is None:
             base = start
             my_redis.delete("good_board_in_history2")
             for i in range(day_span):

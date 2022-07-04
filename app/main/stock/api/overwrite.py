@@ -167,6 +167,8 @@ def stock_ind(symbol, code_id_dict=None):
         "staticPERation",
         "RollingPERations"
     ]
+    df.loc[df["MarketValue"] == '-', ["MarketValue"]] = 0
+    df.loc[df["flowCapitalValue"] == '-', ["flowCapitalValue"]] = 0
     df.loc[df["staticPERation"] == '-', ["staticPERation"]] = 0
     df.loc[df["PERation"] == '-', ["PERation"]] = 0
     df.loc[df["RollingPERations"] == '-', ["RollingPERations"]] = 0

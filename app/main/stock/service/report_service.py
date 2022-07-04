@@ -253,17 +253,24 @@ def market_status_analysis(date=None):
     result['limit_up_stock'] = limit_up_stock
     result['limit_down_stock'] = limit_down_stock
 
+    hour = date.hour
     min = date.minute if date.minute % 5 == 0 else (int(date.minute / 5) + 1) * 5
-    dt = datetime(date.year, date.month, date.day, date.hour, min, 0)
+    if min == 60:
+        min = 0
+        hour = hour+1
+    dt = datetime(date.year, date.month, date.day, hour, min, 0)
 
     result['date'] = dt
     market_status.update_one({"date": dt}, {"$set": result}, upsert=True)
 
 
 if __name__ == "__main__":
-    rps_analysis(datetime(2022, 5, 20), -250)
-    rps_analysis(datetime(2022, 5, 20), -120)
-    rps_analysis(datetime(2022, 5, 20), -60)
-    rps_analysis(datetime(2022, 5, 20), -30)
+    # rps_analysis(datetime(2022, 5, 20), -250)
+    # rps_analysis(datetime(2022, 5, 20), -120)
+    # rps_analysis(datetime(2022, 5, 20), -60)
+    # rps_analysis(datetime(2022, 5, 20), -30)
     # up_down_limit_analysis(datetime(2022, 5, 13))
     # market_status_analysis(datetime(2022, 4, 29,23,37,0))
+
+    print((int(56 / 5) + 1) * 5)
+
