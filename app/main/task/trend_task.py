@@ -40,7 +40,7 @@ def get_trend_data_task(self):
     :param date:
     :return:
     """
-    date = datetime.now()
+    date = date_util.get_end_of_day(datetime.now())
     trend_service.get_trend_size_info(date,date)
 
 

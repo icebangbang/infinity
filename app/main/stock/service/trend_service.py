@@ -160,4 +160,4 @@ if __name__ == "__main__":
     #     if l >= 10:
     #         print(industry, group.to_dict())
     # print(industry,len(group))
-    get_trend_size_info(datetime(2022, 5, 9), datetime(2022, 7, 1))
+    get_trend_size_info(datetime.now(), datetime.now())
