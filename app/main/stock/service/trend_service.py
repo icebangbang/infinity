@@ -13,7 +13,7 @@ from app.main.utils.date_util import WorkDayIterator
 
 def save_stock_trend_with_features(code, name, features, start_of_day: datetime):
     trend_point_set = db['trend_point']
-
+    print("save_stock_trend_with_features code ",code)
     stock_detail = stock_dao.get_stock_detail_by_code(code)
 
     # 当前底分型趋势的斜率
@@ -147,8 +147,10 @@ def get_trend_size_info(start, end):
 
 
 if __name__ == "__main__":
-    for date in WorkDayIterator(datetime(2022, 4, 1), datetime(2022, 7, 4)):
+    # for date in WorkDayIterator(datetime(2022, 4, 1), datetime(2022, 7, 4)):
 
-        features = stock_dao.get_company_feature("000338", date)
-        save_stock_trend_with_features("000338", "潍柴动力", features, date)
-    # get_trend_size_info(datetime(2022, 4, 1), datetime(2022, 7, 4))
+        # features = stock_dao.get_company_feature("000338", date)
+        # save_stock_trend_with_features("000338", "潍柴动力", features, date)
+    get_trend_size_info(datetime(2022, 4, 1), datetime(2022, 7, 4))
+
+    print("code","300763")
