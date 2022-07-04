@@ -6,7 +6,7 @@ from app.main.stock import constant
 from app.main.stock.company import Company
 from app.main.stock.dao import stock_dao
 from datetime import datetime
-
+import pandas as pd
 from app.main.utils import date_util
 from app.main.utils.date_util import WorkDayIterator
 
@@ -147,7 +147,6 @@ def get_trend_size_info(start, end):
 
 
 if __name__ == "__main__":
-    import pandas as pd
 
     # now = datetime.now()
     # start_of_day = date_util.get_start_of_day(now)
