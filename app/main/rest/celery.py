@@ -7,7 +7,7 @@ from . import rest
 from app.main.utils import date_util
 from app.main.task import demo, trend_task
 from app.main.task import board_task
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 from app.main.task import board_task, stock_task
 from flask import request
 
@@ -29,8 +29,8 @@ def maunlly():
 @rest.route("/celery/stock/trend", methods=['post'])
 def get_stock_trend():
     body = request.json
-    date_start_str = body.get("start",None)
-    date_end_str = body.get("end",None)
+    date_start_str = body.get("start", None)
+    date_end_str = body.get("end", None)
 
     if date_start_str is not None:
         date_start = date_util.parse_date_time(date_start_str, "%Y-%m-%d")
@@ -39,17 +39,18 @@ def get_stock_trend():
         date_start = datetime.now()
         date_end = datetime.now()
 
-    trend_task.submit_trend_task(date_util.to_timestamp(date_start),date_util.to_timestamp(date_end))
-
+    trend_task.submit_trend_task.apply_async(
+        args=[date_util.to_timestamp(date_start), date_util.to_timestamp(date_end)])
 
     return restful.response("ok")
+
 
 @rest.route("/celery/stock/feature", methods=['post'])
 def get_stock_feature():
     body = request.json
-    date_start_str = body.get("start",None)
-    date_end_str = body.get("end",None)
-    codes = body.get("codes",None)
+    date_start_str = body.get("start", None)
+    date_end_str = body.get("end", None)
+    codes = body.get("codes", None)
 
     if date_start_str is not None:
         date_start = date_util.parse_date_time(date_start_str, "%Y-%m-%d")
@@ -62,12 +63,12 @@ def get_stock_feature():
     logging.info("days span is {}".format(days))
     if days == 0:
         logging.info("submit stock feature:{}".format(date_start_str))
-        stock_task.submit_stock_feature(date_util.to_timestamp(date_start),codes)
+        stock_task.submit_stock_feature(date_util.to_timestamp(date_start), codes)
     else:
         for day in range(days):
             date_start = date_start + timedelta(days=1)
             logging.info("submit stock feature:{}".format(date_util.dt_to_str(date_start)))
-            stock_task.submit_stock_feature(date_util.to_timestamp(date_start),codes)
+            stock_task.submit_stock_feature(date_util.to_timestamp(date_start), codes)
 
     return restful.response("ok")
 
@@ -81,6 +82,7 @@ def get_stock_data():
     stock_task.sync_stock_k_line.apply_async(args=[])
     return restful.response("ok")
 
+
 @rest.route("/celery/stock/detail", methods=['post'])
 def get_stock_detail():
     """
@@ -90,11 +92,12 @@ def get_stock_detail():
     sync_board.sync()
     return restful.response("ok")
 
+
 @rest.route("/celery/board/feature", methods=['post'])
 def get_board_feature():
     body = request.json
-    date_start_str = body.get("start",None)
-    date_end_str = body.get("end",None)
+    date_start_str = body.get("start", None)
+    date_end_str = body.get("end", None)
 
     if date_start_str is not None:
         date_start = date_util.parse_date_time(date_start_str, "%Y-%m-%d")
