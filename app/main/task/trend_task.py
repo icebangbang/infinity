@@ -13,7 +13,7 @@ from app.main.utils import date_util
 """
 
 
-@celery.task(bind=True, base=MyTask, expires=180)
+# @celery.task(bind=True, base=MyTask, expires=180)
 def submit_trend_task(self,from_date=None,end_date=None):
     stocks = stock_dao.get_all_stock(dict(code=1))
     codes = [stock['code'] for stock in stocks]
@@ -32,7 +32,7 @@ def submit_trend_task(self,from_date=None,end_date=None):
         name_dict = {code: code_name_map[code] for code in codes_group}
         from_timestamp = int(time.mktime(from_date.timetuple()))
         end_timestamp = int(time.mktime(end_date.timetuple()))
-        sync_trend_task.apply_async(args=[from_timestamp,end_timestamp, codes, name_dict])\
+        sync_trend_task.apply_async(args=[from_timestamp,end_timestamp, codes_group, name_dict])
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
@@ -60,4 +60,3 @@ def sync_trend_task(self,from_date,end_date,codes,name_dict):
             start_of_day = date_util.get_start_of_day(date)
             features = stock_dao.get_company_feature(code,date)
             trend_service.save_stock_trend_with_features(code,name,features,start_of_day)
-
