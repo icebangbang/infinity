@@ -13,7 +13,7 @@ from app.main.utils import date_util
 """
 
 
-# @celery.task(bind=True, base=MyTask, expires=180)
+@celery.task(bind=True, base=MyTask, expires=180)
 def submit_trend_task(self,from_date=None,end_date=None):
     stocks = stock_dao.get_all_stock(dict(code=1))
     codes = [stock['code'] for stock in stocks]
