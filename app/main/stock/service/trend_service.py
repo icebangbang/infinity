@@ -132,13 +132,13 @@ def get_trend_size_info(start, end):
         r = list(trend_point_set.find(
             {"date": {"$lte": date},
              "update": {"$gte": date}}))
-        if len(r) is None: continue
+        if len(r) ==0: continue
         df = pd.DataFrame(r)
         series = df.groupby(['industry', 'trend']).size()
         series_to_dict = series.to_dict()
         result_list = [dict(industry=k[0], trend=k[1], size=v, rate=round(v / board_dict[k[0]], 2), date=date,update=datetime.now()) for k, v
                        in series_to_dict.items()]
-
+        print(date)
         for result in result_list:
             db.trend_data.update_one(
                 {"industry": result["industry"], "trend": result["trend"],
@@ -147,17 +147,8 @@ def get_trend_size_info(start, end):
 
 
 if __name__ == "__main__":
+    for date in WorkDayIterator(datetime(2022, 4, 1), datetime(2022, 7, 4)):
 
-    # now = datetime.now()
-    # start_of_day = date_util.get_start_of_day(now)
-    # trend_point_set = db['trend_point']
-    # trend_point_list = list(trend_point_set.find({"update": start_of_day, "trend": "up", "prev_trend": "convergence"}))
-    #
-    # df = pd.DataFrame(trend_point_list)
-    #
-    # for industry, group in df.groupby("industry"):
-    #     l = len(group)
-    #     if l >= 10:
-    #         print(industry, group.to_dict())
-    # print(industry,len(group))
-    get_trend_size_info(datetime.now(), datetime.now())
+        features = stock_dao.get_company_feature("000338", date)
+        save_stock_trend_with_features("000338", "潍柴动力", features, date)
+    # get_trend_size_info(datetime(2022, 4, 1), datetime(2022, 7, 4))
