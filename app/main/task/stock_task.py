@@ -245,9 +245,9 @@ def sync_stock_feature(self, base_date, offset, codes, name_dict):
         sync_trend_disable = my_redis.get_bool("sync_trend_disable")
 
         #禁用同步
-        if not sync_trend_disable:
-            for company in companies:
-                trend_service.save_stock_trend_with_company(company, base_date)
+        # if not sync_trend_disable:
+        #     for company in companies:
+        #         trend_service.save_stock_trend_with_company(company, base_date)
 
 
 @celery.task(bind=True, base=MyTask, expire=1800)
