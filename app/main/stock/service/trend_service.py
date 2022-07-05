@@ -151,6 +151,6 @@ if __name__ == "__main__":
 
         # features = stock_dao.get_company_feature("000338", date)
         # save_stock_trend_with_features("000338", "潍柴动力", features, date)
-    get_trend_size_info(datetime(2022, 4, 1), datetime(2022, 7, 4))
+    get_trend_size_info(datetime(2022, 7, 5), datetime(2022, 7, 5))
 
-    print("code","300763")
+    # print("code","300763")
