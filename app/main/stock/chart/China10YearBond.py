@@ -5,7 +5,6 @@ from app.main.utils import date_util
 from datetime import datetime
 import pandas as pd
 import requests
-import chardet
 
 class China10YearBond(Line):
     """
