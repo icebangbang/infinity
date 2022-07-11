@@ -51,6 +51,7 @@ def sync_trend_task(self, from_date, end_date, codes, name_dict, global_task_id)
         for date in date_util.WorkDayIterator(from_date, end_date):
             start_of_day = date_util.get_start_of_day(date)
             features = stock_dao.get_company_feature(code, start_of_day)
+            log.info("sync_trend_task {},{}".format(code,start_of_day))
             trend_service.save_stock_trend_with_features(code, name, features, start_of_day)
 
     task_dao.update_task(global_task_id, len(codes),
