@@ -42,7 +42,7 @@ def submit_trend_task(self, from_date=None, end_date=None, global_task_id=None,c
 
 # 同步趋势线
 @celery.task(bind=True, base=MyTask, expires=180)
-def sync_trend_task(self, from_date, end_date, codes, name_dict, global_task_id):
+def sync_trend_task(self, from_date, end_date, codes, name_dict, global_task_id,chain):
     from_date = datetime.fromtimestamp(int(from_date))
     end_date = datetime.fromtimestamp(int(end_date))
     for code in codes:
@@ -55,7 +55,7 @@ def sync_trend_task(self, from_date, end_date, codes, name_dict, global_task_id)
 
     task_dao.update_task(global_task_id, len(codes),
                          "app.main.task.trend_task.submit_trend_task",
-                         dict(from_date=from_date,end_date=end_date,global_task_id=global_task_id))
+                         dict(from_date=from_date,end_date=end_date,global_task_id=global_task_id,chain=chain))
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
