@@ -147,7 +147,11 @@ class RedisCache(object):
 
     @operator_status
     def incr(self, key, amount):
-        return self._connection.incr(key, amount)
+        return self._connection.incr(key, amount)\
+
+    @operator_status
+    def incrby(self, key, amount):
+        return self._connection.incrby(key, amount)
 
     @operator_status
     def pipeline(self):
@@ -220,6 +224,8 @@ def r_push(key, value):
 def incr(key, value):
     return RedisCache().incr(key, value)
 
+def incrby(key, value):
+    return RedisCache().incrby(key, value)
 
 def setnx(key, value):
     return RedisCache().setnx(key, value)

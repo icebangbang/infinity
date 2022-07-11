@@ -31,6 +31,7 @@ def get_stock_trend():
     body = request.json
     date_start_str = body.get("start", None)
     date_end_str = body.get("end", None)
+    chain = ['app.main.task.trend_task.submit_trend_task', 'app.main.task.trend_task.get_trend_data_task']
 
     if date_start_str is not None:
         date_start = date_util.parse_date_time(date_start_str, "%Y-%m-%d")
@@ -40,7 +41,9 @@ def get_stock_trend():
         date_end = datetime.now()
 
     trend_task.submit_trend_task.apply_async(
-        args=[date_util.to_timestamp(date_start), date_util.to_timestamp(date_end)])
+        kwargs=dict(from_date=date_util.to_timestamp(date_start),
+                    end_date=date_util.to_timestamp(date_end),
+                    chain=chain))
 
     return restful.response("ok")
 
