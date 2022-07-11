@@ -30,19 +30,19 @@ def submit_trend_task(self, from_date=None, end_date=None, global_task_id=None,c
         end_date = datetime.now()
 
     global_task_id = global_task_id if global_task_id is not None else str(uuid.uuid1())
-    task_dao.create_task(global_task_id, "app.main.task.trend_task.submit_trend_task", len(codes))
+    task_dao.create_task(global_task_id, "app.main.task.trend_task.submit_trend_task", len(codes),chain)
 
     for i in range(0, len(codes), step):
         codes_group = codes[i:i + step]
         name_dict = {code: code_name_map[code] for code in codes_group}
         from_timestamp = int(time.mktime(from_date.timetuple()))
         end_timestamp = int(time.mktime(end_date.timetuple()))
-        sync_trend_task.apply_async(args=[from_timestamp, end_timestamp, codes_group, name_dict, global_task_id,chain])
+        sync_trend_task.apply_async(args=[from_timestamp, end_timestamp, codes_group, name_dict, global_task_id])
 
 
 # 同步趋势线
 @celery.task(bind=True, base=MyTask, expires=180)
-def sync_trend_task(self, from_date, end_date, codes, name_dict, global_task_id,chain):
+def sync_trend_task(self, from_date, end_date, codes, name_dict, global_task_id):
     from_date = datetime.fromtimestamp(int(from_date))
     end_date = datetime.fromtimestamp(int(end_date))
     for code in codes:
@@ -55,7 +55,7 @@ def sync_trend_task(self, from_date, end_date, codes, name_dict, global_task_id,
 
     task_dao.update_task(global_task_id, len(codes),
                          "app.main.task.trend_task.submit_trend_task",
-                         dict(from_date=from_date,end_date=end_date,global_task_id=global_task_id,chain=chain))
+                         dict(from_date=from_date,end_date=end_date,global_task_id=global_task_id))
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
