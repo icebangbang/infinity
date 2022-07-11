@@ -126,7 +126,7 @@ def market_status_analysis(date=None):
     """
     date = datetime.now() if date is None else date
     if date_util.is_workday(date) is False: return
-    if date.hour >= 15: return
+    if date.hour >= 15 or date.hour <= 8: return
     if date > datetime(date.year, date.month, date.day, 11, 30, 00) and \
             date < datetime(date.year, date.month, date.day, 13, 00, 00):
         return
