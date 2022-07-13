@@ -51,9 +51,11 @@ def sync_trend_task(self, from_date, end_date, codes, name_dict, global_task_id)
         for date in date_util.WorkDayIterator(from_date, end_date):
             start_of_day = date_util.get_start_of_day(date)
             features = stock_dao.get_company_feature(code, start_of_day)
-            log.info("sync_trend_task {},{}".format(code,start_of_day))
-            trend_service.save_stock_trend_with_features(code, name, features, start_of_day)
-
+            log.info("sync_trend_task {},{}".format(code, start_of_day))
+            try:
+                trend_service.save_stock_trend_with_features(code, name, features, start_of_day)
+            except Exception as e:
+                log.error(e, exc_info=1)
     task_dao.update_task(global_task_id, len(codes),
                          "app.main.task.trend_task.submit_trend_task",
                          dict(from_date=from_date,end_date=end_date,global_task_id=global_task_id))

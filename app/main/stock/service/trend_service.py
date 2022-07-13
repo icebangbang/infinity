@@ -11,10 +11,14 @@ from app.main.utils import date_util
 from app.main.utils.date_util import WorkDayIterator
 import logging as log
 
+
 def save_stock_trend_with_features(code, name, features, start_of_day: datetime):
     trend_point_set = db['trend_point']
     try:
         stock_detail = stock_dao.get_stock_detail_by_code(code)
+
+        if stock_detail.get("industry", None) is None:
+            return
 
         # 当前底分型趋势的斜率
         current_bot_type_slope = features[constant.current_bot_type_slope]

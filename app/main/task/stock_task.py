@@ -228,11 +228,9 @@ def sync_index_data(self):
     :param expect:
     :return:
     """
-    sync_index_kline.sync() \
- \
-    @ celery.task(bind=True, base=MyTask, expire=1800)
+    sync_index_kline.sync()
 
-
+@celery.task(bind=True, base=MyTask, expire=1800)
 def sync_rps_analysis_250(self):
     report_service.rps_analysis(offset=-250)
 
