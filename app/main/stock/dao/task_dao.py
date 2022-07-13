@@ -25,9 +25,9 @@ def update_task(task_id, size, task_path=None, next_kwargs=None):
     if i <= 0:
         now = datetime.now()
         sync_record = db['sync_record']
-        sync_record.update_one({"task_id": task_id, "task_path": task_path}, {"$set": {"update_time": now}})
-
         chain_json = my_redis.get("chain_" + task_id)
+
+        sync_record.update_one({"task_id": task_id, "task_path": task_path}, {"$set": {"update_time": now,"chain":chain_json}})
         log.info("chain_" + task_id)
         if chain_json is not None:
             chain: list = json.loads(chain_json)
