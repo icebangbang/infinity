@@ -22,7 +22,7 @@ def create_task(task_id, task_path, size, chain=None):
 
 def update_task(task_id, size, task_path=None, next_kwargs=None):
     i = my_redis.incrby(task_id, -size)
-    log.info("{} {} try to update task,size {}".format(task_id,task_path,size))
+    log.info("{} {} try to update task,size {}".format(task_id,task_path,i))
     if i <= 0:
         now = datetime.now()
         sync_record = db['sync_record']
