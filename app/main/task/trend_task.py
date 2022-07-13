@@ -58,7 +58,7 @@ def sync_trend_task(self, from_date_ts, end_date_ts, codes, name_dict, global_ta
                 log.error(e, exc_info=1)
     task_dao.update_task(global_task_id, len(codes),
                          "app.main.task.trend_task.submit_trend_task",
-                         dict(from_date=from_date_ts,end_date=end_date_ts,global_task_id=global_task_id))
+                         dict(from_date_ts=from_date_ts,end_date_ts=end_date_ts,global_task_id=global_task_id))
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
