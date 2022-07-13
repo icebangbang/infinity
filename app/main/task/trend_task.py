@@ -42,9 +42,9 @@ def submit_trend_task(self, from_date=None, end_date=None, global_task_id=None,c
 
 # 同步趋势线
 @celery.task(bind=True, base=MyTask, expires=180)
-def sync_trend_task(self, from_date, end_date, codes, name_dict, global_task_id):
-    from_date = datetime.fromtimestamp(int(from_date))
-    end_date = datetime.fromtimestamp(int(end_date))
+def sync_trend_task(self, from_date_ts, end_date_ts, codes, name_dict, global_task_id):
+    from_date = datetime.fromtimestamp(int(from_date_ts))
+    end_date = datetime.fromtimestamp(int(end_date_ts))
     for code in codes:
         name = name_dict.get(code)
 
@@ -58,11 +58,11 @@ def sync_trend_task(self, from_date, end_date, codes, name_dict, global_task_id)
                 log.error(e, exc_info=1)
     task_dao.update_task(global_task_id, len(codes),
                          "app.main.task.trend_task.submit_trend_task",
-                         dict(from_date=from_date,end_date=end_date,global_task_id=global_task_id))
+                         dict(from_date=from_date_ts,end_date=end_date_ts,global_task_id=global_task_id))
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
-def get_trend_data_task(self, from_date=None, end_date=None, global_task_id=None):
+def get_trend_data_task(self, from_date_ts=None, end_date_ts=None, global_task_id=None):
     """
     将趋势变化数据聚合
     :param self:
@@ -70,11 +70,11 @@ def get_trend_data_task(self, from_date=None, end_date=None, global_task_id=None
     :return:
     """
 
-    from_date = date_util.get_start_of_day(from_date) \
-        if from_date is not None else date_util.get_start_of_day(datetime.now())
+    from_date = date_util.get_start_of_day(datetime.fromtimestamp(int(from_date_ts))) \
+        if from_date_ts is not None else date_util.get_start_of_day(datetime.now())
 
-    end_date = date_util.get_start_of_day(end_date) \
-        if end_date is not None else date_util.get_start_of_day(datetime.now())
+    end_date = date_util.get_start_of_day(datetime.fromtimestamp(int(end_date_ts))) \
+        if end_date_ts is not None else date_util.get_start_of_day(datetime.now())
 
     log.info("get_trend_data_task {},{}:{}".format(global_task_id,from_date,end_date))
 

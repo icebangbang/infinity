@@ -40,8 +40,7 @@ def get_stock_trend():
         date_start = datetime.now()
         date_end = datetime.now()
 
-    trend_task.submit_trend_task.apply_async(
-        kwargs=dict(from_date=date_util.to_timestamp(date_start),
+    trend_task.submit_trend_task.apply_async(kwargs=dict(from_date=date_util.to_timestamp(date_start),
                     end_date=date_util.to_timestamp(date_end),
                     chain=chain))
 
