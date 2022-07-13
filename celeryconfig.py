@@ -154,7 +154,7 @@ beat_schedule = {
     },
     'get_trend_data': {  # 趋势数据聚合
         "task": "app.main.task.trend_task.get_trend_data_task",
-        "schedule": 120
+        "schedule": 120000000
     },
     'sync_macrodata': {
         "task": "app.main.task.macrodata_task.sync",
