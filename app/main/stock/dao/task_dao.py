@@ -10,7 +10,7 @@ def create_task(task_id, task_path, size, chain=None):
     now = datetime.now()
     sync_record = db['sync_record']
 
-    data = dict(create_time=now, size=size, task_path=task_path)
+    data = dict(create_time=now, size=size, task_path=task_path,chain=chain)
 
     sync_record.update_one({"task_id": task_id,"task_path":task_path}, {"$set": data}, upsert=True)
     my_redis.set(task_id, size)
