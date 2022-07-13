@@ -35,9 +35,13 @@ def update_task(task_id, size, task_path=None,next_kwargs=None):
                 return
             # 执行下一个任务
             next = chain[index + 1]
-            importlib.import_module(next)
+            p, m = next.rsplit('.', 1)
+
+            m = getattr(importlib.import_module(p),
+                                m, None)
+
             next_kwargs = next_kwargs if next_kwargs is not None else dict(global_task_id=task_id)
-            next.apply_async(kwargs=next_kwargs)
+            m.apply_async(kwargs=next_kwargs)
 
 
 
