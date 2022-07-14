@@ -146,7 +146,7 @@ beat_schedule = {
     },
     'get_stock_feature': {
         "task": "app.main.task.stock_task.submit_stock_feature",
-        "schedule": 300  # 每5分钟执行一次
+        "schedule": 120000000  # 每5分钟执行一次
     },
     'get_trend_point': {  # 趋势数据收集
         "task": "app.main.task.trend_task.submit_trend_task",
