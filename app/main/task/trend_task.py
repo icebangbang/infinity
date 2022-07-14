@@ -41,7 +41,7 @@ def submit_trend_task(self, from_date=None, end_date=None, global_task_id=None,c
 
 
 # 同步趋势线
-@celery.task(bind=True, base=MyTask, expires=180)
+@celery.task(bind=True, base=MyTask, expires=1800)
 def sync_trend_task(self, from_date_ts, end_date_ts, codes, name_dict, global_task_id):
     from_date = datetime.fromtimestamp(int(from_date_ts))
     end_date = datetime.fromtimestamp(int(end_date_ts))
@@ -61,7 +61,7 @@ def sync_trend_task(self, from_date_ts, end_date_ts, codes, name_dict, global_ta
                          dict(from_date_ts=from_date_ts,end_date_ts=end_date_ts,global_task_id=global_task_id))
 
 
-@celery.task(bind=True, base=MyTask, expires=180)
+@celery.task(bind=True, base=MyTask, expires=1800)
 def get_trend_data_task(self, from_date_ts=None, end_date_ts=None, global_task_id=None):
     """
     将趋势变化数据聚合
