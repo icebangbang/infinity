@@ -177,8 +177,7 @@ def get_trend_size_info(start, end):
         for result in result_list:
             db.trend_data.update_one(
                 {"industry": result["industry"], "trend": result["trend"],
-                 "date": result['date']}, {"$set": result},
-                upsert=True)
+                 "date": result['date']}, {"$set": result},upsert=True)
 
 
 if __name__ == "__main__":
@@ -186,6 +185,6 @@ if __name__ == "__main__":
 
     # features = stock_dao.get_company_feature("000338", date)
     # save_stock_trend_with_features("000338", "潍柴动力", features, date)
-    get_trend_size_info(datetime(2022, 6, 8), datetime(2022, 7, 8))
+    get_trend_size_info(datetime(2022, 6, 3), datetime(2022, 6, 10))
 
     # print("code","300763")
