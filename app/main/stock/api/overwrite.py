@@ -297,6 +297,8 @@ def stock_board_concept_hist_em(symbol: str = "数字货币", adjust: str = "qfq
     data_json = r.json()
     data = data_json["data"]
     prev_k_price = data['preKPrice']
+    if len(data_json["data"]["klines"]) == 0:
+        return pd.DataFrame(['日期', '开盘', '收盘', '最高', '最低', '成交量', '成交额','最近收盘'])
     temp_df = pd.DataFrame([item.split(",") for item in data_json["data"]["klines"]])
     temp_df.columns = [
         "日期",
@@ -421,14 +423,14 @@ def stock_board_concept_name_em(t=None) -> pd.DataFrame:
             "领涨股票-涨跌幅",
         ]
     ]
-    temp_df["最新价"] = pd.to_numeric(temp_df["最新价"])
-    temp_df["涨跌额"] = pd.to_numeric(temp_df["涨跌额"])
-    temp_df["涨跌幅"] = pd.to_numeric(temp_df["涨跌幅"])
-    temp_df["总市值"] = pd.to_numeric(temp_df["总市值"])
-    temp_df["换手率"] = pd.to_numeric(temp_df["换手率"])
-    temp_df["上涨家数"] = pd.to_numeric(temp_df["上涨家数"])
-    temp_df["下跌家数"] = pd.to_numeric(temp_df["下跌家数"])
-    temp_df["领涨股票-涨跌幅"] = pd.to_numeric(temp_df["领涨股票-涨跌幅"])
+    temp_df["最新价"] = pd.to_numeric(temp_df["最新价"],errors="coerce")
+    temp_df["涨跌额"] = pd.to_numeric(temp_df["涨跌额"],errors="coerce")
+    temp_df["涨跌幅"] = pd.to_numeric(temp_df["涨跌幅"],errors="coerce")
+    temp_df["总市值"] = pd.to_numeric(temp_df["总市值"],errors="coerce")
+    temp_df["换手率"] = pd.to_numeric(temp_df["换手率"],errors="coerce")
+    temp_df["上涨家数"] = pd.to_numeric(temp_df["上涨家数"],errors="coerce")
+    temp_df["下跌家数"] = pd.to_numeric(temp_df["下跌家数"],errors="coerce")
+    temp_df["领涨股票-涨跌幅"] = pd.to_numeric(temp_df["领涨股票-涨跌幅"],errors="coerce")
     return temp_df
 
 
