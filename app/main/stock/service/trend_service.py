@@ -133,7 +133,7 @@ def get_trend_size_info(start, end):
     :return:
     """
     board_detail = db['board_detail']
-    boards = board_detail.find({"type": 2})
+    boards = list(board_detail.find({"type": 2}))
     board_dict = {board['board']: board['size'] for board in boards}
 
     for date in WorkDayIterator(start, end):
@@ -145,10 +145,35 @@ def get_trend_size_info(start, end):
         df = pd.DataFrame(r)
         series = df.groupby(['industry', 'trend']).size()
         series_to_dict = series.to_dict()
-        result_list = [dict(industry=k[0], trend=k[1], size=v, rate=round(v / board_dict[k[0]], 2), date=date,
-                            update=datetime.now()) for k, v
-                       in series_to_dict.items()]
-        print(date)
+
+        result_list = []
+        for item in boards:
+            board = item['board']
+            for trend in ['up','down','enlarge','convergence']:
+                if (board,trend) in series_to_dict.keys():
+                    size = series_to_dict[(board,trend)]
+                    result_list.append(
+                        dict(industry=board, trend=trend, size=size, rate=round(size / board_dict[board], 2), date=date,
+                             update=datetime.now()))
+                else:
+                    result_list.append(
+                        dict(industry=board, trend=trend, size=0, rate=0, date=date,
+                             update=datetime.now()))
+
+        # collected_industry = []
+        # for  k,v in series_to_dict.items():
+        #     result_list.append(dict(industry=k[0], trend=k[1], size=v, rate=round(v / board_dict[k[0]], 2), date=date,
+        #          update=datetime.now()))
+        #     collected_industry.append(k[0])
+
+        # result_list = [dict(industry=k[0], trend=k[1], size=v, rate=round(v / board_dict[k[0]], 2), date=date,
+        #                     update=datetime.now()) for k, v
+        #                in series_to_dict.items()]
+
+        # 补全没有出现的数据
+
+
+
         for result in result_list:
             db.trend_data.update_one(
                 {"industry": result["industry"], "trend": result["trend"],
@@ -161,6 +186,6 @@ if __name__ == "__main__":
 
     # features = stock_dao.get_company_feature("000338", date)
     # save_stock_trend_with_features("000338", "潍柴动力", features, date)
-    get_trend_size_info(datetime(2022, 7, 8), datetime(2022, 7, 8))
+    get_trend_size_info(datetime(2022, 6, 8), datetime(2022, 7, 8))
 
     # print("code","300763")

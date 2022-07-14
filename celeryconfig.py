@@ -146,15 +146,15 @@ beat_schedule = {
     },
     'get_stock_feature': {
         "task": "app.main.task.stock_task.submit_stock_feature",
-        "schedule": 120000000  # 每5分钟执行一次
+        "schedule": 300  # 每5分钟执行一次
     },
     'get_trend_point': {  # 趋势数据收集
         "task": "app.main.task.trend_task.submit_trend_task",
-        "schedule": crontab(minute='1', hour='15', day_of_week='1-5')
+        "schedule": 600  # 每10分钟执行一次
     },
     'get_trend_data': {  # 趋势数据聚合
         "task": "app.main.task.trend_task.get_trend_data_task",
-        "schedule": 120000000
+        "schedule": 120
     },
     'sync_macrodata': {
         "task": "app.main.task.macrodata_task.sync",
