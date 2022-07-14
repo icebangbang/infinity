@@ -20,6 +20,9 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
         if stock_detail.get("industry", None) is None:
             return
 
+        if features is None or len(features) ==0:
+            return
+
         # 当前底分型趋势的斜率
         current_bot_type_slope = features[constant.current_bot_type_slope]
         # 当前顶分型趋势的斜率
