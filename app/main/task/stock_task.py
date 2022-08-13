@@ -5,7 +5,8 @@ import logging
 from datetime import datetime, timedelta
 import time
 
-from app.main.stock.job import sync_stock_indicator, sync_index_kline
+from app.main.stock.job import sync_stock_indicator, sync_index_kline, job_config
+from app.main.stock.job import status_config
 from app.main.stock.task_wrapper import TaskWrapper
 from app.main.task import task_constant
 from app.main.utils import date_util
@@ -54,21 +55,33 @@ def submit_stock_month_task(self):
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
-def sync_stock_k_line(self):
+def sync_stock_k_line(self, reuild_data=False):
     """
     schedule驱动
     提交同步股票日k线任务
     :param self:
+    :param reuild_data: 因为分红等关系,前复权数据会将历史收盘价进行压缩,需要重跑数据
     :return:
     """
     now = datetime.now()
     # 收盘后,不再同步
+    if status_config.check_status_available("app.main.task.stock_task.sync_stock_k_line") is False:
+        return
 
     stocks = stock_dao.get_all_stock(dict(code=1))
     # 获取最近一个交易日
     codes = [stock['code'] for stock in stocks]
 
     global_task_id = str(uuid.uuid1())
+
+    if reuild_data:
+        job_config.set_job_config(global_task_id,
+                                  dict(
+                                      job_chain=['app.main.task.stock_task.auto_submit_stock_feature'],
+                                      normal_chain=[],
+                                      kwargs=dict()
+                                  ))
+
     task_dao.create_task(global_task_id, "app.main.task.stock_task.sync_stock_k_line", len(codes))
     transform_task.apply_async(args=[codes, global_task_id, 0])
 
@@ -114,7 +127,7 @@ def sync_stock_data(self, codes, task_id):
     except Exception as e:
         raise self.retry(exc=e, countdown=3, max_retries=5)
 
-    task_dao.update_task(task_id, len(codes),"app.main.task.stock_task.sync_stock_k_line")
+    task_dao.update_task(task_id, len(codes), "app.main.task.stock_task.sync_stock_k_line")
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
@@ -185,7 +198,7 @@ def sync_stock_feature(self, base_date, offset, codes, name_dict, global_task_id
         # if not sync_trend_disable:
         #     for company in companies:
         #         trend_service.save_stock_trend_with_company(company, base_date)
-    task_dao.update_task(global_task_id, len(codes), 'app.main.task.stock_task.submit_stock_feature',)
+    task_dao.update_task(global_task_id, len(codes), 'app.main.task.stock_task.submit_stock_feature', )
 
 
 @celery.task(bind=True, base=MyTask, expire=1800)
@@ -219,6 +232,17 @@ def sync_stock_ind(self, codes, task_id, expect):
 
 
 @celery.task(bind=True, base=MyTask, expire=1800)
+def auto_submit_stock_feature(self):
+    days = 60
+    logging.info("days span is {}".format(days))
+    date_start = date_util.get_work_day(datetime.now(),days)
+    for day in range(days):
+        date_start = date_start + timedelta(days=1)
+        logging.info("submit stock feature:{}".format(date_util.dt_to_str(date_start)))
+        submit_stock_feature.apply_async(args=[date_util.to_timestamp(date_start)])
+
+
+@celery.task(bind=True, base=MyTask, expire=1800)
 def sync_index_data(self):
     """
     同步大盘指标
@@ -229,6 +253,7 @@ def sync_index_data(self):
     :return:
     """
     sync_index_kline.sync()
+
 
 @celery.task(bind=True, base=MyTask, expire=1800)
 def sync_rps_analysis_250(self):

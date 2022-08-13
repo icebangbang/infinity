@@ -160,7 +160,7 @@ def stock_remind():
                 boards_in_front = list(board_counter.keys())[0:20]
                 my_redis.hset("good_board_in_history", dt, json.dumps(boards_in_front, ensure_ascii=False))
                 # n 天过期
-                my_redis.expire("good_board_in_history", day_span * 24 * 60 * 60 * 1000)
+                my_redis.expire("good_board_in_history", day_span * 24 * 60 * 60)
 
         request_body['date'] = origin_date
         request_body['until'] = origin_until

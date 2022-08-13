@@ -22,6 +22,7 @@ def submit_trend_task(self, from_date=None, end_date=None, global_task_id=None,c
     code_name_map = stock_dao.get_code_name_map()
     step = int(len(codes) / 630)
 
+
     if from_date and end_date:
         from_date = date_util.from_timestamp(from_date)
         end_date = date_util.from_timestamp(end_date)
@@ -40,9 +41,19 @@ def submit_trend_task(self, from_date=None, end_date=None, global_task_id=None,c
         sync_trend_task.apply_async(args=[from_timestamp, end_timestamp, codes_group, name_dict, global_task_id])
 
 
-# 同步趋势线
 @celery.task(bind=True, base=MyTask, expires=1800)
 def sync_trend_task(self, from_date_ts, end_date_ts, codes, name_dict, global_task_id):
+    """
+    同步分型趋势线
+
+    :param self:
+    :param from_date_ts:
+    :param end_date_ts:
+    :param codes:
+    :param name_dict:
+    :param global_task_id:
+    :return:
+    """
     from_date = datetime.fromtimestamp(int(from_date_ts))
     end_date = datetime.fromtimestamp(int(end_date_ts))
     for code in codes:

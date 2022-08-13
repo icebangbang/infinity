@@ -1,7 +1,8 @@
 import logging
+import uuid
 
 from app.main.stock.dao import board_dao
-from app.main.stock.job import sync_board
+from app.main.stock.job import sync_board, job_config
 from app.main.utils import restful
 from . import rest
 from app.main.utils import date_util
@@ -31,7 +32,7 @@ def get_stock_trend():
     body = request.json
     date_start_str = body.get("start", None)
     date_end_str = body.get("end", None)
-    chain = ['app.main.task.trend_task.submit_trend_task', 'app.main.task.trend_task.get_trend_data_task']
+    global_task_id = str(uuid.uuid1())
 
     if date_start_str is not None:
         date_start = date_util.parse_date_time(date_start_str, "%Y-%m-%d")
@@ -40,9 +41,18 @@ def get_stock_trend():
         date_start = datetime.now()
         date_end = datetime.now()
 
+    chain_job_info = dict(
+        job_chain=['app.main.task.trend_task.get_trend_data_task'],
+        normal_chain=[],
+        kwargs=dict(from_date_ts=date_util.to_timestamp(date_start),
+                    end_date_ts=date_util.to_timestamp(date_end),
+                    global_task_id=global_task_id)
+    )
+    job_config.set_job_config(global_task_id,chain_job_info)
+
     trend_task.submit_trend_task.apply_async(kwargs=dict(from_date=date_util.to_timestamp(date_start),
                     end_date=date_util.to_timestamp(date_end),
-                    chain=chain))
+                    global_task_id=global_task_id))
 
     return restful.response("ok")
 
