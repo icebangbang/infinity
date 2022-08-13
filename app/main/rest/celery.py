@@ -79,7 +79,7 @@ def get_stock_feature():
     return restful.response("ok")
 
 @rest.route("/celery/stock/etf", methods=['post'])
-def get_stock_feature():
+def get_etf_feature():
     """
     手动跑批etf特征
     :return:
