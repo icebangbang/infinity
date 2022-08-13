@@ -66,7 +66,7 @@ def sync_stock_k_line(self, reuild_data=None):
     now = datetime.now()
     # 收盘后,不再同步
     if reuild_data is None and \
-            job_config.check_status_available("app.main.task.stock_task.sync_stock_k_line") is True:
+            job_config.check_status_available("app.main.task.stock_task.sync_stock_k_line") is False:
         return
 
     stocks = stock_dao.get_all_stock(dict(code=1))
