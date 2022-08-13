@@ -32,5 +32,5 @@ def clear_stock_info():
 if __name__ == "__main__":
     from app import application
     application.create_app("development")
-    # clear_stock_info()
-    test()
+    clear_stock_info()
+    # test()
