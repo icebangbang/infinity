@@ -238,7 +238,7 @@ def auto_submit_stock_feature(self):
     logging.info("days span is {}".format(days))
     date_start = date_util.get_work_day(datetime.now(),days)
     for day in range(days):
-        date_start = date_start + timedelta(days=1)
+        date_start = date_util.add_and_get_work_day(date_start,1)
         logging.info("submit stock feature:{}".format(date_util.dt_to_str(date_start)))
         submit_stock_feature.apply_async(args=[date_util.to_timestamp(date_start)])
 
