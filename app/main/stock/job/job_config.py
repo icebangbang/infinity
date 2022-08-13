@@ -27,7 +27,7 @@ def release_job(task_path):
     :param method: job方法名
     :return:
     """
-    my_redis.set("job_available_" + task_path, 1)
+    my_redis.set("job_available_" + task_path, True)
     my_redis.expire("job_available_" + task_path, 2 * 60 * 60)
 
 
