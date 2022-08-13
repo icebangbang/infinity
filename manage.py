@@ -1,6 +1,5 @@
 from app import application
 import os
-from celery.schedules import crontab
 
 # 获取环境变量,
 # pycharm启动可以在 RUN/DEBUG Configuration-Environment variables中添加FLASK_ENV

@@ -4,8 +4,7 @@ from datetime import datetime
 
 from app.main.stock.company import Company
 from app.main.stock.job import job_config
-from app.main.task.stock_task import sync_stock_k_line
-from app.main.utils import date_util
+from app.main.utils import date_util, simple_util
 import pymongo
 
 
@@ -110,25 +109,6 @@ def get_company_feature(code, date):
     # company = Company.load(code, result['name'], result['features'])
     return result['features']
 
-def clear_stock_info():
-    """
-    清空个股k线
-    :return:
-    """
-    db['k_line_day'].drop()
-    # db['k_line_month'].drop()
-    # db.k_line_month.create_index([("date", 1), ("code", 1)])
-    db.k_line_day.create_index([("code", 1)])
-    db.k_line_day.create_index([("date", 1), ("code", 1)])
-    db.k_line_day.create_index([("date", 1)])
-
-    db['stock_feature'].drop()
-    db.stock_feature.create_index([("code", 1)])
-    db.stock_feature.create_index([("date", 1), ("code", 1)])
-
-    job_config.acquire_job("app.main.task.stock_task.sync_stock_k_line")
-
-    sync_stock_k_line.apply_async(kwargs=dict(reuild_data=True))
 
 
 
@@ -137,5 +117,4 @@ def clear_stock_info():
 if __name__ == "__main__":
     # get_company_feature("689009", datetime(2021, 11, 1))
     # a = get_stock_detail(['159980'])
-    clear_stock_info()
     print()

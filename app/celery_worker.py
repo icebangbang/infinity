@@ -1,4 +1,4 @@
-from app.application import app
+from app.application import app,create_app
 import os
 from celery import Celery
 import logging
@@ -8,7 +8,6 @@ import logging
 # 线上启动在 honeybee.sysconfig中指定
 # env = os.environ.get('FLASK_ENV') or 'development'
 # app = application.create_app(env)  # from .main.rest import rest as main_blueprint
-
 
 celery = Celery(
     app.import_name,

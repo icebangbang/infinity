@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import time
 
 from app.main.stock.job import sync_stock_indicator, sync_index_kline, job_config
-from app.main.stock.job import status_config
+from app.main.stock.job import job_config
 from app.main.stock.task_wrapper import TaskWrapper
 from app.main.task import task_constant
 from app.main.utils import date_util
@@ -65,7 +65,7 @@ def sync_stock_k_line(self, reuild_data=False):
     """
     now = datetime.now()
     # 收盘后,不再同步
-    if status_config.check_status_available("app.main.task.stock_task.sync_stock_k_line") is False:
+    if job_config.check_status_available("app.main.task.stock_task.sync_stock_k_line") is False:
         return
 
     stocks = stock_dao.get_all_stock(dict(code=1))

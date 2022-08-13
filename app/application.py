@@ -4,9 +4,7 @@ from app.log import init_log
 from app.main.db import models
 from app.main.db import mongo
 from config import config
-from celery import Celery
 from datetime import timedelta
-from celery.schedules import crontab
 
 
 app = None
