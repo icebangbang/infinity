@@ -1,20 +1,18 @@
-
 import os, time
 
 if hasattr(time, 'tzset'):
     os.environ['TZ'] = 'Asia/Shanghai'
     time.tzset()
 
-
 import logging as log
-from app.main.stock.api.overwrite import stock_zh_a_hist,\
-    stock_ind,\
-    code_id_map,\
-    stock_board_concept_hist_em,\
-    stock_board_concept_name_em,\
-stock_board_concept_cons_em,chinese_ppi,chinese_cpi,pig_data,chinese_pmi\
-    ,get_stock_web,get_stock_business,get_bellwether
-
+from app.main.stock.api.overwrite import stock_zh_a_hist, \
+    stock_ind, \
+    code_id_map, \
+    stock_board_concept_hist_em, \
+    stock_board_concept_name_em, \
+    stock_board_concept_cons_em, \
+    chinese_ppi, chinese_cpi, pig_data, chinese_pmi,\
+    get_stock_web, get_stock_business, get_bellwether,fund_etf_hist_sina
 
 log.basicConfig(
     level=log.INFO,
@@ -22,6 +20,7 @@ log.basicConfig(
 )
 
 import akshare
+
 akshare.stock_zh_a_hist = stock_zh_a_hist
 akshare.stock_ind = stock_ind
 akshare.code_id_map = code_id_map
@@ -36,3 +35,4 @@ akshare.pig_data = pig_data
 akshare.get_stock_web = get_stock_web
 akshare.get_stock_business = get_stock_business
 akshare.get_bellwether = get_bellwether
+akshare.fund_etf_hist_sina = fund_etf_hist_sina

@@ -2,7 +2,8 @@
 ## 定时任务
 
 ```
-celery -A manage.celery beat -l info
+etf
+stock
 ```
 
 ## flower

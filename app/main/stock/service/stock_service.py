@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import Decimal
 
 import pandas as pd
@@ -7,18 +7,14 @@ import pandas as pd
 from app.main.stock.api import stock_info
 from app.main.utils import my_redis
 
-from app.main.stock import constant
 from app.main.stock.dao import stock_dao, k_line_dao, index_dao
-from app.main.stock.stock_pick_filter import stock_filter
 from app.main.utils import date_util
-from app.main.stock.stock_kline import id_map
-from app.main.stock.service import search_udf_service, stock_search_service, stock_index_service
+from app.main.stock.api.stock_kline import id_map
+from app.main.stock.service import stock_search_service
 import akshare as ak
 from app.main.db.mongo import db
 from app.main.stock.task_wrapper import TaskWrapper
 import json
-from app.main.utils import dingtalk_util
-import time
 
 
 def publish(days=10, slice=30, code_list=None, stock_map={}, start=None, end=None):

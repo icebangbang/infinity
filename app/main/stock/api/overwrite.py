@@ -6,6 +6,11 @@ from datetime import datetime, timedelta
 import dateutil
 import logging
 from lxml import etree
+from py_mini_racer import py_mini_racer
+
+
+from akshare.stock.cons import hk_js_decode
+
 
 
 def stock_zh_a_hist(
@@ -721,10 +726,29 @@ def get_bellwether():
     ) for data in data_list]
     return data_list
 
+def fund_etf_hist_sina(symbol: str = "sz159996") -> pd.DataFrame:
+    """
+    ETF 基金的日行情数据
+    http://finance.sina.com.cn/fund/quotes/159996/bc.shtml
+    :param symbol: 基金名称, 可以通过 fund_etf_category_sina 函数获取
+    :type symbol: str
+    :return: ETF 基金的日行情数据
+    :rtype: pandas.DataFrame
+    """
+    url = f"https://finance.sina.com.cn/realstock/company/{symbol}/hisdata/klc_kl.js"
+    r = requests.get(url)
+    js_code = py_mini_racer.MiniRacer()
+    js_code.eval(hk_js_decode)
+    dict_list = js_code.call('d', r.text.split("=")[1].split(";")[0].replace('"', ""))  # 执行js解密代码
+    temp_df = pd.DataFrame(dict_list)
+    temp_df["date"] = pd.to_datetime(temp_df["date"]).dt.date
+    return temp_df
+
 
 if __name__ == "__main__":
     # results = stock_board_concept_name_em()
     # r = chinese_cpi()
     # r = get_stock_web(dict(code="300763",belong="sz"))
-    r = get_bellwether()
+    # r = get_bellwether()
+    df = ak.fund_etf_hist_sina(symbol="sz169103")
     print(123)

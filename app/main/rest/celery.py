@@ -8,7 +8,7 @@ from app.main.utils import date_util
 from app.main.task import demo, trend_task
 from app.main.task import board_task
 from datetime import datetime, timedelta
-from app.main.task import board_task, stock_task
+from app.main.task import board_task, stock_task,etf_task
 from flask import request
 
 
@@ -49,6 +49,10 @@ def get_stock_trend():
 
 @rest.route("/celery/stock/feature", methods=['post'])
 def get_stock_feature():
+    """
+    手动跑批个股特征
+    :return:
+    """
     body = request.json
     date_start_str = body.get("start", None)
     date_end_str = body.get("end", None)
@@ -71,6 +75,37 @@ def get_stock_feature():
             date_start = date_start + timedelta(days=1)
             logging.info("submit stock feature:{}".format(date_util.dt_to_str(date_start)))
             stock_task.submit_stock_feature(date_util.to_timestamp(date_start), codes)
+
+    return restful.response("ok")
+
+@rest.route("/celery/stock/etf", methods=['post'])
+def get_stock_feature():
+    """
+    手动跑批etf特征
+    :return:
+    """
+    body = request.json
+    date_start_str = body.get("start", None)
+    date_end_str = body.get("end", None)
+    codes = body.get("codes", None)
+
+    if date_start_str is not None:
+        date_start = date_util.parse_date_time(date_start_str, "%Y-%m-%d")
+        date_end = date_util.parse_date_time(date_end_str, "%Y-%m-%d")
+    else:
+        date_start = datetime.now()
+        date_end = datetime.now()
+
+    days = date_util.get_days_between(date_end, date_start)
+    logging.info("days span is {}".format(days))
+    if days == 0:
+        logging.info("submit stock feature:{}".format(date_start_str))
+        etf_task.submit_etf_feature(date_util.to_timestamp(date_start), codes)
+    else:
+        for day in range(days):
+            date_start = date_start + timedelta(days=1)
+            logging.info("submit stock feature:{}".format(date_util.dt_to_str(date_start)))
+            etf_task.submit_etf_feature(date_util.to_timestamp(date_start), codes)
 
     return restful.response("ok")
 

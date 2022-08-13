@@ -58,6 +58,11 @@ task_routes = (
         'routing_key': 'default'
     }
     },
+    {'app.main.task.stock_task.submit_etf_feature': {
+        'queue': 'default',
+        'routing_key': 'default'
+    }
+    },
     {'app.main.task.trend_task.submit_trend_task': {
         'queue': 'default',
         'routing_key': 'default'
@@ -74,6 +79,11 @@ task_routes = (
     }
     },
     {'app.main.task.stock_task.sync_stock_feature': {
+        'queue': 'indicator',
+        'routing_key': 'indicator'
+    }
+    },
+    {'app.main.task.stock_task.sync_etf_feature': {
         'queue': 'indicator',
         'routing_key': 'indicator'
     }

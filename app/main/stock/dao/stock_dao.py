@@ -115,4 +115,6 @@ def add_event(record):
 
 
 if __name__ == "__main__":
-    get_company_feature("689009", datetime(2021, 11, 1))
+    # get_company_feature("689009", datetime(2021, 11, 1))
+    a = get_stock_detail(['159980'])
+    print()

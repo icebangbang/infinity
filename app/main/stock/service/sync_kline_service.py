@@ -1,8 +1,7 @@
 from app.main.stock.dao import k_line_dao
 from datetime import datetime, timedelta
 from app.main.utils import date_util
-from app.main.stock import stock_kline
-import pandas as pd
+from app.main.stock.api import stock_kline
 from app.application import app
 
 
