@@ -114,7 +114,7 @@ def sync_stock_data(self, codes, task_id):
     except Exception as e:
         raise self.retry(exc=e, countdown=3, max_retries=5)
 
-    task_dao.update_task(task_id, len(codes))
+    task_dao.update_task(task_id, len(codes),"app.main.task.stock_task.sync_stock_k_line")
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
