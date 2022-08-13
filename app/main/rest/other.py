@@ -162,7 +162,7 @@ def get_work_info():
     # 提前设置好的请求参数
     stock_remind_record = db['stock_remind_record']
 
-    result = stock_remind_record.find_one({"date": date_util.get_start_of_day(now), "key": "trend_reversal"})
+    result = stock_remind_record.find_one({"date": date_util.get_latest_work_day(), "key": "trend_reversal"})
     recommend_stock_set = set()
     for r in result['boards']:
         recommend_stock_set.update([stock['name'] for stock in r['stocks']])
