@@ -177,12 +177,12 @@ def get(key):
 
 def get_bool(key):
     r = RedisCache().get_data(key)
-    if r is not None: return json.loads(r.lower())
-
-    return r
+    return bool(r)
 
 
 def set(key, value):
+    if isinstance(value,bool):
+        value = int(value)
     return RedisCache().set_data(key, value)
 
 

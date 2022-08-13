@@ -24,7 +24,7 @@ def clear_stock_info():
     job_config.acquire_job("app.main.task.stock_task.sync_stock_k_line")
 
 
-    method.apply_async(kwargs=dict(reuild_data=True))
+    method.apply_async(kwargs=dict(reuild_data=1))
 
 if __name__ == "__main__":
     from app import application

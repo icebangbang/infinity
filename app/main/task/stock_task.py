@@ -55,7 +55,7 @@ def submit_stock_month_task(self):
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
-def sync_stock_k_line(self, reuild_data=False):
+def sync_stock_k_line(self, reuild_data=None):
     """
     schedule驱动
     提交同步股票日k线任务
