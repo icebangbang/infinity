@@ -99,12 +99,12 @@ def get_etf_feature():
     days = date_util.get_days_between(date_end, date_start)
     logging.info("days span is {}".format(days))
     if days == 0:
-        logging.info("submit stock feature:{}".format(date_start_str))
+        logging.info("submit etf feature:{}".format(date_start_str))
         etf_task.submit_etf_feature(date_util.to_timestamp(date_start), codes)
     else:
         for day in range(days):
             date_start = date_start + timedelta(days=1)
-            logging.info("submit stock feature:{}".format(date_util.dt_to_str(date_start)))
+            logging.info("submit etf feature:{}".format(date_util.dt_to_str(date_start)))
             etf_task.submit_etf_feature(date_util.to_timestamp(date_start), codes)
 
     return restful.response("ok")
