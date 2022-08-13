@@ -234,7 +234,7 @@ def sync_stock_ind(self, codes, task_id, expect):
 
 @celery.task(bind=True, base=MyTask, expire=1800)
 def auto_submit_stock_feature(self):
-    days = 5
+    days = 30
     logging.info("days span is {}".format(days))
     date_start = date_util.get_work_day(datetime.now(),days)
     for day in range(days):
