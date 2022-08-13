@@ -147,8 +147,8 @@ class RedisCache(object):
 
     @operator_status
     def incr(self, key, amount):
-        return self._connection.incr(key, amount)\
-
+        return self._connection.incr(key, amount) \
+ \
     @operator_status
     def incrby(self, key, amount):
         return self._connection.incrby(key, amount)
@@ -177,11 +177,13 @@ def get(key):
 
 def get_bool(key):
     r = RedisCache().get_data(key)
+
+    if r is None: return None
     return bool(r)
 
 
 def set(key, value):
-    if isinstance(value,bool):
+    if isinstance(value, bool):
         value = int(value)
     return RedisCache().set_data(key, value)
 
@@ -224,8 +226,10 @@ def r_push(key, value):
 def incr(key, value):
     return RedisCache().incr(key, value)
 
+
 def incrby(key, value):
     return RedisCache().incrby(key, value)
+
 
 def setnx(key, value):
     return RedisCache().setnx(key, value)
