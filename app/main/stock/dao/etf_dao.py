@@ -58,7 +58,7 @@ def dump_history_kline():
         kline_data = etf_info.fetch_kline_data(etf['code'])
         etf_kline_day.insert_many(kline_data)
 
-def dump_stock_feature(companies: List[Company], date):
+def dump_etf_feature(companies: List[Company], date):
     start_of_day = date_util.get_start_of_day(date)
 
     my_set = db['etf_feature']

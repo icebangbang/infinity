@@ -72,11 +72,11 @@ def sync_etf_feature(self, base_date, offset, codes, name_dict, global_task_id):
         base_date = datetime.fromtimestamp(int(base_date))
     companies = etf_filter.get_etf_status(base_date, int(offset), codes=codes, code_name_map=name_dict)
     if companies is not None:
-        etf_dao.dump_stock_feature(companies, base_date)
+        etf_dao.dump_etf_feature(companies, base_date)
 
         # sync_trend_disable = my_redis.get_bool("sync_trend_disable")
         # 禁用同步
         # if not sync_trend_disable:
         #     for company in companies:
         #         trend_service.save_stock_trend_with_company(company, base_date)
-    task_dao.update_task(global_task_id, len(codes), 'app.main.task.stock_task.submit_stock_feature', )
+    task_dao.update_task(global_task_id, len(codes), 'app.main.task.etf_task.submit_etf_feature', )
