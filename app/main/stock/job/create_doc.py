@@ -10,6 +10,9 @@ def create_doc(doc_name):
 
 
 def run():
+    db.etf_feature.create_index([("code", 1)])
+    db.etf_feature.create_index([("date", -1), ("code", 1)])
+
     db.etf_kline_day.create_index([("code", 1)])
     db.etf_kline_day.create_index([("date", -1), ("code", 1)])
 
