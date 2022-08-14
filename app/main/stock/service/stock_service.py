@@ -248,12 +248,12 @@ def stock_remind_v2():
     筛选个股结果存储
     :return:
     """
-    now = datetime.now()
-    # now = datetime(2022, 6, 10)
-    if now.hour >= 22:
-        return
-    if date_util.is_workday(now) is False or date_util.is_weekend(now):
-        return
+    # now = datetime.now()
+    now = datetime(2022, 8, 12)
+    # if now.hour >= 22:
+    #     return
+    # if date_util.is_workday(now) is False or date_util.is_weekend(now):
+    #     return
 
     query_store = db["ind_query_store"]
     query_list = list(query_store.find({"in_use": 1}))

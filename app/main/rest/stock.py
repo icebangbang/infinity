@@ -128,7 +128,6 @@ def data_miner_with_store():
 
     for board in boards:
         group_data = group[board['board']]
-        bellwether_detail = special_stock_group[board['board']][0]
         board_detail = board_detail_group[board['board']][0]
         # 板块构成
         stock_of_board_size = len(board_detail['codes'])
@@ -143,8 +142,12 @@ def data_miner_with_store():
         board['hit_rate'] = cal_util.get_rate(len(board['historyStocks']),stock_of_board_size)
         board['hit'] = len(board['historyStocks'])
         board['total'] = stock_of_board_size
-        board['bellwether'] = bellwether_detail['bellwether']
-        board['bellwether_rate'] = bellwether_detail['bellwether_rate']
+
+        if len(special_stock_group) >0:
+            bellwether_detail = special_stock_group[board['board']][0]
+            board['bellwether'] = bellwether_detail['bellwether']
+            board['bellwether_rate'] = bellwether_detail['bellwether_rate']
+
         board['option'] = dict(
             xAxis={
                 "show": False,
