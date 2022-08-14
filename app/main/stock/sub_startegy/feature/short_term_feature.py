@@ -67,11 +67,17 @@ class ShortTermFeature(SubST):
             ma5 = company.getInd("ma5")
             gap = 0
 
+            vol_20 = data.volume.get(ago=-1, size=20)
+            vol_20_max = max(vol_20)
+
+
             vol_10 = data.volume.get(ago=-1, size=10)
             vol_10_avg = sum(vol_10) / len(vol_10)
+            vol_10_max = max(vol_10)
 
             vol_5 = data.volume.get(ago=-1, size=5)
             vol_5_avg = sum(vol_5) / len(vol_5)
+            vol_5_max = max(vol_5)
 
             close_5 = data.close.get(ago=0, size=5)
             if len(close_5) > 0:
@@ -108,6 +114,9 @@ class ShortTermFeature(SubST):
 
             company.set(constant.vol_avg_10, vol_10_avg)
             company.set(constant.vol_avg_5, vol_5_avg)
+            company.set(constant.vol_max_5, vol_5_max)
+            company.set(constant.vol_max_10, vol_10_max)
+            company.set(constant.vol_max_20, vol_20_max)
             company.set(constant.volume, data.volume[0])
             company.set(constant.close, data.close[0])
             company.set(constant.high, data.high[0])

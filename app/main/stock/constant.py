@@ -29,6 +29,9 @@ ma200 = "ma200"
 ma250 = "ma250"
 vol_avg_10 = "vol_avg_10"
 vol_avg_5 = "vol_avg_5"
+vol_max_5 = "vol_max_5"
+vol_max_10 = "vol_max_10"
+vol_max_20 = "vol_max_20"
 volume = "volume"
 close = "close"
 high = "high"
@@ -99,6 +102,9 @@ feature = {
     "ma250": "250日均线",
     "vol_avg_10": "10日均量",
     "volume": "当前成交量",
+    'vol_max_5': "5内最大量",
+    'vol_max_10': "10内最大量",
+    'vol_max_20': "20内最大量",
     "close": "当前价格",
     "high": "当日最高价",
     "rate": "当前涨幅",
@@ -337,7 +343,7 @@ feature_detail = [
         default_comparator="gte",
         default_value=0,
         category="基础"
-    ),dict(
+    ), dict(
         name="cont_up_limit_count",
         desc="连续涨停次数",
         type="int",
