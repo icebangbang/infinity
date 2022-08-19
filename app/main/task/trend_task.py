@@ -81,10 +81,10 @@ def get_trend_data_task(self, from_date_ts=None, end_date_ts=None, global_task_i
     :return:
     """
 
-    from_date = date_util.get_start_of_day(datetime.fromtimestamp(int(from_date_ts))) \
+    from_date = date_util.get_start_of_day(date_util.from_timestamp(int(from_date_ts))) \
         if from_date_ts is not None else date_util.get_start_of_day(datetime.now())
 
-    end_date = date_util.get_start_of_day(datetime.fromtimestamp(int(end_date_ts))) \
+    end_date = date_util.get_start_of_day(date_util.from_timestamp(int(end_date_ts))) \
         if end_date_ts is not None else date_util.get_start_of_day(datetime.now())
 
     log.info("get_trend_data_task {},{}:{}".format(global_task_id,from_date,end_date))

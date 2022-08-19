@@ -33,11 +33,12 @@ def clear_stock_info():
 
 def trend_data_task():
     method = simple_util.get_method_by_path("app.main.task.trend_task.get_trend_data_task")
-    method.apply_async(kwargs= {
+    kwargs = {
         "from_date_ts": 1648742400000,
         "end_date_ts": 1660924800000,
         "global_task_id": "1fd1716e-1fda-11ed-934b-00163e0a10b2"
-    })
+    }
+    method.apply_async(kwargs= kwargs)
 
 
 if __name__ == "__main__":
