@@ -34,7 +34,7 @@ class TrendAnaysis(Line):
         data_y_array = [dict(name="", y=[], yAxisIndex=0) for i in range(len(industrys))]
         index = 0
         df = pd.DataFrame(trend_data_list)
-        for key, group in df.groupby(['industry']):
+        for key, group in df.sort_values("date",ascending=True).groupby('industry'):
             data_y_array[index]['name'] = key
             for point in group.to_dict("records"):
                 data_y_array[index]['y'].append(point['rate'])
