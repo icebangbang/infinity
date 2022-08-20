@@ -30,7 +30,7 @@ class SingleTrendAnaysis(Line):
         trend_data_list = list(trend_data.find({"industry": industry,
                                                 "date": {"$gte": start, "$lte": end},
                                                 }))
-        data_y_array = [dict(name="", y=[], yAxisIndex=0) for i in range(4)]
+        data_y_array = [dict(name="", y=[], yAxisIndex=0,markLine={}) for i in range(4)]
         index = 0
         df = pd.DataFrame(trend_data_list)
         for key, group in df.sort_values("date", ascending=True).groupby('trend'):
