@@ -4,6 +4,7 @@
 from app.main.db.mongo import db
 from app.main.stock import constant
 from app.main.stock.company import Company
+from app.main.stock.const import board_const
 from app.main.stock.dao import stock_dao
 from datetime import datetime
 import pandas as pd
@@ -20,7 +21,7 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
         if stock_detail.get("industry", None) is None:
             return
 
-        if features is None or len(features) ==0:
+        if features is None or len(features) == 0:
             return
 
         # 当前底分型趋势的斜率
@@ -136,7 +137,38 @@ def get_trend_size_info(start, end):
     boards = list(board_detail.find({"type": 2}))
     board_dict = {board['board']: board['size'] for board in boards}
 
+    result_list = []
+
+    another_boards = list(board_detail.find({"board": {"$in": board_const.include}}))
+
     for date in WorkDayIterator(start, end):
+        print(date)
+        for another_board in another_boards:
+            trend_point_set = db['trend_point']
+            total = another_board['codes']
+            r = list(trend_point_set.find(
+                {"date": {"$lte": date},
+                 "update": {"$gte": date}, "code": {"$in": total}}))
+            if len(r) == 0: continue
+            df = pd.DataFrame(r)
+            series = df.groupby(['trend']).size()
+            series_to_dict = series.to_dict()
+
+            board = another_board['board']
+            for trend in ['up', 'down', 'enlarge', 'convergence']:
+                if trend in series_to_dict.keys():
+                    size = series_to_dict[trend]
+                    result_list.append(
+                        dict(industry=board, trend=trend, size=size, rate=round(size / len(total), 2),
+                             date=date,
+                             update=datetime.now()))
+                else:
+                    result_list.append(
+                        dict(industry=board, trend=trend, size=0, rate=0, date=date,
+                             update=datetime.now()))
+
+    for date in WorkDayIterator(start, end):
+        print(date)
         trend_point_set = db['trend_point']
         r = list(trend_point_set.find(
             {"date": {"$lte": date},
@@ -146,12 +178,11 @@ def get_trend_size_info(start, end):
         series = df.groupby(['industry', 'trend']).size()
         series_to_dict = series.to_dict()
 
-        result_list = []
         for item in boards:
             board = item['board']
-            for trend in ['up','down','enlarge','convergence']:
-                if (board,trend) in series_to_dict.keys():
-                    size = series_to_dict[(board,trend)]
+            for trend in ['up', 'down', 'enlarge', 'convergence']:
+                if (board, trend) in series_to_dict.keys():
+                    size = series_to_dict[(board, trend)]
                     result_list.append(
                         dict(industry=board, trend=trend, size=size, rate=round(size / board_dict[board], 2), date=date,
                              update=datetime.now()))
@@ -159,6 +190,7 @@ def get_trend_size_info(start, end):
                     result_list.append(
                         dict(industry=board, trend=trend, size=0, rate=0, date=date,
                              update=datetime.now()))
+
 
         # collected_industry = []
         # for  k,v in series_to_dict.items():
@@ -172,19 +204,19 @@ def get_trend_size_info(start, end):
 
         # 补全没有出现的数据
 
-
-
-        for result in result_list:
-            db.trend_data.update_one(
-                {"industry": result["industry"], "trend": result["trend"],
-                 "date": result['date']}, {"$set": result},upsert=True)
+    for result in result_list:
+        print("insert {},{},{}".format(result["industry"],result["trend"],result['date']))
+        db.trend_data.update_one(
+            {"industry": result["industry"], "trend": result["trend"],
+             "date": result['date']}, {"$set": result}, upsert=True)
 
 
 if __name__ == "__main__":
-    # for date in WorkDayIterator(datetime(2022, 4, 1), datetime(2022, 7, 4)):
+    for date in WorkDayIterator(datetime(2022, 7, 5), datetime(2022, 8, 25)):
+        features = stock_dao.get_company_feature("300763", date)
+        save_stock_trend_with_features("300763", "锦浪科技", features, date)
 
-    # features = stock_dao.get_company_feature("000338", date)
-    # save_stock_trend_with_features("000338", "潍柴动力", features, date)
-    get_trend_size_info(datetime(2022, 4, 1), datetime(2022, 8, 20))
+    # save_stock_trend_with_features("300763", "锦浪科技", features, datetime(2022, 8, 25))
+    # get_trend_size_info(datetime(2022, 4, 1), datetime(2022, 8, 24))
 
     # print("code","300763")

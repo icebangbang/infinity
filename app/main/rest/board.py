@@ -1,6 +1,7 @@
 import collections
 from typing import List
 
+from app.main.stock.const import board_const
 from app.main.stock.dao import k_line_dao
 from app.main.utils import restful, date_util
 from . import rest
@@ -11,6 +12,14 @@ import pandas as  pd
 from datetime import timedelta, datetime
 from flask import request
 import re
+
+@rest.route("/board/list", methods=['get'])
+def get_board_list():
+    set = db['board_detail']
+    condition = {"$or": [{"type": 2}, {"board": {"$in": board_const.include}}]}
+    boards = list(set.find(condition,dict(board=1, _id=0)))
+
+    return restful.response(boards)
 
 
 @rest.route("/board/rank", methods=['get'])

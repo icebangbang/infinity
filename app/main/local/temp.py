@@ -45,6 +45,6 @@ if __name__ == "__main__":
     from app import application
 
     application.create_app("development")
-    # clear_stock_info()
-    trend_data_task()
+    clear_stock_info()
+    # trend_data_task()
     # test()
