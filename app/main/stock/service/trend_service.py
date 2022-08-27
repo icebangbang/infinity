@@ -8,12 +8,20 @@ from app.main.stock.const import board_const
 from app.main.stock.dao import stock_dao
 from datetime import datetime
 import pandas as pd
-from app.main.utils import date_util
+from app.main.utils import date_util, cal_util
 from app.main.utils.date_util import WorkDayIterator
 import logging as log
 
 
 def save_stock_trend_with_features(code, name, features, start_of_day: datetime):
+    """
+    从特征中提取趋势数据,并保存
+    :param code:
+    :param name:
+    :param features:
+    :param start_of_day:
+    :return:
+    """
     trend_point_set = db['trend_point']
     try:
         stock_detail = stock_dao.get_stock_detail_by_code(code)
@@ -128,7 +136,7 @@ def save_stock_trend_with_company(company: Company, start_of_day: datetime):
     save_stock_trend_with_features(code, name, features, start_of_day)
 
 
-def get_trend_size_info(start, end):
+def get_trend_size_info(start, end,only_include=False):
     """
     获取各个趋势分组数据
     :return:
@@ -166,30 +174,30 @@ def get_trend_size_info(start, end):
                     result_list.append(
                         dict(industry=board, trend=trend, size=0, rate=0, date=date,
                              update=datetime.now()))
+    if not only_include:
+        for date in WorkDayIterator(start, end):
+            print(date)
+            trend_point_set = db['trend_point']
+            r = list(trend_point_set.find(
+                {"date": {"$lte": date},
+                 "update": {"$gte": date}}))
+            if len(r) == 0: continue
+            df = pd.DataFrame(r)
+            series = df.groupby(['industry', 'trend']).size()
+            series_to_dict = series.to_dict()
 
-    for date in WorkDayIterator(start, end):
-        print(date)
-        trend_point_set = db['trend_point']
-        r = list(trend_point_set.find(
-            {"date": {"$lte": date},
-             "update": {"$gte": date}}))
-        if len(r) == 0: continue
-        df = pd.DataFrame(r)
-        series = df.groupby(['industry', 'trend']).size()
-        series_to_dict = series.to_dict()
-
-        for item in boards:
-            board = item['board']
-            for trend in ['up', 'down', 'enlarge', 'convergence']:
-                if (board, trend) in series_to_dict.keys():
-                    size = series_to_dict[(board, trend)]
-                    result_list.append(
-                        dict(industry=board, trend=trend, size=size, rate=round(size / board_dict[board], 2), date=date,
-                             update=datetime.now()))
-                else:
-                    result_list.append(
-                        dict(industry=board, trend=trend, size=0, rate=0, date=date,
-                             update=datetime.now()))
+            for item in boards:
+                board = item['board']
+                for trend in ['up', 'down', 'enlarge', 'convergence']:
+                    if (board, trend) in series_to_dict.keys():
+                        size = series_to_dict[(board, trend)]
+                        result_list.append(
+                            dict(industry=board, trend=trend, size=size, rate=round(size / board_dict[board], 2), date=date,
+                                 update=datetime.now()))
+                    else:
+                        result_list.append(
+                            dict(industry=board, trend=trend, size=0, rate=0, date=date,
+                                 update=datetime.now()))
 
 
         # collected_industry = []
@@ -210,6 +218,57 @@ def get_trend_size_info(start, end):
             {"industry": result["industry"], "trend": result["trend"],
              "date": result['date']}, {"$set": result}, upsert=True)
 
+def get_trend_list():
+    config = db['config']
+    boards = config.find_one({"name": "board"}, {"_id": 0})
+    industries = boards['value']
+
+    trend_data = db['trend_data']
+    end = date_util.get_latest_work_day()
+    start = date_util.get_work_day(end, 120)
+    trend_data_list = list(trend_data.find({"industry": {"$in": industries},
+                                            "date": {"$gte": start, "$lte": end},
+                                            }))
+    total = []
+    df = pd.DataFrame(trend_data_list)
+    df.sort_values("date", ascending=True, inplace=True)
+    for industry in industries:
+        up = df[(df['industry'] == industry) & (df['trend'] == 'up')].reset_index(drop=True)
+        down = df[(df['industry'] == industry) & (df['trend'] == 'down')].reset_index(drop=True)
+
+        rate_diff = down['rate'] - up['rate']
+        up['diff'] = rate_diff
+        latest = rate_diff[0]
+        result = _analysis(up,down)
+        result['name'] = industry
+        # total[industry] = round(latest,2)
+        total.append(result)
+    total = sorted(total, key=lambda item: item['currentDiff'], reverse=True)
+    return total
+
+def _analysis(up_df,down_df):
+    # 最低上行率
+    lowest_up = up_df.iloc[[up_df['rate'].idxmin()]]
+    # 历史最高上行率
+    highest_up = up_df.iloc[[up_df['rate'].idxmax()]]
+    # 区间差距最大的一天,和值
+    max_diff = up_df.iloc[[up_df['diff'].idxmax()]]
+    # 当前区间差距
+    current_diff = up_df.iloc[[len(up_df) - 1]]
+    current_down = down_df.iloc[[len(down_df)-1]]
+    result = dict(
+                  lowestUpValue=cal_util.round(lowest_up['rate']),
+                  lowestUpDay=lowest_up.iloc[0]['date'].strftime('%Y-%m-%d'),
+                  highestUp=cal_util.round(highest_up['rate']),
+                  highestUpDay=lowest_up.iloc[0]['date'].strftime('%Y-%m-%d'),
+                  maxDiffValue=cal_util.round(max_diff['diff']),
+                  maxDiffDay=lowest_up.iloc[0]['date'].strftime('%Y-%m-%d'),
+                  currentDiff=cal_util.round(current_diff['diff']),
+                  currentUpValue=cal_util.round(current_diff['rate']),
+                  currentDownValue=cal_util.round(current_down['rate']),
+
+    )
+    return result
 
 if __name__ == "__main__":
     for date in WorkDayIterator(datetime(2022, 7, 5), datetime(2022, 8, 25)):
@@ -217,6 +276,6 @@ if __name__ == "__main__":
         save_stock_trend_with_features("300763", "锦浪科技", features, date)
 
     # save_stock_trend_with_features("300763", "锦浪科技", features, datetime(2022, 8, 25))
-    # get_trend_size_info(datetime(2022, 4, 1), datetime(2022, 8, 24))
+    get_trend_size_info(datetime(2022, 4, 1), datetime(2022, 8, 25),True)
 
     # print("code","300763")

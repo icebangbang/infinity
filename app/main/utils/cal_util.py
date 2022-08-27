@@ -4,8 +4,9 @@ import math
 from decimal import Decimal
 
 
-def get_rate(a1,a2):
+def get_rate(a1, a2):
     return Decimal((a2 - a1) / a1 * 100).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP")
+
 
 def get_line(Y=None, X=None):
     """
@@ -64,7 +65,7 @@ def get_bot_line(Y):
 
     [m, c] = get_line(new_Y, new_X)
 
-    return [m, c,new_Y,new_X]
+    return [m, c, new_Y, new_X]
 
 
 def get_top_line(Y):
@@ -96,7 +97,7 @@ def get_top_line(Y):
 
     [m, c] = get_line(new_Y, new_X)
 
-    return [m, c,new_Y,new_X]
+    return [m, c, new_Y, new_X]
 
 
 # d_order = sorted(dis.items(), key=lambda x: x[1], reverse=False)
@@ -136,15 +137,19 @@ def get_reverse_point(points):
             pos_p.append(i)
             total_p.append(i)
 
+    return pos_p, neg_p, total_p
 
-    return pos_p, neg_p,total_p
 
-def get_rate(numerator,denominator,ndigits=2)->float:
+def get_rate(numerator, denominator, ndigits=2) -> float:
     """
     计算涨幅
     :return:
     """
     return float(Decimal(numerator / denominator * 100).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP"))
+
+
+def round(v, ndigits=2) -> float:
+    return float(Decimal(float(v)).quantize(Decimal(str(pow(10,-ndigits))), rounding="ROUND_HALF_UP"))
 
 
 def get_williams(highest, lowest, close):
@@ -173,6 +178,6 @@ if __name__ == "__main__":
     # print(a[total[-1]:])
     # print(a[total[-2]:total[-1]+1])
 
-    c = [1,2,3,4,5,6,7,8,9]
-    [m,c] = get_line(c)
+    c = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    [m, c] = get_line(c)
     print(_trace(math.atan(1)))
