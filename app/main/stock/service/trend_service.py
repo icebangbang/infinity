@@ -149,7 +149,11 @@ def get_trend_size_info(start, end, only_include=False):
 
     result_list = []
 
-    another_boards = list(board_detail.find({"board": {"$in": board_const.include}}))
+    config = db['config']
+    board_info = config.find_one({"name": "board"}, {"_id": 0})
+    another_boards = board_info['value']
+
+    another_boards = list(board_detail.find({"board": {"$in": another_boards}}))
 
     for date in WorkDayIterator(start, end):
         print(date)
@@ -290,11 +294,11 @@ def _analysis(up_df, down_df):
 
 
 if __name__ == "__main__":
-    for date in WorkDayIterator(datetime(2022, 7, 5), datetime(2022, 8, 25)):
-        features = stock_dao.get_company_feature("300763", date)
-        save_stock_trend_with_features("300763", "锦浪科技", features, date)
+    # for date in WorkDayIterator(datetime(2022, 7, 5), datetime(2022, 8, 25)):
+    #     features = stock_dao.get_company_feature("300763", date)
+    #     save_stock_trend_with_features("300763", "锦浪科技", features, date)
 
     # save_stock_trend_with_features("300763", "锦浪科技", features, datetime(2022, 8, 25))
-    get_trend_size_info(datetime(2022, 4, 1), datetime(2022, 8, 25), True)
+    get_trend_size_info(datetime(2022, 4, 1), datetime(2022, 8, 26), True)
 
     # print("code","300763")

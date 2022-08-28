@@ -7,8 +7,8 @@ from flask import request
 from app.main.utils import my_redis
 
 
-@rest.route("/trend/list", methods=['get'])
+@rest.route("/trend/board/list", methods=['get'])
 def trend_list():
-    total = trend_service.get_trend_list()
+    total = ""
     return restful.response(total)
 

@@ -13,6 +13,19 @@ from datetime import timedelta, datetime
 from flask import request
 import re
 
+@rest.route("/board/list/custom", methods=['get'])
+def get_custom_board_list():
+    config = db['config']
+    board_info = config.find_one({"name": "board"}, {"_id": 0})
+    board_custom = board_info['value']
+
+    set = db['board_detail']
+    condition = {"$or": [{"type": 2}, {"board": {"$in": board_custom}}]}
+    boards = set.find(condition, dict(board=1, _id=0))
+    results = [ board['board'] for board in boards]
+
+    return restful.response(results)
+
 @rest.route("/board/list", methods=['get'])
 def get_board_list():
     set = db['board_detail']
