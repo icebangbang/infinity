@@ -35,9 +35,3 @@ class Core:
         :return:
         """
         self.data: DataFrame = data
-
-    def get_income(self):
-        pass
-
-    def sell(self, row):
-        pass

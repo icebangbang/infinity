@@ -23,7 +23,7 @@ class SingleTrendAnaysis(Line):
         )
         trend_data = db['trend_data']
         end = date_util.get_latest_work_day()
-        start = date_util.get_work_day(end, 120)
+        start = date_util.get_work_day(end, 99)
 
         data_x = [date_util.date_time_to_str(date, "%m-%d") for date in WorkDayIterator(start, end)]
 

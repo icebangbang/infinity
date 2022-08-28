@@ -1,6 +1,8 @@
 """
 趋势相关服务
 """
+from collections import OrderedDict
+
 from app.main.db.mongo import db
 from app.main.stock import constant
 from app.main.stock.company import Company
@@ -136,7 +138,7 @@ def save_stock_trend_with_company(company: Company, start_of_day: datetime):
     save_stock_trend_with_features(code, name, features, start_of_day)
 
 
-def get_trend_size_info(start, end,only_include=False):
+def get_trend_size_info(start, end, only_include=False):
     """
     获取各个趋势分组数据
     :return:
@@ -192,13 +194,13 @@ def get_trend_size_info(start, end,only_include=False):
                     if (board, trend) in series_to_dict.keys():
                         size = series_to_dict[(board, trend)]
                         result_list.append(
-                            dict(industry=board, trend=trend, size=size, rate=round(size / board_dict[board], 2), date=date,
+                            dict(industry=board, trend=trend, size=size, rate=round(size / board_dict[board], 2),
+                                 date=date,
                                  update=datetime.now()))
                     else:
                         result_list.append(
                             dict(industry=board, trend=trend, size=0, rate=0, date=date,
                                  update=datetime.now()))
-
 
         # collected_industry = []
         # for  k,v in series_to_dict.items():
@@ -213,12 +215,13 @@ def get_trend_size_info(start, end,only_include=False):
         # 补全没有出现的数据
 
     for result in result_list:
-        print("insert {},{},{}".format(result["industry"],result["trend"],result['date']))
+        print("insert {},{},{}".format(result["industry"], result["trend"], result['date']))
         db.trend_data.update_one(
             {"industry": result["industry"], "trend": result["trend"],
              "date": result['date']}, {"$set": result}, upsert=True)
 
-def get_trend_list():
+
+def get_trend_info():
     config = db['config']
     boards = config.find_one({"name": "board"}, {"_id": 0})
     industries = boards['value']
@@ -239,14 +242,29 @@ def get_trend_list():
         rate_diff = down['rate'] - up['rate']
         up['diff'] = rate_diff
         latest = rate_diff[0]
-        result = _analysis(up,down)
+        result = _analysis(up, down)
         result['name'] = industry
         # total[industry] = round(latest,2)
         total.append(result)
     total = sorted(total, key=lambda item: item['currentDiff'], reverse=True)
-    return total
 
-def _analysis(up_df,down_df):
+    df = pd.DataFrame(total)
+    labels = ["0-0.1", "0.1-0.2", "0.2-0.3",
+              "0.3-0.4", "0.4-0.5", "0.5-0.6",
+              "0.6-0.7", "0.7-0.8", "0.8-0.9", "0.9-1"]
+    df['cut'] = pd.cut(df.currentUpValue, bins=[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+                       labels=labels,
+                       include_lowest=True)
+    industry_info = OrderedDict()
+    for label in labels:
+        items = list(df[df['cut'] == label]['name'])
+        industry_info[label] = dict(industries=industries, rate=cal_util.round(len(items) / len(industries), 2))
+
+    return dict(records=df.to_dict("records"),
+                industryInfo=industry_info)
+
+
+def _analysis(up_df, down_df):
     # 最低上行率
     lowest_up = up_df.iloc[[up_df['rate'].idxmin()]]
     # 历史最高上行率
@@ -255,20 +273,21 @@ def _analysis(up_df,down_df):
     max_diff = up_df.iloc[[up_df['diff'].idxmax()]]
     # 当前区间差距
     current_diff = up_df.iloc[[len(up_df) - 1]]
-    current_down = down_df.iloc[[len(down_df)-1]]
+    current_down = down_df.iloc[[len(down_df) - 1]]
     result = dict(
-                  lowestUpValue=cal_util.round(lowest_up['rate']),
-                  lowestUpDay=lowest_up.iloc[0]['date'].strftime('%Y-%m-%d'),
-                  highestUp=cal_util.round(highest_up['rate']),
-                  highestUpDay=lowest_up.iloc[0]['date'].strftime('%Y-%m-%d'),
-                  maxDiffValue=cal_util.round(max_diff['diff']),
-                  maxDiffDay=lowest_up.iloc[0]['date'].strftime('%Y-%m-%d'),
-                  currentDiff=cal_util.round(current_diff['diff']),
-                  currentUpValue=cal_util.round(current_diff['rate']),
-                  currentDownValue=cal_util.round(current_down['rate']),
+        lowestUpValue=cal_util.round(lowest_up['rate']),
+        lowestUpDay=lowest_up.iloc[0]['date'].strftime('%Y-%m-%d'),
+        highestUp=cal_util.round(highest_up['rate']),
+        highestUpDay=lowest_up.iloc[0]['date'].strftime('%Y-%m-%d'),
+        maxDiffValue=cal_util.round(max_diff['diff']),
+        maxDiffDay=lowest_up.iloc[0]['date'].strftime('%Y-%m-%d'),
+        currentDiff=cal_util.round(current_diff['diff']),
+        currentUpValue=cal_util.round(current_diff['rate']),
+        currentDownValue=cal_util.round(current_down['rate']),
 
     )
     return result
+
 
 if __name__ == "__main__":
     for date in WorkDayIterator(datetime(2022, 7, 5), datetime(2022, 8, 25)):
@@ -276,6 +295,6 @@ if __name__ == "__main__":
         save_stock_trend_with_features("300763", "锦浪科技", features, date)
 
     # save_stock_trend_with_features("300763", "锦浪科技", features, datetime(2022, 8, 25))
-    get_trend_size_info(datetime(2022, 4, 1), datetime(2022, 8, 25),True)
+    get_trend_size_info(datetime(2022, 4, 1), datetime(2022, 8, 25), True)
 
     # print("code","300763")
