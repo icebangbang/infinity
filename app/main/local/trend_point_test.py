@@ -13,6 +13,7 @@ stocks = list(stock_detail.find({}))
 
 for stock in stocks:
     code = stock['code']
+    print(code)
     # code = "300763"
     trend_point_list = list(trend_point_set.find({"code": code,
                                                   },

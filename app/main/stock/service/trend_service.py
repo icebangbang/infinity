@@ -10,6 +10,8 @@ from app.main.stock.const import board_const
 from app.main.stock.dao import stock_dao
 from datetime import datetime
 import pandas as pd
+
+from app.main.stock.service import board_service
 from app.main.utils import date_util, cal_util
 from app.main.utils.date_util import WorkDayIterator
 import logging as log
@@ -226,9 +228,9 @@ def get_trend_size_info(start, end, only_include=False):
 
 
 def get_trend_info():
-    config = db['config']
-    boards = config.find_one({"name": "board"}, {"_id": 0})
-    industries = boards['value']
+    # config = db['config']
+    # boards = config.find_one({"name": "board"}, {"_id": 0})
+    industries = board_service.get_all_board()
 
     trend_data = db['trend_data']
     end = date_util.get_latest_work_day()

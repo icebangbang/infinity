@@ -89,6 +89,17 @@ def get_concepts(stock_map,code):
         return stock_map[code]['board']
     return ""
 
+def get_all_board():
+    config = db['config']
+    board_info = config.find_one({"name": "board"}, {"_id": 0})
+    board_custom = board_info['value']
+
+    set = db['board_detail']
+    condition = {"$or": [{"type": 2}, {"board": {"$in": board_custom}}]}
+    boards = set.find(condition, dict(board=1, _id=0))
+    results = [board['board'] for board in boards]
+    return results
+
 
 if __name__ == "__main__":
     publish(2,100)
