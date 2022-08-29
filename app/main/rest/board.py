@@ -20,9 +20,10 @@ def get_custom_board_list():
     board_custom = board_info['value']
 
     set = db['board_detail']
-    condition = {"$or": [{"type": 2}, {"board": {"$in": board_custom}}]}
+    condition = {"$or": [{"type": 2}]}
     boards = set.find(condition, dict(board=1, _id=0))
     results = [ board['board'] for board in boards]
+    results.extend(board_custom)
 
     return restful.response(results)
 

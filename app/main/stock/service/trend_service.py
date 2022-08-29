@@ -12,7 +12,7 @@ from datetime import datetime
 import pandas as pd
 
 from app.main.stock.service import board_service
-from app.main.utils import date_util, cal_util
+from app.main.utils import date_util, cal_util, stock_util
 from app.main.utils.date_util import WorkDayIterator
 import logging as log
 
@@ -140,9 +140,51 @@ def save_stock_trend_with_company(company: Company, start_of_day: datetime):
     save_stock_trend_with_features(code, name, features, start_of_day)
 
 
+def get_all_trend_info(start, end):
+    """
+    获取大盘的趋势分组数据
+    :param start:
+    :param end:
+    :return:
+    """
+    for date in WorkDayIterator(start, end):
+        print(date)
+        trend_point_set = db['trend_point']
+        r = list(trend_point_set.find(
+            {"date": {"$lte": date},
+             "update": {"$gte": date}}))
+        if len(r) == 0: continue
+        df = pd.DataFrame(r)
+        df['market'] = df.apply(lambda row: stock_util.market_belong(row['code']), axis=1)
+        series = df.groupby(['market', 'trend']).size()
+        series_to_dict = series.to_dict()
+        series_market = df.groupby(['market']).size()
+
+        result_list = []
+        for market in ['沪市', '深市', '科创板', '创业板']:
+            for trend in ['up', 'down', 'enlarge', 'convergence']:
+                if (market, trend) in series_to_dict.keys():
+                    size = series_to_dict[(market, trend)]
+                    result_list.append(
+                        dict(industry=market, trend=trend, size=size,
+                             rate=cal_util.round(size / int(series_market[market]), 2),
+                             date=date,
+                             update=datetime.now()))
+                else:
+                    result_list.append(
+                        dict(industry=market, trend=trend, size=0, rate=0, date=date,
+                             update=datetime.now()))
+
+        for result in result_list:
+            print("insert {},{},{}".format(result["industry"], result["trend"], result['date']))
+            db.trend_data.update_one(
+                {"industry": result["industry"], "trend": result["trend"],
+                 "date": result['date']}, {"$set": result}, upsert=True)
+
+
 def get_trend_size_info(start, end, only_include=False):
     """
-    获取各个趋势分组数据
+    获取各个板块的趋势分组数据
     :return:
     """
     board_detail = db['board_detail']
@@ -175,7 +217,7 @@ def get_trend_size_info(start, end, only_include=False):
                 if trend in series_to_dict.keys():
                     size = series_to_dict[trend]
                     result_list.append(
-                        dict(industry=board, trend=trend, size=size, rate=round(size / len(total), 2),
+                        dict(industry=board, trend=trend, size=size, rate=cal_util.round(size / len(total), 2),
                              date=date,
                              update=datetime.now()))
                 else:
@@ -200,7 +242,8 @@ def get_trend_size_info(start, end, only_include=False):
                     if (board, trend) in series_to_dict.keys():
                         size = series_to_dict[(board, trend)]
                         result_list.append(
-                            dict(industry=board, trend=trend, size=size, rate=round(size / board_dict[board], 2),
+                            dict(industry=board, trend=trend, size=size,
+                                 rate=cal_util.round(size / board_dict[board], 2),
                                  date=date,
                                  update=datetime.now()))
                     else:
@@ -296,11 +339,12 @@ def _analysis(up_df, down_df):
 
 
 if __name__ == "__main__":
-    # for date in WorkDayIterator(datetime(2022, 7, 5), datetime(2022, 8, 25)):
+    for date in WorkDayIterator(datetime(2022, 4, 1), datetime(2022, 8, 29)):
+        get_all_trend_info(date, date)
     #     features = stock_dao.get_company_feature("300763", date)
     #     save_stock_trend_with_features("300763", "锦浪科技", features, date)
 
     # save_stock_trend_with_features("300763", "锦浪科技", features, datetime(2022, 8, 25))
-    get_trend_size_info(datetime(2022, 4, 1), datetime(2022, 8, 26), True)
+    # get_trend_size_info(datetime(2022, 4, 1), datetime(2022, 8, 26), True)
 
     # print("code","300763")
