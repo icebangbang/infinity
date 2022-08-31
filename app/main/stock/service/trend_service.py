@@ -339,7 +339,7 @@ def _analysis(up_df, down_df):
 
 
 if __name__ == "__main__":
-    for date in WorkDayIterator(datetime(2022, 4, 1), datetime(2022, 8, 29)):
+    for date in WorkDayIterator(datetime(2022, 8, 31), datetime(2022, 8, 31)):
         get_all_trend_info(date, date)
     #     features = stock_dao.get_company_feature("300763", date)
     #     save_stock_trend_with_features("300763", "锦浪科技", features, date)
