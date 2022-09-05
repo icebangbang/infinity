@@ -83,6 +83,11 @@ task_routes = (
         'routing_key': 'indicator'
     }
     },
+    {'app.main.task.stock_task.sync_stock_ind': {
+        'queue': 'indicator',
+        'routing_key': 'indicator'
+    }
+    },
     {'app.main.task.etf_task.sync_etf_feature': {
         'queue': 'indicator',
         'routing_key': 'indicator'
