@@ -99,6 +99,7 @@ def sync_stock_ind(codes, task_wrapper: TaskWrapper = None):
     stock_value_set = db["stock_value"]
     print("code size {}".format(len(codes)))
     for code in codes:
+        print(code)
         now = datetime.now()
         # start_of_day = date_util.get_start_of_day(now)
         k_line_data_list = k_line_dao.get_k_line_by_code([code], limit=1, sort=-1)
@@ -116,8 +117,8 @@ def sync_stock_ind(codes, task_wrapper: TaskWrapper = None):
                                        update_time=now),
                                    }, upsert=True)
 
-        if task_wrapper is not None:
-            task_wrapper.trigger_count()
+        # if task_wrapper is not None:
+        #     task_wrapper.trigger_count()
 
 
 def stock_remind():
@@ -464,7 +465,7 @@ if __name__ == "__main__":
     # from_time = to_time - timedelta(739)
     # stock_filter.get_stock_status(from_time, to_time)
     # publish(3, 100)
-    stock_remind_v2()
+    # stock_remind_v2()
     # detail = get_full_stock_detail("300763")
     pass
     # sync_bellwether()
@@ -476,7 +477,7 @@ if __name__ == "__main__":
     #         "inf_h_point_value": "5","inf_h_point_date":"6",
     #         }
     # print(msg.format(**d))
-
+    sync_stock_ind(["300763"])
     # stock_value_set = db["stock_value"]
     # stock_value_set.update_one({"code": "300763", "date": datetime.now()},
     #                            {"$set": dict(

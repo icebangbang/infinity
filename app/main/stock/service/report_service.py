@@ -33,7 +33,7 @@ def rps_analysis(date=None, offset=-250):
     for index, stock in enumerate(stocks):
         code = stock['code']
         name = stock['name']
-        logging.info("{},{}".format(index, code))
+        # logging.info("{},{}".format(index, code))
 
         data_list = k_line_dao.get_k_line_data_by_offset(end, offset, code=code)
         if len(data_list) >= abs(offset):

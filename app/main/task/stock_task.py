@@ -210,26 +210,32 @@ def submit_stock_ind_task(self):
     :param self:
     :return:
     """
-    stocks = stock_dao.get_all_stock(dict(code=1))
-    codes = [stock['code'] for stock in stocks]
-    t = datetime.now()
+    try:
+        stocks = stock_dao.get_all_stock(dict(code=1))
+        codes = [stock['code'] for stock in stocks]
+        t = datetime.now()
 
-    task_id = str(uuid.uuid1())
-    task_set = db['task_center']
-    task_set.update({"task_id": task_id, "job_name": task_constant.TASK_SYNC_STOCK_IND},
-                    {"$set": {"is_finished": 0, "create_time": t, "update_time": t}}, upsert=True)
+        task_id = str(uuid.uuid1())
+        task_set = db['task_center']
+        task_set.update({"task_id": task_id, "job_name": task_constant.TASK_SYNC_STOCK_IND},
+                        {"$set": {"is_finished": 0, "create_time": t, "update_time": t}}, upsert=True)
 
-    step = int(len(codes) / 100)
-    for i in range(0, len(codes), step):
-        group = codes[i:i + step]
-        # logging.info("submit group index {} - {},{},{}".format(i, i + step,task_id,len(stocks)))
-        sync_stock_ind.apply_async(args=[group, task_id, len(stocks)])
+        step = int(len(codes) / 100)
+        for i in range(0, len(codes), step):
+            group = codes[i:i + step]
+            # logging.info("submit group index {} - {},{},{}".format(i, i + step,task_id,len(stocks)))
+            sync_stock_ind.apply_async(args=[group, task_id, len(stocks)])
+    except Exception as e:
+        logging.error(e, exc_info=1)
 
 
 @celery.task(bind=True, base=MyTask, expire=1800)
 def sync_stock_ind(self, codes, task_id, expect):
-    task_wrapper = TaskWrapper(task_id, task_constant.TASK_SYNC_STOCK_IND, expect)
-    stock_service.sync_stock_ind(codes, task_wrapper)
+    try:
+        task_wrapper = TaskWrapper(task_id, task_constant.TASK_SYNC_STOCK_IND, expect)
+        stock_service.sync_stock_ind(codes, task_wrapper)
+    except Exception as e:
+        logging.error(e, exc_info=1)
 
 
 @celery.task(bind=True, base=MyTask, expire=1800)
