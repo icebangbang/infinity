@@ -90,7 +90,8 @@ task_routes = (
     },
     {'app.main.task.trend_task.sync_trend_task': {
         'queue': 'indicator',
-        'routing_key': 'indicator'}
+        'routing_key': 'indicator'
+    }
     },
     {'app.main.task.board_task.sync_board_k_line': {
         'queue': 'day_level',

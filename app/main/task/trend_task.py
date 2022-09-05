@@ -41,7 +41,7 @@ def submit_trend_task(self, from_date=None, end_date=None, global_task_id=None,c
         sync_trend_task.apply_async(args=[from_timestamp, end_timestamp, codes_group, name_dict, global_task_id])
 
 
-@celery.task(bind=True, base=MyTask, expires=1800)
+@celery.task(bind=True, base=MyTask, expires=18000)
 def sync_trend_task(self, from_date_ts, end_date_ts, codes, name_dict, global_task_id):
     """
     同步分型趋势线
