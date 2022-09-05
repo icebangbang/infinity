@@ -33,7 +33,6 @@ class SingleTrendAnaysis(Line):
         data_y_array = [dict(name="", y=[], yAxisIndex=0,markLine={}) for i in range(4)]
         index = 0
         df = pd.DataFrame(trend_data_list)
-        data_x = []
         for key, group in df.sort_values("date", ascending=True).groupby('trend'):
             data_y_array[index]['name'] = key
             for point in group.to_dict("records"):
