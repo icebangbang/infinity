@@ -152,7 +152,7 @@ beat_schedule = {
     },
     'sync_board_stock_ind': {
         "task": "app.main.task.stock_task.submit_stock_ind_task",
-        "schedule": 600  # 每20分钟执行一次
+        "schedule": 6000  # 每20分钟执行一次
     },
     'get_stock_feature': {
         "task": "app.main.task.stock_task.submit_stock_feature",
