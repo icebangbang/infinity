@@ -113,6 +113,21 @@ task_routes = (
         'routing_key': 'day_level'
     }
     },
+{'app.main.task.stock_task.sync_balance': {
+        'queue': 'day_level',
+        'routing_key': 'day_level'
+    }
+    },
+{'app.main.task.stock_task.sync_cash_flow': {
+        'queue': 'day_level',
+        'routing_key': 'day_level'
+    }
+    },
+{'app.main.task.stock_task.sync_profit': {
+        'queue': 'day_level',
+        'routing_key': 'day_level'
+    }
+    },
     # 提交特征任务,做任务拆分
     {'app.main.task.board_task.submit_board_feature': {
         'queue': 'default',
@@ -197,7 +212,7 @@ beat_schedule = {
         "schedule": 20
     },
     'rps_analysis_250': {  # 250日30日rps统计
-        "task": "app.main.task.st`ock_task.sync_rps_analysis_250",
+        "task": "app.main.task.stock_task.sync_rps_analysis_250",
         "schedule": 1200
     }, 'rps_analysis_120': {  # 120日30日rps统计
         "task": "app.main.task.stock_task.sync_rps_analysis_120",
