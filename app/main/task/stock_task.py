@@ -5,7 +5,7 @@ import logging
 from datetime import datetime, timedelta
 import time
 
-from app.main.stock.job import sync_stock_indicator, sync_index_kline, job_config
+from app.main.stock.job import sync_stock_indicator, sync_index_kline, job_config, sync_performance
 from app.main.stock.job import job_config
 from app.main.stock.task_wrapper import TaskWrapper
 from app.main.task import task_constant
@@ -285,3 +285,31 @@ def sync_rps_analysis_30(self):
 @celery.task(bind=True, base=MyTask, expire=1800)
 def sync_bellwether(self):
     stock_service.sync_bellwether()
+
+
+@celery.task(bind=True, base=MyTask, expire=18000)
+def sync_balance(self):
+    """
+    资产负债表
+    :param self:
+    :return:
+    """
+    sync_performance.sync_balance()
+
+@celery.task(bind=True, base=MyTask, expire=18000)
+def sync_cash_flow(self):
+    """
+    现金流
+    :param self:
+    :return:
+    """
+    sync_performance.sync_cash_flow()
+
+@celery.task(bind=True, base=MyTask, expire=18000)
+def sync_profit(self):
+    """
+    利润表
+    :param self:
+    :return:
+    """
+    sync_performance.sync_profit()

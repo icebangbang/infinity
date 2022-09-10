@@ -12,6 +12,17 @@ from datetime import datetime, timedelta
 from app.main.task import board_task, stock_task,etf_task
 from flask import request
 
+@rest.route("/celery/performance", methods=['get'])
+def performance():
+    """
+    业绩数据拉取
+    :return:
+    """
+    stock_task.sync_profit.apply_async(args=[])
+    stock_task.sync_cash_flow.apply_async(args=[])
+    stock_task.sync_balance.apply_async(args=[])
+
+    return restful.response("ok")
 
 @rest.route("/celery/board", methods=['get'])
 def maunlly():

@@ -1,4 +1,4 @@
-akshare==1.0.67
+akshare==1.7.19
 amqp==5.0.6
 backtrader==1.9.76.123
 bcrypt==3.2.0
