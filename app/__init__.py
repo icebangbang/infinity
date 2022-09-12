@@ -11,8 +11,8 @@ from app.main.stock.api.overwrite import stock_zh_a_hist, \
     stock_board_concept_hist_em, \
     stock_board_concept_name_em, \
     stock_board_concept_cons_em, \
-    chinese_ppi, chinese_cpi, pig_data, chinese_pmi,\
-    get_stock_web, get_stock_business, get_bellwether,fund_etf_hist_sina
+    chinese_ppi, chinese_cpi, pig_data, chinese_pmi, \
+    get_stock_web, get_stock_business, get_bellwether, fund_etf_hist_sina, stock_cash_flow_sheet_by_report_em
 
 log.basicConfig(
     level=log.INFO,
@@ -36,3 +36,4 @@ akshare.get_stock_web = get_stock_web
 akshare.get_stock_business = get_stock_business
 akshare.get_bellwether = get_bellwether
 akshare.fund_etf_hist_sina = fund_etf_hist_sina
+akshare.stock_cash_flow_sheet_by_report_em = stock_cash_flow_sheet_by_report_em

@@ -10,6 +10,7 @@ from py_mini_racer import py_mini_racer
 
 
 from akshare.stock.cons import hk_js_decode
+from tqdm import tqdm
 
 
 
@@ -670,11 +671,59 @@ def fund_etf_hist_sina(symbol: str = "sz159996") -> pd.DataFrame:
     temp_df["date"] = pd.to_datetime(temp_df["date"]).dt.date
     return temp_df
 
+def stock_cash_flow_sheet_by_report_em(
+    symbol: str = "SH600519",
+) -> pd.DataFrame:
+    """
+    东方财富-股票-财务分析-现金流量表-按报告期
+    https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/Index?type=web&code=sh600519#lrb-0
+    :param symbol: 股票代码; 带市场标识
+    :type symbol: str
+    :return: 现金流量表-按报告期
+    :rtype: pandas.DataFrame
+    """
+    company_types = [4,3,1,0]
+    true_company_type = -1
+    for company_type in company_types:
+        url = "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/xjllbDateAjaxNew"
+        params = {
+            "companyType": company_type,
+            "reportDateType": "0",
+            "code": symbol,
+        }
+        r = requests.get(url, params=params)
+        data_json:dict = r.json()
+        true_company_type = company_type
+        if 'data' in data_json.keys() : break
+    temp_df = pd.DataFrame(data_json["data"])
+    temp_df["REPORT_DATE"] = pd.to_datetime(temp_df["REPORT_DATE"]).dt.date
+    temp_df["REPORT_DATE"] = temp_df["REPORT_DATE"].astype(str)
+    need_date = temp_df["REPORT_DATE"].tolist()
+    sep_list = [
+        ",".join(need_date[i : i + 5]) for i in range(0, len(need_date), 5)
+    ]
+    big_df = pd.DataFrame()
+    for item in tqdm(sep_list, leave=False):
+        url = "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/xjllbAjaxNew"
+        params = {
+            "companyType": company_type,
+            "reportDateType": "0",
+            "reportType": "1",
+            "dates": item,
+            "code": symbol,
+        }
+        r = requests.get(url, params=params)
+        data_json = r.json()
+        temp_df = pd.DataFrame(data_json["data"])
+        big_df = pd.concat([big_df, temp_df], ignore_index=True)
+    return big_df
+
 
 if __name__ == "__main__":
     # results = stock_board_concept_name_em()
     # r = chinese_cpi()
     # r = get_stock_web(dict(code="300763",belong="sz"))
     # r = get_bellwether()
-    df = ak.fund_etf_hist_sina(symbol="sz169103")
+    # df = ak.fund_etf_hist_sina(symbol="sz169103")
+    df = stock_cash_flow_sheet_by_report_em(symbol="sz300763")
     print(123)

@@ -25,7 +25,7 @@ def sync_balance():
         name:str = stock['name']
         if "退市" in name: continue
         belong = stock_util.basic_belong(code)
-        logging.info("{}({})同步资产负债表",name,code)
+        logging.info("{}({})同步资产负债表".format(name,code))
         df = ak.stock_balance_sheet_by_report_em(symbol=belong+code)
         df.rename(columns={
             'SECURITY_CODE': 'code',
@@ -54,7 +54,7 @@ def sync_profit():
         name: str = stock['name']
         if "退市" in name: continue
         belong = stock_util.basic_belong(code)
-        logging.info("{}({})同步利润表",name,code)
+        logging.info("{}({})同步利润表".format(name,code))
 
         df = ak.stock_profit_sheet_by_report_em(symbol=belong + code)
         df.rename(columns={
@@ -82,7 +82,7 @@ def sync_cash_flow():
         name: str = stock['name']
         if "退市" in name: continue
         belong = stock_util.basic_belong(code)
-        logging.info("{}({})同步现金流表",name,code)
+        logging.info("{}{}同步现金流表".format(name,code))
         df = ak.stock_cash_flow_sheet_by_report_em(symbol=belong + code)
         df.rename(columns={
             'SECURITY_CODE': 'code',
@@ -93,6 +93,6 @@ def sync_cash_flow():
         stock_cash_flow.insert_many(details)
 
 if __name__ == "__main__":
-    # sync_balance()
-    df = ak.stock_balance_sheet_by_report_em(symbol="SH603057")
+    sync_cash_flow()
+    # df = ak.stock_balance_sheet_by_report_em(symbol="SH603057")
     pass
