@@ -33,7 +33,7 @@ def get_performance_size_info(start, end,    time_level = 'year'):
             code_list = another_board['codes']
             stock_detail: dict = stock_dao.get_stock_detail_map(code_list)
             profits = list(stock_profit.find(
-                {"date": time_range,
+                {"date": date_util.dt_to_str(time_range,'%Y-%m-%d %H:%M:%S'),
                  "code": {"$in": code_list}}, dict(PARENT_NETPROFIT=1, _id=0)))
 
             netprofit = 0

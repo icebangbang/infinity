@@ -113,17 +113,22 @@ task_routes = (
         'routing_key': 'day_level'
     }
     },
-{'app.main.task.stock_task.sync_balance': {
+    {'app.main.task.stock_task.sync_balance': {
         'queue': 'day_level',
         'routing_key': 'day_level'
     }
     },
-{'app.main.task.stock_task.sync_cash_flow': {
+    {'app.main.task.stock_task.sync_cash_flow': {
         'queue': 'day_level',
         'routing_key': 'day_level'
     }
     },
-{'app.main.task.stock_task.sync_profit': {
+    {'app.main.task.stock_task.sync_profit': {
+        'queue': 'day_level',
+        'routing_key': 'day_level'
+    }
+    },
+    {'app.main.task.stock_task.sync_analysis_indicator': {
         'queue': 'day_level',
         'routing_key': 'day_level'
     }

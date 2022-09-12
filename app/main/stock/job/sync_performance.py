@@ -95,7 +95,29 @@ def sync_cash_flow():
         details = df.to_dict("records")
         stock_cash_flow.insert_many(details)
 
+def sync_analysis_indicator():
+    """
+    同步主要指标
+    :return:
+    """
+    stocks = stock_dao.get_all_stock()
+    stock_analysis_indicator = db['stock_analysis_indicator']
+    stock_analysis_indicator.drop()
+    # 获取最近一个交易日
+    stock_analysis_indicator.create_index([("date", -1), ("code", 1)])
+    stock_analysis_indicator.create_index([("code", 1)])
+
+    for stock in stocks:
+        code = stock['code']
+        name: str = stock['name']
+        if "退市" in name: continue
+        logging.info("{}{}同步分析指标".format(name,code))
+        df = ak.stock_financial_analysis_indicator(from_datetime.year,code,name)
+        details = df.to_dict("records")
+        stock_analysis_indicator.insert_many(details)
+
 if __name__ == "__main__":
     # sync_cash_flow()
-    df = ak.stock_balance_sheet_by_report_em(from_datetime,symbol="SH603057")
+    sync_analysis_indicator()
+    # df = ak.stock_balance_sheet_by_report_em(from_datetime,symbol="SH603057")
     pass

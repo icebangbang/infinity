@@ -312,4 +312,13 @@ def sync_profit(self):
     :param self:
     :return:
     """
-    sync_performance.sync_profit()
+    sync_performance.sync_profit()\
+
+@celery.task(bind=True, base=MyTask, expire=18000)
+def sync_analysis_indicator(self):
+    """
+    利润表
+    :param self:
+    :return:
+    """
+    sync_performance.sync_analysis_indicator()
