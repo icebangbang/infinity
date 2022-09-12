@@ -2,6 +2,15 @@ from datetime import datetime, timedelta, date
 from datetime import time
 from chinese_calendar import is_workday
 import time as tm
+from dateutil.relativedelta import relativedelta
+
+
+def in_time_range(time: datetime, range: datetime, level):
+    if level == 'year':
+        return time.year == range.year
+    if level == 'season':
+        start =  range-timedelta(3)
+        return start <=time <= range
 
 
 def utc_now():
@@ -177,7 +186,7 @@ def get_week_end(t: datetime, if_work_day: bool = True):
 
 
 class WorkDayIterator(object):
-    def __init__(self,start,end):
+    def __init__(self, start, end):
         self.date = start
         self.end = end
 
@@ -187,11 +196,31 @@ class WorkDayIterator(object):
     def __next__(self):
         if self.date <= self.end:
             val = self.date
-            self.date = add_and_get_work_day(val,1)
+            self.date = add_and_get_work_day(val, 1)
             return val
         else:
             raise StopIteration
 
+
+class ReportTimeIterator(object):
+    def __init__(self, start, end, type):
+        self.date = start
+        self.end = end
+        self.type = type
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.date <= self.end:
+            val = self.date
+            if self.type == 'year':
+                self.date = val + relativedelta(years=1)
+            elif self.type == 'season':
+                self.date = val + relativedelta(months=1)
+            return val
+        else:
+            raise StopIteration
 
 
 if __name__ == "__main__":
@@ -203,6 +232,9 @@ if __name__ == "__main__":
     # print(is_workday(datetime(2022, 10, 7)))
     # print(get_week_start(datetime.now()))
 
-    values = WorkDayIterator(datetime(2022, 6, 1),datetime(2022, 6, 2))
-    for v in values:
-        print(v, end=' ')
+    # values = WorkDayIterator(datetime(2022, 6, 1),datetime(2022, 6, 2))
+    # for v in values:
+    #     print(v, end=' ')
+
+    for value in YearIterator(2010, 2022):
+        print(value)

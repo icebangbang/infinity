@@ -200,7 +200,6 @@ def get_trend_size_info(start, end, only_include=False):
     another_boards = list(board_detail.find({"board": {"$in": another_boards}}))
 
     for date in WorkDayIterator(start, end):
-        print(date)
         for another_board in another_boards:
             trend_point_set = db['trend_point']
             total = another_board['codes']

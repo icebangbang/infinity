@@ -8,7 +8,7 @@ from app.main.utils import date_util, simple_util
 import pymongo
 
 
-def get_all_stock(fields=None,filter={}):
+def get_all_stock(fields=None, filter={}):
     if fields is None:
         fields = dict(code=1, date=1, belong=1, name=1, _id=0)
     my_set = db['stock_detail']
@@ -16,7 +16,7 @@ def get_all_stock(fields=None,filter={}):
     return data
 
 
-def get_stock_detail(codes:list):
+def get_stock_detail(codes: list):
     """
     获取一组个股详情数据
     :param codes:
@@ -25,6 +25,7 @@ def get_stock_detail(codes:list):
     my_set = db['stock_detail']
     data_list = list(my_set.find({"code": {"$in": codes}}))
     return {data['code']: data for data in data_list}
+
 
 def get_stock_detail_by_code(code):
     """
@@ -36,6 +37,7 @@ def get_stock_detail_by_code(code):
     data = my_set.find_one({"code": code})
     return data
 
+
 def get_stock_detail_by_name(name):
     """
     获取单独个股详情
@@ -45,6 +47,7 @@ def get_stock_detail_by_name(name):
     my_set = db['stock_detail']
     data = my_set.find_one({"name": name})
     return data
+
 
 def get_one_stock(code):
     my_set = db['stock_detail']
@@ -61,6 +64,11 @@ def get_stock_detail_list(codes=None, fields=None):
 
     data_list = list(my_set.find(condition, projection=fields))
     return data_list
+
+
+def get_stock_detail_map(codes=None, fields=None)->dict:
+    data_list = get_stock_detail_list(codes, fields)
+    return {data['code']: data for data in data_list}
 
 
 def get_code_name_map():
@@ -108,10 +116,6 @@ def get_company_feature(code, date):
     if result is None: return {}
     # company = Company.load(code, result['name'], result['features'])
     return result['features']
-
-
-
-
 
 
 if __name__ == "__main__":

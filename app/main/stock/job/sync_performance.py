@@ -56,7 +56,7 @@ def sync_profit():
         belong = stock_util.basic_belong(code)
         logging.info("{}({})同步利润表",name,code)
 
-        df = ak.stock_balance_sheet_by_report_em(symbol=belong + code)
+        df = ak.stock_profit_sheet_by_report_em(symbol=belong + code)
         df.rename(columns={
             'SECURITY_CODE': 'code',
             'SECURITY_NAME_ABBR': 'name',
@@ -83,7 +83,7 @@ def sync_cash_flow():
         if "退市" in name: continue
         belong = stock_util.basic_belong(code)
         logging.info("{}({})同步现金流表",name,code)
-        df = ak.stock_balance_sheet_by_report_em(symbol=belong + code)
+        df = ak.stock_cash_flow_sheet_by_report_em(symbol=belong + code)
         df.rename(columns={
             'SECURITY_CODE': 'code',
             'SECURITY_NAME_ABBR': 'name',
