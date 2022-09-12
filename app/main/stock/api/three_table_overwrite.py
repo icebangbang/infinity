@@ -8,6 +8,8 @@ import pandas as pd
 from tqdm import tqdm
 from datetime import date, datetime
 
+from app.main.utils import date_util
+
 
 def _stock_balance_sheet_by_report_ctype_em(symbol: str = "SH600519") -> str:
     """
@@ -48,10 +50,10 @@ def stock_profit_sheet_by_report_em(from_datetime: datetime, symbol: str = "SH60
     temp_df["REPORT_DATE"] = pd.to_datetime(temp_df["REPORT_DATE"]).dt.date
     temp_df = temp_df[temp_df["REPORT_DATE"] >= from_datetime.date()]
 
-    temp_df["REPORT_DATE"] = temp_df["REPORT_DATE"].astype(str)
+    # temp_df["REPORT_DATE"] = temp_df["REPORT_DATE"].astype(str)
     need_date = temp_df["REPORT_DATE"].tolist()
     sep_list = [
-        ",".join(need_date[i: i + 5]) for i in range(0, len(need_date), 5)
+        ",".join(date_util.dt_to_str(d,'%Y-%m-%d') for d in need_date[i: i + 5]) for i in range(0, len(need_date), 5)
     ]
     big_df = pd.DataFrame()
     for item in tqdm(sep_list, leave=False):
@@ -93,10 +95,10 @@ def stock_cash_flow_sheet_by_report_em(from_datetime,
     temp_df = pd.DataFrame(data_json["data"])
     temp_df["REPORT_DATE"] = pd.to_datetime(temp_df["REPORT_DATE"]).dt.date
     temp_df = temp_df[temp_df["REPORT_DATE"] >= from_datetime.date()]
-    temp_df["REPORT_DATE"] = temp_df["REPORT_DATE"].astype(str)
+    # temp_df["REPORT_DATE"] = temp_df["REPORT_DATE"].astype(str)
     need_date = temp_df["REPORT_DATE"].tolist()
     sep_list = [
-        ",".join(need_date[i: i + 5]) for i in range(0, len(need_date), 5)
+        ",".join(date_util.dt_to_str(d, '%Y-%m-%d') for d in need_date[i: i + 5]) for i in range(0, len(need_date), 5)
     ]
     big_df = pd.DataFrame()
     for item in tqdm(sep_list, leave=False):
@@ -136,10 +138,10 @@ def stock_balance_sheet_by_report_em(from_datetime, symbol: str = "SH600519") ->
     temp_df = pd.DataFrame(data_json["data"])
     temp_df["REPORT_DATE"] = pd.to_datetime(temp_df["REPORT_DATE"]).dt.date
     temp_df = temp_df[temp_df["REPORT_DATE"] >= from_datetime.date()]
-    temp_df["REPORT_DATE"] = temp_df["REPORT_DATE"].astype(str)
+    # temp_df["REPORT_DATE"] = temp_df["REPORT_DATE"].astype(str)
     need_date = temp_df["REPORT_DATE"].tolist()
     sep_list = [
-        ",".join(need_date[i: i + 5]) for i in range(0, len(need_date), 5)
+        ",".join(date_util.dt_to_str(d, '%Y-%m-%d') for d in need_date[i: i + 5]) for i in range(0, len(need_date), 5)
     ]
     big_df = pd.DataFrame()
     for item in tqdm(sep_list, leave=False):
