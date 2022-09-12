@@ -7,6 +7,9 @@ from app.main.stock.dao import stock_dao
 from app.main.db.mongo import db
 from app.main.utils import stock_util
 import logging
+from datetime import datetime
+
+from_datetime = datetime(2010,1,1)
 
 def sync_balance():
     """
@@ -26,7 +29,7 @@ def sync_balance():
         if "退市" in name: continue
         belong = stock_util.basic_belong(code)
         logging.info("{}({})同步资产负债表".format(name,code))
-        df = ak.stock_balance_sheet_by_report_em(symbol=belong+code)
+        df = ak.stock_balance_sheet_by_report_em(from_datetime,symbol=belong+code)
         df.rename(columns={
             'SECURITY_CODE': 'code',
             'SECURITY_NAME_ABBR': 'name',
@@ -56,7 +59,7 @@ def sync_profit():
         belong = stock_util.basic_belong(code)
         logging.info("{}({})同步利润表".format(name,code))
 
-        df = ak.stock_profit_sheet_by_report_em(symbol=belong + code)
+        df = ak.stock_profit_sheet_by_report_em(from_datetime,symbol=belong + code)
         df.rename(columns={
             'SECURITY_CODE': 'code',
             'SECURITY_NAME_ABBR': 'name',
@@ -83,7 +86,7 @@ def sync_cash_flow():
         if "退市" in name: continue
         belong = stock_util.basic_belong(code)
         logging.info("{}{}同步现金流表".format(name,code))
-        df = ak.stock_cash_flow_sheet_by_report_em(symbol=belong + code)
+        df = ak.stock_cash_flow_sheet_by_report_em(from_datetime,symbol=belong + code)
         df.rename(columns={
             'SECURITY_CODE': 'code',
             'SECURITY_NAME_ABBR': 'name',
@@ -93,6 +96,6 @@ def sync_cash_flow():
         stock_cash_flow.insert_many(details)
 
 if __name__ == "__main__":
-    sync_cash_flow()
-    # df = ak.stock_balance_sheet_by_report_em(symbol="SH603057")
+    # sync_cash_flow()
+    df = ak.stock_balance_sheet_by_report_em(from_datetime,symbol="SH603057")
     pass
