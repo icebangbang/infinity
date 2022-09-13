@@ -10,7 +10,9 @@ class TrendTable(Line):
     """
 
     def generate(self, **kwargs):
-        trend_info = trend_service.get_trend_info()
+        end_date = kwargs['date']
+        end_date = date_util.parse_date_time(end_date)
+        trend_info = trend_service.get_trend_info(date_util.get_start_of_day(end_date))
 
         return dict(
             columns=[

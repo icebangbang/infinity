@@ -269,13 +269,13 @@ def get_trend_size_info(start, end, only_include=False):
              "date": result['date']}, {"$set": result}, upsert=True)
 
 
-def get_trend_info():
+def get_trend_info(end_date):
     # config = db['config']
     # boards = config.find_one({"name": "board"}, {"_id": 0})
     industries = board_service.get_all_board()
 
     trend_data = db['trend_data']
-    end = date_util.get_latest_work_day()
+    end = date_util.get_latest_work_day() if end_date is None else end_date
     start = date_util.get_work_day(end, 120)
     trend_data_list = list(trend_data.find({"industry": {"$in": industries},
                                             "date": {"$gte": start, "$lte": end},
