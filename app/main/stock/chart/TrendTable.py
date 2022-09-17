@@ -26,8 +26,8 @@ class TrendTable(Line):
                 {"title": '最高上行值日期', "dataIndex": 'highestUpDay', "key": 'highestUpDay'},
                 {"title": '最大差值', "dataIndex": 'maxDiffValue', "key": 'maxDiffValue'},
                 {"title": '最大差值日期', "dataIndex": 'maxDiffDay', "key": 'maxDiffDay'},
-                {"title": '高点对比值', "dataIndex": 'up', "key": 'up'},
-                {"title": '低点对比值', "dataIndex": 'down', "key": 'down'},
+                {"title": '高点对比值', "dataIndex": 'up_slop', "key": 'up_slop'},
+                {"title": '低点对比值', "dataIndex": 'down_slop', "key": 'down_slop'},
             ],
             data=trend_info['records'],
             industryInfo=trend_info['industryInfo']
