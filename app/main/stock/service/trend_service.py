@@ -8,7 +8,7 @@ from app.main.stock import constant
 from app.main.stock.company import Company
 from app.main.stock.const import board_const
 from app.main.stock.dao import stock_dao
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 
 from app.main.stock.service import board_service
@@ -193,6 +193,7 @@ def get_trend_size_info(start, end, only_include=False):
 
     result_list = []
 
+    # 自定义的板块
     config = db['config']
     board_info = config.find_one({"name": "board"}, {"_id": 0})
     another_boards = board_info['value']
@@ -247,23 +248,53 @@ def get_trend_size_info(start, end, only_include=False):
                                  update=datetime.now()))
                     else:
                         result_list.append(
-                            dict(industry=board, trend=trend, size=0, rate=0, date=date,
+                            dict(industry=board, trend=trend, size=0, rate=0, date=date, bot=0, top=0,
                                  update=datetime.now()))
 
-        # collected_industry = []
-        # for  k,v in series_to_dict.items():
-        #     result_list.append(dict(industry=k[0], trend=k[1], size=v, rate=round(v / board_dict[k[0]], 2), date=date,
-        #          update=datetime.now()))
-        #     collected_industry.append(k[0])
-
-        # result_list = [dict(industry=k[0], trend=k[1], size=v, rate=round(v / board_dict[k[0]], 2), date=date,
-        #                     update=datetime.now()) for k, v
-        #                in series_to_dict.items()]
-
-        # 补全没有出现的数据
-
     for result in result_list:
+        industry = result["industry"]
+        trend = result["trend"]
         print("insert {},{},{}".format(result["industry"], result["trend"], result['date']))
+
+        range_end = result['date']
+        range_start = range_end - timedelta(60)
+        # 写入当前趋势
+        trend_data_list = list(db.trend_data.find({"industry": industry,'trend':trend,
+                                              "date": {"$gte": range_start, "$lte": range_end},
+                                              }).sort("date", 1))
+        trend_data_rate = [point['rate'] for point in trend_data_list]
+
+        if len(trend_data_rate) > 0:
+            trend_data_rate[len(trend_data_rate) - 1] = result['rate']
+        else:
+            trend_data_rate.append(result['rate'])
+
+        high_type_list: list = cal_util.get_top_type(trend_data_rate)
+        low_type_list: list = cal_util.get_bottom_type(trend_data_rate)
+
+        pos_p, neg_p, total_p, point_index = cal_util.get_reverse_point(high_type_list)
+        if len(total_p) == 0:
+            current_trend_scope = high_type_list
+        else:
+            current_trend_scope = high_type_list[total_p[-1]:]
+
+        current_trend_scope = [item for item in current_trend_scope if item['index'] != len(trend_data_list)-1]
+        max_top_type = 0 if len(current_trend_scope)==0 else current_trend_scope[len(current_trend_scope)-1]['value']
+
+        pos_p, neg_p, total_p, point_index = cal_util.get_reverse_point(low_type_list)
+        if len(total_p) == 0:
+            current_trend_scope = low_type_list
+        else:
+            current_trend_scope = low_type_list[total_p[-1]:]
+
+        current_trend_scope = [item for item in current_trend_scope if item['index'] != len(trend_data_list) - 1]
+        max_bot_type = 0 if len(current_trend_scope) == 0 else current_trend_scope[len(current_trend_scope) - 1][
+            'value']
+        x,c = cal_util.get_line([max_top_type,result['rate']])
+        result['up_slop'] = x
+        x,c = cal_util.get_line([max_bot_type,result['rate']])
+        result['down_slop'] = x
+
         db.trend_data.update_one(
             {"industry": result["industry"], "trend": result["trend"],
              "date": result['date']}, {"$set": result}, upsert=True)
@@ -338,12 +369,12 @@ def _analysis(up_df, down_df):
 
 
 if __name__ == "__main__":
-    for date in WorkDayIterator(datetime(2022, 8, 31), datetime(2022, 8, 31)):
-        get_all_trend_info(date, date)
+    # for date in WorkDayIterator(datetime(2022, 8, 31), datetime(2022, 8, 31)):
+    #     get_all_trend_info(date, date)
     #     features = stock_dao.get_company_feature("300763", date)
     #     save_stock_trend_with_features("300763", "锦浪科技", features, date)
 
     # save_stock_trend_with_features("300763", "锦浪科技", features, datetime(2022, 8, 25))
-    # get_trend_size_info(datetime(2022, 4, 1), datetime(2022, 8, 26), True)
-
+    # get_trend_size_info(datetime(2022, 4, 1), datetime(2022, 9, 16), False)
+    get_all_trend_info(datetime(2022, 4, 1), datetime(2022, 9, 16))
     # print("code","300763")

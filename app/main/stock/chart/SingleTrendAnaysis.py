@@ -25,7 +25,9 @@ class SingleTrendAnaysis(Line):
         end = date_util.get_latest_work_day()
         start = date_util.get_work_day(end, 99)
 
-        data_x = [date_util.date_time_to_str(date, "%m-%d") for date in WorkDayIterator(start, end)]
+        # data_x = [date_util.date_time_to_str(date, "%m-%d") for date in WorkDayIterator(start, end)]
+        data_x = []
+        fill_x_flag = True
 
         trend_data_list = list(trend_data.find({"industry": industry,
                                                 "date": {"$gte": start, "$lte": end},
@@ -37,6 +39,9 @@ class SingleTrendAnaysis(Line):
             data_y_array[index]['name'] = key
             for point in group.to_dict("records"):
                 data_y_array[index]['y'].append(point['rate'])
+                if fill_x_flag:
+                    data_x.append(date_util.date_time_to_str(point['date'],"%m-%d"))
+            fill_x_flag = False
             if key == 'up' or key == 'down':
                 median = numpy.median(data_y_array[index]['y'])
                 data_y_array[index]['markLine'] = {"data": [{"yAxis": median, "name": "中位数"}]}

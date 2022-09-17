@@ -10,6 +10,8 @@ from datetime import date, datetime
 
 from app.main.utils import date_util
 
+requests.adapters.DEFAULT_RETRIES = 5
+
 
 def _stock_balance_sheet_by_report_ctype_em(symbol: str = "SH600519") -> str:
     """
@@ -210,6 +212,7 @@ def stock_financial_analysis_indicator(from_year=2010,symbol: str = "600004",nam
     out_df.rename(columns={'index': 'date',
                            "加权净资产收益率(%)":"weighted_roe",
                            "净资产收益率(%)":"roe"}, inplace=True)
+    out_df['date'] = pd.to_datetime(out_df['date'], format='%Y-%m-%d')
     out_df['code'] = symbol
     out_df['name'] = name
     return out_df

@@ -2,8 +2,12 @@
 ## 定时任务
 
 ## 个股趋势相关
-先分析个股的趋势走向`app.main.task.trend_task.submit_trend_task`
-然后通过个股的趋势走向,归并板块的趋势走势`get_trend_data_task`
+### /celery/stock/trend
+1. 先分析个股的趋势走向.
+`app.main.task.trend_task.submit_trend_task`
+2. 然后通过个股的趋势走向,归并板块的趋势走势.`get_trend_data_task`
+
+## 整体板块趋势相关
 
 
 

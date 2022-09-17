@@ -12,92 +12,7 @@ def custom_sort(e):
 
 class BoxType(SubST):
 
-    def get_reverse_point(self, points):
-        """
-        三点确定中间点的斜率情况
-        获取反转点
-        :param point:
-        :return: pos_p  先下后上
-                 neg_p  先上后下
-        """
-        pos_p = []
-        neg_p = []
-        total_p = []
-        point_index = []
 
-        for i, point in enumerate(points):
-            if i == 0 or i == len(points) - 1: continue
-            prev, useless = cal_util.get_line([points[i - 1]['value'], points[i]['value']])
-            next, useless = cal_util.get_line([points[i]['value'], points[i + 1]['value']])
-            if prev >= 0 and next < 0:
-                neg_p.append(i)
-                total_p.append(i)
-                point_index.append(point['index'])
-            if prev < 0 and next >= 0:
-                pos_p.append(i)
-                total_p.append(i)
-                point_index.append(point['index'])
-
-        return pos_p, neg_p, total_p, point_index
-
-    """
-    k线趋势判断辅助变量
-    """
-
-    def get_top_type(self, arrays) -> list:
-        """
-        筛选顶分型
-        :return:
-        """
-        results = []
-
-        for i, item in enumerate(arrays):
-            if i == 0:
-                # results.append(dict(i=i, v=item))
-                results.append(dict(index=i, value=item))
-                continue
-            if i == len(arrays) - 1:
-                pre = results[-1]['value']
-                if item > pre:
-                    results.append(dict(index=i, value=item))
-                continue
-
-            target = item
-            pre = arrays[i - 1]
-            next = arrays[i + 1]
-
-            if target > pre and target > next:
-                # results.append(dict(i=i, v=item))
-                results.append(dict(index=i, value=item))
-        return results
-
-    def get_bottom_type(self, arrays) -> list:
-        """
-        筛选底分型
-        :param arrays:
-        :return:
-        """
-        results = []
-
-        for i, item in enumerate(arrays):
-            if i == 0:
-                # results.append(dict(i=i, v=item))
-                results.append(dict(index=i, value=item))
-                continue
-            if i == len(arrays) - 1:
-                pre = results[-1]['value']
-                if item < pre:
-                    results.append(dict(index=i, value=item))
-                continue
-            target = item
-            pre = arrays[i - 1]
-            next = arrays[i + 1]
-
-            if target < pre and target <= next:
-                # results.append(dict(i=i, v=item))
-                results.append(dict(index=i, value=item))
-
-        return results
 
     def __init__(self, **kwargs):
         """
@@ -121,8 +36,8 @@ class BoxType(SubST):
         if day != 0: return  # 从当日开始统计数据
 
         high = data.high.get(ago=0, size=len(data))
-        high_type_list: list = self.get_top_type(high)
-        pos_p, neg_p, total_p, point_index = self.get_reverse_point(high_type_list)
+        high_type_list: list = cal_util.get_top_type(high)
+        pos_p, neg_p, total_p, point_index = cal_util.get_reverse_point(high_type_list)
         # point_dt_index = [data.datetime.datetime(i - len(high)) for i in point_index]
         if len(total_p) == 0:
             current_top_type_slope, c = cal_util.get_line([i['value'] for i in high_type_list])
@@ -160,10 +75,10 @@ class BoxType(SubST):
             company.set(constant.current_max_high_type, current_max_high_type)
 
         low = data.low.get(ago=0, size=len(data))
-        low_type_list: list = self.get_bottom_type(low)
-        pos_p, neg_p, total_p, point_index = self.get_reverse_point(low_type_list)
+        low_type_list: list = cal_util.get_bottom_type(low)
+        pos_p, neg_p, total_p, point_index = cal_util.get_reverse_point(low_type_list)
         if len(total_p) == 0:
-            current_bot_type_slope, c = cal_util.get_line([i['value'] for i in high_type_list])
+            current_bot_type_slope, c = cal_util.get_line([i['value'] for i in low_type_list])
             company.set(constant.prev_bot_type_slope, None)
             company.set(constant.current_bot_type_slope, current_bot_type_slope)
             company.set(constant.prev_bot_trend_size, 0)

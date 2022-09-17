@@ -162,6 +162,89 @@ def get_williams(highest, lowest, close):
     """
     return (highest - close) / (highest - lowest) * 100
 
+def get_reverse_point(points):
+    """
+    三点确定中间点的斜率情况
+    获取反转点
+    :param point:
+    :return: pos_p  先下后上
+             neg_p  先上后下
+    """
+    pos_p = []
+    neg_p = []
+    total_p = []
+    point_index = []
+
+    for i, point in enumerate(points):
+        if i == 0 or i == len(points) - 1: continue
+        prev, useless = get_line([points[i - 1]['value'], points[i]['value']])
+        next, useless = get_line([points[i]['value'], points[i + 1]['value']])
+        if prev >= 0 and next < 0:
+            neg_p.append(i)
+            total_p.append(i)
+            point_index.append(point['index'])
+        if prev < 0 and next >= 0:
+            pos_p.append(i)
+            total_p.append(i)
+            point_index.append(point['index'])
+
+    return pos_p, neg_p, total_p, point_index
+
+def get_top_type(arrays) -> list:
+        """
+        筛选顶分型
+        :return:
+        """
+        results = []
+
+        for i, item in enumerate(arrays):
+            if i == 0:
+                # results.append(dict(i=i, v=item))
+                results.append(dict(index=i, value=item))
+                continue
+            if i == len(arrays) - 1:
+                pre = results[-1]['value']
+                if item > pre:
+                    results.append(dict(index=i, value=item))
+                continue
+
+            target = item
+            pre = arrays[i - 1]
+            next = arrays[i + 1]
+
+            if target > pre and target > next:
+                # results.append(dict(i=i, v=item))
+                results.append(dict(index=i, value=item))
+        return results
+
+def get_bottom_type(arrays) -> list:
+        """
+        筛选底分型
+        :param arrays:
+        :return:
+        """
+        results = []
+
+        for i, item in enumerate(arrays):
+            if i == 0:
+                # results.append(dict(i=i, v=item))
+                results.append(dict(index=i, value=item))
+                continue
+            if i == len(arrays) - 1:
+                pre = results[-1]['value']
+                if item < pre:
+                    results.append(dict(index=i, value=item))
+                continue
+            target = item
+            pre = arrays[i - 1]
+            next = arrays[i + 1]
+
+            if target < pre and target <= next:
+                # results.append(dict(i=i, v=item))
+                results.append(dict(index=i, value=item))
+
+        return results
+
 
 if __name__ == "__main__":
     # print(_trace(math.atan(0.55)))
@@ -178,6 +261,9 @@ if __name__ == "__main__":
     # print(a[total[-1]:])
     # print(a[total[-2]:total[-1]+1])
 
-    c = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-    [m, c] = get_line(c)
+    # c = [1,2,3,4]
+    # x = get_bottom_type(c)
+    # a,b,c,d = get_reverse_point(x)
+
+    m, c = get_line([1,2,3,4])
     print(_trace(math.atan(1)))

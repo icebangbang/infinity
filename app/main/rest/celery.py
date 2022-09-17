@@ -41,6 +41,11 @@ def maunlly():
 
 @rest.route("/celery/stock/trend", methods=['post'])
 def get_stock_trend():
+    """
+    个股趋势跑批
+    fork get_trend_data_task方法
+    :return:
+    """
     body = request.json
     date_start_str = body.get("start", None)
     date_end_str = body.get("end", None)

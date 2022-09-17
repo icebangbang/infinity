@@ -89,5 +89,7 @@ def get_trend_data_task(self, from_date_ts=None, end_date_ts=None, global_task_i
 
     log.info("get_trend_data_task {},{}:{}".format(global_task_id,from_date,end_date))
 
+    # 板块级别的聚合
     trend_service.get_trend_size_info(from_date, end_date)
+    # 大盘级别的聚合
     trend_service.get_all_trend_info(from_date, end_date)
