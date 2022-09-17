@@ -363,6 +363,8 @@ def _analysis(up_df, down_df):
         currentDiff=cal_util.round(current_diff['diff']),
         currentUpValue=cal_util.round(current_diff['rate']),
         currentDownValue=cal_util.round(current_down['rate']),
+        up=current_down['up'],
+        down=current_down['down'],
 
     )
     return result

@@ -47,7 +47,7 @@ def rps_analysis(date=None, offset=-250):
     results = []
     for index, groups in enumerate(split_100_list):
         for sub_index, item in enumerate(groups):
-            item['rps'] = 100 - index - round(1 / len(groups) * sub_index, 2)
+            item['rps'] = 100 - index - cal_util.round(1 / len(groups) * sub_index, 2)
             item['date'] = date_util.get_start_of_day(end)
             item['span'] = abs(offset)
             results.append(item)
