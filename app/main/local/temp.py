@@ -1,7 +1,7 @@
 from app.main.db.mongo import db
 from app.main.stock.job import job_config
 from app.main.utils import simple_util
-
+from datetime import datetime
 
 def test():
     method = simple_util.get_method_by_path("app.main.task.stock_task.auto_submit_stock_feature")
@@ -40,11 +40,39 @@ def trend_data_task():
     }
     method.apply_async(kwargs= kwargs)
 
+def rps_test():
+    board_detail = db['board_detail']
+    rps_anslysis = db['rps_anslysis']
+    trend_point = db['trend_point']
+    another_boards = list(board_detail.find({"board": {"$in": ['游戏']}}))
+    for another_board in another_boards:
+        total = another_board['codes']
+        r = list(rps_anslysis.find(
+            {"code": {"$in": total},
+             "date": datetime(2022,9,13),
+             "span":30}).sort("rate",-1))
+        pass
+def trend_detail():
+    board_detail = db['board_detail']
+    trend_point = db['trend_point']
+    another_boards = list(board_detail.find({"board": {"$in": ['猪肉概念']}}))
+    for another_board in another_boards:
+        total = another_board['codes']
+        r = list(trend_point.find(
+            {"code": {"$in": total},
+             "date": {"$lte": datetime(2022, 9, 16)},
+             "update": {"$gte": datetime(2022, 9, 16)},
+             "is_in_use":1,
+             "trend":"up"
+             }))
+        pass
 
 if __name__ == "__main__":
     from app import application
 
-    application.create_app("development")
-    clear_stock_info()
+    # application.create_app("development")
+    # clear_stock_info()
     # trend_data_task()
     # test()
+    # rps_test()
+    trend_detail()

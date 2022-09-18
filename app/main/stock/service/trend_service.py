@@ -50,12 +50,11 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
         inf_l_point_value = features[constant.inf_l_point_value]
         inf_h_point_value = features[constant.inf_h_point_value]
 
-        # todo 查找之前的趋势并判断趋势是否出现变化
         # 顶分型趋势
         # 底分型趋势
         # 任何趋势变化,就新增一条记录
         trend_change_scope = []
-        trend_point_list = list(trend_point_set.find({"code": code,
+        trend_point_list = list(trend_point_set.find({"code": code,"is_deleted":0,
                                                       "date": {"$lte": start_of_day}},
                                                      sort=[("date", -1), ("_id", -1)]).limit(2))
         trend_point = None
@@ -64,11 +63,23 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
             trend_point = trend_point_list[0]
             inf_l_point_date_history = trend_point['inf_l_point_date']
             inf_h_point_date_history = trend_point['inf_h_point_date']
-            if inf_l_point_date_history != inf_l_point_date:
+            prev_inf_l_point_date = trend_point['prev_inf_l_point_date']
+            prev_inf_h_point_date = trend_point['prev_inf_h_point_date']
+
+            # 和之前都不一致
+            if inf_l_point_date_history != inf_l_point_date \
+                    and prev_inf_l_point_date != inf_l_point_date:
                 trend_change_scope.append(1)
-            if inf_h_point_date_history != inf_h_point_date:
+            if inf_h_point_date_history != inf_h_point_date \
+                    and prev_inf_h_point_date != inf_h_point_date:
                 trend_change_scope.append(2)
 
+            # 日内波动引起的改动,直接将该记录软删除
+            if inf_h_point_date == prev_inf_h_point_date or inf_l_point_date == prev_inf_l_point_date:
+                trend_point_set.update_one({"_id": trend_point["_id"]}, {"$set": {"is_deleted":1}})
+                return
+
+        # 没有任何变化,更新
         if len(trend_change_scope) == 0 and trend_point is not None:
             trend_point['current_bot_trend_size'] = current_bot_trend_size
             trend_point['current_top_trend_size'] = current_top_trend_size
@@ -109,9 +120,11 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
             prev_top_type_slope=prev_top_type_slope,
             prev_bot_type_slope=prev_bot_type_slope,
             trend=trend,  # 当前总体趋势
-            prev_trend=trend_point['trend'] if trend_point is not None else None,  # 之前总体趋势
+            prev_trend=trend_point['trend'] if trend_point else None,  # 之前总体趋势
             inf_l_point_date=inf_l_point_date,  # 底分型趋势成立时间
             inf_h_point_date=inf_h_point_date,  # 顶分型趋势成立时间
+            prev_inf_l_point_date = trend_point['inf_l_point_date'] if trend_point else None,
+            prev_inf_h_point_date = trend_point['inf_h_point_date'] if trend_point else None,
             trend_change_scope=trend_change_scope,  # 趋势变化记录
             industry=stock_detail['industry'],  # 行业
             name=name,
@@ -119,7 +132,8 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
             update=start_of_day,
             update_time=datetime.now(),
             inf_l_point_value=inf_l_point_value,
-            inf_h_point_value=inf_h_point_value
+            inf_h_point_value=inf_h_point_value,
+            is_deleted=0
         )
         trend_point_set.save(entity)
         if (trend_point):
@@ -198,7 +212,7 @@ def get_trend_size_info(start, end, only_include=False):
     board_info = config.find_one({"name": "board"}, {"_id": 0})
     another_boards = board_info['value']
 
-    another_boards = list(board_detail.find({"board": {"$in": another_boards}}))
+    another_boards = list(board_detail.find({"board": {"$in": ['猪肉概念']}}))
 
     for date in WorkDayIterator(start, end):
         for another_board in another_boards:
@@ -328,16 +342,16 @@ def get_trend_info(end_date):
     total = sorted(total, key=lambda item: item['currentDiff'], reverse=True)
 
     df = pd.DataFrame(total)
-    labels = ["0-0.1", "0.1-0.2", "0.2-0.3",
-              "0.3-0.4", "0.4-0.5", "0.5-0.6",
-              "0.6-0.7", "0.7-0.8", "0.8-0.9", "0.9-1"]
-    df['cut'] = pd.cut(df.currentUpValue, bins=[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+    labels = ["-1~-0.75", "-0.75~-0.5", "-0.5~-0.25",
+              "-0.25~0", "0~0.25", "0.25~0.5",
+              "0.5~0.75", "0.75~1"]
+    df['cut'] = pd.cut(df.currentDiff, bins=[-1,-0.75,-0.5,-0.25,0, 0.25, 0.5, 0.75, 1],
                        labels=labels,
                        include_lowest=True)
     industry_info = OrderedDict()
     for label in labels:
         items = list(df[df['cut'] == label]['name'])
-        industry_info[label] = dict(industries=industries, rate=cal_util.round(len(items) / len(industries), 2))
+        industry_info[label] = dict(industries=items, rate=cal_util.round(len(items) / len(industries), 2))
 
     return dict(records=df.to_dict("records"),
                 industryInfo=industry_info)
@@ -371,12 +385,21 @@ def _analysis(up_df, down_df):
 
 
 if __name__ == "__main__":
-    # for date in WorkDayIterator(datetime(2022, 8, 31), datetime(2022, 8, 31)):
-    #     get_all_trend_info(date, date)
-    #     features = stock_dao.get_company_feature("300763", date)
-    #     save_stock_trend_with_features("300763", "锦浪科技", features, date)
+    stocks = stock_dao.get_all_stock()
+    for stock in stocks:
+        code = stock['code']
+        name = stock['name']
+        print(code,name)
+
+        for date in WorkDayIterator(datetime(2022, 3, 16), datetime(2022, 9, 16)):
+            features = stock_dao.get_company_feature(code, date)
+            save_stock_trend_with_features(code, name, features, date)
 
     # save_stock_trend_with_features("300763", "锦浪科技", features, datetime(2022, 8, 25))
-    # get_trend_size_info(datetime(2022, 4, 1), datetime(2022, 9, 16), False)
-    get_all_trend_info(datetime(2022, 4, 1), datetime(2022, 9, 16))
+    # get_trend_size_info(datetime(2022, 9, 16), datetime(2022, 9, 16), False)
+    # get_all_trend_info(datetime(2022, 4, 1), datetime(2022, 9, 16))
     # print("code","300763")
+    for date in WorkDayIterator(datetime(2022, 3, 16), datetime(2022, 9, 16)):
+        get_trend_size_info(date, date, False)
+        get_all_trend_info(date, date)
+
