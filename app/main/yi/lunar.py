@@ -4,7 +4,7 @@ from app.main.yi.constant import *
 import json
 import os
 
-lunar = sxtwl.Lunar()
+# lunar = sxtwl.Lunar()
 
 Zhi = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
 
@@ -171,5 +171,32 @@ class DateEncoder(json.JSONEncoder):
             return json.JSONEncoder.default(self, obj)
 
 
-d = Big6ren(datetime.datetime.now())
-d.get_section()
+# d = Big6ren(datetime.datetime.now())
+# d.prepare()
+# print()
+if __name__ == "__main__":
+    jq_list = []
+    now = datetime.datetime.now()
+    lunar_start = datetime.datetime(now.year - 1, 10, 1)
+    day = sxtwl.fromSolar(lunar_start.year, lunar_start.month, lunar_start.day)
+
+    date = lunar_start
+    while True:
+        if day.hasJieQi():
+            if day.getSolarYear() > now.year:
+                break
+            # if date.year != now.year:
+            #     date = date + datetime.timedelta(1)
+            #     day = lunar.getDayBySolar(date.year, date.month, date.day)
+            #     continue
+            qj_start_time = sxtwl.JD2DD(day.getJieQiJD())
+            jq_start = datetime.datetime(day.getSolarYear(), day.getSolarMonth(), day.getSolarDay(),
+                                         int(qj_start_time.h), int(qj_start_time.m),
+                                         int(qj_start_time.s))
+            jq_list.append(dict(time=jq_start, jq=jqmc[day.getJieQi()], jq_index=day.getJieQi))
+
+            # date = date + datetime.timedelta(1)
+            # day = sxtwl.fromSolar(date.year, date.month, date.day)
+        date = date + datetime.timedelta(1)
+        day = sxtwl.fromSolar(date.year, date.month, date.day)
+    pass

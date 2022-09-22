@@ -1,16 +1,25 @@
 from datetime import datetime, timedelta, date
 from datetime import time
+from app.main.yi.constant import jqmc
+import sxtwl
 from chinese_calendar import is_workday
 import time as tm
 from dateutil.relativedelta import relativedelta
 
 
 def in_time_range(time: datetime, range: datetime, level):
+    """
+    判断是否在某个年度内,或者季节内
+    :param time:
+    :param range:
+    :param level:
+    :return:
+    """
     if level == 'year':
         return time.year == range.year
     if level == 'season':
-        start =  range-timedelta(3)
-        return start <=time <= range
+        start = range - timedelta(3)
+        return start <= time <= range
 
 
 def utc_now():
@@ -104,14 +113,14 @@ def get_work_day(now, offset):
     return get_start_of_day(now - timedelta(days=offset))
 
 
-def get_latest_work_day():
+def get_latest_work_day(base=datetime.now()):
     """
     倒推工作日
     :param now:
     :param offset:
     :return:
     """
-    d = get_start_of_day(datetime.now())
+    d = get_start_of_day(base)
     while True:
         if is_workday(d) is False or is_weekend(d):
             d = d - timedelta(days=1)
@@ -185,6 +194,48 @@ def get_week_end(t: datetime, if_work_day: bool = True):
     return get_end_of_day(start)
 
 
+def get_jq_list(start, end, ignore_time=True) -> list:
+    """
+    获取一定时间范围内的节气节点
+    :param start:
+    :param end:
+    :param ignore_time:
+    :return:
+    """
+    jq_list = []
+    # lunar_start = datetime(now.year - 1, 10, 1)
+    day = sxtwl.fromSolar(start.year, start.month, start.day)
+    date = start
+    while True:
+        if day.hasJieQi():
+            if date > end:
+                break
+            # if date.year != now.year:
+            #     date = date + datetime.timedelta(1)
+            #     day = lunar.getDayBySolar(date.year, date.month, date.day)
+            #     continue
+            qj_start_time = sxtwl.JD2DD(day.getJieQiJD())
+            if ignore_time:
+                jq_start = datetime(day.getSolarYear(), day.getSolarMonth(), day.getSolarDay())
+            else:
+                jq_start = datetime(day.getSolarYear(), day.getSolarMonth(), day.getSolarDay(),
+                                    int(qj_start_time.h), int(qj_start_time.m),
+                                    int(qj_start_time.s))
+            jq_list.append(dict(time=jq_start, jq=jqmc[day.getJieQi()], jq_index=day.getJieQi()))
+
+            # date = date + datetime.timedelta(1)
+            # day = sxtwl.fromSolar(date.year, date.month, date.day)
+        date = date + timedelta(1)
+        day = sxtwl.fromSolar(date.year, date.month, date.day)
+
+    if len(jq_list) > 0:
+        jq_index = (len(jqmc) + jq_list[0]['jq_index'] - 1) % len(jqmc)
+        new_jq_list = [dict(time=start, jq_index=jq_index, jq=jqmc[jq_index])]
+        new_jq_list.extend(jq_list)
+        return new_jq_list
+    return jq_list
+
+
 class WorkDayIterator(object):
     def __init__(self, start, end):
         self.date = start
@@ -236,5 +287,7 @@ if __name__ == "__main__":
     # for v in values:
     #     print(v, end=' ')
 
-    for value in YearIterator(2010, 2022):
-        print(value)
+    # for value in YearIterator(2010, 2022):
+    #     print(value)
+    jq_list = get_jq_list(datetime(2022, 4, 1), datetime(2022, 12, 31))
+    print(jq_list)

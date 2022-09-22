@@ -17,7 +17,7 @@ class TrendTable(Line):
         return dict(
             columns=[
                 {"title": '板块名', "dataIndex": 'name', "key": 'name'},
-                {"title": '当前差值', "dataIndex": 'currentDiff', "key": 'currentDiff', },
+                {"title": '当前差值', "dataIndex": 'currentDiff', "key": 'currentDiff', "useSort": True},
                 {"title": '当前上行值', "dataIndex": 'currentUpValue', "key": 'currentUpValue', },
                 {"title": '当前下行值', "dataIndex": 'currentDownValue', "key": 'currentDownValue', },
                 {"title": '最低上行值', "dataIndex": 'lowestUpValue', "key": 'lowestUpValue'},
@@ -27,7 +27,7 @@ class TrendTable(Line):
                 {"title": '最大差值', "dataIndex": 'maxDiffValue', "key": 'maxDiffValue'},
                 {"title": '最大差值日期', "dataIndex": 'maxDiffDay', "key": 'maxDiffDay'},
                 {"title": '高点对比值', "dataIndex": 'up_slop', "key": 'up_slop'},
-                {"title": '低点对比值', "dataIndex": 'down_slop', "key": 'down_slop'},
+                {"title": '低点对比值', "dataIndex": 'down_slop', "key": 'down_slop', "useSort": True},
             ],
             data=trend_info['records'],
             industryInfo=trend_info['industryInfo']
