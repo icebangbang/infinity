@@ -317,7 +317,7 @@ def get_trend_size_info(start, end, only_include=False):
 def get_trend_info(end_date):
     # config = db['config']
     # boards = config.find_one({"name": "board"}, {"_id": 0})
-    industries = board_service.get_all_board()
+    industries = board_service.get_all_board_names()
 
     trend_data = db['trend_data']
     end = date_util.get_latest_work_day() if end_date is None else end_date

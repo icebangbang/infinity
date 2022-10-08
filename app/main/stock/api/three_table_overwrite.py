@@ -139,7 +139,7 @@ def stock_balance_sheet_by_report_em(from_datetime, symbol: str = "SH600519") ->
     data_json = r.json()
     temp_df = pd.DataFrame(data_json["data"])
     temp_df["REPORT_DATE"] = pd.to_datetime(temp_df["REPORT_DATE"]).dt.date
-    temp_df = temp_df[temp_df["REPORT_DATE"] >= from_datetime.date()]
+    temp_df = temp_df[temp_df["REPORT_DATE"] > from_datetime.date()]
     # temp_df["REPORT_DATE"] = temp_df["REPORT_DATE"].astype(str)
     need_date = temp_df["REPORT_DATE"].tolist()
     sep_list = [

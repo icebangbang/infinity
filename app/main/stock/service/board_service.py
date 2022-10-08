@@ -89,14 +89,26 @@ def get_concepts(stock_map,code):
         return stock_map[code]['board']
     return ""
 
-def get_all_board():
+def get_all_board()->dict:
+    """
+    获取板块数据,包括自定义板块
+    :return:
+    """
     config = db['config']
     board_info = config.find_one({"name": "board"}, {"_id": 0})
     board_custom = board_info['value']
 
     set = db['board_detail']
     condition = {"$or": [{"type": 2}, {"board": {"$in": board_custom}}]}
-    boards = set.find(condition, dict(board=1, _id=0))
+    boards = set.find(condition, dict(board=1, _id=0,codes=1))
+    return boards
+
+def get_all_board_names():
+    """
+    获取板块数据,包括自定义板块
+    :return:
+    """
+    boards = get_all_board()
     results = [board['board'] for board in boards]
     return results
 

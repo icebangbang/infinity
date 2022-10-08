@@ -20,12 +20,6 @@ class BoardKLine(Line):
         data_x = [date_util.date_time_to_str(data['date'], "%Y-%m-%d") for data in data_list]
         y = [[data['open'], data['close'], data['low'], data['high']] for data in data_list]
 
-        yAxis_array = [
-            {
-                "name": "抱团比例",
-                "type": 'value'
-            }
-        ]
         return dict(
             xAxis={
                 "show": False,
