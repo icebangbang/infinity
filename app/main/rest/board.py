@@ -17,13 +17,13 @@ import re
 def get_custom_board_list():
     config = db['config']
     board_info = config.find_one({"name": "board"}, {"_id": 0})
-    board_custom = board_info['value']
+    results = board_info['value']
 
     set = db['board_detail']
     condition = {"$or": [{"type": 2}]}
     boards = set.find(condition, dict(board=1, _id=0))
-    results = [ board['board'] for board in boards]
-    results.extend(board_custom)
+    results2 = [ board['board'] for board in boards]
+    results.extend(results2)
 
     return restful.response(results)
 

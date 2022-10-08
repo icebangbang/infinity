@@ -2,7 +2,8 @@ import pandas as pd
 
 from app.main.db.mongo import db
 from app.main.stock.service import board_service
-from app.main.utils import date_util
+from app.main.utils import date_util, stock_util
+import numpy as np
 
 
 def get_board_inventory_info():
@@ -23,9 +24,19 @@ def get_board_inventory_info():
         # data_x = [date_util.date_time_to_str(data['date'], "%Y-%m-%d") for data in data_list]
         df = pd.DataFrame(data_list)
         for date, group in df.groupby(['date']):
-            mean = group.dropna()['INVENTORY_YOY'].mean()
-            inventory_data.update_one({"name":name,"date":date_util.parse_date_time(date)},
-                                      {"$set":dict(date=date, value=mean,name=name)},
+            if "INVENTORY_YOY" not in group.columns:
+                print(name)
+                continue
+            print(date,name)
+            n = group.dropna()['INVENTORY_YOY']
+            me = np.median(n)
+            mad = np.median(abs(n - me))
+            up = me + (3 * 1.4826 * mad)
+            down = me - (3 * 1.4826 * mad)
+            n = np.where(n > up, up, n)
+            n = np.where(n < down, down, n)
+            inventory_data.update_one({"name": name, "date": date_util.parse_date_time(date)},
+                                      {"$set": dict(date=date_util.parse_date_time(date), value=n.mean(), name=name)},
                                       upsert=True)
 
 
@@ -34,7 +45,40 @@ def get_market_inventory_info():
     统计深市,沪市等市场的库存情况
     :return:
     """
-    pass
+    stock_balance = db['stock_balance']
+    inventory_data = db['inventory_data']
+    r = stock_balance.find({}, {"INVENTORY_YOY": 1, "_id": 0, "code": 1, "date": 1})
+    df = pd.DataFrame(r)
+    df['market'] = df.apply(lambda row: stock_util.market_belong(row['code']), axis=1)
+    groups = df.groupby(['date', 'market'])
+    for key, group in groups:
+        n = group.dropna()['INVENTORY_YOY']
+
+        me = np.median(n)
+        mad = np.median(abs(n - me))
+        up = me + (3 * 1.4826 * mad)
+        down = me - (3 * 1.4826 * mad)
+        n = np.where(n > up, up, n)
+        n = np.where(n < down, down, n)
+        date = key[0]
+        name = key[1]
+        inventory_data.update_one({"name": name, "date": date_util.parse_date_time(date)},
+                                  {"$set": dict(date=date_util.parse_date_time(date), value=n.mean(), name=name)},
+                                  upsert=True)
+
+
+def _mad(factor):
+    me = np.median(factor)
+    mad = np.median(abs(factor - me))
+    # 求出3倍中位数的上下限制
+    up = me + (3 * 1.4826 * mad)
+    down = me - (3 * 1.4826 * mad)
+    # 利用3倍中位数的值去极值
+    factor = np.where(factor > up, up, factor)
+    factor = np.where(factor < down, down, factor)
+    return factor
+
 
 if __name__ == "__main__":
     get_board_inventory_info()
+    get_market_inventory_info()

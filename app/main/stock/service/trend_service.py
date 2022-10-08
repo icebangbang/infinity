@@ -162,7 +162,6 @@ def get_all_trend_info(start, end):
     :return:
     """
     for date in WorkDayIterator(start, end):
-        print(date)
         trend_point_set = db['trend_point']
         r = list(trend_point_set.find(
             {"date": {"$lte": date},

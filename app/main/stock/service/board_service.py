@@ -99,9 +99,12 @@ def get_all_board()->dict:
     board_custom = board_info['value']
 
     set = db['board_detail']
-    condition = {"$or": [{"type": 2}, {"board": {"$in": board_custom}}]}
-    boards = set.find(condition, dict(board=1, _id=0,codes=1))
-    return boards
+    condition1 = {"board": {"$in": board_custom}}
+    condition2 = {"type": 2}
+    boards_custom = list(set.find(condition1, dict(board=1, _id=0,codes=1)))
+    boards = list(set.find(condition2, dict(board=1, _id=0,codes=1)))
+    boards_custom.extend(boards)
+    return boards_custom
 
 def get_all_board_names():
     """
