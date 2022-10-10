@@ -26,6 +26,8 @@ def sync_board_k_line(self):
     """
     now = datetime.now()
     # 收盘后,不再同步
+    if 16 <= now.hour < 10:
+        return
 
     # switch = my_redis.get_bool("sync_after_15")
     # logging.info("switch is {}".format(switch))

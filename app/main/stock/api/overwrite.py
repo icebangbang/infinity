@@ -273,7 +273,7 @@ def stock_board_concept_hist_em(symbol: str = "数字货币", adjust: str = "qfq
 
     temp_df['最近收盘'] = temp_df.loc[temp_df['收盘'].shift(-1) > 0, '收盘']
     temp_df['最近收盘'] = temp_df['最近收盘'].shift()
-    temp_df['最近收盘'][0] = prev_k_price
+    temp_df.loc[0,'最近收盘'] = prev_k_price
     return temp_df
 
 

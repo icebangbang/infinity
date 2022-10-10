@@ -31,6 +31,9 @@ def sync_stock_month_data(self, codes):
     :param codes:
     :return:
     """
+    now = datetime.now()
+    if 16 <= now.hour < 10:
+        return
     try:
         for index, code in enumerate(codes):
             r = sync_kline_service.sync_month_level(code)
@@ -135,7 +138,7 @@ def sync_stock_data(self, codes, task_id):
 def submit_stock_feature(self, to_date=None, codes=None, global_task_id=None):
     if to_date is None:
         t = datetime.now()
-        if t.hour >= 20 or t.hour <=8:
+        if t.hour >= 20 or t.hour <= 8:
             logging.info("will not run job after 16")
             return
         to_date = date_util.get_start_of_day(datetime.now())
@@ -242,9 +245,9 @@ def sync_stock_ind(self, codes, task_id, expect):
 def auto_submit_stock_feature(self):
     days = 120
     logging.info("days span is {}".format(days))
-    date_start = date_util.get_work_day(datetime.now(),days)
+    date_start = date_util.get_work_day(datetime.now(), days)
     for day in range(days):
-        date_start = date_util.add_and_get_work_day(date_start,1)
+        date_start = date_util.add_and_get_work_day(date_start, 1)
         logging.info("submit stock feature:{}".format(date_util.dt_to_str(date_start)))
         submit_stock_feature.apply_async(args=[date_util.to_timestamp(date_start)])
 
@@ -296,6 +299,7 @@ def sync_balance(self):
     """
     sync_performance.sync_balance()
 
+
 @celery.task(bind=True, base=MyTask, expire=18000)
 def sync_cash_flow(self):
     """
@@ -305,6 +309,7 @@ def sync_cash_flow(self):
     """
     sync_performance.sync_cash_flow()
 
+
 @celery.task(bind=True, base=MyTask, expire=18000)
 def sync_profit(self):
     """
@@ -312,8 +317,9 @@ def sync_profit(self):
     :param self:
     :return:
     """
-    sync_performance.sync_profit()\
-
+    sync_performance.sync_profit() \
+ \
+ \
 @celery.task(bind=True, base=MyTask, expire=18000)
 def sync_analysis_indicator(self):
     """

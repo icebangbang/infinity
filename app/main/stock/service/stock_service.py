@@ -99,7 +99,6 @@ def sync_stock_ind(codes, task_wrapper: TaskWrapper = None):
     stock_value_set = db["stock_value"]
     print("code size {}".format(len(codes)))
     for code in codes:
-        print(code)
         now = datetime.now()
         # start_of_day = date_util.get_start_of_day(now)
         k_line_data_list = k_line_dao.get_k_line_by_code([code], limit=1, sort=-1)

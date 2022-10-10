@@ -16,12 +16,11 @@ import logging as log
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
-def submit_trend_task(self, from_date=None, end_date=None, global_task_id=None,chain=None):
+def submit_trend_task(self, from_date=None, end_date=None, global_task_id=None, chain=None):
     stocks = stock_dao.get_all_stock(dict(code=1))
     codes = [stock['code'] for stock in stocks]
     code_name_map = stock_dao.get_code_name_map()
     step = int(len(codes) / 630)
-
 
     if from_date and end_date:
         from_date = date_util.from_timestamp(from_date)
@@ -31,7 +30,7 @@ def submit_trend_task(self, from_date=None, end_date=None, global_task_id=None,c
         end_date = datetime.now()
 
     global_task_id = global_task_id if global_task_id is not None else str(uuid.uuid1())
-    task_dao.create_task(global_task_id, "app.main.task.trend_task.submit_trend_task", len(codes),chain)
+    task_dao.create_task(global_task_id, "app.main.task.trend_task.submit_trend_task", len(codes), chain)
 
     for i in range(0, len(codes), step):
         codes_group = codes[i:i + step]
@@ -87,7 +86,7 @@ def get_trend_data_task(self, from_date_ts=None, end_date_ts=None, global_task_i
     end_date = date_util.get_start_of_day(date_util.from_timestamp(int(end_date_ts))) \
         if end_date_ts is not None else date_util.get_start_of_day(datetime.now())
 
-    log.info("get_trend_data_task {},{}:{}".format(global_task_id,from_date,end_date))
+    log.info("get_trend_data_task {},{}:{}".format(global_task_id, from_date, end_date))
 
     # 板块级别的聚合
     trend_service.get_trend_size_info(from_date, end_date)

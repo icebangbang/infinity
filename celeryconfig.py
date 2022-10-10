@@ -69,8 +69,8 @@ task_routes = (
     }
     },
     {'app.main.task.trend_task.get_trend_data_task': {
-        'queue': 'day_level',
-        'routing_key': 'day_level'
+        'queue': 'indicator',
+        'routing_key': 'indicator'
     }
     },
     {'app.main.task.stock_task.submit_stock_ind_task': {
