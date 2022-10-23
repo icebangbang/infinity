@@ -9,7 +9,7 @@ def associate():
     board_detail = db['board_detail']
     stock_detail = db['stock_detail']
 
-    for stock in stocks:
+    for index,stock in enumerate(stocks):
         code = stock['code']
 
         detail = board_detail.find_one({"type":2,"codes":{"$in":[code]}})
@@ -20,7 +20,7 @@ def associate():
         board = detail['board']
 
         stock_detail.update_one({"code":code},{"$set":dict(industry=board)})
-        print("{} 属于 {}".format(stock['name'],detail['board']))
+        print("{}，{} 属于 {}".format(index,stock['name'],detail['board']))
 
 if __name__ == "__main__":
     associate()

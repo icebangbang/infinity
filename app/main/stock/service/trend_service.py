@@ -384,24 +384,24 @@ def _analysis(up_df, down_df):
 
 
 if __name__ == "__main__":
-    from_date = date_util.get_start_of_day(date_util.from_timestamp(int(1665331200000)))
-
-    end_date = date_util.get_start_of_day(date_util.from_timestamp(int(1665331200000)))
-    log.info("get_trend_data_task {},{}:{}".format("14a3c4d8-48b4-11ed-bb4c-00163e0a10b2", from_date, end_date))
-
-    # 板块级别的聚合
-    get_trend_size_info(from_date, end_date)
-    # 大盘级别的聚合
-    get_all_trend_info(from_date, end_date)
-    # stocks = stock_dao.get_all_stock()
-    # for stock in stocks:
-    #     code = stock['code']
-    #     name = stock['name']
-    #     print(code,name)
+    # from_date = date_util.get_start_of_day(date_util.from_timestamp(int(1665331200000)))
     #
-    #     for date in WorkDayIterator(datetime(2022, 3, 16), datetime(2022, 9, 16)):
-    #         features = stock_dao.get_company_feature(code, date)
-    #         save_stock_trend_with_features(code, name, features, date)
+    # end_date = date_util.get_start_of_day(date_util.from_timestamp(int(1665331200000)))
+    # log.info("get_trend_data_task {},{}:{}".format("14a3c4d8-48b4-11ed-bb4c-00163e0a10b2", from_date, end_date))
+    #
+    # # 板块级别的聚合
+    # get_trend_size_info(from_date, end_date)
+    # # 大盘级别的聚合
+    # get_all_trend_info(from_date, end_date)
+    stocks = stock_dao.get_all_stock()
+    for stock in stocks:
+        code = stock['code']
+        name = stock['name']
+        print(code,name)
+
+        for date in WorkDayIterator(datetime(2022, 3, 16), datetime(2022, 9, 16)):
+            features = stock_dao.get_company_feature(code, date)
+            save_stock_trend_with_features(code, name, features, date)
 
     # save_stock_trend_with_features("300763", "锦浪科技", features, datetime(2022, 8, 25))
     # get_trend_size_info(datetime(2022, 9, 16), datetime(2022, 9, 16), False)

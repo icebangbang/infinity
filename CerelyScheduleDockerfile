@@ -1,5 +1,8 @@
 FROM python:3.8.10-slim
 
+ARG PIP_MIRROR=https://mirrors.cloud.aliyuncs.com/pypi/simple
+ARG PIP_MIRROR_HOST=mirrors.cloud.aliyuncs.com
+
 RUN  sed -i s@/archive.ubuntu.com/@/mirrors.aliyun.com/@g /etc/apt/sources.list
 RUN  sed -i s@/deb.debian.org/@/mirrors.aliyun.com/@g /etc/apt/sources.list
 RUN  apt-get clean
@@ -19,7 +22,7 @@ COPY ./requirements.txt /
 
 
 #RUN pip3 install --user -i https://mirrors.aliyun.com/pypi/simple --no-cache-dir -r requirements.txt
-RUN pip3 install --trusted-host mirrors.cloud.aliyuncs.com -i https://mirrors.cloud.aliyuncs.com/pypi/simple --no-cache-dir -r requirements.txt
+RUN pip3 install --trusted-host ${PIP_MIRROR_HOST} -i ${PIP_MIRROR} --no-cache-dir -r requirements.txt
 
 
 COPY ./app /app

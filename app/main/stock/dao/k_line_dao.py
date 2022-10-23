@@ -217,6 +217,8 @@ def get_board_k_line_data(
             symbol=name,
             beg=start_day,
             end=end_day)
+    if data is None or len(data) <=0:
+        return None
     data = pd.DataFrame(data[['日期', '开盘', '收盘', '最高', '最低', '成交量', '成交额','最近收盘']])
     data.columns = ['date', 'open', 'close', 'high', 'low', 'volume', 'money','prev_close']
     data['name'] = str(name)

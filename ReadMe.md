@@ -1,6 +1,13 @@
 
 ## 定时任务
 
+## 数据初始化相关
+1. 配置个股详情
+`app.main.stock.job.sync_board.sync`
+2. 个股关联板块
+`app.main.stock.job.board_association.associate`
+
+
 ## 个股趋势相关
 ### /celery/stock/trend
 1. 先分析个股的趋势走向.

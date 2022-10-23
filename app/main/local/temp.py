@@ -70,9 +70,9 @@ def trend_detail():
 if __name__ == "__main__":
     from app import application
 
-    # application.create_app("development")
-    # clear_stock_info()
+    application.create_app("infinity")
+    clear_stock_info()
     # trend_data_task()
     # test()
     # rps_test()
-    trend_detail()
+    # trend_detail()

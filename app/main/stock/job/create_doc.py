@@ -16,7 +16,7 @@ def run():
     db.etf_kline_day.create_index([("code", 1)])
     db.etf_kline_day.create_index([("date", -1), ("code", 1)])
 
-    db.trend_data.create_index([("date", -1),("industry", 1)])
+    db.trend_data.create_index([("date", -1), ("industry", 1)])
     db.trend_point.create_index([("code", 1)])
     db.trend_point.create_index([("date", -1), ("code", 1)])
     docs = ["k_line_day", "board_k_line_day", "stock_feature", "stock_detail", "stock_value", "report_data"]
@@ -38,6 +38,13 @@ def run():
 
     db.rps_anslysis.create_index([("code", 1), ("date", 1)])
 
+def add_config_data():
+    db['config'].insert_one(dict(
+        name="board",
+        value=['猪肉概念',"白酒","氢能源","沪市","深市","科创板","创业板"]
+    ))
+
 
 if __name__ == "__main__":
-    run()
+    # run()
+    add_config_data()

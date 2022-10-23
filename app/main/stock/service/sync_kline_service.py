@@ -139,7 +139,10 @@ def sync_board_k_line(name, type, base_time=None, time_window=1095):
     df = k_line_dao.get_board_k_line_data(name,
                                           date_util.dt_to_str(before),
                                           date_util.dt_to_str(now))
+    if df is None: return None
+
     df['type'] = type
+
 
     # if (before.hour >= 15):
     #     start = before + timedelta(days=1)
