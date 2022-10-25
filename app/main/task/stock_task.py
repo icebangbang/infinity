@@ -34,11 +34,9 @@ def sync_stock_month_data(self, codes):
     now = datetime.now()
     if 16 <= now.hour < 10:
         return
-    try:
-        for index, code in enumerate(codes):
-            r = sync_kline_service.sync_month_level(code)
-    except Exception as e:
-        raise self.retry(exc=e, countdown=3, max_retries=5)
+    for index, code in enumerate(codes):
+        r = sync_kline_service.sync_month_level(code)
+
 
 
 @celery.task(bind=True, base=MyTask, expires=180)

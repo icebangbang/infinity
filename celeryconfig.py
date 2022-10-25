@@ -25,27 +25,11 @@ task_default_exchange = 'default'
 task_default_routing_key = 'default'
 #
 task_routes = (
-    {'app.main.task.stock_task.sync_profit': {
-        'queue': 'day_level',
-        'routing_key': 'day_level'
-    }
-    },
-    {'app.main.task.stock_task.sync_cash_flow': {
-        'queue': 'day_level',
-        'routing_key': 'day_level'
-    }
-    },
-    {'app.main.task.stock_task.sync_balance': {
-        'queue': 'day_level',
-        'routing_key': 'day_level'
-    }
-    },
     {'app.main.task.stock_task.sync_stock_k_line': {
         'queue': 'day_level',
         'routing_key': 'day_level'
     }
     },
-
     {'app.main.task.stock_task.transform_task': {
         'queue': 'day_level',
         'routing_key': 'day_level'
@@ -225,6 +209,10 @@ beat_schedule = {
     },
     'sync_profit': {
         "task": "app.main.task.stock_task.sync_profit",
+        "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
+    },
+    'sync_analysis_indicator': {
+        "task": "app.main.task.stock_task.sync_analysis_indicator",
         "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
     },
     'market_status_analysis': {

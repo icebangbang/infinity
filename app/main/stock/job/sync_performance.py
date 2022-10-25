@@ -19,7 +19,7 @@ def sync_balance():
     :return:
     """
     stocks = stock_dao.get_all_stock()
-    stock_balance = db['stock_balance']
+    stock_balance = db['stock_performance_balance']
     # stock_balance.drop()
     # 获取最近一个交易日
     stock_balance.create_index([("date", -1), ("code", 1)])
@@ -67,7 +67,7 @@ def sync_profit():
     :return:
     """
     stocks = stock_dao.get_all_stock()
-    stock_profit = db['stock_profit']
+    stock_profit = db['stock_performance_profit']
     # 获取最近一个交易日
     stock_profit.create_index([("date", -1), ("code", 1)])
     stock_profit.create_index([("code", 1)])
@@ -99,9 +99,13 @@ def sync_profit():
             'SECURITY_NAME_ABBR': 'name',
             'REPORT_DATE': 'date',
         }, inplace=True)
-        df = df.assign(update=datetime.now())
-        details = df.to_dict("records")
-        stock_profit.insert_many(details)
+
+        sort_df = df.sort_index(ascending=False)
+        details = sort_df.to_dict("records")
+
+        for detail in details:
+            detail['update'] = datetime.now()
+            stock_profit.update_one({"code": code, "date": detail['date']}, {"$set": detail}, upsert=True)
 
 
 def sync_cash_flow():
@@ -110,7 +114,7 @@ def sync_cash_flow():
     :return:
     """
     stocks = stock_dao.get_all_stock()
-    stock_cash_flow = db['stock_cash_flow']
+    stock_cash_flow = db['stock_performance_cash_flow']
     # 获取最近一个交易日
     stock_cash_flow.create_index([("date", -1), ("code", 1)])
     stock_cash_flow.create_index([("code", 1)])
@@ -145,10 +149,13 @@ def sync_cash_flow():
             'REPORT_DATE': 'date',
         }, inplace=True)
 
-        df = df.assign(update=datetime.now())
 
-        details = df.to_dict("records")
-        stock_cash_flow.insert_many(details)
+        sort_df = df.sort_index(ascending=False)
+        details = sort_df.to_dict("records")
+
+        for detail in details:
+            detail['update'] = datetime.now()
+            stock_cash_flow.update_one({"code": code, "date": detail['date']}, {"$set": detail}, upsert=True)
 
 
 def sync_analysis_indicator():
@@ -157,8 +164,7 @@ def sync_analysis_indicator():
     :return:
     """
     stocks = stock_dao.get_all_stock()
-    stock_analysis_indicator = db['stock_analysis_indicator']
-    # stock_analysis_indicator.drop()
+    stock_analysis_indicator = db['stock_performance_analysis_indicator']
     # 获取最近一个交易日
     stock_analysis_indicator.create_index([("date", -1), ("code", 1)])
     stock_analysis_indicator.create_index([("code", 1)])
@@ -169,25 +175,33 @@ def sync_analysis_indicator():
         if "退" in name or "艾格" in name : continue
         logging.info("{}.{}{}同步分析指标".format(index, name, code))
 
-        point = list(stock_analysis_indicator.find({"code": code}, {"update": 1}).sort("date", -1).limit(1))
-        if len(point) != 0:
-            latest_point_update_time = point[0]['update']
+        point = stock_analysis_indicator.find_one({"code": code}, sort=[('date', -1)])
+        if point != None:
+            latest_point_update_time = point['update']
             if latest_point_update_time + timedelta(days=7) >= datetime.now(): continue
-
-            df = ak.stock_financial_analysis_indicator(latest_point_update_time.year, code, name)
-            df['update'] = datetime.now()
-            details = df.to_dict("records")
-            for detail in details:
-                stock_analysis_indicator.update_one({"code": code, "date": detail['date']}, {"$set": detail})
+            from_dt = date_util.parse_date_time(point['date'])
         else:
-            df = ak.stock_financial_analysis_indicator(from_datetime.year, code, name)
-            df['update'] = datetime.now()
-            details = df.to_dict("records")
-            stock_analysis_indicator.insert_many(details)
+            from_dt = from_datetime
+
+        while True:
+            try:
+                df = ak.stock_financial_analysis_indicator(from_dt.year, code,name)
+                break
+            except Exception as e:
+                logging.error(e, exc_info=1)
+
+        sort_df = df.sort_index(ascending=False)
+        details = sort_df.to_dict("records")
+
+        for detail in details:
+            detail['update'] = datetime.now()
+            stock_analysis_indicator.update_one({"code": code, "date": detail['date']}, {"$set": detail}, upsert=True)
+
 
 
 if __name__ == "__main__":
-    sync_balance()
+    # sync_analysis_indicator()
+    # sync_balance()
     # sync_cash_flow()
     sync_profit()
     # df = ak.stock_balance_sheet_by_report_em(from_datetime,symbol="SH603057")
