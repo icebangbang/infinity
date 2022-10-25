@@ -464,7 +464,7 @@ if __name__ == "__main__":
     # from_time = to_time - timedelta(739)
     # stock_filter.get_stock_status(from_time, to_time)
     # publish(3, 100)
-    # stock_remind_v2()
+    stock_remind_v2()
     # detail = get_full_stock_detail("300763")
     pass
     # sync_bellwether()
@@ -476,7 +476,7 @@ if __name__ == "__main__":
     #         "inf_h_point_value": "5","inf_h_point_date":"6",
     #         }
     # print(msg.format(**d))
-    sync_stock_ind(["300763"])
+    # sync_stock_ind(["300763"])
     # stock_value_set = db["stock_value"]
     # stock_value_set.update_one({"code": "300763", "date": datetime.now()},
     #                            {"$set": dict(

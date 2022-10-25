@@ -6,7 +6,14 @@
 `app.main.stock.job.sync_board.sync`
 2. 个股关联板块
 `app.main.stock.job.board_association.associate`
-
+3. 报团分析
+`app.main.stock.service.report_service.baotuan_analysis`
+4. 个股特征筛选
+`app.main.stock.service.stock_service.stock_remind_v2`
+5. 个股特征跑批
+`app.main.rest.celery.get_stock_feature`
+6. 清数据重跑 
+`app.main.local.temp.clear_stock_info`
 
 ## 个股趋势相关
 ### /celery/stock/trend
@@ -20,9 +27,10 @@
 
 ## 财报
 
-* stock_profit 利润表
-* stock_cash_flow 现金流
-* stock_balance 资产负债表
+1. stock_profit 利润表
+2. stock_cash_flow 现金流
+3. 资产负债表数据同步
+`app.main.stock.job.sync_performance.sync_balance`
 
 
 ## flower

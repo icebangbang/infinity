@@ -271,6 +271,7 @@ if __name__ == "__main__":
     # rps_analysis(datetime(2022, 5, 20), -30)
     # up_down_limit_analysis(datetime(2022, 5, 13))
     # market_status_analysis(datetime(2022, 4, 29,23,37,0))
+    baotuan_analysis()
 
     print((int(56 / 5) + 1) * 5)
 

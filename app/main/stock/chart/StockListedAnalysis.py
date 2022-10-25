@@ -13,7 +13,7 @@ class StockListedAnalysis(Line):
     def generate(self,**kwargs):
 
         stocks = stock_dao.get_all_stock(dict(code=1, name=1, _id=0,date=1),
-                                         filter={"date":{"$gte":"2008-01-01"}})
+                                         filter={"date":{"$gte":datetime(2008,1,1)}})
         # 获取所有数据点位
         df = pd.DataFrame(stocks)
         df.index = pd.to_datetime(df.date)

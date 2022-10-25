@@ -25,15 +25,15 @@ done
 
 for ((index2=2; index2<=5; index2++))
 do
+echo ${index2}
 docker stop dao-celery-${index2}
 done
 
-for ((index3=6; index3<=11; index3++))
+for ((index3=6; index3<=20; index3++))
 do
 echo ${index3}
 docker stop dao-celery-${index3}
 done
-
 
 docker build --network=host --build-arg PIP_MIRROR=${PIP_MIRROR} --build-arg PIP_MIRROR_HOST=${PIP_MIRROR_HOST} -f ./CerelyDockerfile -t dao-celery:latest .
 
@@ -47,7 +47,7 @@ do
 docker run -d --privileged=true  -e "profiles=${env}" --name=dao-celery-${index2} -e "index=${index2}" -e "route=day_level" -e "FLASK_ENV=${env}" -e "thread=50" --net=host --rm -it dao-celery:latest
 done
 
-for ((index3=7; index3<=16; index3++))
+for ((index3=7; index3<=13; index3++))
 do
 docker run -d --privileged=true  -e "profiles=${env}" --name=dao-celery-${index3} -e "index=${index3}" -e "route=indicator" -e "FLASK_ENV=${env}" -e "thread=20" --net=host --rm -it dao-celery:latest
 done

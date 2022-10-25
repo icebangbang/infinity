@@ -25,6 +25,21 @@ task_default_exchange = 'default'
 task_default_routing_key = 'default'
 #
 task_routes = (
+    {'app.main.task.stock_task.sync_profit': {
+        'queue': 'day_level',
+        'routing_key': 'day_level'
+    }
+    },
+    {'app.main.task.stock_task.sync_cash_flow': {
+        'queue': 'day_level',
+        'routing_key': 'day_level'
+    }
+    },
+    {'app.main.task.stock_task.sync_balance': {
+        'queue': 'day_level',
+        'routing_key': 'day_level'
+    }
+    },
     {'app.main.task.stock_task.sync_stock_k_line': {
         'queue': 'day_level',
         'routing_key': 'day_level'
@@ -156,12 +171,12 @@ beat_schedule = {
     'stock_data_sync':
         {  # 股票数据同步
             "task": "app.main.task.stock_task.sync_stock_k_line",  # 任务函数所在位置
-            "schedule": 180,  # 定时每300秒执行一次
+            "schedule": 300,  # 定时每300秒执行一次
         },
     'sync_index_data':
         {  # 股票数据同步
             "task": "app.main.task.stock_task.sync_index_data",  # 任务函数所在位置
-            "schedule": 30,  # 定时每300秒执行一次
+            "schedule": 300,  # 定时每300秒执行一次
         },
     'stock_month_data_sync':
         {  # 股票月线数据同步
@@ -198,6 +213,18 @@ beat_schedule = {
     },
     'sync_baotuan': {
         "task": "app.main.task.macrodata_task.baotuan_update",
+        "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
+    },
+    'sync_balance': {
+        "task": "app.main.task.stock_task.sync_balance",
+        "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
+    },
+    'sync_cash_flow': {
+        "task": "app.main.task.stock_task.sync_cash_flow",
+        "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
+    },
+    'sync_profit': {
+        "task": "app.main.task.stock_task.sync_profit",
         "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
     },
     'market_status_analysis': {

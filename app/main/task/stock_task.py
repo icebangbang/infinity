@@ -67,9 +67,12 @@ def sync_stock_k_line(self, reuild_data=None):
     :return:
     """
     now = datetime.now()
-    # 收盘后,不再同步
     if reuild_data is None and \
             job_config.check_status_available("app.main.task.stock_task.sync_stock_k_line") is False:
+        return
+
+    # 收盘后,不再同步
+    if 20 <= now.hour < 10:
         return
 
     stocks = stock_dao.get_all_stock(dict(code=1))
@@ -138,7 +141,7 @@ def sync_stock_data(self, codes, task_id):
 def submit_stock_feature(self, to_date=None, codes=None, global_task_id=None):
     if to_date is None:
         t = datetime.now()
-        if t.hour >= 20 or t.hour <= 8:
+        if t.hour >= 16 or t.hour <= 8:
             logging.info("will not run job after 16")
             return
         to_date = date_util.get_start_of_day(datetime.now())
@@ -243,7 +246,7 @@ def sync_stock_ind(self, codes, task_id, expect):
 
 @celery.task(bind=True, base=MyTask, expire=1800)
 def auto_submit_stock_feature(self):
-    days = 120
+    days = 240
     logging.info("days span is {}".format(days))
     date_start = date_util.get_work_day(datetime.now(), days)
     for day in range(days):
@@ -317,9 +320,8 @@ def sync_profit(self):
     :param self:
     :return:
     """
-    sync_performance.sync_profit() \
- \
- \
+    sync_performance.sync_profit()
+
 @celery.task(bind=True, base=MyTask, expire=18000)
 def sync_analysis_indicator(self):
     """

@@ -399,7 +399,7 @@ if __name__ == "__main__":
         name = stock['name']
         print(code,name)
 
-        for date in WorkDayIterator(datetime(2022, 3, 16), datetime(2022, 9, 16)):
+        for date in WorkDayIterator(datetime(2022, 10, 24), datetime(2022, 10, 24)):
             features = stock_dao.get_company_feature(code, date)
             save_stock_trend_with_features(code, name, features, date)
 
@@ -407,6 +407,6 @@ if __name__ == "__main__":
     # get_trend_size_info(datetime(2022, 9, 16), datetime(2022, 9, 16), False)
     # get_all_trend_info(datetime(2022, 4, 1), datetime(2022, 9, 16))
     # print("code","300763")
-    for date in WorkDayIterator(datetime(2022, 3, 16), datetime(2022, 9, 29)):
+    for date in WorkDayIterator(datetime(2022, 10, 24), datetime(2022, 10, 24)):
         get_trend_size_info(date, date, False)
         get_all_trend_info(date, date)

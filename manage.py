@@ -11,4 +11,5 @@ from app.celery_worker import celery
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=20060, debug=True, use_reloader=False, threaded=True)
+    port = os.environ.get('SERVER_PORT') or 20060
+    app.run(host='0.0.0.0', port=port, debug=True, use_reloader=False, threaded=True)
