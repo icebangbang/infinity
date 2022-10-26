@@ -327,6 +327,37 @@ def parse_seconds(time):
         return t
 
 
+def drictToStrStock(nowData,tableName):
+    sql1="insert into "+tableName+" ("
+    sql2=" values ("
+    retData=""
+    retList=[]
+    for k in nowData:
+        retData=""
+        sql1="insert into "+tableName+" ("
+        sql2=" values ("
+        for i,j in k.items():
+            sql1+=str(i)
+            sql1+=","
+            if(type(j) is str):
+                sql2+='\''+str(j)+'\''
+            else:
+                sql2+=str(j)
+            sql2+=","
+        sql1=sql1[0:-1]+")"
+        sql2=sql2[0:-1]+")"
+        retData=sql1+sql2
+        retList.append(retData)
+    return retList
+
+if __name__ == "__main__":
+    # print(drictToStrStock([dict(name=1,sex=2)],"table"))
+    import pandas as pd
+    p = pd.DataFrame([dict(a=123),dict(a=12),dict(a=321),dict(a=43),dict(a=123),dict(a=123)])
+    p[0:2].reset_index(drop=True).to_excel("./a.xlsx",index=False)
+    p[2:4].reset_index(drop=True).to_excel("./b.xlsx",index=False)
+
+
 class DatetimeJsonEncoder(simplejson.JSONEncoder):
     def default(self, o):
         if isinstance(o, datetime.datetime):
@@ -334,3 +365,5 @@ class DatetimeJsonEncoder(simplejson.JSONEncoder):
             return o.strftime("%Y-%m-%d %H:%M:%S")
         if isinstance(o, ObjectId):
             return str(o)
+
+
