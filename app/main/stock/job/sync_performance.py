@@ -200,9 +200,9 @@ def sync_analysis_indicator():
 
 
 if __name__ == "__main__":
-    # sync_analysis_indicator()
+    sync_analysis_indicator()
     # sync_balance()
     # sync_cash_flow()
-    sync_profit()
+    # sync_profit()
     # df = ak.stock_balance_sheet_by_report_em(from_datetime,symbol="SH603057")
     pass

@@ -75,9 +75,9 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
                 trend_change_scope.append(2)
 
             # 日内波动引起的改动,直接将该记录软删除
-            if inf_h_point_date == prev_inf_h_point_date or inf_l_point_date == prev_inf_l_point_date:
-                trend_point_set.update_one({"_id": trend_point["_id"]}, {"$set": {"is_deleted":1}})
-                return
+            # if inf_h_point_date == prev_inf_h_point_date or inf_l_point_date == prev_inf_l_point_date:
+            #     trend_point_set.update_one({"_id": trend_point["_id"]}, {"$set": {"is_deleted":1}})
+            #     return
 
         # 没有任何变化,更新
         if len(trend_change_scope) == 0 and trend_point is not None:
@@ -399,7 +399,7 @@ if __name__ == "__main__":
         name = stock['name']
         print(code,name)
 
-        for date in WorkDayIterator(datetime(2022, 10, 24), datetime(2022, 10, 24)):
+        for date in WorkDayIterator(datetime(2022, 10, 26), datetime(2022, 10, 26)):
             features = stock_dao.get_company_feature(code, date)
             save_stock_trend_with_features(code, name, features, date)
 
@@ -407,6 +407,6 @@ if __name__ == "__main__":
     # get_trend_size_info(datetime(2022, 9, 16), datetime(2022, 9, 16), False)
     # get_all_trend_info(datetime(2022, 4, 1), datetime(2022, 9, 16))
     # print("code","300763")
-    for date in WorkDayIterator(datetime(2022, 10, 24), datetime(2022, 10, 24)):
+    for date in WorkDayIterator(datetime(2022, 10, 26), datetime(2022, 10, 26)):
         get_trend_size_info(date, date, False)
         get_all_trend_info(date, date)
