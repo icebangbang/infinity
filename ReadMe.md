@@ -36,7 +36,7 @@
 ## flower
 
 ```
- celery --broker='redis://:ironBackRedis123@39.105.104.215:30004/1' flower
+ celery -A manage.celery --broker='redis://:ironBackRedis123@39.105.104.215:30004/1' flower
 ```
 
 ## 其他脚本
