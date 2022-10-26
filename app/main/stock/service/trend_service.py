@@ -26,6 +26,9 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
     :param start_of_day:
     :return:
     """
+    normal = 1
+    frozen = 2
+    temp=3
     trend_point_set = db['trend_point']
     try:
         stock_detail = stock_dao.get_stock_detail_by_code(code)
@@ -35,6 +38,12 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
 
         if features is None or len(features) == 0:
             return
+
+        in_trade_time = date_util.in_trade_time(datetime.now())
+
+        if not in_trade_time:
+            trend_point_set.delete_many({"code":code,"trend_type":temp})
+            trend_point_set.update_many({"code":code,"trend_type":frozen},{"$set": {"trend_type":normal}})
 
         # 当前底分型趋势的斜率
         current_bot_type_slope = features[constant.current_bot_type_slope]
@@ -54,6 +63,7 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
         # 底分型趋势
         # 任何趋势变化,就新增一条记录
         trend_change_scope = []
+        # 获取最近一个趋势状态
         trend_point_list = list(trend_point_set.find({"code": code,"is_deleted":0,
                                                       "date": {"$lte": start_of_day}},
                                                      sort=[("date", -1), ("_id", -1)]).limit(2))
@@ -61,11 +71,16 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
         # 历史记录不为空,就要做更新
         if len(trend_point_list) > 0:
             trend_point = trend_point_list[0]
-            inf_l_point_date_history = trend_point['inf_l_point_date']
-            inf_h_point_date_history = trend_point['inf_h_point_date']
+            inf_l_point_date_history = trend_point['inf_l_point_date'] # 底分型拐点出现的时间
+            inf_h_point_date_history = trend_point['inf_h_point_date'] # 顶分型拐点出现的时间
             prev_inf_l_point_date = trend_point['prev_inf_l_point_date']
             prev_inf_h_point_date = trend_point['prev_inf_h_point_date']
 
+            # 判断时间区间
+            # 如果是日内的话，且有变更，不对原来的数据内容做变更,临时拷贝一条记录插入，并将最近一条记录更新为特殊状态
+            # 如果在日内的
+
+            # inf_l_point_date 和 inf_h_point_date 这个拐点数据，随着日内随时会出现波动
             # 和之前都不一致
             if inf_l_point_date_history != inf_l_point_date \
                     and prev_inf_l_point_date != inf_l_point_date:
@@ -79,7 +94,7 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
             #     trend_point_set.update_one({"_id": trend_point["_id"]}, {"$set": {"is_deleted":1}})
             #     return
 
-        # 没有任何变化,更新
+        # 没有任何变化,更新，只要有变化，就新增一条记录
         if len(trend_change_scope) == 0 and trend_point is not None:
             trend_point['current_bot_trend_size'] = current_bot_trend_size
             trend_point['current_top_trend_size'] = current_top_trend_size
@@ -110,6 +125,8 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
         if current_bot_type_slope <= 0 and current_top_type_slope >= 0:
             trend = "enlarge"
 
+        trend_type = normal if not in_trade_time else temp
+
         entity = dict(
             date=start_of_day,
             is_in_use=1,
@@ -133,11 +150,16 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
             update_time=datetime.now(),
             inf_l_point_value=inf_l_point_value,
             inf_h_point_value=inf_h_point_value,
-            is_deleted=0
+            is_deleted=0,
+            trend_type=trend_type
         )
         trend_point_set.save(entity)
         if (trend_point):
-            trend_point_set.update_one({"_id": trend_point["_id"]}, {"$set": {"is_in_use": 0}})
+            update_item = {"is_in_use": 0}
+            if in_trade_time:
+                update_item['trend_type'] = frozen
+
+            trend_point_set.update_one({"_id": trend_point["_id"]}, {"$set": update_item})
     except Exception as e:
         log.error(e, exc_info=1)
 

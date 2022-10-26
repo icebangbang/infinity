@@ -7,6 +7,14 @@ import time as tm
 from dateutil.relativedelta import relativedelta
 
 
+def in_trade_time(time: datetime):
+    hour = time.hour
+    min = time.minute
+    mixed = hour + min / 60
+
+    return 9.5 <= hour <= 15
+
+
 def in_time_range(time: datetime, range: datetime, level):
     """
     判断是否在某个年度内,或者季节内
