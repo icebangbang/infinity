@@ -16,6 +16,10 @@ from app.main.utils import date_util, cal_util, stock_util
 from app.main.utils.date_util import WorkDayIterator
 import logging as log
 
+normal = 1
+frozen = 2
+temp = 3
+
 
 def save_stock_trend_with_features(code, name, features, start_of_day: datetime):
     """
@@ -26,9 +30,7 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
     :param start_of_day:
     :return:
     """
-    normal = 1
-    frozen = 2
-    temp=3
+
     trend_point_set = db['trend_point']
     try:
         stock_detail = stock_dao.get_stock_detail_by_code(code)
@@ -39,11 +41,13 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
         if features is None or len(features) == 0:
             return
 
-        in_trade_time = date_util.in_trade_time(datetime.now())
+        in_trade_time = start_of_day == date_util.get_start_of_day(datetime.now()) \
+                        and date_util.in_trade_time(datetime.now())
 
         if not in_trade_time:
-            trend_point_set.delete_many({"code":code,"trend_type":temp})
-            trend_point_set.update_many({"code":code,"trend_type":frozen},{"$set": {"trend_type":normal}})
+            trend_point_set.delete_many({"code": code, "trend_type": temp})
+            trend_point_set.update_many({"code": code, "trend_type": frozen},
+                                        {"$set": {"trend_type": normal, "is_in_use": 1}})
 
         # 当前底分型趋势的斜率
         current_bot_type_slope = features[constant.current_bot_type_slope]
@@ -64,15 +68,15 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
         # 任何趋势变化,就新增一条记录
         trend_change_scope = []
         # 获取最近一个趋势状态
-        trend_point_list = list(trend_point_set.find({"code": code,"is_deleted":0,
+        trend_point_list = list(trend_point_set.find({"code": code, "is_deleted": 0,
                                                       "date": {"$lte": start_of_day}},
                                                      sort=[("date", -1), ("_id", -1)]).limit(2))
         trend_point = None
         # 历史记录不为空,就要做更新
         if len(trend_point_list) > 0:
             trend_point = trend_point_list[0]
-            inf_l_point_date_history = trend_point['inf_l_point_date'] # 底分型拐点出现的时间
-            inf_h_point_date_history = trend_point['inf_h_point_date'] # 顶分型拐点出现的时间
+            inf_l_point_date_history = trend_point['inf_l_point_date']  # 底分型拐点出现的时间
+            inf_h_point_date_history = trend_point['inf_h_point_date']  # 顶分型拐点出现的时间
             prev_inf_l_point_date = trend_point['prev_inf_l_point_date']
             prev_inf_h_point_date = trend_point['prev_inf_h_point_date']
 
@@ -140,8 +144,8 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
             prev_trend=trend_point['trend'] if trend_point else None,  # 之前总体趋势
             inf_l_point_date=inf_l_point_date,  # 底分型趋势成立时间
             inf_h_point_date=inf_h_point_date,  # 顶分型趋势成立时间
-            prev_inf_l_point_date = trend_point['inf_l_point_date'] if trend_point else None,
-            prev_inf_h_point_date = trend_point['inf_h_point_date'] if trend_point else None,
+            prev_inf_l_point_date=trend_point['inf_l_point_date'] if trend_point else None,
+            prev_inf_h_point_date=trend_point['inf_h_point_date'] if trend_point else None,
             trend_change_scope=trend_change_scope,  # 趋势变化记录
             industry=stock_detail['industry'],  # 行业
             name=name,
@@ -241,7 +245,7 @@ def get_trend_size_info(start, end, only_include=False):
             total = another_board['codes']
             r = list(trend_point_set.find(
                 {"date": {"$lte": date},
-                 "update": {"$gte": date}, "code": {"$in": total}}))
+                 "update": {"$gte": date}, "code": {"$in": total}, "trend_type": {"$in": [normal, temp]}}))
             if len(r) == 0: continue
             df = pd.DataFrame(r)
             series = df.groupby(['trend']).size()
@@ -294,9 +298,9 @@ def get_trend_size_info(start, end, only_include=False):
         range_end = result['date']
         range_start = range_end - timedelta(60)
         # 写入当前趋势
-        trend_data_list = list(db.trend_data.find({"industry": industry,'trend':trend,
-                                              "date": {"$gte": range_start, "$lte": range_end},
-                                              }).sort("date", 1))
+        trend_data_list = list(db.trend_data.find({"industry": industry, 'trend': trend,
+                                                   "date": {"$gte": range_start, "$lte": range_end},
+                                                   }).sort("date", 1))
         trend_data_rate = [point['rate'] for point in trend_data_list]
 
         if len(trend_data_rate) > 0:
@@ -313,8 +317,9 @@ def get_trend_size_info(start, end, only_include=False):
         else:
             current_trend_scope = high_type_list[total_p[-1]:]
 
-        current_trend_scope = [item for item in current_trend_scope if item['index'] != len(trend_data_list)-1]
-        max_top_type = 0 if len(current_trend_scope)==0 else current_trend_scope[len(current_trend_scope)-1]['value']
+        current_trend_scope = [item for item in current_trend_scope if item['index'] != len(trend_data_list) - 1]
+        max_top_type = 0 if len(current_trend_scope) == 0 else current_trend_scope[len(current_trend_scope) - 1][
+            'value']
 
         pos_p, neg_p, total_p, point_index = cal_util.get_reverse_point(low_type_list)
         if len(total_p) == 0:
@@ -325,9 +330,9 @@ def get_trend_size_info(start, end, only_include=False):
         current_trend_scope = [item for item in current_trend_scope if item['index'] != len(trend_data_list) - 1]
         max_bot_type = 0 if len(current_trend_scope) == 0 else current_trend_scope[len(current_trend_scope) - 1][
             'value']
-        x,c = cal_util.get_line([max_top_type,result['rate']])
+        x, c = cal_util.get_line([max_top_type, result['rate']])
         result['up_slop'] = x
-        x,c = cal_util.get_line([max_bot_type,result['rate']])
+        x, c = cal_util.get_line([max_bot_type, result['rate']])
         result['down_slop'] = x
 
         db.trend_data.update_one(
@@ -366,7 +371,7 @@ def get_trend_info(end_date):
     labels = ["-1~-0.75", "-0.75~-0.5", "-0.5~-0.25",
               "-0.25~0", "0~0.25", "0.25~0.5",
               "0.5~0.75", "0.75~1"]
-    df['cut'] = pd.cut(df.currentDiff, bins=[-1,-0.75,-0.5,-0.25,0, 0.25, 0.5, 0.75, 1],
+    df['cut'] = pd.cut(df.currentDiff, bins=[-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1],
                        labels=labels,
                        include_lowest=True)
     industry_info = OrderedDict()
@@ -419,7 +424,7 @@ if __name__ == "__main__":
     for stock in stocks:
         code = stock['code']
         name = stock['name']
-        print(code,name)
+        print(code, name)
 
         for date in WorkDayIterator(datetime(2022, 10, 26), datetime(2022, 10, 26)):
             features = stock_dao.get_company_feature(code, date)
