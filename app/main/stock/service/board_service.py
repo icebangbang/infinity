@@ -118,6 +118,16 @@ def get_all_board_names():
     results = [board['board'] for board in boards]
     return results
 
+def get_trade_info(industry,start,end):
+    """
+    获取行业板块的成交信息
+    :param start:
+    :param end:
+    :return:
+    """
+    return list(db['board_trade_volume']
+                .find({"date": {"$gte": start, "$lte": end},
+                                               "industry":industry}))
 
 def collect_trade_money(start, end):
     """
@@ -135,9 +145,11 @@ def collect_trade_money(start, end):
             money = cal_util.divide(money_sum, 100000000, 3)
             logging.info("同步板块{}的交易量和成交额:{},{},{}".format(industry,date,money,volume_sum))
             update_item = dict(industry=industry, date=date,
-                               volume=volume_sum, money_sum=money)
+                               volume=volume_sum, money=money)
             db['board_trade_volume'].update_one({"industry": industry, "date": date},
                                                 {"$set": update_item},upsert=True)
+
+
 
 
 if __name__ == "__main__":

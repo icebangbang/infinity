@@ -127,9 +127,32 @@ class Infinity(Config):
     RESULT_BACKEND = 'redis://:ironBackRedis123@0.0.0.0:30004/1'
     MONGO_URL = "mongodb://root:whosyourdaddy$879@0.0.0.0:20017/"
 
+
+class InfinityLocal(Config):
+    """
+    线下服务的配置
+    """
+
+    # REDIS_HOST = '10.10.10.200'
+    # REDIS_PORT = 16379
+    # REDIS_DB_ID = 10
+    # REDIS_PASSWORD = '123'
+    # MACHINE_ID = 0
+    # 'sqlite:///' + os.path.join(basedir, 'data-test.sqlite')
+    REDIS_HOST = '10.8.0.2'
+    REDIS_PORT = 30004
+    REDIS_DB_ID = 1
+    REDIS_PASSWORD = 'ironBackRedis123'
+
+    BROKER_URL = 'redis://:ironBackRedis123@10.8.0.2:30004/1'
+    RESULT_BACKEND = 'redis://:ironBackRedis123@10.8.0.2:30004/1'
+    MONGO_URL = "mongodb://root:whosyourdaddy$879@10.8.0.2:20017/"
+
+
 config = {
     'development': DevelopmentConfig,
     'test': TestConfig,
-    'offline':Offline,
-    'infinity':Infinity
+    'offline': Offline,
+    'infinity': Infinity,
+    'infinityLocal': InfinityLocal
 }

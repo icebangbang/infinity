@@ -2,6 +2,7 @@ import numpy
 
 from app.main.stock.chart.Line import Line
 from app.main.db.mongo import db
+from app.main.stock.service import board_service
 from app.main.utils import date_util
 from datetime import datetime
 import pandas as pd
@@ -24,6 +25,7 @@ class SingleTrendAnaysis(Line):
         trend_data = db['trend_data']
         end = date_util.get_latest_work_day()
         start = date_util.get_work_day(end, 120)
+
 
         # 节气节点数据
         # time=时间, jq=节气, jq_index=节气下标
@@ -71,6 +73,12 @@ class SingleTrendAnaysis(Line):
                 median = numpy.median(data_y_array[index]['y'])
                 data_y_array[index]['markLine'] = {"data": [{"yAxis": median, "name": "中位数"}]}
             index = index + 1
+
+        trade_info_list = board_service.get_trade_info(industry, start, end)
+
+        data_y_array.extend(_build_trade_info(trade_info_list))
+
+
         # y轴组合
         yAxis_array = [
             {
@@ -87,6 +95,15 @@ class SingleTrendAnaysis(Line):
                     mark_area=mark_area,
                     )
 
+def _build_trade_info(trade_info_list):
+    money_y = []
+    money_volume=[]
+    for trade_info in trade_info_list:
+        money_y.append(trade_info['money'])
+        money_volume.append(trade_info['volume'])
+
+    return [dict(name="成交额", y=money_y, yAxisIndex=0),
+            dict(name="成交量", y=money_volume, yAxisIndex=0)]
 
 if __name__ == "__main__":
     trend = SingleTrendAnaysis()
