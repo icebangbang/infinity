@@ -134,7 +134,7 @@ def collect_trade_money(start, end):
             volume_sum = sum([line['volume'] for line in lines])
             money = cal_util.divide(money_sum, 100000000, 3)
             logging.info("同步板块{}的交易量和成交额:{},{},{}".format(industry,date,money,volume_sum))
-            update_item = dict(industry=industry, date=industry,
+            update_item = dict(industry=industry, date=date,
                                volume=volume_sum, money_sum=money)
             db['board_trade_volume'].update_one({"industry": industry, "date": date},
                                                 {"$set": update_item},upsert=True)
