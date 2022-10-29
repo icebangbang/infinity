@@ -19,8 +19,8 @@ class SingleTrendAnaysis(Line):
         industry = kwargs['industry']
 
         legend = dict(
-            data=['up', 'down', 'enlarge', 'convergence'],
-            selected=dict(up=True, down=True, enlarge=False, convergence=False)
+            data=['up', 'down','成交额','成交量', 'enlarge', 'convergence'],
+            selected={"up":True, "down":True,"成交额":True,"成交量":False, "enlarge":False, "convergence":False}
         )
         trend_data = db['trend_data']
         end = date_util.get_latest_work_day()
@@ -84,6 +84,11 @@ class SingleTrendAnaysis(Line):
             {
                 "name": "数据",
                 "type": 'value'
+            },
+            {
+                "name": "成交量",
+                "type": "value",
+                "position": "right"
             }
         ]
 
@@ -102,8 +107,8 @@ def _build_trade_info(trade_info_list):
         money_y.append(trade_info['money'])
         money_volume.append(trade_info['volume'])
 
-    return [dict(name="成交额", y=money_y, yAxisIndex=0),
-            dict(name="成交量", y=money_volume, yAxisIndex=0)]
+    return [dict(name="成交额", y=money_y, yAxisIndex=1,type='bar'),
+            dict(name="成交量", y=money_volume, yAxisIndex=1,type='bar')]
 
 if __name__ == "__main__":
     trend = SingleTrendAnaysis()

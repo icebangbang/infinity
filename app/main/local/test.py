@@ -1,3 +1,7 @@
+import requests
+
+print(requests.get("http://baidu.com").text)
+
 from app.main.utils import date_util
 from datetime import datetime
 from app.main.db.mongo import db

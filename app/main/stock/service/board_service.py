@@ -1,9 +1,9 @@
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 
 import pandas as pd
 
 from app.main.stock.dao import k_line_dao, board_dao, stock_dao
-from app.main.utils import date_util, cal_util
+from app.main.utils import date_util, cal_util, stock_util
 import logging
 from app.main.db.mongo import db
 from app.main.utils.date_util import WorkDayIterator
@@ -118,7 +118,8 @@ def get_all_board_names():
     results = [board['board'] for board in boards]
     return results
 
-def get_trade_info(industry,start,end):
+
+def get_trade_info(industry, start, end):
     """
     获取行业板块的成交信息
     :param start:
@@ -127,11 +128,23 @@ def get_trade_info(industry,start,end):
     """
     return list(db['board_trade_volume']
                 .find({"date": {"$gte": start, "$lte": end},
-                                               "industry":industry}))
+                       "industry": industry}))
+
 
 def collect_trade_money(start, end):
     """
     计算交易金额
+    :return:
+    """
+    collect_industry_info(start,end)
+    collect_index_info(start,end)
+
+
+def collect_industry_info(start, end):
+    """
+    行业板块
+    :param start:
+    :param end:
     :return:
     """
     boards = get_all_board()
@@ -143,16 +156,40 @@ def collect_trade_money(start, end):
             money_sum = sum([line['money'] for line in lines])
             volume_sum = sum([line['volume'] for line in lines])
             money = cal_util.divide(money_sum, 100000000, 3)
-            logging.info("同步板块{}的交易量和成交额:{},{},{}".format(industry,date,money,volume_sum))
+            logging.info("同步板块{}的交易量和成交额:{},{},{}".format(industry, date, money, volume_sum))
             update_item = dict(industry=industry, date=date,
                                volume=volume_sum, money=money)
             db['board_trade_volume'].update_one({"industry": industry, "date": date},
-                                                {"$set": update_item},upsert=True)
+                                                {"$set": update_item}, upsert=True)
 
 
+def collect_index_info(start, end):
+    """
+    大盘数据
+    :param start:
+    :param end:
+    :return:
+    """
+    stocks = stock_dao.get_all_stock(dict(code=1, name=1, _id=0, date=1))
+    belong_map = {"创业板": [], "深市": [], "沪市": [], "科创板": []}
+    for stock in stocks:
+        code = stock['code']
+        belong = stock_util.market_belong(code)
+        belong_map[belong].append(code)
+    for date in WorkDayIterator(start, end):
+        for belong,codes in belong_map.items():
+            lines = k_line_dao.get_k_line_data(date, date, codes=codes)
+            money_sum = sum([line['money'] for line in lines])
+            volume_sum = sum([line['volume'] for line in lines])
+            money = cal_util.divide(money_sum, 100000000, 3)
+            logging.info("同步板块{}的交易量和成交额:{},{},{}".format(belong, date, money, volume_sum))
+            update_item = dict(industry=belong, date=date,
+                               volume=volume_sum, money=money)
+            db['board_trade_volume'].update_one({"industry": belong, "date": date},
+                                                {"$set": update_item}, upsert=True)
 
 
 if __name__ == "__main__":
-    end = datetime.now()
-    start = end-timedelta(356)
-    collect_trade_money(start, end)
+    end = date_util.get_start_of_day(datetime.now())
+    start = end - timedelta(356)
+    collect_trade_money(start,end)
