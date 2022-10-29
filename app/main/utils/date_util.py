@@ -258,9 +258,9 @@ class WorkDayIterator(object):
     def __next__(self):
         if self.date <= self.end:
             val = self.date
-            if if_workday(val) is False:
-                val = add_and_get_work_day(val, 1)
-            else:
+            self.date = add_and_get_work_day(val, 1)
+            if is_workday(val) is not True:
+                val = self.date
                 self.date = add_and_get_work_day(val, 1)
             return val
         else:
