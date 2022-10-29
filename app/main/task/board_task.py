@@ -53,7 +53,8 @@ def sync_data(self, boards):
 @celery.task(bind=True, base=MyTask, expire=1800)
 def sync_board_stock_detail(self):
     """
-    同步板块和个股详情
+    从东财同步板块和个股详情
+    单线程同步操作
     :param self:
     :return:
     """
@@ -62,6 +63,13 @@ def sync_board_stock_detail(self):
 
 @celery.task(bind=True, base=MyTask, expires=180)
 def submit_board_feature(self, to_date=None, codes=None):
+    """
+    拆分任务,然后各个节点执行任务
+    :param self:
+    :param to_date:
+    :param codes:
+    :return:
+    """
     if to_date is None:
         to_date = date_util.get_start_of_day(datetime.now())
     else:

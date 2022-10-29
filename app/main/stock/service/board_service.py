@@ -1,30 +1,30 @@
-from datetime import datetime
+from datetime import datetime,timedelta
 
 import pandas as pd
 
-from app.main.stock.dao import k_line_dao,board_dao
-from app.main.utils import date_util
+from app.main.stock.dao import k_line_dao, board_dao, stock_dao
+from app.main.utils import date_util, cal_util
 import logging
 from app.main.db.mongo import db
+from app.main.utils.date_util import WorkDayIterator
 
 
-def get_board_k_line_by_offset(from_date, to_date, concept_name,level='day'):
+def get_board_k_line_by_offset(from_date, to_date, concept_name, level='day'):
     db_name = "k_line_" + level
     my_set = db[db_name]
     board_dao.get_board_k_line_data_from_db(from_date, to_date, concept_name)
-    daily_price = pd.DataFrame(board_dao.get_board_k_line_data_from_db(from_date, to_date,concept_names))
+    daily_price = pd.DataFrame(board_dao.get_board_k_line_data_from_db(from_date, to_date, concept_names))
 
     daily_price = daily_price.set_index("date", drop=False)
     return daily_price
 
-def publish(days=10, slice=30, code_list=None,stock_map={},start=None,end=None):
-    if start is None and end is None:
 
+def publish(days=10, slice=30, code_list=None, stock_map={}, start=None, end=None):
+    if start is None and end is None:
         end = date_util.get_start_of_day(datetime.now())
-        start = date_util.get_work_day(end,offset=days)
+        start = date_util.get_work_day(end, offset=days)
 
     boards = board_dao.get_all_board(type=[2])
-
 
     rise = []
     result_dict = dict()
@@ -48,7 +48,7 @@ def publish(days=10, slice=30, code_list=None,stock_map={},start=None,end=None):
             flag = True
         temp_code_list = [item['board'] for item in inner]
         result_dict = {item['board']: [] for item in inner}
-        k_list = board_dao.get_board_k_line_data_from_db( start, end,temp_code_list)
+        k_list = board_dao.get_board_k_line_data_from_db(start, end, temp_code_list)
         for k in k_list:
             result_dict[k['name']].append(k)
         for k, v in result_dict.items():
@@ -78,18 +78,20 @@ def publish(days=10, slice=30, code_list=None,stock_map={},start=None,end=None):
 
     print("涨幅前{}是:".format(slice))
     for i in top:
-        print("{} {} {} {}".format(i['code'], i['name'], i['rise'],get_concepts(stock_map,i['code'])))
+        print("{} {} {} {}".format(i['code'], i['name'], i['rise'], get_concepts(stock_map, i['code'])))
 
     print("跌幅前{}是:".format(slice))
     for i in bot:
-        print("{} {} {} {}".format(i['code'], i['name'], i['rise'],get_concepts(stock_map,i['code'])))
+        print("{} {} {} {}".format(i['code'], i['name'], i['rise'], get_concepts(stock_map, i['code'])))
 
-def get_concepts(stock_map,code):
+
+def get_concepts(stock_map, code):
     if code in stock_map.keys():
         return stock_map[code]['board']
     return ""
 
-def get_all_board()->dict:
+
+def get_all_board() -> list:
     """
     获取板块数据,包括自定义板块
     :return:
@@ -101,10 +103,11 @@ def get_all_board()->dict:
     set = db['board_detail']
     condition1 = {"board": {"$in": board_custom}}
     condition2 = {"type": 2}
-    boards_custom = list(set.find(condition1, dict(board=1, _id=0,codes=1)))
-    boards = list(set.find(condition2, dict(board=1, _id=0,codes=1)))
+    boards_custom = list(set.find(condition1, dict(board=1, _id=0, codes=1)))
+    boards = list(set.find(condition2, dict(board=1, _id=0, codes=1)))
     boards_custom.extend(boards)
     return boards_custom
+
 
 def get_all_board_names():
     """
@@ -116,5 +119,28 @@ def get_all_board_names():
     return results
 
 
+def collect_trade_money(start, end):
+    """
+    计算交易金额
+    :return:
+    """
+    boards = get_all_board()
+    for board in boards:
+        for date in WorkDayIterator(start, end):
+            industry = board['board']
+            codes = board['codes']
+            lines = k_line_dao.get_k_line_data(date, date, codes=codes)
+            money_sum = sum([line['money'] for line in lines])
+            volume_sum = sum([line['volume'] for line in lines])
+            money = cal_util.divide(money_sum, 100000000, 3)
+            logging.info("同步板块{}的交易量和成交额:{},{},{}".format(industry,date,money,volume_sum))
+            update_item = dict(industry=industry, date=industry,
+                               volume=volume_sum, money_sum=money)
+            db['board_trade_volume'].update_one({"industry": industry, "date": date},
+                                                {"$set": update_item},upsert=True)
+
+
 if __name__ == "__main__":
-    publish(2,100)
+    end = datetime.now()
+    start = end-timedelta(356)
+    collect_trade_money(start, end)

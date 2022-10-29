@@ -151,6 +151,11 @@ def get_rate(numerator, denominator, ndigits=2) -> float:
 def round(v, ndigits=2) -> float:
     return float(Decimal(float(v)).quantize(Decimal(str(pow(10,-ndigits))), rounding="ROUND_HALF_UP"))
 
+def divide(a,b,ndigits=2)->float:
+    v = a/b
+    return round(v,ndigits)
+
+
 
 def get_williams(highest, lowest, close):
     """

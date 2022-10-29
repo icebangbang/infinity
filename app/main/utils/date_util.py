@@ -8,11 +8,14 @@ from dateutil.relativedelta import relativedelta
 
 
 def in_trade_time(time: datetime):
+    if is_weekend(time) or is_workday(time) is False:
+        return False
+
     hour = time.hour
     min = time.minute
     mixed = hour + min / 60
 
-    return 9.5 <= hour <= 15
+    return 9.5 <= mixed <= 15
 
 
 def in_time_range(time: datetime, range: datetime, level):

@@ -10,6 +10,8 @@ def create_doc(doc_name):
 
 
 def run():
+    db.board_trade_volume.create_index([("date", -1), ("industry", 1)])
+
     db.trend_data.create_index([("date", -1), ("industry", 1)])
     db.trend_point.create_index([("code", 1)])
     db.trend_point.create_index([("date", -1), ("code", 1)])
@@ -64,5 +66,5 @@ def add_config_data():
 
 
 if __name__ == "__main__":
-    # run()
-    add_config_data()
+    run()
+    # add_config_data()
