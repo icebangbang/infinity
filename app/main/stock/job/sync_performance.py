@@ -200,6 +200,7 @@ def sync_analysis_indicator():
 
 
 if __name__ == "__main__":
+    ak.stock_profit_sheet_by_report_em(datetime(2015,1,1,1), symbol="SZ000001")
     sync_analysis_indicator()
     # sync_balance()
     # sync_cash_flow()

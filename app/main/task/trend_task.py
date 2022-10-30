@@ -6,7 +6,7 @@ from app.main.db.mongo import db
 from app.main.stock.dao import stock_dao, task_dao
 from datetime import datetime
 
-from app.main.stock.service import stock_service, trend_service
+from app.main.stock.service import stock_service, trend_service, board_service
 from app.main.utils import date_util
 import logging as log
 
@@ -92,3 +92,5 @@ def get_trend_data_task(self, from_date_ts=None, end_date_ts=None, global_task_i
     trend_service.get_trend_size_info(from_date, end_date)
     # 大盘级别的聚合
     trend_service.get_all_trend_info(from_date, end_date)
+    # 成交量和成交额的聚合
+    board_service.collect_trade_money(from_date, end_date)

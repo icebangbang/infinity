@@ -6,14 +6,15 @@ from app.main.utils import date_util, stock_util
 import numpy as np
 
 
+
 def get_board_inventory_info():
     """
-    统计板块中的库存数据
+    统计行业板块中的库存数据
     :return:
     """
     boards = board_service.get_all_board()
-    inventory_data = db['inventory_data']
-    stock_balance = db['stock_balance']
+    inventory_data = db['financial_inventory_data']
+    stock_balance = db['stock_performance_balance']
     for board in boards:
         codes = board['codes']
         name = board['board']
@@ -36,7 +37,7 @@ def get_board_inventory_info():
             n = np.where(n > up, up, n)
             n = np.where(n < down, down, n)
             inventory_data.update_one({"name": name, "date": date_util.parse_date_time(date)},
-                                      {"$set": dict(date=date_util.parse_date_time(date), value=n.mean(), name=name)},
+                                      {"$set": dict(date=date_util.parse_date_time(date), inventory_data=n.mean(), name=name)},
                                       upsert=True)
 
 
@@ -45,8 +46,8 @@ def get_market_inventory_info():
     统计深市,沪市等市场的库存情况
     :return:
     """
-    stock_balance = db['stock_balance']
-    inventory_data = db['inventory_data']
+    stock_balance = db['stock_performance_balance']
+    inventory_data = db['financial_inventory_data']
     r = stock_balance.find({}, {"INVENTORY_YOY": 1, "_id": 0, "code": 1, "date": 1})
     df = pd.DataFrame(r)
     df['market'] = df.apply(lambda row: stock_util.market_belong(row['code']), axis=1)
