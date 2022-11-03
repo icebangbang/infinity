@@ -164,6 +164,8 @@ def get_work_info():
 
     result = stock_remind_record.find_one({"date": date_util.get_latest_work_day(), "key": "trend_reversal"})
     recommend_stock_set = set()
+    if result is None:
+        return restful.response(definition_work)
     for r in result['boards']:
         recommend_stock_set.update([stock['name'] for stock in r['stocks']])
 

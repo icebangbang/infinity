@@ -420,20 +420,24 @@ if __name__ == "__main__":
     # get_trend_size_info(from_date, end_date)
     # # 大盘级别的聚合
     # get_all_trend_info(from_date, end_date)
-    stocks = stock_dao.get_all_stock()
-    for stock in stocks:
-        code = stock['code']
-        name = stock['name']
-        print(code, name)
-
-        for date in WorkDayIterator(datetime(2022, 10, 26), datetime(2022, 10, 26)):
-            features = stock_dao.get_company_feature(code, date)
-            save_stock_trend_with_features(code, name, features, date)
+    # stocks = stock_dao.get_all_stock()
+    # for stock in stocks:
+    #     code = stock['code']
+    #     name = stock['name']
+    #     print(code, name)
+    #
+    #     for date in WorkDayIterator(datetime(2022, 10, 26), datetime(2022, 10, 26)):
+    #         features = stock_dao.get_company_feature(code, date)
+    #         save_stock_trend_with_features(code, name, features, date)
 
     # save_stock_trend_with_features("300763", "锦浪科技", features, datetime(2022, 8, 25))
     # get_trend_size_info(datetime(2022, 9, 16), datetime(2022, 9, 16), False)
     # get_all_trend_info(datetime(2022, 4, 1), datetime(2022, 9, 16))
     # print("code","300763")
-    for date in WorkDayIterator(datetime(2022, 10, 26), datetime(2022, 10, 26)):
+    for date in WorkDayIterator(datetime(2022, 11, 1), datetime(2022, 11, 1)):
         get_trend_size_info(date, date, False)
         get_all_trend_info(date, date)
+        board_service.collect_trade_money(date, date)
+
+
+
