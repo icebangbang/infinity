@@ -182,7 +182,7 @@ def collect_index_info(start, end):
             money_sum = sum([line['money'] for line in lines])
             volume_sum = sum([line['volume'] for line in lines])
             money_sum = cal_util.divide(money_sum, 100000000, 3)
-            logging.info("同步板块{}的交易量和成交额:{},{},{}".format(belong, date, volume_sum,money))
+            logging.info("同步板块{}的交易量和成交额:{},{},{}".format(belong, date, volume_sum,money_sum))
             update_item = dict(industry=belong, date=date,
                                volume=volume_sum, money=money_sum)
             db['board_trade_volume'].update_one({"industry": belong, "date": date},
