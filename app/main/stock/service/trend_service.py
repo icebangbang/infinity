@@ -434,9 +434,9 @@ if __name__ == "__main__":
     # get_trend_size_info(datetime(2022, 9, 16), datetime(2022, 9, 16), False)
     # get_all_trend_info(datetime(2022, 4, 1), datetime(2022, 9, 16))
     # print("code","300763")
-    for date in WorkDayIterator(datetime(2022, 11, 1), datetime(2022, 11, 1)):
-        get_trend_size_info(date, date, False)
-        get_all_trend_info(date, date)
+    for date in WorkDayIterator(datetime(2022, 11, 4), datetime(2022, 11, 4)):
+        # get_trend_size_info(date, date, False)
+        # get_all_trend_info(date, date)
         board_service.collect_trade_money(date, date)
 
 

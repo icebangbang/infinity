@@ -128,7 +128,7 @@ def get_trade_info(industry, start, end):
     """
     return list(db['board_trade_volume']
                 .find({"date": {"$gte": start, "$lte": end},
-                       "industry": industry}))
+                       "industry": industry}).sort("date", 1))
 
 
 def collect_trade_money(start, end):
@@ -181,10 +181,10 @@ def collect_index_info(start, end):
             lines = k_line_dao.get_k_line_data(date, date, codes=codes)
             money_sum = sum([line['money'] for line in lines])
             volume_sum = sum([line['volume'] for line in lines])
-            money = cal_util.divide(money_sum, 100000000, 3)
-            logging.info("同步板块{}的交易量和成交额:{},{},{}".format(belong, date, money, volume_sum))
+            money_sum = cal_util.divide(money_sum, 100000000, 3)
+            logging.info("同步板块{}的交易量和成交额:{},{},{}".format(belong, date, volume_sum,money))
             update_item = dict(industry=belong, date=date,
-                               volume=volume_sum, money=money)
+                               volume=volume_sum, money=money_sum)
             db['board_trade_volume'].update_one({"industry": belong, "date": date},
                                                 {"$set": update_item}, upsert=True)
 
