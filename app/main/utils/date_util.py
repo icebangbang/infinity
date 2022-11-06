@@ -1,13 +1,21 @@
+import time as tm
 from datetime import datetime, timedelta, date
 from datetime import time
-from app.main.yi.constant import jqmc
+
 import sxtwl
 from chinese_calendar import is_workday
-import time as tm
 from dateutil.relativedelta import relativedelta
 
+from app.main.yi.constant import jqmc
 
 def in_trade_time(time: datetime):
+    """
+
+    :param time:
+    :param early: 提早时间
+    :param delay: 延迟时间
+    :return:
+    """
     if is_weekend(time) or is_workday(time) is False:
         return False
 
@@ -15,7 +23,24 @@ def in_trade_time(time: datetime):
     min = time.minute
     mixed = hour + min / 60
 
-    return 9.5 <= mixed <= 15
+    return 9.5<= mixed <= 15
+
+def in_trade_time_scope(time: datetime, early=0, delay=0):
+    """
+    设定交易的时间范围
+    :param time:
+    :param early: 提早时间
+    :param delay: 延迟时间
+    :return:
+    """
+    if is_weekend(time) or is_workday(time) is False:
+        return False
+
+    hour = time.hour
+    min = time.minute
+    mixed = hour + min / 60
+
+    return 9.5 - early <= mixed <= 15 + delay or 11.5+early <= mixed <= 13.5-delay
 
 
 def in_time_range(time: datetime, range: datetime, level):

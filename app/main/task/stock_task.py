@@ -1,21 +1,18 @@
+import logging
+import time
+import uuid
+from datetime import datetime
+
 from app.celery_worker import celery, MyTask
 from app.main.db.mongo import db
-from app.main.stock.dao import board_dao, stock_dao, task_dao
-import logging
-from datetime import datetime, timedelta
-import time
-
-from app.main.stock.job import sync_stock_indicator, sync_index_kline, job_config, sync_performance
+from app.main.stock.dao import stock_dao, task_dao
 from app.main.stock.job import job_config
+from app.main.stock.job import sync_index_kline, sync_performance
+from app.main.stock.service import sync_kline_service, stock_service, report_service
+from app.main.stock.stock_pick_filter import stock_filter
 from app.main.stock.task_wrapper import TaskWrapper
 from app.main.task import task_constant
 from app.main.utils import date_util
-
-from app.main.stock.service import sync_kline_service, stock_service, report_service, trend_service
-from app.main.stock.stock_pick_filter import stock_filter
-from app.main.utils import my_redis, date_util
-import uuid
-import akshare as ak
 
 """
 个股数据同步
@@ -36,7 +33,6 @@ def sync_stock_month_data(self, codes):
         return
     for index, code in enumerate(codes):
         r = sync_kline_service.sync_month_level(code)
-
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
@@ -139,8 +135,8 @@ def sync_stock_data(self, codes, task_id):
 def submit_stock_feature(self, to_date=None, codes=None, global_task_id=None):
     if to_date is None:
         t = datetime.now()
-        if t.hour >= 16 or t.hour <= 8:
-            logging.info("will not run job after 16")
+        if date_util.in_trade_time_scope(t, 0, 0.5) is False:
+            logging.info("非交易时间不执行个股特征跑批")
             return
         to_date = date_util.get_start_of_day(datetime.now())
     else:
@@ -319,6 +315,7 @@ def sync_profit(self):
     :return:
     """
     sync_performance.sync_profit()
+
 
 @celery.task(bind=True, base=MyTask, expire=18000)
 def sync_analysis_indicator(self):
