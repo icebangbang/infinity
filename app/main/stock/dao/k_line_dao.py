@@ -1,8 +1,10 @@
-from app.main.db.mongo import db
 from datetime import datetime
 from typing import List
-import pandas as pd
+
 import akshare as ak
+import pandas as pd
+
+from app.main.db.mongo import db
 
 
 def get_oldest_k_line(code, level='day'):
@@ -141,12 +143,31 @@ def get_k_line_data(
     return list(query)
 
 
+def get_k_line_data_point(
+        code: str,
+        date: datetime,
+        level='day', ) -> dict:
+    """
+    获取特定时间的股票走势
+    :param start_day:
+    :param end_day:
+    :param level:
+    :return:
+    """
+    db_name = "k_line_" + level
+    my_set = db[db_name]
+
+    result = my_set.find_one({"date": date, "code": code})
+
+    return result
+
+
 def get_k_line_data_by_offset(
         base_day: datetime,
         offset: int,
         level='day',
         table_name="k_line",
-        key = "code",
+        key="code",
         code=None, reverse_result=True) -> List:
     """
     因为有工作日,停牌等无法交易的日期,所以用时间范围筛选,可能会使得筛选的数据无法达到预期
@@ -217,10 +238,10 @@ def get_board_k_line_data(
             symbol=name,
             beg=start_day,
             end=end_day)
-    if data is None or len(data) <=0:
+    if data is None or len(data) <= 0:
         return None
-    data = pd.DataFrame(data[['日期', '开盘', '收盘', '最高', '最低', '成交量', '成交额','最近收盘']])
-    data.columns = ['date', 'open', 'close', 'high', 'low', 'volume', 'money','prev_close']
+    data = pd.DataFrame(data[['日期', '开盘', '收盘', '最高', '最低', '成交量', '成交额', '最近收盘']])
+    data.columns = ['date', 'open', 'close', 'high', 'low', 'volume', 'money', 'prev_close']
     data['name'] = str(name)
     data['date'] = pd.to_datetime(data['date'], format='%Y-%m-%d')
     data['create_time'] = datetime.now()

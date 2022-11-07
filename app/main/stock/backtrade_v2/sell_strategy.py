@@ -6,7 +6,7 @@ class AbstractSellStrategy:
     holding: StockHolding = None
 
 
-    def trigger(self,row):
+    def trigger(self,date,index):
         pass
 
     def __init__(self, holding):
@@ -16,6 +16,6 @@ class AbstractSellStrategy:
 class DefaultSellStrategy(AbstractSellStrategy):
 
 
-    def trigger(self,row):
+    def trigger(self,date,index):
         pass
 

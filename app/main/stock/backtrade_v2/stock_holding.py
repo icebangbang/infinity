@@ -3,6 +3,8 @@ from typing import List
 
 from app.main.utils import cal_util
 
+TRADE_TYPE_BUY = 1
+
 
 class Trader:
     """
@@ -74,22 +76,20 @@ class StockHolding:
     def set_price(self, price):
         self.price = price
 
-    def record_income(self, row):
+    def record_income(self, row, index):
         close = row['close']
         index = row.name
         float_income = cal_util.round(
             sum([record.deal_num * (close - record.deal_price) for record in self.trade_record])
-            ,2)
-        self.income_record.append(dict(float_income=float_income, index=index,date=row['date']))
+            , 2)
+        self.income_record.append(dict(float_income=float_income, index=index, date=row['date']))
 
-    def buy(self, row, motivation):
-        open = row['open']
-        date = row['date']
+    def buy(self, price: float, date: datetime, motivation):
         # 滑点
         slippage = self.trader.slippage
         money = self.trader.money
         # 滑点后的费用
-        cost = cal_util.round(open * (1 + slippage), 2)
+        cost = cal_util.round(price * (1 + slippage), 2)
         # 计算可以买的手数
         deal_num = int(money / (cost * 100))
 
@@ -98,7 +98,11 @@ class StockHolding:
         self.money = money - deal_num * cost * 100
         self.deal_num = self.deal_num + deal_num * 100
 
-        history = StockTradeRecord(1, self.deal_num, cost, datetime.now(), motivation)
+        now = datetime.now()
+        trade_time = datetime(date.year, date.month, date.day,
+                              now.hour, now.minute, now.second)
+
+        history = StockTradeRecord(TRADE_TYPE_BUY, self.deal_num, cost, trade_time, motivation)
         # 添加买入记录
         self.trade_history.append(history)
         self.trade_record.append(history)

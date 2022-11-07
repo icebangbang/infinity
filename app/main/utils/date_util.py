@@ -8,6 +8,11 @@ from dateutil.relativedelta import relativedelta
 
 from app.main.yi.constant import jqmc
 
+def is_same_day(day1:datetime,day2:datetime)->bool:
+    return day1.year == day2.year \
+           and day1.month == day2.month \
+           and day1.day == day2.day
+
 def in_trade_time(time: datetime):
     """
 

@@ -20,6 +20,9 @@ normal = 1
 frozen = 2
 temp = 3
 
+def get_trend_data(date,industries):
+    return list(db['trend_data'].find({"date":date,"industry":{"$in":industries}}))
+
 
 def save_stock_trend_with_features(code, name, features, start_of_day: datetime):
     """
