@@ -113,4 +113,4 @@ def _build_trade_info(trade_info_list):
 if __name__ == "__main__":
     trend = SingleTrendAnaysis()
     trend.generate(trend="up",
-                   industryStart=0, industryEnd=10)
+                   industryStart=0, industryEnd=10,industry="猪肉概念")

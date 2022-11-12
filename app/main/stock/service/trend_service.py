@@ -209,12 +209,13 @@ def get_all_trend_info(start, end):
                     size = series_to_dict[(market, trend)]
                     result_list.append(
                         dict(industry=market, trend=trend, size=size,
-                             rate=cal_util.round(size / int(series_market[market]), 2),
+                             rate=cal_util.round(size / int(series_market[market]), 4),
                              date=date,
+                             total=int(series_market[market]),
                              update=datetime.now()))
                 else:
                     result_list.append(
-                        dict(industry=market, trend=trend, size=0, rate=0, date=date,
+                        dict(industry=market, trend=trend, size=0, rate=0,total=int(series_market[market]), date=date,
                              update=datetime.now()))
 
         for result in result_list:
@@ -259,12 +260,15 @@ def get_trend_size_info(start, end, only_include=False):
                 if trend in series_to_dict.keys():
                     size = series_to_dict[trend]
                     result_list.append(
-                        dict(industry=board, trend=trend, size=size, rate=cal_util.round(size / len(total), 2),
+                        dict(industry=board, trend=trend, size=size, rate=cal_util.round(size / len(total), 4),
+                             total=len(total),
                              date=date,
                              update=datetime.now()))
                 else:
                     result_list.append(
-                        dict(industry=board, trend=trend, size=0, rate=0, date=date,
+                        dict(industry=board, trend=trend, size=0, rate=0,
+                             total=len(total),
+                             date=date,
                              update=datetime.now()))
     if not only_include:
         for date in WorkDayIterator(start, end):
@@ -286,11 +290,14 @@ def get_trend_size_info(start, end, only_include=False):
                         result_list.append(
                             dict(industry=board, trend=trend, size=size,
                                  rate=cal_util.round(size / board_dict[board], 2),
+                                 total=board_dict[board],
                                  date=date,
                                  update=datetime.now()))
                     else:
                         result_list.append(
-                            dict(industry=board, trend=trend, size=0, rate=0, date=date, bot=0, top=0,
+                            dict(industry=board, trend=trend, size=0, rate=0,
+                                 total=board_dict[board],
+                                 date=date, bot=0, top=0,
                                  update=datetime.now()))
 
     for result in result_list:
