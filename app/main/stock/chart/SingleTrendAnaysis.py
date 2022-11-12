@@ -53,9 +53,13 @@ class SingleTrendAnaysis(Line):
         data_x = []
         fill_x_flag = True
 
+        total = 0
         trend_data_list = list(trend_data.find({"industry": industry,
                                                 "date": {"$gte": start, "$lte": end},
-                                                }))
+                                                }).sort("date", -1))
+        total = trend_data_list[0]['total']
+
+
         data_y_array = [dict(name="", y=[], yAxisIndex=0, markLine={}) for i in range(4)]
         index = 0
         df = pd.DataFrame(trend_data_list)
@@ -96,6 +100,7 @@ class SingleTrendAnaysis(Line):
             # time = jq['time']
 
         return dict(x=data_x_format, y_array=data_y_array, desc=industry, multiSerie=True,
+                    totalStock = total,
                     yAxis_array=yAxis_array, legend=legend,
                     mark_area=mark_area,
                     )
