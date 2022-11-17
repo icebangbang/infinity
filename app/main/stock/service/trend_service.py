@@ -289,7 +289,7 @@ def get_trend_size_info(start, end, only_include=False):
                         size = series_to_dict[(board, trend)]
                         result_list.append(
                             dict(industry=board, trend=trend, size=size,
-                                 rate=cal_util.round(size / board_dict[board], 2),
+                                 rate=cal_util.round(size / board_dict[board], 4),
                                  total=board_dict[board],
                                  date=date,
                                  update=datetime.now()))
