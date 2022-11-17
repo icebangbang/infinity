@@ -39,17 +39,17 @@ docker build --network=host --build-arg PIP_MIRROR=${PIP_MIRROR} --build-arg PIP
 
 for ((index1=1; index1<=1; index1++))
 do
-docker run -d --privileged=true  -e "profiles=${env}" --name=dao-celery-${index1} -e "index=${index1}" -e "route=default" -e "FLASK_ENV=${env}" -e "thread=50" --net=host --rm -it dao-celery:latest
+docker run -d --privileged=true  -e "profiles=${env}" --name=dao-celery-${index1} -e "index=${index1}" -e "route=default" -e "FLASK_ENV=${env}" -e "thread=50" -v /etc/localtime:/etc/localtime:ro --net=host --rm -it dao-celery:latest
 done
 
 for ((index2=2; index2<=6; index2++))
 do
-docker run -d --privileged=true  -e "profiles=${env}" --name=dao-celery-${index2} -e "index=${index2}" -e "route=day_level" -e "FLASK_ENV=${env}" -e "thread=50" --net=host --rm -it dao-celery:latest
+docker run -d --privileged=true  -e "profiles=${env}" --name=dao-celery-${index2} -e "index=${index2}" -e "route=day_level" -e "FLASK_ENV=${env}" -e "thread=50" -v /etc/localtime:/etc/localtime:ro --net=host --rm -it dao-celery:latest
 done
 
 for ((index3=7; index3<=13; index3++))
 do
-docker run -d --privileged=true  -e "profiles=${env}" --name=dao-celery-${index3} -e "index=${index3}" -e "route=indicator" -e "FLASK_ENV=${env}" -e "thread=20" --net=host --rm -it dao-celery:latest
+docker run -d --privileged=true  -e "profiles=${env}" --name=dao-celery-${index3} -e "index=${index3}" -e "route=indicator" -e "FLASK_ENV=${env}" -e "thread=20" -v /etc/localtime:/etc/localtime:ro --net=host --rm -it dao-celery:latest
 done
 
 echo y | docker system prune
