@@ -53,7 +53,6 @@ class SingleTrendAnaysis(Line):
         data_x = []
         fill_x_flag = True
 
-        total = 0
         trend_data_list = list(trend_data.find({"industry": industry,
                                                 "date": {"$gte": start, "$lte": end},
                                                 }).sort("date", -1))

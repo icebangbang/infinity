@@ -8,10 +8,12 @@ from dateutil.relativedelta import relativedelta
 
 from app.main.yi.constant import jqmc
 
-def is_same_day(day1:datetime,day2:datetime)->bool:
+
+def is_same_day(day1: datetime, day2: datetime) -> bool:
     return day1.year == day2.year \
            and day1.month == day2.month \
            and day1.day == day2.day
+
 
 def in_trade_time(time: datetime):
     """
@@ -28,7 +30,8 @@ def in_trade_time(time: datetime):
     min = time.minute
     mixed = hour + min / 60
 
-    return 9.5<= mixed <= 15
+    return 9.5 <= mixed <= 15
+
 
 def in_trade_time_scope(time: datetime, early=0, delay=0):
     """
@@ -45,7 +48,7 @@ def in_trade_time_scope(time: datetime, early=0, delay=0):
     min = time.minute
     mixed = hour + min / 60
 
-    return 9.5 - early <= mixed <= 15 + delay or 11.5+early <= mixed <= 13.5-delay
+    return 9.5 - early <= mixed <= 15 + delay or 11.5 + early <= mixed <= 13.5 - delay
 
 
 def in_time_range(time: datetime, range: datetime, level):
@@ -154,7 +157,7 @@ def get_work_day(now, offset):
     return get_start_of_day(now - timedelta(days=offset))
 
 
-def get_latest_work_day(base):
+def get_latest_work_day(base=None):
     """
     倒推工作日
     :param now:
