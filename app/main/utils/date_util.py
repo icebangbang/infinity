@@ -154,13 +154,14 @@ def get_work_day(now, offset):
     return get_start_of_day(now - timedelta(days=offset))
 
 
-def get_latest_work_day(base=datetime.now()):
+def get_latest_work_day(base):
     """
     倒推工作日
     :param now:
     :param offset:
     :return:
     """
+    base = datetime.now() if base is None else base
     d = get_start_of_day(base)
     while True:
         if is_workday(d) is False or is_weekend(d):
