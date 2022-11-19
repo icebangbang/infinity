@@ -55,10 +55,12 @@ class StockHolding:
 
     def refresh_holding(self,row,date):
         # 数据为空可能是因为停牌等原因
+        latest = None
         if row is None:
-            latest = self.refresh_record[len(self.refresh_record)-1]
-            copy:StockRefreshRecord = object_util.copy_obj(latest)
+            record = self.refresh_record[len(self.refresh_record) - 1]
+            copy:StockRefreshRecord = object_util.copy_obj(record)
             copy.date= date
+            latest = copy
             self.refresh_record.append(copy)
         else:
             close = row['close']
@@ -66,10 +68,13 @@ class StockHolding:
             self.price = close
             record = StockRefreshRecord(self.cost,close,self.deal_num,date)
             self.refresh_record.append(record)
+            latest=record
             log.info("{},{},{}".format(self.price,self.profit,date))
 
         # 计算最大回撤
         self.trade_monitor.cal_maximum_rollback(self.code,self.refresh_record,self.in_time,date)
+        self.trade_monitor.cal_annualized_return(self.code,latest,self.in_time,date)
+
 
 
     def buy(self, price: float, date: datetime, motivation,trader):
@@ -101,10 +106,16 @@ class StockHolding:
         self.trade_record.append(history)
 
     def sell(self):
+        """
+        清空仓位
+        :return:
+        """
         pass
 
 class HoldingPool:
     stock_holding_list: List[StockHolding] = list()
+    # 完成交易的仓位
+    finished_holding:List[StockHolding] = list()
 
     def size(self):
         return len(self.stock_holding_list)

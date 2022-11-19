@@ -30,4 +30,5 @@ class Core:
         for index,work_day in enumerate(self.date_range):
             # self.data.apply(lambda row: self.apply_row(row), axis=1)
             self.trader.trigger(work_day)
+        pass
 
