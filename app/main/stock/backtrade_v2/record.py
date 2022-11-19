@@ -21,7 +21,8 @@ class StockTradeRecord:
 
 class StockRefreshRecord:
 
-    def __init__(self, cost, price, date):
+    def __init__(self, cost, price, positions_num,date):
         self.cost = cost
         self.price = price
         self.date = date
+        self.positions_num = positions_num

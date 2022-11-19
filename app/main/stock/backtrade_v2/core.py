@@ -16,8 +16,7 @@ class Core:
         self.trader:Trader = trader
 
     def init(self, trader, **kwargs):
-        self.buy_strategy_instance = kwargs['buy_strategy'](self)
-        self.sell_strategy_instance = kwargs['sell_strategy'](self)
+
         self.trader = trader
 
         start: datetime = kwargs['start']

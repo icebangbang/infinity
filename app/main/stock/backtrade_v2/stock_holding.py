@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import List
 
 from app.main.stock.backtrade_v2.record import StockTradeRecord,StockRefreshRecord
+from app.main.stock.backtrade_v2.trade_monitor import TradeMonitor
 from app.main.utils import cal_util, object_util
 from app.main.stock.backtrade_v2.stock_selector import StockSelector,RecommendStock
 from app.main.stock.dao import k_line_dao
@@ -33,6 +34,7 @@ class StockHolding:
     # 手数
     deal_num: int = 0
 
+    trade_monitor = TradeMonitor()
     # 股票成交历史
     trade_history: List[StockTradeRecord] = list()
     # 股票成交记录
@@ -62,9 +64,12 @@ class StockHolding:
             close = row['close']
             self.profit = cal_util.round(close - self.cost) * self.deal_num
             self.price = close
-            record = StockRefreshRecord(self.cost,close,date)
+            record = StockRefreshRecord(self.cost,close,self.deal_num,date)
             self.refresh_record.append(record)
             log.info("{},{},{}".format(self.price,self.profit,date))
+
+        # 计算最大回撤
+        self.trade_monitor.cal_maximum_rollback(self.code,self.refresh_record,self.in_time,date)
 
 
     def buy(self, price: float, date: datetime, motivation,trader):
