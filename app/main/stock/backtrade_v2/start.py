@@ -12,6 +12,7 @@ if __name__ == "__main__":
 
     from app.main.stock.backtrade_v2.sell_strategy import DefaultSellStrategy
 
+    # 金额，手续费，滑点
     trader = Trader(100000, 0.0001, 0.005)
 
     base_date = date_util.get_start_of_day(datetime.now())
@@ -19,7 +20,6 @@ if __name__ == "__main__":
     offset = 252
     start = base_date - timedelta(offset)
     end = datetime.now()
-    code = "300763"
     # data_list = k_line_dao.get_k_line_data_by_offset(base_date, offset, code=code)
     core = Core()
     core.init(trader=trader,
