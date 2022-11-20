@@ -40,8 +40,8 @@ class DevelopmentConfig(Config):
     REDIS_DB_ID = 1
     REDIS_PASSWORD = 'ironBackRedis123'
 
-    BROKER_URL = 'redis://:ironBackRedis123@39.105.104.215:30004/1'
-    RESULT_BACKEND = 'redis://:ironBackRedis123@39.105.104.215:30004/1'
+    BROKER_URL = 'redis://:ironBackRedis123@10.8.0.2:30004/1'
+    RESULT_BACKEND = 'redis://:ironBackRedis123@10.8.0.2:30004/1'
     MONGO_URL = "mongodb://root:whosyourdaddy$879@39.105.104.215:20017/"
 
 
@@ -68,8 +68,8 @@ class TestConfig(Config):
     REDIS_DB_ID = 1
     REDIS_PASSWORD = 'ironBackRedis123'
 
-    BROKER_URL = 'redis://:ironBackRedis123@172.17.156.159:30004/1'
-    RESULT_BACKEND = 'redis://:ironBackRedis123@172.17.156.159:30004/1'
+    BROKER_URL = 'redis://:ironBackRedis123@10.8.0.2:30004/1'
+    RESULT_BACKEND = 'redis://:ironBackRedis123@10.8.0.2:30004/1'
     MONGO_URL = "mongodb://root:whosyourdaddy$879@172.17.156.159:20017/"
 
 

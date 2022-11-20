@@ -10,13 +10,14 @@ import pandas as pd
 from app.main.utils.date_util import WorkDayIterator
 
 
-class SingleTrendAnaysis(Line):
+class SingleTrendAnalysis(Line):
     """
     趋势分析表
     """
 
     def generate(self, **kwargs):
         industry = kwargs['industry']
+        size = int(kwargs.get("size",120))
 
         legend = dict(
             data=['up', 'down','成交额','成交量', 'enlarge', 'convergence'],
@@ -24,8 +25,14 @@ class SingleTrendAnaysis(Line):
         )
         trend_data = db['trend_data']
         end = date_util.get_latest_work_day()
-        start = date_util.get_work_day(end, 120)
+        start = date_util.get_work_day(end, size)
 
+        trend_data_list = list(trend_data.find({"industry": industry,
+                                                "date": {"$gte": start, "$lte": end},
+                                                }).sort("date", -1))
+        start = trend_data_list[len(trend_data_list)-1]['date']
+        end = trend_data_list[0]['date']
+        total = trend_data_list[0]['total']
 
         # 节气节点数据
         # time=时间, jq=节气, jq_index=节气下标
@@ -53,10 +60,7 @@ class SingleTrendAnaysis(Line):
         data_x = []
         fill_x_flag = True
 
-        trend_data_list = list(trend_data.find({"industry": industry,
-                                                "date": {"$gte": start, "$lte": end},
-                                                }).sort("date", -1))
-        total = trend_data_list[0]['total']
+
 
 
         data_y_array = [dict(name="", y=[], yAxisIndex=0, markLine={}) for i in range(4)]
@@ -66,6 +70,11 @@ class SingleTrendAnaysis(Line):
             data_y_array[index]['name'] = key
             if key =='up':
                 data_y_array[index]['markArea'] = mark_area
+                data_y_array[index]['color'] = 'red'
+            if key == 'down':
+                data_y_array[index]['color'] = '#000000'
+
+
             for point in group.to_dict("records"):
                 data_y_array[index]['y'].append(point['rate'])
                 if fill_x_flag:
@@ -104,7 +113,7 @@ class SingleTrendAnaysis(Line):
                     mark_area=mark_area,
                     )
 
-def _build_trade_info(trade_info_list):
+def _build_trade_info(trade_info_list)->list:
     money_y = []
     money_volume=[]
     for trade_info in trade_info_list:

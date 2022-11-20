@@ -13,8 +13,8 @@ from datetime import timedelta, datetime
 from flask import request
 import re
 
-@rest.route("/board/list/custom", methods=['get'])
-def get_custom_board_list():
+@rest.route("/board/list/mixed", methods=['get'])
+def get_mixed_board_list():
     config = db['config']
     board_info = config.find_one({"name": "board"}, {"_id": 0})
     results = board_info['value']
@@ -26,6 +26,22 @@ def get_custom_board_list():
     results.extend(results2)
 
     return restful.response(results)
+
+@rest.route("/board/list/custom", methods=['get'])
+def get_custom_board_list():
+    config = db['config']
+    board_info = config.find_one({"name": "board"}, {"_id": 0})
+    results = board_info['value']
+    return restful.response(results)
+
+@rest.route("/board/list/eastmoney", methods=['get'])
+def get_easymoney_board_list():
+    set = db['board_detail']
+    condition = {"$or": [{"type": 2}]}
+    boards = set.find(condition, dict(board=1, _id=0))
+    results2 = [ board['board'] for board in boards]
+
+    return restful.response(results2)
 
 @rest.route("/board/list", methods=['get'])
 def get_board_list():
