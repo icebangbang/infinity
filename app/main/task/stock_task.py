@@ -52,7 +52,7 @@ def submit_stock_month_task(self):
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
-def sync_stock_k_line(self, reuild_data=None):
+def sync_stock_k_line(self, rebuild_data=None):
     """
     schedule驱动
     提交同步股票日k线任务
@@ -61,12 +61,12 @@ def sync_stock_k_line(self, reuild_data=None):
     :return:
     """
     now = datetime.now()
-    if reuild_data is None and \
+    if rebuild_data is None and \
             job_config.check_status_available("app.main.task.stock_task.sync_stock_k_line") is False:
         return
 
     # 收盘后,不再同步
-    if 20 <= now.hour < 10:
+    if 20 <= now.hour < 10 and rebuild_data is None:
         return
 
     stocks = stock_dao.get_all_stock(dict(code=1))
@@ -75,7 +75,7 @@ def sync_stock_k_line(self, reuild_data=None):
 
     global_task_id = str(uuid.uuid1())
 
-    if reuild_data:
+    if rebuild_data:
         job_config.set_job_config(global_task_id,
                                   dict(
                                       job_chain=['app.main.task.stock_task.auto_submit_stock_feature'],
@@ -105,12 +105,12 @@ def transform_task(self, codes, task_id, deepth):
     step = int(len(codes) / 25)
     for i in range(0, len(codes), step):
         group = codes[i:i + step]
-        print("拆分个股k线任务,时序{}:{},层次:{}".format(i, i + step, deepth))
+        logging.info("拆分个股k线任务,时序{}:{},层次:{}".format(i, i + step, deepth))
 
         transform_task.apply_async(args=[group, task_id, deepth + 1])
 
 
-@celery.task(bind=True, base=MyTask, expires=180)
+@celery.task(bind=True, base=MyTask, expires=1800)
 def sync_stock_data(self, codes, task_id):
     """
     day_level worker驱动
@@ -126,12 +126,12 @@ def sync_stock_data(self, codes, task_id):
             # logging.info("同步{}:{}的日k数据,时序{}".format(board['board'], board["code"], index))
             r = sync_kline_service.sync_day_level(code)
     except Exception as e:
-        raise self.retry(exc=e, countdown=3, max_retries=5)
+        raise self.retry(exc=e, countdown=3, max_retries=10)
 
     task_dao.update_task(task_id, len(codes), "app.main.task.stock_task.sync_stock_k_line")
 
 
-@celery.task(bind=True, base=MyTask, expires=180)
+@celery.task(bind=True, base=MyTask, expires=36000)
 def submit_stock_feature(self, to_date=None, codes=None, global_task_id=None):
     if to_date is None:
         t = datetime.now()
@@ -239,8 +239,12 @@ def sync_stock_ind(self, codes, task_id, expect):
 
 
 @celery.task(bind=True, base=MyTask, expire=1800)
-def auto_submit_stock_feature(self):
-    days = 240
+def auto_submit_stock_feature(self,days=1100):
+    """
+    全局重跑个股指标
+    :param self:
+    :return:
+    """
     logging.info("days span is {}".format(days))
     date_start = date_util.get_work_day(datetime.now(), days)
     for day in range(days):

@@ -55,6 +55,10 @@ def get_stock_status(base_date, offset, data_list=None, codes=None, code_name_ma
         # print(len(data_list),codes)
     # data = data.set_index("date", drop=False)
 
+    if len(input) == 0:
+        logging.info("[特征跑批]基准时间:{},offset:{},codes:{},找不到k线数据".format(base_date,offset,codes))
+        return None
+
     data_df = pd.DataFrame(input)
     data_df = data_df.set_index("date", drop=False)
 

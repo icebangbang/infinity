@@ -12,6 +12,22 @@ from datetime import datetime, timedelta
 from app.main.task import board_task, stock_task,etf_task
 from flask import request
 
+@rest.route("/celery/stock/feature/rebuild", methods=['get'])
+def rebuild_stock_feature():
+    """
+    重跑个股特征
+    :return:
+    """
+    days=1100
+    logging.info("days span is {}".format(days))
+    date_start = date_util.get_work_day(datetime.now(), days)
+    for day in range(days):
+        date_start = date_util.add_and_get_work_day(date_start, 1)
+        logging.info("submit stock feature:{}".format(date_util.dt_to_str(date_start)))
+        stock_task.submit_stock_feature.apply_async(args=[date_util.to_timestamp(date_start)])
+
+    return restful.response("ok")
+
 @rest.route("/celery/performance/profit", methods=['get'])
 def performance_profit():
     """

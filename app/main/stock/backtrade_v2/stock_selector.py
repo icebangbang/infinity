@@ -30,3 +30,12 @@ class StockSelector:
         recommend_stock_list.append(recommend)
 
         return recommend_stock_list
+
+    def release(self,code:str):
+        """
+        给出结论，是否应该卖出
+        :return:
+        """
+        stock_detail = stock_dao.get_one_stock(code)
+        industry = stock_detail['industry']
+

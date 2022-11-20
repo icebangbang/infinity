@@ -1,6 +1,6 @@
 from app.main.db.mongo import db
 from app.main.stock.job import job_config
-from app.main.utils import simple_util
+from app.main.utils import simple_util, date_util
 from datetime import datetime
 
 def test():
@@ -28,7 +28,7 @@ def clear_stock_info():
     job_config.acquire_job("app.main.task.stock_task.sync_stock_k_line")
 
     method = simple_util.get_method_by_path("app.main.task.stock_task.sync_stock_k_line")
-    method.apply_async(kwargs=dict(reuild_data=1))
+    method.apply_async(kwargs=dict(rebuild_data=1))
 
 
 def trend_data_task():
@@ -68,6 +68,10 @@ def trend_detail():
         pass
 
 if __name__ == "__main__":
+
+    # print(date_util.get_work_day(datetime.now(), 1100))
+
+
     from app import application
 
     application.create_app("infinity")

@@ -5,7 +5,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
     CELERY_CONFIG = "celeryconfig"
-    KLINE_TIME_WINDOW = 1095
+    KLINE_TIME_WINDOW = 2190
 
     @staticmethod
     def init_app(app):

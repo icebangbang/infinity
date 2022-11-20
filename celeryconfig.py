@@ -53,8 +53,8 @@ task_routes = (
     }
     },
     {'app.main.task.stock_task.submit_stock_feature': {
-        'queue': 'default',
-        'routing_key': 'default'
+        'queue': 'day_level',
+        'routing_key': 'day_level'
     }
     },
     {'app.main.task.etf_task.submit_etf_feature': {

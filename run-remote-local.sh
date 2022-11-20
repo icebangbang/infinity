@@ -47,7 +47,7 @@ do
 docker run -d --privileged=true  -e "profiles=${env}" --name=dao-celery-${index2} -e "index=${index2}" -e "route=day_level" -e "FLASK_ENV=${env}" -e "thread=50" -v /etc/localtime:/etc/localtime:ro --net=host --rm -it dao-celery:latest
 done
 
-for ((index3=7; index3<=13; index3++))
+for ((index3=7; index3<=20; index3++))
 do
 docker run -d --privileged=true  -e "profiles=${env}" --name=dao-celery-${index3} -e "index=${index3}" -e "route=indicator" -e "FLASK_ENV=${env}" -e "thread=20" -v /etc/localtime:/etc/localtime:ro --net=host --rm -it dao-celery:latest
 done
