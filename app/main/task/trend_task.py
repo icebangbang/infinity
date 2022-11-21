@@ -15,7 +15,7 @@ import logging as log
 """
 
 
-@celery.task(bind=True, base=MyTask, expires=180)
+@celery.task(bind=True, base=MyTask, expires=1800)
 def submit_trend_task(self, from_date=None, end_date=None, global_task_id=None, chain=None):
     stocks = stock_dao.get_all_stock(dict(code=1))
     codes = [stock['code'] for stock in stocks]

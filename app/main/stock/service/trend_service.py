@@ -215,7 +215,7 @@ def get_all_trend_info(start, end):
                              update=datetime.now()))
                 else:
                     result_list.append(
-                        dict(industry=market, trend=trend, size=0, rate=0,total=int(series_market[market]), date=date,
+                        dict(industry=market, trend=trend, size=0, rate=0,total=0, date=date,
                              update=datetime.now()))
 
         for result in result_list:
@@ -444,9 +444,9 @@ if __name__ == "__main__":
     # get_trend_size_info(datetime(2022, 9, 16), datetime(2022, 9, 16), False)
     # get_all_trend_info(datetime(2022, 4, 1), datetime(2022, 9, 16))
     # print("code","300763")
-    for date in WorkDayIterator(datetime(2022, 11, 4), datetime(2022, 11, 4)):
+    for date in WorkDayIterator(datetime(2018, 6, 1), datetime(2022, 11, 21)):
         # get_trend_size_info(date, date, False)
-        # get_all_trend_info(date, date)
+        get_all_trend_info(date, date)
         board_service.collect_trade_money(date, date)
 
 
