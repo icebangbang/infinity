@@ -13,7 +13,7 @@ db = myclient['stock']
 def init_db(app):
     global db
     global myclient
-    myclient = pymongo.MongoClient(app.config['MONGO_URL'])
+    myclient = pymongo.MongoClient(app.config['MONGO_URL'],socketTimeoutMS=10000)
     db = myclient['stock']
     return db
 
