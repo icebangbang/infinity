@@ -10,22 +10,22 @@ import pandas as pd
 from app.main.utils.date_util import WorkDayIterator
 
 
-class SingleTrendAnalysis(Line):
+class SingleTrendAnalysisYearly(Line):
     """
     趋势分析表
     """
 
     def generate(self, **kwargs):
         industry = kwargs['industry']
-        size = int(kwargs.get("size",120))
+        year = int(kwargs.get('dataId',datetime.now().year))
+        start = datetime(year,1,1)
+        end = datetime(year,12,31)
 
         legend = dict(
             data=['up', 'down','成交额','成交量', 'enlarge', 'convergence'],
             selected={"up":True, "down":True,"成交额":True,"成交量":False, "enlarge":False, "convergence":False}
         )
         trend_data = db['trend_data']
-        end = date_util.get_latest_work_day()
-        start = date_util.get_work_day(end, size)
 
         trend_data_list = list(trend_data.find({"industry": industry,
                                                 "date": {"$gte": start, "$lte": end},
@@ -124,6 +124,6 @@ def _build_trade_info(trade_info_list)->list:
             dict(name="成交量", y=money_volume, yAxisIndex=1,type='bar')]
 
 if __name__ == "__main__":
-    trend = SingleTrendAnalysis()
+    trend = SingleTrendAnalysisYearly()
     trend.generate(trend="up",
                    industryStart=0, industryEnd=10,industry="猪肉概念")

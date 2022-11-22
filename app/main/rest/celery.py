@@ -18,7 +18,7 @@ def rebuild_stock_feature():
     重跑个股特征
     :return:
     """
-    days=1100
+    days=300
     logging.info("days span is {}".format(days))
     date_start = date_util.get_work_day(datetime.now(), days)
     for day in range(days):
