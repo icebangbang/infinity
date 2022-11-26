@@ -184,12 +184,12 @@ def save_stock_trend_with_company(company: Company, start_of_day: datetime):
 
     save_stock_trend_with_features(code, name, features, start_of_day)
 
-def retry_if_auto_reconnect_error(exception):
+def _retry_if_auto_reconnect_error(exception):
     """Return True if we should retry (in this case when it's an AutoReconnect), False otherwise"""
     return isinstance(exception, AutoReconnect)
 
 
-@retry(retry_on_exception=retry_if_auto_reconnect_error,stop_max_attempt_number=2,wait_fixed=2000)
+@retry(retry_on_exception=_retry_if_auto_reconnect_error,stop_max_attempt_number=2,wait_fixed=2000)
 def _get_trend_point(date):
     trend_point_set = db['trend_point']
     r = list(trend_point_set.find(
@@ -402,6 +402,15 @@ def get_trend_info(end_date):
 
     return dict(records=df.to_dict("records"),
                 industryInfo=industry_info)
+
+def mark_trend_section():
+    """
+    标志趋势区间
+    使用笨方法，进行迭代，从一个点开始，从高点找到低点，再从低点找到高点
+    锚定一个点
+    :return:
+    """
+    pass
 
 
 def _analysis(up_df, down_df):
