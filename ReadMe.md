@@ -2,17 +2,25 @@
 ## 定时任务
 
 ## 数据初始化相关
-1. 配置个股详情
-`app.main.stock.job.sync_board.sync`
-2. 个股关联板块
+### 配置个股详情
+同步board_detail，stock_detail
+相关方法：`app.main.stock.job.sync_board.sync`
+
+### 个股关联板块
+stock_detail添加industry
 `app.main.stock.job.board_association.associate`
-3. 报团分析
+
+### 报团分析
+首页抱团分析数据展示
 `app.main.stock.service.report_service.baotuan_analysis`
-4. 个股特征筛选
+
+### 个股特征筛选
 `app.main.stock.service.stock_service.stock_remind_v2`
-5. 个股特征跑批
+
+### 个股特征跑批
 `app.main.rest.celery.get_stock_feature`
-6. 清数据重跑 
+
+### 清数据重跑 
 `app.main.local.temp.clear_stock_info`
 
 ## 个股趋势相关

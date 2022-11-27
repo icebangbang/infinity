@@ -15,7 +15,7 @@ def basic_belong(code:str):
     判断是深市,沪市
     :return:
     """
-    if code.startswith("30"): return "SZ"
+    if code.startswith("3"): return "SZ"
     if code.startswith("60"): return "SH"
     if code.startswith("00"): return "SZ"
     if code.startswith("68"): return "SH"
