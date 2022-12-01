@@ -1,7 +1,6 @@
 """
 股东分析，覆盖akshare的stock_gdfx_free_top_10_em
 """
-from typing import Optional, NoReturn
 
 import pandas as pd
 import requests
@@ -63,4 +62,8 @@ def stock_gdfx_free_top_10_em(
     temp_df["持股数"] = pd.to_numeric(temp_df["持股数"])
     temp_df["占总流通股本持股比例"] = pd.to_numeric(temp_df["占总流通股本持股比例"])
     temp_df["变动比率"] = pd.to_numeric(temp_df["变动比率"])
+
+    temp_df.columns = ['index', 'gd_name', 'gd_type', 'gf_type', 'holding_num', 'holding_rate', 'is_change',
+                       'change_rate']
+
     return temp_df

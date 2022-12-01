@@ -9,6 +9,18 @@ from dateutil.relativedelta import relativedelta
 from app.main.yi.constant import jqmc
 
 
+def get_report_day(dt: datetime):
+    month = dt.month
+    year = dt.year
+
+    if 1 <= month <= 3: m = 12
+    if 4 <= month <= 6: m = 3
+    if 7 <= month <= 9: m = 6
+    if 10 <= month <= 12: m = 9
+
+    return datetime(year, m, 30)
+
+
 def is_same_day(day1: datetime, day2: datetime) -> bool:
     return day1.year == day2.year \
            and day1.month == day2.month \

@@ -183,7 +183,8 @@ def get_stock_data():
     手动同步日k线数据
     :return:
     """
-    stock_task.sync_stock_k_line.apply_async(args=[])
+
+    stock_task.sync_stock_k_line.apply_async(kwargs=dict(rebuild_data=1))
     return restful.response("ok")
 
 
