@@ -8,9 +8,15 @@ from app.main.stock.company import Company
 from app.main.utils import date_util
 
 
-def get_all_board(type=[1,2,3]):
+def get_board_by_name(board_name):
     my_set = db['board_detail']
-    data = list(my_set.find({"type":{"$in":type}},dict(_id=0)))
+    data = my_set.find_one({"board": board_name})
+    return data
+
+
+def get_all_board(type=[1, 2, 3]):
+    my_set = db['board_detail']
+    data = list(my_set.find({"type": {"$in": type}}, dict(_id=0)))
     return data
 
 
@@ -49,6 +55,7 @@ def get_board_k_line_data_from_db(
         .find(base) \
         .sort("date", 1)
     return list(query)
+
 
 def dump_board_feature(companies: List[Company], date):
     start_of_day = date_util.get_start_of_day(date)

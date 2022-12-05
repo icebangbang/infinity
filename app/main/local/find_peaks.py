@@ -5,17 +5,18 @@ import scipy
 from matplotlib import pyplot as plt
 from scipy.signal import argrelextrema, find_peaks
 from app.main.db.mongo import db
-
-def transform(trend_data_list,idx_list,type):
-
-    return [ dict(index=idx,
-                  date=trend_data_list[idx]['date'],
-                  rate=trend_data_list[idx]['rate'],
-                  type=type
-                  ) for idx in idx_list]
+from app.main.utils import hn_wrapper
 
 
-def plot_peaks(industry,start=None,end=None):
+def transform(trend_data_list, idx_list, type):
+    return [dict(index=idx,
+                 date=trend_data_list[idx]['date'],
+                 rate=trend_data_list[idx]['rate'],
+                 type=type
+                 ) for idx in idx_list]
+
+
+def plot_peaks(industry, start=None, end=None, show_plot=True):
     """
     根据顶和底，拆分得出上行的区间以及下行的区间
     因为每个年份，每个板块的表现也不一样，所以需要根据年份来制定顶部和底部
@@ -32,7 +33,7 @@ def plot_peaks(industry,start=None,end=None):
     end = datetime(2019, 12, 1)
     trend_data_list = list(trend_data.find({"industry": industry,
                                             "date": {"$gte": start, "$lte": end},
-                                            "trend": "up"}).sort("date",1))
+                                            "trend": "up"}).sort("date", 1))
 
     df = pd.DataFrame(trend_data_list)
     t = df.date
@@ -47,8 +48,8 @@ def plot_peaks(industry,start=None,end=None):
     # Find indices of valleys (from inverting the signal)
     valley_idx, _ = find_peaks(-x, height=-thresh_bottom, distance=5)
 
-    peak_list = transform(trend_data_list,peak_idx,"top")
-    valley_list = transform(trend_data_list,valley_idx,"bottom")
+    peak_list = transform(trend_data_list, peak_idx, "top")
+    valley_list = transform(trend_data_list, valley_idx, "bottom")
 
     # 合并peak和valley,然后根据index进行排序
     peak_list.extend(valley_list)
@@ -56,11 +57,11 @@ def plot_peaks(industry,start=None,end=None):
 
     merged_result = []
     index = 0
-    while index<len(sorted_result)-1:
+    while index < len(sorted_result) - 1:
         element = sorted_result[index]
         trend = element['type']
         temp_list = [element]
-        while index<len(sorted_result)-1:
+        while index < len(sorted_result) - 1:
             index = index + 1
             next_element = sorted_result[index]
             if trend == next_element['type']:
@@ -69,28 +70,43 @@ def plot_peaks(industry,start=None,end=None):
                 break
 
         is_reverse = True if trend == 'top' else False
-        r = sorted(temp_list, key=lambda item: (item['rate'],item['date']), reverse=is_reverse)
+        r = sorted(temp_list, key=lambda item: (item['rate'], item['date']), reverse=is_reverse)
         merged_result.append(r[0])
 
     peak_idx = [merged['index'] for merged in merged_result if merged['type'] == 'top']
     valley_idx = [merged['index'] for merged in merged_result if merged['type'] == 'bottom']
-    plt.plot(t, x, color='b', label='data')
-    plt.scatter(t, x, s=10, c='b', label='value')
-    # Plot threshold
-    plt.plot([min(t), max(t)], [thresh_top, thresh_top], '--', color='r', label='peaks-threshold')
-    plt.plot([min(t), max(t)], [thresh_bottom, thresh_bottom], '--', color='g', label='valleys-threshold')
 
-    # Plot peaks (red) and valleys (blue)
-    plt.plot(t[peak_idx], x[peak_idx], "x", color='r', label='peaks')
-    plt.plot(t[valley_idx], x[valley_idx], "x", color='g', label='valleys')
+    if show_plot:
+        plt.plot(t, x, color='b', label='data')
+        plt.scatter(t, x, s=10, c='b', label='value')
+        # Plot threshold
+        plt.plot([min(t), max(t)], [thresh_top, thresh_top], '--', color='r', label='peaks-threshold')
+        plt.plot([min(t), max(t)], [thresh_bottom, thresh_bottom], '--', color='g', label='valleys-threshold')
 
-    plt.xticks(rotation=100)
-    plt.ylabel('value')
-    plt.xlabel('timestamp')
-    plt.title(f'data over time for username=target')
-    plt.legend(loc='upper left')
-    plt.gcf().autofmt_xdate()
-    plt.show()
+        # Plot peaks (red) and valleys (blue)
+        plt.plot(t[peak_idx], x[peak_idx], "x", color='r', label='peaks')
+        plt.plot(t[valley_idx], x[valley_idx], "x", color='g', label='valleys')
+
+        plt.xticks(rotation=100)
+        plt.ylabel('value')
+        plt.xlabel('timestamp')
+        plt.title(f'data over time for username=target')
+        plt.legend(loc='upper left')
+        plt.gcf().autofmt_xdate()
+        plt.show()
+    else:
+        return merged_result
+
+
+def find_stocks(industry, start=None, end=None):
+    """
+    按照波峰和波谷的提示，筛选出，涨幅最高的，和跌幅最大的股
+    :return:
+    """
+    merged_result = plot_peaks(industry, start, end)
+    x = hn_wrapper(merged_result)
+    while x.hasnext():
+        print(next(x))
 
 
 def func2():
@@ -110,10 +126,10 @@ def func2():
     # (you may want to use std calculated on 10-90 percentile data, without outliers)
 
     # Find indices of peaks
-    peak_idx, _ = find_peaks(x, height=thresh_top,distance=10)
+    peak_idx, _ = find_peaks(x, height=thresh_top, distance=10)
 
     # Find indices of valleys (from inverting the signal)
-    valley_idx, _ = find_peaks(-x, height=-thresh_bottom,distance=10)
+    valley_idx, _ = find_peaks(-x, height=-thresh_bottom, distance=10)
 
     # Plot signal
     # plt.figure(figsize=(14, 12))
@@ -135,5 +151,6 @@ def func2():
     plt.legend(loc='upper left')
     plt.gcf().autofmt_xdate()
     plt.show()
+
 
 plot_peaks("煤炭行业")

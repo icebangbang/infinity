@@ -1,6 +1,7 @@
 """
 趋势相关服务
 """
+import logging
 from collections import OrderedDict
 from retrying import retry
 from pymongo.errors import AutoReconnect
@@ -9,7 +10,7 @@ from app.main.db.mongo import db
 from app.main.stock import constant
 from app.main.stock.company import Company
 from app.main.stock.const import board_const
-from app.main.stock.dao import stock_dao
+from app.main.stock.dao import stock_dao, board_dao, k_line_dao
 from datetime import datetime, timedelta
 import pandas as pd
 
@@ -235,6 +236,57 @@ def get_all_trend_info(start, end):
                 {"industry": result["industry"], "trend": result["trend"],
                  "date": result['date']}, {"$set": result}, upsert=True)
 
+def get_trend_info_by_name(board_name,start,end):
+    """
+    特定板块跑数据
+    :param board:
+    :param start:
+    :param end:
+    :return:
+    """
+    board = board_dao.get_board_by_name(board_name)
+    result_list = []
+
+    for date in WorkDayIterator(start, end):
+        logging.info("完成对{}板块的趋势分析:{}".format(board_name,date))
+        trend_point_set = db['trend_point']
+        total = board['codes']
+        r = list(trend_point_set.find(
+            {"date": {"$lte": date},
+             "update": {"$gte": date}, "code": {"$in": total}, "trend_type": {"$in": [normal, temp]}}))
+        if len(r) == 0: continue
+        df = pd.DataFrame(r)
+        series = df.groupby(['trend']).size()
+        series_to_dict = series.to_dict()
+
+
+        for trend in ['up', 'down', 'enlarge', 'convergence']:
+            if trend in series_to_dict.keys():
+                size = series_to_dict[trend]
+                result_list.append(
+                    dict(industry=board_name, trend=trend, size=size, rate=cal_util.round(size / len(total), 4),
+                         total=len(total),
+                         date=date,
+                         update=datetime.now()))
+            else:
+                result_list.append(
+                    dict(industry=board, trend=trend, size=0, rate=0,
+                         total=len(total),
+                         date=date,
+                         update=datetime.now()))
+
+        lines = k_line_dao.get_k_line_data(date, date, codes=total)
+        money_sum = sum([line['money'] for line in lines])
+        volume_sum = sum([line['volume'] for line in lines])
+        money = cal_util.divide(money_sum, 100000000, 3)
+        logging.info("同步板块{}的交易量和成交额:{},{},{}".format(board_name, date, money, volume_sum))
+        update_item = dict(industry=board_name, date=date,
+                           volume=volume_sum, money=money)
+        db['board_trade_volume'].update_one({"industry": board_name, "date": date},
+                                            {"$set": update_item}, upsert=True)
+
+    _dump_trend_data(result_list)
+
 
 def get_trend_size_info(start, end, only_include=False):
     """
@@ -247,7 +299,7 @@ def get_trend_size_info(start, end, only_include=False):
 
     result_list = []
 
-    # 自定义的板块
+    # 自定义的板块跑批
     config = db['config']
     board_info = config.find_one({"name": "board"}, {"_id": 0})
     another_boards = board_info['value']
@@ -281,6 +333,7 @@ def get_trend_size_info(start, end, only_include=False):
                              total=len(total),
                              date=date,
                              update=datetime.now()))
+
     if not only_include:
         for date in WorkDayIterator(start, end):
             print(date)
@@ -362,6 +415,11 @@ def get_trend_size_info(start, end, only_include=False):
 
 
 def get_trend_info(end_date):
+    """
+    趋势信息列表展示
+    :param end_date:
+    :return:
+    """
     # config = db['config']
     # boards = config.find_one({"name": "board"}, {"_id": 0})
     industries = board_service.get_all_board_names()
@@ -402,16 +460,55 @@ def get_trend_info(end_date):
 
     return dict(records=df.to_dict("records"),
                 industryInfo=industry_info)
+def _dump_trend_data(result_list):
+    for result in result_list:
+        industry = result["industry"]
+        trend = result["trend"]
+        print("insert {},{},{}".format(result["industry"], result["trend"], result['date']))
 
-def mark_trend_section():
-    """
-    标志趋势区间
-    使用笨方法，进行迭代，从一个点开始，从高点找到低点，再从低点找到高点
-    锚定一个点
-    :return:
-    """
-    pass
+        range_end = result['date']
+        range_start = range_end - timedelta(60)
+        # 写入当前趋势
+        trend_data_list = list(db.trend_data.find({"industry": industry, 'trend': trend,
+                                                   "date": {"$gte": range_start, "$lte": range_end},
+                                                   }).sort("date", 1))
+        trend_data_rate = [point['rate'] for point in trend_data_list]
 
+        if len(trend_data_rate) > 0:
+            trend_data_rate[len(trend_data_rate) - 1] = result['rate']
+        else:
+            trend_data_rate.append(result['rate'])
+
+        high_type_list: list = cal_util.get_top_type(trend_data_rate)
+        low_type_list: list = cal_util.get_bottom_type(trend_data_rate)
+
+        pos_p, neg_p, total_p, point_index = cal_util.get_reverse_point(high_type_list)
+        if len(total_p) == 0:
+            current_trend_scope = high_type_list
+        else:
+            current_trend_scope = high_type_list[total_p[-1]:]
+
+        current_trend_scope = [item for item in current_trend_scope if item['index'] != len(trend_data_list) - 1]
+        max_top_type = 0 if len(current_trend_scope) == 0 else current_trend_scope[len(current_trend_scope) - 1][
+            'value']
+
+        pos_p, neg_p, total_p, point_index = cal_util.get_reverse_point(low_type_list)
+        if len(total_p) == 0:
+            current_trend_scope = low_type_list
+        else:
+            current_trend_scope = low_type_list[total_p[-1]:]
+
+        current_trend_scope = [item for item in current_trend_scope if item['index'] != len(trend_data_list) - 1]
+        max_bot_type = 0 if len(current_trend_scope) == 0 else current_trend_scope[len(current_trend_scope) - 1][
+            'value']
+        x, c = cal_util.get_line([max_top_type, result['rate']])
+        result['up_slop'] = x
+        x, c = cal_util.get_line([max_bot_type, result['rate']])
+        result['down_slop'] = x
+
+        db.trend_data.update_one(
+            {"industry": result["industry"], "trend": result["trend"],
+             "date": result['date']}, {"$set": result}, upsert=True)
 
 def _analysis(up_df, down_df):
     # 最低上行率
@@ -464,10 +561,12 @@ if __name__ == "__main__":
     # get_trend_size_info(datetime(2022, 9, 16), datetime(2022, 9, 16), False)
     # get_all_trend_info(datetime(2022, 4, 1), datetime(2022, 9, 16))
     # print("code","300763")
-    for date in WorkDayIterator(datetime(2021, 9, 1), datetime(2022, 11, 21)):
-        # get_trend_size_info(date, date, False)
-        get_all_trend_info(date, date)
-        board_service.collect_trade_money(date, date)
+    get_trend_info_by_name('中字头',datetime(2019, 1, 1), datetime(2022, 12, 5))
+    # for date in WorkDayIterator(datetime(2019, 1, 1), datetime(2022, 12, 5)):
+    #     # get_trend_size_info(date, date, False)
+    #     get_trend_info_by_name("中字头")
+    #     get_all_trend_info(date, date)
+    #     board_service.collect_trade_money(date, date)
 
 
 
