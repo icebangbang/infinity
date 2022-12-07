@@ -1,11 +1,12 @@
 from datetime import datetime
 import numpy as np
-import pandas as pd
 import scipy
 from matplotlib import pyplot as plt
 from scipy.signal import argrelextrema, find_peaks
 from app.main.db.mongo import db
+from app.main.stock.dao import k_line_dao, board_dao
 from app.main.utils import hn_wrapper
+import pandas as pd
 
 
 def transform(trend_data_list, idx_list, type):
@@ -17,6 +18,7 @@ def transform(trend_data_list, idx_list, type):
 
 
 def plot_peaks(industry, start=None, end=None, show_plot=True):
+
     """
     根据顶和底，拆分得出上行的区间以及下行的区间
     因为每个年份，每个板块的表现也不一样，所以需要根据年份来制定顶部和底部
@@ -103,10 +105,33 @@ def find_stocks(industry, start=None, end=None):
     按照波峰和波谷的提示，筛选出，涨幅最高的，和跌幅最大的股
     :return:
     """
-    merged_result = plot_peaks(industry, start, end)
+    board_detail = board_dao.get_board_by_name(industry)
+    codes = board_detail['codes']
+    merged_result = plot_peaks(industry, start, end,False)
     x = hn_wrapper(merged_result)
-    while x.hasnext():
-        print(next(x))
+    while True:
+        if x.hasnext():
+            a = next(x)
+        else:
+            break
+        if x.hasnext():
+            b = next(x)
+        else:
+            break
+        # 上行区间
+        if a['type'] == 'bottom' and b['type'] == 'top':
+            start_scope = a['date']
+            end_scope = b['date']
+            k_line_list = k_line_dao.get_k_line_data(start_scope,end_scope,'day',codes)
+            print(123)
+            pass
+
+        # 下行区间
+        if a['type'] == 'bottom' and b['type'] == 'top':
+            pass
+
+
+        print(a,b)
 
 
 def func2():
@@ -153,4 +178,4 @@ def func2():
     plt.show()
 
 
-plot_peaks("煤炭行业")
+find_stocks("煤炭行业")
