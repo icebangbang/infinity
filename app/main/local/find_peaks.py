@@ -7,6 +7,9 @@ from app.main.db.mongo import db
 from app.main.stock.dao import k_line_dao, board_dao
 from app.main.utils import hn_wrapper
 import pandas as pd
+from itertools import groupby
+from operator import itemgetter
+
 
 
 def transform(trend_data_list, idx_list, type):
@@ -123,6 +126,11 @@ def find_stocks(industry, start=None, end=None):
             start_scope = a['date']
             end_scope = b['date']
             k_line_list = k_line_dao.get_k_line_data(start_scope,end_scope,'day',codes)
+            df = pd.DataFrame(k_line_list)
+            for code, group in df.groupby("code"):
+                #todo 计算最大回撤
+                print(code,group.to_dict("records"))
+
             print(123)
             pass
 
