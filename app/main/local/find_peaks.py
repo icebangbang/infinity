@@ -5,11 +5,11 @@ from matplotlib import pyplot as plt
 from scipy.signal import argrelextrema, find_peaks
 from app.main.db.mongo import db
 from app.main.stock.dao import k_line_dao, board_dao
-from app.main.utils import hn_wrapper
+from app.main.utils import hn_wrapper, cal_util
 import pandas as pd
-from itertools import groupby
-from operator import itemgetter
+import logging as log
 
+from app.main.utils.date_util import WorkDayIterator
 
 
 def transform(trend_data_list, idx_list, type):
@@ -21,7 +21,6 @@ def transform(trend_data_list, idx_list, type):
 
 
 def plot_peaks(industry, start=None, end=None, show_plot=True):
-
     """
     根据顶和底，拆分得出上行的区间以及下行的区间
     因为每个年份，每个板块的表现也不一样，所以需要根据年份来制定顶部和底部
@@ -34,8 +33,6 @@ def plot_peaks(industry, start=None, end=None, show_plot=True):
     trend_data = db['trend_data']
 
     industry = "光伏设备"
-    start = datetime(2019, 1, 1)
-    end = datetime(2019, 12, 1)
     trend_data_list = list(trend_data.find({"industry": industry,
                                             "date": {"$gte": start, "$lte": end},
                                             "trend": "up"}).sort("date", 1))
@@ -103,6 +100,64 @@ def plot_peaks(industry, start=None, end=None, show_plot=True):
         return merged_result
 
 
+def cal_maximum_rollback(start, end, k_line_data_list):
+    """
+        统计最大回撤
+        :return:
+        """
+    cost = k_line_data_list[0]['close']
+    maximum_rollback = 0
+    maximum_rollback_start = None
+    maximum_rollback_end = None
+
+    k_line_data_dict = {k_line_data['date']: k_line_data for k_line_data in k_line_data_list}
+
+    for cursor in WorkDayIterator(start, end):
+        for sub_cursor in WorkDayIterator(cursor, end):
+            k_line_data = k_line_data_dict.get(sub_cursor, None)
+            if k_line_data is None: continue
+
+            close = k_line_data['close']
+
+            rate = cal_util.get_rate(close - cost, cost)
+            if rate < maximum_rollback:
+                maximum_rollback = rate
+                maximum_rollback_start = cursor
+                maximum_rollback_end = sub_cursor
+    log.info("{},{},最大回撤:{}".format(maximum_rollback_start, maximum_rollback_end,
+                                        maximum_rollback))
+    return maximum_rollback,maximum_rollback_start,maximum_rollback_end
+
+
+
+def cal_maximum_up(start, end, k_line_data_list):
+    """
+        统计最大涨幅
+        :return:
+        """
+    cost = k_line_data_list[0]['close']
+    maximum_up = 0
+    maximum_up_start = None
+    maximum_up_end = None
+
+    k_line_data_dict = {k_line_data['date']: k_line_data for k_line_data in k_line_data_list}
+
+    for cursor in WorkDayIterator(start, end):
+        for sub_cursor in WorkDayIterator(cursor, end):
+            k_line_data = k_line_data_dict.get(sub_cursor, None)
+            if k_line_data is None: continue
+
+            close = k_line_data['close']
+
+            rate = cal_util.get_rate(close - cost, cost)
+            if rate > maximum_up:
+                maximum_up = rate
+                maximum_up_start = cursor
+                maximum_up_end = sub_cursor
+    log.info("{},{},最大涨幅:{}".format(maximum_up_start, maximum_up_end,
+                                        maximum_up))
+    return maximum_up,maximum_up_start,maximum_up_end
+
 def find_stocks(industry, start=None, end=None):
     """
     按照波峰和波谷的提示，筛选出，涨幅最高的，和跌幅最大的股
@@ -110,7 +165,7 @@ def find_stocks(industry, start=None, end=None):
     """
     board_detail = board_dao.get_board_by_name(industry)
     codes = board_detail['codes']
-    merged_result = plot_peaks(industry, start, end,False)
+    merged_result = plot_peaks(industry, start, end, False)
     x = hn_wrapper(merged_result)
     while True:
         if x.hasnext():
@@ -125,11 +180,16 @@ def find_stocks(industry, start=None, end=None):
         if a['type'] == 'bottom' and b['type'] == 'top':
             start_scope = a['date']
             end_scope = b['date']
-            k_line_list = k_line_dao.get_k_line_data(start_scope,end_scope,'day',codes)
+            k_line_list = k_line_dao.get_k_line_data(start_scope, end_scope, 'day', codes)
+            # 将数据按照code分组
             df = pd.DataFrame(k_line_list)
             for code, group in df.groupby("code"):
-                #todo 计算最大回撤
-                print(code,group.to_dict("records"))
+                # todo 计算最大回撤
+                log.info(code)
+                records = group.to_dict("records")
+                maximum_rollback,maximum_rollback_start,maximum_rollback_end = cal_maximum_rollback(start_scope, end_scope,records)
+                maximum_up,maximum_up_start,maximum_up_end = cal_maximum_up(start_scope, end_scope,records)
+                # print(code, group.to_dict("records"))
 
             print(123)
             pass
@@ -138,52 +198,7 @@ def find_stocks(industry, start=None, end=None):
         if a['type'] == 'bottom' and b['type'] == 'top':
             pass
 
-
-        print(a,b)
-
-
-def func2():
-    trend_data = db['trend_data']
-
-    trend_data_list = list(trend_data.find({"industry": "煤炭行业",
-                                            "date": {"$gte": datetime(2019, 1, 1), "$lte": datetime(2022, 12, 1)},
-                                            "trend": "up"}))
-    df = pd.DataFrame(trend_data_list)
-    t = df.date
-    x = df.rate
-
-    # rate_list = [data['rate'] for data in trend_data_list]
-    # x = np.array(rate_list)
-    thresh_top = np.mean(x) + 1 * np.std(x)
-    thresh_bottom = np.mean(x) - 1 * np.std(x)
-    # (you may want to use std calculated on 10-90 percentile data, without outliers)
-
-    # Find indices of peaks
-    peak_idx, _ = find_peaks(x, height=thresh_top, distance=10)
-
-    # Find indices of valleys (from inverting the signal)
-    valley_idx, _ = find_peaks(-x, height=-thresh_bottom, distance=10)
-
-    # Plot signal
-    # plt.figure(figsize=(14, 12))
-    plt.plot(t, x, color='b', label='data')
-    plt.scatter(t, x, s=10, c='b', label='value')
-
-    # Plot threshold
-    plt.plot([min(t), max(t)], [thresh_top, thresh_top], '--', color='r', label='peaks-threshold')
-    plt.plot([min(t), max(t)], [thresh_bottom, thresh_bottom], '--', color='g', label='valleys-threshold')
-
-    # Plot peaks (red) and valleys (blue)
-    plt.plot(t[peak_idx], x[peak_idx], "x", color='r', label='peaks')
-    plt.plot(t[valley_idx], x[valley_idx], "x", color='g', label='valleys')
-
-    plt.xticks(rotation=45)
-    plt.ylabel('value')
-    plt.xlabel('timestamp')
-    plt.title(f'data over time for username=target')
-    plt.legend(loc='upper left')
-    plt.gcf().autofmt_xdate()
-    plt.show()
+        print(a, b)
 
 
-find_stocks("煤炭行业")
+find_stocks("煤炭行业",datetime(2019, 1, 1),datetime(2019, 12, 1))
