@@ -149,6 +149,21 @@ task_routes = (
         'routing_key': 'default'
     }
     },
+    {'app.main.task.wrapper.sub_task.io_task': {
+        'queue': 'day_level',
+        'routing_key': 'day_level'
+    }
+    },
+    {'app.main.task.wrapper.sub_task.cpu_task': {
+        'queue': 'indicator',
+        'routing_key': 'indicator'
+    }
+    },
+    {'app.main.task.wrapper.trigger_task.trigger': {
+        'queue': 'default',
+        'routing_key': 'default'
+    }
+    },
 )
 
 beat_schedule = {
@@ -195,6 +210,7 @@ beat_schedule = {
         "task": "app.main.task.macrodata_task.sync",
         "schedule": 400
     },
+    # 股市资金抱团分析
     'sync_baotuan': {
         "task": "app.main.task.macrodata_task.baotuan_update",
         "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
@@ -254,4 +270,5 @@ beat_schedule = {
 imports = ("app.main.task.macrodata_task",
            "app.main.task.house_task",
            "app.main.task.fund_task",
-           "app.main.task.remind_task")
+           "app.main.task.remind_task",
+           'app.main.task.wrapper.sub_task')

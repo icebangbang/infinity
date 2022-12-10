@@ -11,6 +11,16 @@ from app.main.task import board_task
 from datetime import datetime, timedelta
 from app.main.task import board_task, stock_task,etf_task
 from flask import request
+from app.main.task.wrapper.trigger_task import trigger
+
+
+@rest.route("/celery/task/wrapper", methods=['get'])
+def task_wrapper():
+    trigger.apply_async(kwargs=dict(
+        wrapper_path = "app.main.task.wrapper.stock_value_wrapper.StockValueTask"
+    ))
+    return restful.response("ok")
+
 
 @rest.route("/celery/stock/feature/rebuild", methods=['get'])
 def rebuild_stock_feature():
