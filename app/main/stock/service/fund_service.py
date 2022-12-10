@@ -78,8 +78,11 @@ def get_china_overview(stock_values):
             kcb_fcv = kcb_fcv + fcv
             kcb_mv = kcb_mv + mv
 
+def get_stock_value(code,date):
+    my_set = db['stock_value']
+    return my_set.find_one(dict(code=code,date=date))
 
-def backtrading_stock_value(stocks, days=1250):
+def backtrading_stock_value(stocks, days=1000):
     """
     根据k线回溯市值
     :return:
