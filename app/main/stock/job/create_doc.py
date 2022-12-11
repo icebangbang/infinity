@@ -10,9 +10,12 @@ def create_doc(doc_name):
 
 
 def run():
+    db.stock_training_picker.create_index([("start_scope", -1), ("code", 1)])
+    # 股东分析
     db.stock_gdfx.create_index([("code", 1)])
     db.stock_gdfx.create_index([("date", -1), ("code", 1)])
 
+    # 板块成交量
     db.board_trade_volume.create_index([("date", -1), ("industry", 1)])
 
     db.trend_data.create_index([("date", -1), ("industry", 1)])

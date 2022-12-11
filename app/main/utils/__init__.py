@@ -1,3 +1,23 @@
+class rolling_window(object):
+    def __init__(self, array,window_size):
+        self.array = array
+        self._hasnext = None
+        self.start = 0
+        self.end = window_size
+    def __next__(self):
+        result = self.array[self.start:self.end]
+        self.start = self.start+1
+        self.end = self.end+1
+        return result
+
+    def hasnext(self):
+        if self.end > len(self.array):
+                self._hasnext = False
+                return False
+        self._hasnext = True
+        return self._hasnext
+
+
 class hn_wrapper(object):
     def __init__(self, it):
         self.it = iter(it)
@@ -25,6 +45,6 @@ class hn_wrapper(object):
         return self._hasnext
 
 if __name__ == "__main__":
-    x = hn_wrapper('ciao')
+    x = rolling_window('ciao',2)
     while x.hasnext():
         print(next(x))

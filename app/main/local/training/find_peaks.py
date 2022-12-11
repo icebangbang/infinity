@@ -7,73 +7,11 @@ from app.main.db.mongo import db
 from app.main.local.training import helper
 from app.main.stock.dao import k_line_dao, board_dao
 from app.main.stock.service import fund_service
-from app.main.utils import hn_wrapper, cal_util
+from app.main.utils import rolling_window, cal_util
 import pandas as pd
 import logging as log
 
 from app.main.utils.date_util import WorkDayIterator
-
-
-def transform(trend_data_list, idx_list, type):
-    """
-    转换数据格式
-    :param trend_data_list:
-    :param idx_list:
-    :param type:
-    :return:
-    """
-    return [dict(index=idx,
-                 date=trend_data_list[idx]['date'],
-                 rate=trend_data_list[idx]['rate'],
-                 type=type
-                 ) for idx in idx_list]
-
-
-def set_head(trend_data_list, sorted_list):
-    """
-    重新设置数据的头部
-    :return:
-    """
-    #
-    head = trend_data_list[0]
-    first = sorted_list[0]
-    if head['rate'] >= first['rate']:
-        new_head = dict(index=0,
-                        date=trend_data_list[0]['date'],
-                        rate=trend_data_list[0]['rate'],
-                        type='top'
-                        )
-    else:
-        new_head = dict(index=0,
-                        date=trend_data_list[0]['date'],
-                        rate=trend_data_list[0]['rate'],
-                        type='bottom'
-                        )
-    return sorted_list.insert(0, new_head)
-
-
-def set_tail(trend_data_list, sorted_list):
-    """
-    重新设置数据的尾部
-    :return:
-    """
-    #
-    tail = trend_data_list[-1]
-    last = sorted_list[-1]
-    if tail['rate'] >= last['rate']:
-        new_tail = dict(index=len(trend_data_list) - 1,
-                        date=trend_data_list[-1]['date'],
-                        rate=trend_data_list[-1]['rate'],
-                        type='top'
-                        )
-    else:
-        new_tail = dict(index=0,
-                        date=trend_data_list[-1]['date'],
-                        rate=trend_data_list[-1]['rate'],
-                        type='bottom'
-                        )
-    return sorted_list.append(new_tail)
-
 
 def plot_peaks(industry, start=None, end=None, show_plot=True):
     """
@@ -119,14 +57,14 @@ def plot_peaks(industry, start=None, end=None, show_plot=True):
     # valley_idx, _ = find_peaks(-x, height=-thresh_bottom, distance=5)
 
     # 数据格式转换
-    peak_list = transform(trend_data_list, peak_idx, "top")
-    valley_list = transform(trend_data_list, valley_idx, "bottom")
+    peak_list = _transform(trend_data_list, peak_idx, "top")
+    valley_list = _transform(trend_data_list, valley_idx, "bottom")
 
     # 合并peak和valley,然后根据index进行排序
     peak_list.extend(valley_list)
     sorted_result = sorted(peak_list, key=lambda item: item['index'], reverse=False)
-    set_head(trend_data_list, sorted_result)
-    set_tail(trend_data_list, sorted_result)
+    _set_head(trend_data_list, sorted_result)
+    _set_tail(trend_data_list, sorted_result)
 
     merged_result = []
     index = 0
@@ -239,16 +177,11 @@ def find_stocks(industry, start=None, end=None):
     board_detail = board_dao.get_board_by_name(industry)
     codes = board_detail['codes']
     merged_result = plot_peaks(industry, start, end, False)
-    x = hn_wrapper(merged_result)
-    while True:
-        if x.hasnext():
-            a = next(x)
-        else:
-            break
-        if x.hasnext():
-            b = next(x)
-        else:
-            break
+    x = rolling_window(merged_result,2)
+    while x.hasnext():
+        window = next(x)
+        a = window[0]
+        b = window[1]
         # 上行区间
         if a['type'] == 'bottom' and b['type'] == 'top':
             start_scope = a['date']
@@ -260,23 +193,28 @@ def find_stocks(industry, start=None, end=None):
             result_list = []
             for code, group in df.groupby("code"):
                 # todo 计算最大回撤
-                log.info(code)
                 records = group.to_dict("records")
                 rollback_dict = cal_maximum_rollback(start_scope, end_scope, records)
                 up_dict = cal_maximum_up(start_scope, end_scope, records)
-                rollback_dict.update(up_dict)
 
-                new_dict = dict(code=code, start_date=records[0]['date'],close=records[0]['close'])
+                new_dict = dict(code=code,
+                                start_date=records[0]['date'],
+                                close=records[0]['close'],
+                                start_scope=start_scope,
+                                end_scope=end_scope)
                 new_dict.update(rollback_dict)
                 new_dict.update(up_dict)
                 result_list.append(new_dict)
             result_list = sorted(result_list, key=lambda item: (item['maximum_up'], item['maximum_rollback']), reverse=True)
             for result in result_list:
                 helper.analysis_stock_value(result)
-            d = pd.DataFrame(result_list)
-            print(123)
+                helper.analysis_price_range(result)
 
 
+            for result in result_list:
+                result['industry'] = industry
+                db['stock_training_picker'].update({"start_scope":result['start_scope'],"code":result['code'],"industry":industry},
+                                                   {"$set":result},upsert=True)
         # 下行区间
         if a['type'] == 'bottom' and b['type'] == 'top':
             pass
@@ -284,5 +222,68 @@ def find_stocks(industry, start=None, end=None):
         print(a, b)
 
 
+
+def _transform(trend_data_list, idx_list, type):
+    """
+    转换数据格式
+    :param trend_data_list:
+    :param idx_list:
+    :param type:
+    :return:
+    """
+    return [dict(index=idx,
+                 date=trend_data_list[idx]['date'],
+                 rate=trend_data_list[idx]['rate'],
+                 type=type
+                 ) for idx in idx_list]
+
+
+def _set_head(trend_data_list, sorted_list):
+    """
+    重新设置数据的头部
+    :return:
+    """
+    #
+    head = trend_data_list[0]
+    first = sorted_list[0]
+    if head['rate'] >= first['rate']:
+        new_head = dict(index=0,
+                        date=trend_data_list[0]['date'],
+                        rate=trend_data_list[0]['rate'],
+                        type='top'
+                        )
+    else:
+        new_head = dict(index=0,
+                        date=trend_data_list[0]['date'],
+                        rate=trend_data_list[0]['rate'],
+                        type='bottom'
+                        )
+    return sorted_list.insert(0, new_head)
+
+
+def _set_tail(trend_data_list, sorted_list):
+    """
+    重新设置数据的尾部
+    :return:
+    """
+    #
+    tail = trend_data_list[-1]
+    last = sorted_list[-1]
+    if tail['rate'] >= last['rate']:
+        new_tail = dict(index=len(trend_data_list) - 1,
+                        date=trend_data_list[-1]['date'],
+                        rate=trend_data_list[-1]['rate'],
+                        type='top'
+                        )
+    else:
+        new_tail = dict(index=0,
+                        date=trend_data_list[-1]['date'],
+                        rate=trend_data_list[-1]['rate'],
+                        type='bottom'
+                        )
+    return sorted_list.append(new_tail)
+
+
 find_stocks("煤炭行业", datetime(2019, 1, 1), datetime(2019, 12, 1))
+find_stocks("光伏设备", datetime(2019, 1, 1), datetime(2019, 12, 1))
 # plot_peaks("光伏设备", datetime(2019, 1, 1), datetime(2019, 12, 1), True)

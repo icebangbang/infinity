@@ -11,3 +11,7 @@ class SubST:
 
     def init_ind(self, datas: List[PandasData], company):
         pass
+
+class BoardSubST:
+    def run(self,date,names):
+        pass
