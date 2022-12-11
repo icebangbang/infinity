@@ -68,13 +68,16 @@ def plot_peaks(industry, start=None, end=None, show_plot=True):
 
     merged_result = []
     index = 0
-    while index < len(sorted_result) - 1:
+    while index <= len(sorted_result) - 1:
         element = sorted_result[index]
         trend = element['type']
         temp_list = [element]
-        while index < len(sorted_result) - 1:
+        while index <= len(sorted_result) - 1:
             index = index + 1
-            next_element = sorted_result[index]
+            try:
+                next_element = sorted_result[index]
+            except IndexError:
+                break
             if trend == next_element['type']:
                 temp_list.append(next_element)
             else:
@@ -213,8 +216,8 @@ def find_stocks(industry, start=None, end=None):
 
             for result in result_list:
                 result['industry'] = industry
-                db['stock_training_picker'].update({"start_scope":result['start_scope'],"code":result['code'],"industry":industry},
-                                                   {"$set":result},upsert=True)
+                # db['stock_training_picker'].update({"start_scope":result['start_scope'],"code":result['code'],"industry":industry},
+                #                                    {"$set":result},upsert=True)
         # 下行区间
         if a['type'] == 'bottom' and b['type'] == 'top':
             pass
@@ -284,6 +287,6 @@ def _set_tail(trend_data_list, sorted_list):
     return sorted_list.append(new_tail)
 
 
-find_stocks("煤炭行业", datetime(2019, 1, 1), datetime(2019, 12, 1))
-find_stocks("光伏设备", datetime(2019, 1, 1), datetime(2019, 12, 1))
+# find_stocks("煤炭行业", datetime(2019, 1, 1), datetime(2019, 12, 1))
+find_stocks("光伏设备", datetime(2022, 1, 1), datetime(2022, 12, 1))
 # plot_peaks("光伏设备", datetime(2019, 1, 1), datetime(2019, 12, 1), True)

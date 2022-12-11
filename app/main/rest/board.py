@@ -15,6 +15,10 @@ import re
 
 @rest.route("/board/list/mixed", methods=['get'])
 def get_mixed_board_list():
+    """
+    展示自定义的板块和东财板块
+    :return:
+    """
     config = db['config']
     board_info = config.find_one({"name": "board"}, {"_id": 0})
     results = board_info['value']
@@ -29,6 +33,10 @@ def get_mixed_board_list():
 
 @rest.route("/board/list/custom", methods=['get'])
 def get_custom_board_list():
+    """
+    展示自定义板块
+    :return:
+    """
     config = db['config']
     board_info = config.find_one({"name": "board"}, {"_id": 0})
     results = board_info['value']
@@ -36,6 +44,10 @@ def get_custom_board_list():
 
 @rest.route("/board/list/eastmoney", methods=['get'])
 def get_easymoney_board_list():
+    """
+    获得东财板块
+    :return:
+    """
     set = db['board_detail']
     condition = {"$or": [{"type": 2}]}
     boards = set.find(condition, dict(board=1, _id=0))
