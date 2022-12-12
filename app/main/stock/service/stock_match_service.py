@@ -20,8 +20,17 @@ def get_by_year(board, year, trend) -> list:
     df = pd.DataFrame(records)
     result = {}
     for start_scope,group in df.groupby("start_scope"):
-        sorted_group = sorted(group.to_dict(orient="records"),key=lambda item: item['maximum_up'], reverse=True)
-        result[date_util.dt_to_str(start_scope)] = sorted_group
+        sorted_group_list = sorted(group.to_dict(orient="records"),key=lambda item: item['maximum_up'], reverse=True)
+        r = []
+        for sorted_group in sorted_group_list:
+            simpled = {}
+            simpled['code'] = sorted_group['code']
+            simpled['maximum_up'] = sorted_group['maximum_up']
+            simpled['name'] = sorted_group['name']
+            simpled['maximum_rollback'] = sorted_group['maximum_rollback']
+            r.append(simpled)
+
+        result[date_util.dt_to_str(start_scope)] = r
 
     return result
 

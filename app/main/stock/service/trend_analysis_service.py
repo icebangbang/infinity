@@ -6,7 +6,7 @@ import scipy
 from matplotlib import pyplot as plt
 from scipy.signal import argrelextrema, find_peaks
 from app.main.db.mongo import db
-from app.main.stock.dao import k_line_dao, board_dao
+from app.main.stock.dao import k_line_dao, board_dao, stock_dao
 from app.main.stock.service import fund_service
 from app.main.stock.service.assist import trend_analysis_helper
 from app.main.utils import rolling_window, cal_util, date_util
@@ -174,14 +174,14 @@ def cal_maximum_up(start, end, k_line_data_list):
     return dict(maximum_up=maximum_up, maximum_up_start=maximum_up_start, maximum_up_end=maximum_up_end)
 
 
-def find_stocks(industry, start=None, end=None):
+def find_stocks(board, start=None, end=None):
     """
     按照波峰和波谷的提示，筛选出，涨幅最高的，和跌幅最大的股
     :return:
     """
-    board_detail = board_dao.get_board_by_name(industry)
+    board_detail = board_dao.get_board_by_name(board)
     codes = board_detail['codes']
-    merged_result = plot_peaks(industry, start, end, False)
+    merged_result = plot_peaks(board, start, end, False)
     x = rolling_window(merged_result,2)
     while x.hasnext():
         window = next(x)
@@ -191,6 +191,7 @@ def find_stocks(industry, start=None, end=None):
         if a['type'] == 'bottom' and b['type'] == 'top':
             start_scope = a['date']
             end_scope = b['date']
+            stock_dict = stock_dao.get_stock_detail(codes)
             k_line_list = k_line_dao.get_k_line_data(start_scope, end_scope, 'day', codes)
             if len(k_line_list) == 0: continue
             # 将数据按照code分组
@@ -203,6 +204,7 @@ def find_stocks(industry, start=None, end=None):
                 up_dict = cal_maximum_up(start_scope, end_scope, records)
 
                 new_dict = dict(code=code,
+                                name=stock_dict[code]['name'],
                                 start_date=records[0]['date'],
                                 close=records[0]['close'],
                                 start_scope=start_scope,
@@ -217,13 +219,13 @@ def find_stocks(industry, start=None, end=None):
 
 
             for result in result_list:
-                result['industry'] = industry
+                result['board'] = board
                 result['up_rate_start'] = a['rate']
                 result['trend'] = "up"
 
                 db['stock_training_picker'].update_one({"start_scope":result['start_scope'],
                                                         "code":result['code'],
-                                                        "board":industry,
+                                                        "board":board,
                                                         "trend":"up"},
                                                    {"$set":result},upsert=True)
         # 下行区间
