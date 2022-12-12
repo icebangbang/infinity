@@ -15,12 +15,29 @@ def get_board_by_name(board_name):
 
 
 def get_all_board(type=[1, 2, 3]):
+    """
+    根据类型获取东财所有的板块
+    :param type:
+    :return:
+    """
     my_set = db['board_detail']
     data = list(my_set.find({"type": {"$in": type}}, dict(_id=0)))
     return data
 
+def get_mixed_board():
+    config = db['config']
+    board_info = config.find_one({"name": "board"}, {"_id": 0})
+    results = board_info['value']
 
-def get_stock_bt_board(board) -> List[str]:
+    set = db['board_detail']
+    condition = {"$or": [{"type": 2}]}
+    boards = set.find(condition, dict(board=1, _id=0))
+    results2 = [board['board'] for board in boards]
+    results.extend(results2)
+    return results
+
+
+def get_stock_by_board(board) -> List[str]:
     """
     根据板块获取股票数据
     :param concept:
@@ -74,4 +91,6 @@ def dump_board_feature(companies: List[Company], date):
 
 
 if __name__ == "__main__":
-    a = get_stock_bt_board("猪肉")
+    # a = get_stock_by_board("猪肉")
+    a = get_mixed_board()
+    print(13)

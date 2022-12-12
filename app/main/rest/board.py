@@ -2,7 +2,7 @@ import collections
 from typing import List
 
 from app.main.stock.const import board_const
-from app.main.stock.dao import k_line_dao
+from app.main.stock.dao import k_line_dao, board_dao
 from app.main.utils import restful, date_util
 from . import rest
 from app.main.task import demo
@@ -12,6 +12,25 @@ import pandas as  pd
 from datetime import timedelta, datetime
 from flask import request
 import re
+from app.main.stock.service import stock_match_service
+
+@rest.route("/board/trend/stock", methods=['get'])
+def get_stock_by_board_trend():
+    """
+    根据板块趋势获取展示个股
+    :return:
+    """
+    board = request.args.get("board","风电设备")
+    trend = request.args.get("trend","up")
+    current_year = datetime.now().year
+    year_list = [ y for y in range(current_year-3,current_year+1)]
+
+    year_list= [2022]
+    results = []
+    for year in year_list:
+       stocks = stock_match_service.get_by_year(board,year,trend)
+       results.append({year:stocks})
+    return restful.response(results)
 
 @rest.route("/board/list/mixed", methods=['get'])
 def get_mixed_board_list():
@@ -19,15 +38,7 @@ def get_mixed_board_list():
     展示自定义的板块和东财板块
     :return:
     """
-    config = db['config']
-    board_info = config.find_one({"name": "board"}, {"_id": 0})
-    results = board_info['value']
-
-    set = db['board_detail']
-    condition = {"$or": [{"type": 2}]}
-    boards = set.find(condition, dict(board=1, _id=0))
-    results2 = [ board['board'] for board in boards]
-    results.extend(results2)
+    results = board_dao.get_mixed_board()
 
     return restful.response(results)
 

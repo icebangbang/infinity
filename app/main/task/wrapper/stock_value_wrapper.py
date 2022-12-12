@@ -13,8 +13,8 @@ class StockValueTask:
         stocks = stock_dao.get_all_stock(dict(code=1))
         codes = [stock['code'] for stock in stocks]
 
-        step = int(len(codes) / 25)
-        for i in range(0, len(codes), step):
+        step=25
+        for i in range(0, len(codes), 25):
             group = codes[i:i + step]
             # 考虑异步提交
             invoke_info = dict(

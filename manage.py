@@ -4,7 +4,7 @@ import os
 # 获取环境变量,
 # pycharm启动可以在 RUN/DEBUG Configuration-Environment variables中添加FLASK_ENV
 # 线上启动在 honeybee.sysconfig中指定
-env = os.environ.get('FLASK_ENV') or 'development'
+env = os.environ.get('FLASK_ENV') or 'infinity'
 app = application.create_app(env)  # from .main.rest import rest as main_blueprint
 
 from app.celery_worker import celery

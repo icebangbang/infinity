@@ -5,12 +5,13 @@ import hashlib
 from decimal import Decimal
 import datetime
 import simplejson
-from app.main.utils import encryption
+from app.main.utils import encryption, date_util
 from app.main.db.models import TableBase
 from app.application import app
 from flask import request
 from bson import ObjectId
 import logging as log
+import pandas
 
 def get_method_by_path(path):
     p, m = path.rsplit('.', 1)
@@ -361,8 +362,11 @@ if __name__ == "__main__":
 class DatetimeJsonEncoder(simplejson.JSONEncoder):
     def default(self, o):
         if isinstance(o, datetime.datetime):
+            if isinstance(o,pandas._libs.tslibs.nattype.NaTType):
+                return None
             # return o.isoformat(sep=" ")
-            return o.strftime("%Y-%m-%d %H:%M:%S")
+            return date_util.dt_to_str(o,"%Y-%m-%d %H:%M:%S")
+            # return o.strftime("%Y-%m-%d %H:%M:%S")
         if isinstance(o, ObjectId):
             return str(o)
 
