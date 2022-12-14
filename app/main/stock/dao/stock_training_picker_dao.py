@@ -7,3 +7,10 @@ def select_by_date(board, start, end,trend):
                                      "trend": trend,
                                      "start_scope": {"$gte": start},
                                      "end_scope": {"$lte": end}}))
+
+def update(result):
+    db['stock_training_picker'].update_one({"start_scope": result['start_scope'],
+                                            "code": result['code'],
+                                            "board": result['board'],
+                                            "trend": "up"},
+                                           {"$set": result}, upsert=True)

@@ -10,6 +10,9 @@ def create_doc(doc_name):
 
 
 def run():
+    # 自定义板块,需要定时同步
+    db.custom_board_detail.create_index([("board", 1)])
+    # 个股训练分析表
     db.stock_training_picker.create_index([("start_scope", -1), ("code", 1)])
     # 股东分析
     db.stock_gdfx.create_index([("code", 1)])

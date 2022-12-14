@@ -24,12 +24,12 @@ def get_stock_by_board_trend():
     trend = request.args.get("trend","up")
     current_year = datetime.now().year
     year_list = [ y for y in range(current_year-3,current_year+1)]
+    year_list.reverse()
 
-    year_list= [2022]
     results = []
     for year in year_list:
        stocks = stock_match_service.get_by_year(board,year,trend)
-       results.append({year:stocks})
+       results.append(dict(year=year,scopes=stocks))
     return restful.response(results)
 
 @rest.route("/board/list/mixed", methods=['get'])
