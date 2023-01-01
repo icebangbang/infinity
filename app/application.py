@@ -1,10 +1,13 @@
 from flask import Flask
 
 from app.log import init_log
+from app.main.client import nacos_client
 from app.main.db import models
 from app.main.db import mongo
 from config import config
 from datetime import timedelta
+import atexit
+
 
 
 app = None
@@ -27,13 +30,14 @@ def create_app(config_name):
     models.init_db(app)
     init_log(app)
     mongo.init_db(app)
-
     # init_all_blueprint(app)
 
 
 
     from app.main.rest import rest
     app.register_blueprint(rest)
+
+    nacos_client.init(app)
 
     return app
 
