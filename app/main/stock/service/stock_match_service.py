@@ -18,19 +18,23 @@ def get_by_year(board, year, trend) -> list:
     end = datetime(year, 12, 31)
     records = stock_training_picker_dao.select_by_date(board, start, end,trend)
     df = pd.DataFrame(records)
-    result = {}
+    result = []
     for start_scope,group in df.groupby("start_scope"):
         sorted_group_list = sorted(group.to_dict(orient="records"),key=lambda item: item['maximum_up'], reverse=True)
         r = []
+        end_scope=""
         for sorted_group in sorted_group_list:
             simpled = {}
+            end_scope = sorted_group['end_scope']
             simpled['code'] = sorted_group['code']
             simpled['maximum_up'] = sorted_group['maximum_up']
             simpled['name'] = sorted_group['name']
             simpled['maximum_rollback'] = sorted_group['maximum_rollback']
             r.append(simpled)
 
-        result[date_util.dt_to_str(start_scope)] = r
+        result.append(dict(start_scope=date_util.dt_to_str(start_scope),
+                           end_scope=date_util.dt_to_str(end_scope),stocks=r))
+        # result[date_util.dt_to_str(start_scope)] = r
 
     return result
 

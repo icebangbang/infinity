@@ -6,7 +6,7 @@ import scipy
 from matplotlib import pyplot as plt
 from scipy.signal import argrelextrema, find_peaks
 from app.main.db.mongo import db
-from app.main.stock.dao import k_line_dao, board_dao, stock_dao
+from app.main.stock.dao import k_line_dao, board_dao, stock_dao, stock_training_picker_dao
 from app.main.stock.service import fund_service
 from app.main.stock.service.assist import trend_analysis_helper
 from app.main.utils import rolling_window, cal_util, date_util
@@ -223,11 +223,7 @@ def find_stocks(board, start=None, end=None):
                 result['up_rate_start'] = a['rate']
                 result['trend'] = "up"
 
-                db['stock_training_picker'].update_one({"start_scope":result['start_scope'],
-                                                        "code":result['code'],
-                                                        "board":board,
-                                                        "trend":"up"},
-                                                   {"$set":result},upsert=True)
+                stock_training_picker_dao.update(result)
         # 下行区间
         if a['type'] == 'bottom' and b['type'] == 'top':
             pass
@@ -310,7 +306,7 @@ if __name__ == '__main__':
     # find_stocks("光伏设备", datetime(2022, 1, 1), datetime(2022, 12, 1))
     # plot_peaks("光伏设备", datetime(2019, 1, 1), datetime(2019, 12, 1), True)
 
-    find_stocks_by_year("风电设备", 2019)
-    find_stocks_by_year("风电设备", 2020)
-    find_stocks_by_year("风电设备", 2021)
-    find_stocks_by_year("风电设备",2022)
+    find_stocks_by_year("光伏设备", 2019)
+    find_stocks_by_year("光伏设备", 2020)
+    find_stocks_by_year("光伏设备", 2021)
+    find_stocks_by_year("光伏设备",2022)
