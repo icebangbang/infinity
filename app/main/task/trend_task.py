@@ -16,7 +16,12 @@ import logging as log
 
 
 @celery.task(bind=True, base=MyTask, expires=1800)
-def submit_trend_task(self, from_date_ts=None, end_date_ts=None, global_task_id=None, chain=None,**kwargs):
+def submit_trend_task(self,**kwargs):
+    from_date_ts = kwargs.get("from_date_ts",None)
+    end_date_ts = kwargs.get("end_date_ts",None)
+    global_task_id = kwargs.get("global_task_id",None)
+    chain = kwargs.get("chain",None)
+
     stocks = stock_dao.get_all_stock(dict(code=1))
     codes = [stock['code'] for stock in stocks]
     code_name_map = stock_dao.get_code_name_map()
@@ -30,7 +35,7 @@ def submit_trend_task(self, from_date_ts=None, end_date_ts=None, global_task_id=
         end_date = datetime.now()
 
     global_task_id = global_task_id if global_task_id is not None else str(uuid.uuid1())
-    task_dao.create_task(global_task_id, "个股趋势跑批", len(codes), chain)
+    task_dao.create_task(global_task_id, "个股趋势跑批", len(codes), kwargs)
 
     for i in range(0, len(codes), step):
         codes_group = codes[i:i + step]
