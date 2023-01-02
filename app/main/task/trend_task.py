@@ -16,7 +16,7 @@ import logging as log
 
 
 @celery.task(bind=True, base=MyTask, expires=1800)
-def submit_trend_task(self, from_date_ts=None, end_date_ts=None, global_task_id=None, chain=None):
+def submit_trend_task(self, from_date_ts=None, end_date_ts=None, global_task_id=None, chain=None,**kwargs):
     stocks = stock_dao.get_all_stock(dict(code=1))
     codes = [stock['code'] for stock in stocks]
     code_name_map = stock_dao.get_code_name_map()
