@@ -14,7 +14,7 @@ app = None
 celery = None
 
 
-def create_app(config_name):
+def create_app(config_name,**kwargs):
     """
     初始化数据库,路由,环境变量
     :param config_name: 环境变量对应的环境
@@ -26,6 +26,12 @@ def create_app(config_name):
 
     # 根据config_name选定环境变量
     app.config.from_object(config[config_name])
+
+    if kwargs is not None:
+        for k,v in kwargs.items():
+            if v is  None:continue
+            app.config.__setitem__(k,v)
+
     config[config_name].init_app(app)
     models.init_db(app)
     init_log(app)

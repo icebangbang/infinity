@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 class NacosClient:
     def init(self, app):
-        if app.config['NACOS_ENABLE'] == 0:
+        if app.config['NACOS_ENABLE'] == '1':
             return
         self.ip = app.config['SERVER_HOST']
         self.port = app.config['SERVER_PORT']
