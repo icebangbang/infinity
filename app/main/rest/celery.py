@@ -6,7 +6,7 @@ from app.main.stock.job import sync_board, job_config
 from app.main.utils import restful
 from . import rest
 from app.main.utils import date_util
-from app.main.task import demo, trend_task
+from app.main.task import demo, trend_task, task_constant
 from app.main.task import board_task
 from datetime import datetime, timedelta
 from app.main.task import board_task, stock_task,etf_task
@@ -109,8 +109,8 @@ def get_stock_trend():
         date_end = datetime.now()
 
     chain_job_info = dict(
+        job_type=task_constant.TASK_TYPE_CELERY,
         job_chain=['app.main.task.trend_task.get_trend_data_task'],
-        normal_chain=[],
         kwargs=dict(from_date_ts=date_util.to_timestamp(date_start),
                     end_date_ts=date_util.to_timestamp(date_end),
                     global_task_id=global_task_id)
