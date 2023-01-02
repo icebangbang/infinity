@@ -43,7 +43,7 @@ def dispatch():
     date_end_str = req['end']
 
     date_start = date_util.parse_date_time(date_start_str)
-    date_end = date_util.date_time_to_str(date_end_str)
+    date_end = date_util.parse_date_time(date_end_str)
 
     flow_job_info = dict(
         task_name=req['taskName'],
