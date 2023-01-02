@@ -37,6 +37,7 @@ def dispatch():
     """
     req = request.json
     global_task_id = req['globalId']
+    callbackUrl = req['callbackUrl']
 
     date_start_str = req['start']
     date_end_str = req['end']
@@ -47,7 +48,7 @@ def dispatch():
     flow_job_info = dict(
         task_name=req['taskName'],
         job_type=task_constant.TASK_TYPE_TASK_FLOW,
-        callback_url=None,
+        callback_url=callbackUrl,
         kwargs=dict(from_date_ts=date_util.to_timestamp(date_start),
                     end_date_ts=date_util.to_timestamp(date_end),
                     from_date=date_start_str,
