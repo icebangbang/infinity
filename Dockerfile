@@ -40,6 +40,6 @@ RUN mkdir /var/log/dao
 #gunicorn -k gevent -w 4 -b 0.0.0.0:20011 app.run:app -e FLASK_ENV=default
 #CMD celery -A manage.celery worker -l info -P  gevent -Q ${route} -c 50 -n worker${index}.%h
 
-CMD  gunicorn -c app/gunicorn/gun.py --log-config app/gunicorn/gunicorn_logging.conf -b 0.0.0.0:${port} manage:app -e FLASK_ENV=${profiles} -e NACOS_ENABLE=0
+CMD  gunicorn -c app/gunicorn/gun.py --log-config app/gunicorn/gunicorn_logging.conf -b 0.0.0.0:${port} manage:app -e FLASK_ENV=${profiles} -e NACOS_ENABLE=1
 
 # gunicorn -c app/gunicorn/gun.py --log-config app/gunicorn/gunicorn_logging.conf -b 0.0.0.0:20050 manage:app -e FLASK_ENV=test
