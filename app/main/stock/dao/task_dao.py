@@ -15,7 +15,7 @@ def create_task(task_id, task_name, size, chain=None):
     now = datetime.now()
     sync_record = db['sync_record']
 
-    data = dict(create_time=now, size=size, task_name=task_name, chain=chain)
+    data = dict(create_time=now, size=size, task_name=task_name, job_info=chain)
 
     sync_record.update_one({"task_id": task_id, "task_name": task_name}, {"$set": data}, upsert=True)
     my_redis.set(task_id, size)
@@ -55,7 +55,7 @@ def update_task(task_id, size, task_name=None):
 
 
 def notify(job_info):
-    global_id = job_info['global_id']
+    global_id = job_info['global_task_id']
     callback_url = job_info['callback_url']
     task_name = job_info['task_name']
     resp = requests.post(callback_url, json=dict(executionId=global_id))
