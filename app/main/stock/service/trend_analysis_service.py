@@ -306,7 +306,7 @@ if __name__ == '__main__':
     # find_stocks("光伏设备", datetime(2022, 1, 1), datetime(2022, 12, 1))
     # plot_peaks("光伏设备", datetime(2019, 1, 1), datetime(2019, 12, 1), True)
 
-    find_stocks_by_year("光伏设备", 2019)
-    find_stocks_by_year("光伏设备", 2020)
-    find_stocks_by_year("光伏设备", 2021)
-    find_stocks_by_year("光伏设备",2022)
+    find_stocks_by_year("有色金属", 2019)
+    find_stocks_by_year("有色金属", 2020)
+    # find_stocks_by_year("有色金属", 2021)
+    # find_stocks_by_year("有色金属",2022)
