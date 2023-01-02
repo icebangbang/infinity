@@ -11,9 +11,10 @@ import atexit
 
 log = logging.getLogger(__name__)
 
+
 class NacosClient:
     def init(self, app):
-        if app.config['REGISTERED_SERVER_TO_NACOS'] is False:
+        if app.config['REGISTERED_SERVER_TO_NACOS'] is False and app.config['NACOS_ENABLE'] == 1:
             return
         self.ip = app.config['SERVER_HOST']
         self.port = app.config['SERVER_PORT']
@@ -24,7 +25,7 @@ class NacosClient:
                                                      ip=self.ip,
                                                      port=self.port,
                                                      cluster_name=app.config['NACOS_CLUSTER_NAME'])
-        self.service_executor = ServiceExecutor(self,['tequila'])
+        self.service_executor = ServiceExecutor(self, ['tequila'])
 
         self.register(app)
         atexit.register(self.deregister, app=app)
@@ -55,13 +56,12 @@ class NacosClient:
                                              0,
                                              app.config['NACOS_HEARTBEAT_INTERVAL'])
 
-        self.schedule.schedule_at_fixed_rate('ServiceExecutor',self.service_executor,
-                                             0,10)
+        self.schedule.schedule_at_fixed_rate('ServiceExecutor', self.service_executor,
+                                             0, 10)
 
         # self.client.subscribe([a], 7,service_name="earring")
 
-
-    def deregister(self,app):
+    def deregister(self, app):
         log.info("start deregister nacos service")
         self.client.remove_naming_instance(service_name=app.config['NACOS_SERVICE_NAME'],
                                            ip=self.ip,
@@ -69,9 +69,5 @@ class NacosClient:
                                            cluster_name=app.config['NACOS_CLUSTER_NAME'])
         log.info("end to deregister nacos service")
 
-    def service(self,service_name):
+    def service(self, service_name):
         return self.client.list_naming_instance(service_name)
-
-
-
-
