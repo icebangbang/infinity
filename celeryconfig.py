@@ -64,7 +64,7 @@ task_routes = (
     },
     {'app.main.task.trend_task.submit_trend_task': {
         'queue': 'default',
-        'routing_key': 'default'
+        'routing_key': 'default',
     }
     },
     {'app.main.task.trend_task.get_trend_data_task': {

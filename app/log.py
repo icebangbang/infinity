@@ -3,6 +3,7 @@ import logging.config
 
 
 def init_log(app):
+    logging.getLogger("nacos.client").setLevel(logging.WARNING)
     env = app.config['ENV']
     if env != "local":
         return

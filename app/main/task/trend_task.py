@@ -16,21 +16,21 @@ import logging as log
 
 
 @celery.task(bind=True, base=MyTask, expires=1800)
-def submit_trend_task(self, from_date=None, end_date=None, global_task_id=None, chain=None):
+def submit_trend_task(self, from_date_ts=None, end_date_ts=None, global_task_id=None, chain=None):
     stocks = stock_dao.get_all_stock(dict(code=1))
     codes = [stock['code'] for stock in stocks]
     code_name_map = stock_dao.get_code_name_map()
     step = int(len(codes) / 630)
 
-    if from_date and end_date:
-        from_date = date_util.from_timestamp(from_date)
-        end_date = date_util.from_timestamp(end_date)
+    if from_date_ts and end_date_ts:
+        from_date = date_util.from_timestamp(from_date_ts)
+        end_date = date_util.from_timestamp(end_date_ts)
     else:
         from_date = datetime.now()
         end_date = datetime.now()
 
     global_task_id = global_task_id if global_task_id is not None else str(uuid.uuid1())
-    task_dao.create_task(global_task_id, "app.main.task.trend_task.submit_trend_task", len(codes), chain)
+    task_dao.create_task(global_task_id, "个股趋势跑批", len(codes), chain)
 
     for i in range(0, len(codes), step):
         codes_group = codes[i:i + step]
@@ -66,9 +66,7 @@ def sync_trend_task(self, from_date_ts, end_date_ts, codes, name_dict, global_ta
                 trend_service.save_stock_trend_with_features(code, name, features, start_of_day)
             except Exception as e:
                 log.error(e, exc_info=1)
-    task_dao.update_task(global_task_id, len(codes),
-                         "app.main.task.trend_task.submit_trend_task"
-                         )
+    task_dao.update_task(global_task_id, len(codes),"个股趋势跑批")
 
 
 @celery.task(bind=True, base=MyTask, expires=1800)
