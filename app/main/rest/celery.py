@@ -233,3 +233,9 @@ def get_board_feature():
             board_task.submit_board_feature(date_util.to_timestamp(date_start))
 
     return restful.response("ok")
+
+@rest.route("/celery/board/test", methods=['post'])
+def test():
+    body = request.json
+
+    return 123

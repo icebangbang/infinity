@@ -7,8 +7,8 @@ import logging as log
 
 class HeartBeatExecutor(Executor):
 
-    def __init__(self, client, service_name, ip, port, cluster_name):
-        self.client = client
+    def __init__(self, parent, service_name, ip, port, cluster_name):
+        self.parent = parent
         self.service_name = service_name
         self.ip = ip
         self.port = port
@@ -16,6 +16,7 @@ class HeartBeatExecutor(Executor):
 
     def callable(self):
         try:
-            self.client.send_heartbeat(self.service_name, self.ip, self.port, self.cluster_name)
+            self.parent.client.send_heartbeat(self.service_name, self.ip, self.port, self.cluster_name)
         except Exception as e:
-            log.error(e, exc_info=1)
+            pass
+            # log.error(e, exc_info=1)

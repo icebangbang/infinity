@@ -1,7 +1,7 @@
 from flask import Flask
 
 from app.log import init_log
-from app.main.client import nacos_client
+from app.main.client.nacos import nacos_client
 from app.main.db import models
 from app.main.db import mongo
 from config import config
@@ -38,6 +38,7 @@ def create_app(config_name):
     app.register_blueprint(rest)
 
     nacos_client.init(app)
+
 
     return app
 

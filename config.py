@@ -159,7 +159,7 @@ class InfinityLocal(Config):
     NACOS_NAMESPACE = "public"
     IS_AUTH_MODE = False
     NACOS_WEIGHT = 1
-    NACOS_HEARTBEAT_INTERVAL = 5
+    NACOS_HEARTBEAT_INTERVAL = 6
 
 
 config = {
