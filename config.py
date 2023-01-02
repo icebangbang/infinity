@@ -5,7 +5,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
     REGISTERED_SERVER_TO_NACOS = True
-    NACOS_ENABLE = 0
+    NACOS_ENABLE = '0'
     CELERY_CONFIG = "celeryconfig"
     KLINE_TIME_WINDOW = 2190
 
