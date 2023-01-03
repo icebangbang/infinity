@@ -58,7 +58,7 @@ def notify(job_info):
     global_id = job_info['global_task_id']
     callback_url = job_info['callback_url']
     task_name = job_info['task_name']
-    resp = requests.post(callback_url, json=dict(executionId=global_id))
+    resp = requests.post(callback_url, json=dict(globalId=global_id,taskName=task_name))
 
     is_finished = 0
     if resp.status_code == 200 and resp.json()['success'] is True:
