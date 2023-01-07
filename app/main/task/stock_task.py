@@ -13,6 +13,7 @@ from app.main.stock.stock_pick_filter import stock_filter
 from app.main.stock.task_wrapper import TaskWrapper
 from app.main.task import task_constant
 from app.main.utils import date_util
+from app.main.utils.date_util import WorkDayIterator
 
 """
 个股数据同步
@@ -146,15 +147,7 @@ def submit_stock_feature(self, to_date=None, codes=None, global_task_id=None):
         logging.info("the day is not workday:{}".format(date_util.date_time_to_str(to_date)))
         return
 
-    # switch = my_redis.get_bool("sync_after_15")
-    # if not switch:
-    #     logging.info("will not run job after 15")
-    #     return
-
     code_name_map = stock_dao.get_code_name_map()
-    # from_date = to_date - timedelta(days=500)
-
-    # from_date_timestamp = int(time.mktime(from_date.timetuple()))
     base_timestamp = int(time.mktime(to_date.timetuple()))
     offset = "-252"
 
@@ -175,6 +168,37 @@ def submit_stock_feature(self, to_date=None, codes=None, global_task_id=None):
         name_dict = {code: code_name_map[code] for code in codes}
         sync_stock_feature.apply_async(args=[base_timestamp, offset, codes, name_dict, global_task_id])
 
+
+@celery.task(bind=True, base=MyTask, expires=36000)
+def submit_stock_feature_within_range(self, **kwargs):
+    params = kwargs.get("params", {})
+    from_date_ts = params.get("from_date_ts", None)
+    end_date_ts = params.get("end_date_ts", None)
+    global_task_id = params.get("global_task_id", None)
+
+    from_date = date_util.from_timestamp(from_date_ts)
+    end_date = date_util.from_timestamp(end_date_ts)
+    days = date_util.get_days_between(end_date,from_date)
+
+    stocks = stock_dao.get_all_stock(dict(code=1))
+    codes = [stock['code'] for stock in stocks]
+    task_dao.create_task(global_task_id, "个股特征跑批", len(codes)*(1+days), kwargs)
+
+    code_name_map = stock_dao.get_code_name_map()
+    for to_date in WorkDayIterator(from_date, end_date):
+
+        base_timestamp = int(time.mktime(to_date.timetuple()))
+        offset = "-252"
+
+
+        step = int(len(codes) / 630)
+
+        task_dao.create_task(global_task_id, "个股特征跑批", len(codes))
+
+        for i in range(0, len(codes), step):
+            group = codes[i:i + step]
+            name_dict = {code: code_name_map[code] for code in group}
+            sync_stock_feature.apply_async(args=[base_timestamp, offset, group, name_dict, global_task_id])
 
 @celery.task(bind=True, base=MyTask, expires=36000)
 def sync_stock_feature(self, base_date, offset, codes, name_dict, global_task_id):
@@ -199,7 +223,7 @@ def sync_stock_feature(self, base_date, offset, codes, name_dict, global_task_id
         # if not sync_trend_disable:
         #     for company in companies:
         #         trend_service.save_stock_trend_with_company(company, base_date)
-    task_dao.update_task(global_task_id, len(codes), 'app.main.task.stock_task.submit_stock_feature', )
+    task_dao.update_task(global_task_id, len(codes), '个股特征跑批', )
 
 
 @celery.task(bind=True, base=MyTask, expire=1800)

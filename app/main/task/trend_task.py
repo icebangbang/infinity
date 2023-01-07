@@ -17,10 +17,10 @@ import logging as log
 
 @celery.task(bind=True, base=MyTask, expires=1800)
 def submit_trend_task(self,**kwargs):
-    from_date_ts = kwargs.get("from_date_ts",None)
-    end_date_ts = kwargs.get("end_date_ts",None)
-    global_task_id = kwargs.get("global_task_id",None)
-    chain = kwargs.get("chain",None)
+    params = kwargs.get("params",{})
+    from_date_ts = params.get("from_date_ts",None)
+    end_date_ts = params.get("end_date_ts",None)
+    global_task_id = params.get("global_task_id",None)
 
     stocks = stock_dao.get_all_stock(dict(code=1))
     codes = [stock['code'] for stock in stocks]

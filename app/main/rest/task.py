@@ -50,7 +50,7 @@ def dispatch():
         job_type=task_constant.TASK_TYPE_TASK_FLOW,
         callback_url=callbackUrl,
         global_task_id = global_task_id,
-        kwargs=dict(from_date_ts=date_util.to_timestamp(date_start),
+        params=dict(from_date_ts=date_util.to_timestamp(date_start),
                     end_date_ts=date_util.to_timestamp(date_end),
                     from_date=date_start_str,
                     end_date=date_end_str,
