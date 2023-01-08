@@ -1,3 +1,5 @@
+import datetime
+
 import akshare as ak
 from app.main.db.mongo import db
 from app.main.utils import date_util
@@ -23,23 +25,24 @@ def sync_ppi():
 
 
 def sync_pmi():
-    data_list = ak.chinese_pmi()
-
-    data_format = []
-
-    for data in data_list:
-        array = data.split(",")
-        date = date_util.parse_date_time(array[0], "%Y-%m-%d")
-        zzy_value = array[1]  # 制造业指数
-        zzy_tb = array[2]  # 同比增长
-        fzzy_value = array[3]  # 累计
-        fzzy_tb = array[4]  # 累计
-
-        data_format.append(dict(date=date, zzy_value=zzy_value, zzy_tb=zzy_tb, fzzy_value=fzzy_value, fzzy_tb=fzzy_tb))
-
+    from datetime import datetime,time
+    data_list = ak.index_pmi_man_cx()
     set = db['pmi']
-    set.drop()
-    set.insert_many(data_format)
+    for data in data_list.to_dict(orient="records"):
+        date = datetime.combine(data['日期'],time())
+        zzy_value = data['制造业PMI']
+        zzy_tb = data['变化值']
+        v = dict(date=date, zzy_value=zzy_value, zzy_tb=zzy_tb)
+        set.update_one({"date": date},{"$set": v}, upsert=True)
+
+    data_list = ak.index_pmi_ser_cx()
+    for data in data_list.to_dict(orient="records"):
+        date = datetime.combine(data['日期'],time())
+        fzzy_value = data['服务业PMI']
+        fzzy_tb = data['变化值']
+        v = dict(date=date, fzzy_value=fzzy_value, fzzy_tb=fzzy_tb)
+        set.update_one({"date": date},
+                       {"$set": v}, upsert=True)
 
 
 def sync_cpi():
@@ -89,7 +92,7 @@ def sync_pig_data():
 
 
 if __name__ == "__main__":
-    # sync_pmi()
+    sync_pmi()
     # sync_ppi()
     # sync_pig_data()
-    sync_cpi()
+    # sync_cpi()

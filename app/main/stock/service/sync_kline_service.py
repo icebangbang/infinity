@@ -8,7 +8,7 @@ from app.application import app
 
 def sync_day_level(code, base_time=None):
     """
-    同步60天内的数据
+    同步KLINE_TIME_WINDOW天内的数据
     :param code:
     :return:
     """

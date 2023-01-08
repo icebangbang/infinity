@@ -30,6 +30,11 @@ task_routes = (
         'routing_key': 'day_level'
     }
     },
+    {'app.main.task.stock_task.sync_stock_k_line_by_job': {
+        'queue': 'day_level',
+        'routing_key': 'day_level'
+    }
+    },
     {'app.main.task.stock_task.transform_task': {
         'queue': 'day_level',
         'routing_key': 'day_level'
@@ -55,6 +60,11 @@ task_routes = (
     {'app.main.task.stock_task.submit_stock_feature': {
         'queue': 'day_level',
         'routing_key': 'day_level'
+    }
+    },
+    {'app.main.task.stock_task.submit_stock_feature_by_job': {
+        'queue': 'default',
+        'routing_key': 'default'
     }
     },
     {'app.main.task.etf_task.submit_etf_feature': {
@@ -167,11 +177,11 @@ task_routes = (
 )
 
 beat_schedule = {
-    'stock_data_sync':
-        {  # 股票数据同步
-            "task": "app.main.task.stock_task.sync_stock_k_line",  # 任务函数所在位置
-            "schedule": 300,  # 定时每300秒执行一次
-        },
+    # 'stock_data_sync':
+    #     {  # 股票数据同步
+    #         "task": "app.main.task.stock_task.sync_stock_k_line",  # 任务函数所在位置
+    #         "schedule": 300,  # 定时每300秒执行一次
+    #     },
     'sync_index_data':
         {  # 股票数据同步
             "task": "app.main.task.stock_task.sync_index_data",  # 任务函数所在位置
@@ -194,10 +204,10 @@ beat_schedule = {
         "task": "app.main.task.stock_task.submit_stock_ind_task",
         "schedule": 6000  # 每20分钟执行一次
     },
-    'get_stock_feature': {
-        "task": "app.main.task.stock_task.submit_stock_feature",
-        "schedule": 300  # 每5分钟执行一次
-    },
+    # 'get_stock_feature': {
+    #     "task": "app.main.task.stock_task.submit_stock_feature",
+    #     "schedule": 300  # 每5分钟执行一次
+    # },
     'get_trend_point': {  # 趋势数据收集
         "task": "app.main.task.trend_task.submit_trend_task",
         "schedule": 600000000  # 每10分钟执行一次

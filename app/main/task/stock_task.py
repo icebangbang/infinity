@@ -87,6 +87,25 @@ def sync_stock_k_line(self, rebuild_data=None):
     task_dao.create_task(global_task_id, "app.main.task.stock_task.sync_stock_k_line", len(codes))
     transform_task.apply_async(args=[codes, global_task_id, 0])
 
+@celery.task(bind=True, base=MyTask, expires=180)
+def sync_stock_k_line_by_job(self,**kwargs):
+    """
+    schedule驱动
+    提交同步股票日k线任务
+    :param self:
+    :param reuild_data: 因为分红等关系,前复权数据会将历史收盘价进行压缩,需要重跑数据
+    :return:
+    """
+    params = kwargs.get("params", {})
+
+    global_task_id = params.get("global_task_id", None)
+    stocks = stock_dao.get_all_stock(dict(code=1))
+    # 获取最近一个交易日
+    codes = [stock['code'] for stock in stocks]
+
+    task_dao.create_task(global_task_id, "同步个股日k线", len(codes),kwargs)
+    transform_task.apply_async(args=[codes, global_task_id, 0])
+
 
 @celery.task(bind=True, base=MyTask, expires=180)
 def transform_task(self, codes, task_id, deepth):
@@ -170,7 +189,7 @@ def submit_stock_feature(self, to_date=None, codes=None, global_task_id=None):
 
 
 @celery.task(bind=True, base=MyTask, expires=36000)
-def submit_stock_feature_within_range(self, **kwargs):
+def submit_stock_feature_by_job(self, **kwargs):
     params = kwargs.get("params", {})
     from_date_ts = params.get("from_date_ts", None)
     end_date_ts = params.get("end_date_ts", None)
@@ -192,8 +211,6 @@ def submit_stock_feature_within_range(self, **kwargs):
 
 
         step = int(len(codes) / 630)
-
-        task_dao.create_task(global_task_id, "个股特征跑批", len(codes))
 
         for i in range(0, len(codes), step):
             group = codes[i:i + step]

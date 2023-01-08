@@ -37,7 +37,7 @@ def dispatch():
     """
     req = request.json
     global_task_id = req['globalId']
-    callbackUrl = req['callbackUrl']
+    callback_url = req['callbackUrl']
 
     date_start_str = req['start']
     date_end_str = req['end']
@@ -48,7 +48,7 @@ def dispatch():
     flow_job_info = dict(
         task_name=req['taskName'],
         job_type=task_constant.TASK_TYPE_TASK_FLOW,
-        callback_url=callbackUrl,
+        callback_url=callback_url,
         global_task_id = global_task_id,
         params=dict(from_date_ts=date_util.to_timestamp(date_start),
                     end_date_ts=date_util.to_timestamp(date_end),
@@ -62,4 +62,4 @@ def dispatch():
     method = task_constant.TASK_MAPPING[req['taskName']]
     method.apply_async(kwargs=flow_job_info)
 
-    return restful.response("ok")
+    return restful.response({"status":"ok","method":method})

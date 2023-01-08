@@ -58,7 +58,7 @@ def get_pmi():
     """
     start = datetime(2006, 1, 1)
     ppi = db['pmi']
-    ppi_list = list(ppi.find({"date": {"$gte": start}}).sort("_id", -1))
+    ppi_list = list(ppi.find({"date": {"$gte": start}}).sort("_id", 1))
 
     date = []
     zzy = []

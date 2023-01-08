@@ -75,13 +75,18 @@ def sync_trend_task(self, from_date_ts, end_date_ts, codes, name_dict, global_ta
 
 
 @celery.task(bind=True, base=MyTask, expires=1800)
-def get_trend_data_task(self, from_date_ts=None, end_date_ts=None, global_task_id=None):
+def get_trend_data_task(self, **kwargs):
     """
     将趋势变化数据聚合
     :param self:
     :param date:
     :return:
     """
+    params = kwargs.get("params", {})
+    from_date_ts = params.get("from_date_ts", None)
+    end_date_ts = params.get("end_date_ts", None)
+
+    global_task_id = params.get("global_task_id", None)
 
     from_date = date_util.get_start_of_day(date_util.from_timestamp(int(from_date_ts))) \
         if from_date_ts is not None else date_util.get_start_of_day(datetime.now())
@@ -89,7 +94,7 @@ def get_trend_data_task(self, from_date_ts=None, end_date_ts=None, global_task_i
     end_date = date_util.get_start_of_day(date_util.from_timestamp(int(end_date_ts))) \
         if end_date_ts is not None else date_util.get_start_of_day(datetime.now())
 
-    log.info("get_trend_data_task {},{}:{}".format(global_task_id, from_date, end_date))
+    log.info("趋势数据聚合:{},{}-{}".format(global_task_id, from_date, end_date))
 
     # 板块级别的聚合
     trend_service.get_trend_size_info(from_date, end_date)
@@ -97,3 +102,5 @@ def get_trend_data_task(self, from_date_ts=None, end_date_ts=None, global_task_i
     trend_service.get_all_trend_info(from_date, end_date)
     # 成交量和成交额的聚合
     board_service.collect_trade_money(from_date, end_date)
+
+    task_dao.finish_task(global_task_id)

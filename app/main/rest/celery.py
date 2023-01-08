@@ -111,15 +111,17 @@ def get_stock_trend():
     chain_job_info = dict(
         job_type=task_constant.TASK_TYPE_CELERY,
         job_chain=['app.main.task.trend_task.get_trend_data_task'],
-        kwargs=dict(from_date_ts=date_util.to_timestamp(date_start),
+        params=dict(from_date_ts=date_util.to_timestamp(date_start),
                     end_date_ts=date_util.to_timestamp(date_end),
                     global_task_id=global_task_id)
     )
     job_config.set_job_config(global_task_id,chain_job_info)
 
-    trend_task.submit_trend_task.apply_async(kwargs=dict(from_date=date_util.to_timestamp(date_start),
-                    end_date=date_util.to_timestamp(date_end),
-                    global_task_id=global_task_id))
+    # trend_task.submit_trend_task.apply_async(kwargs=dict(from_date=date_util.to_timestamp(date_start),
+    #                 end_date=date_util.to_timestamp(date_end),
+    #                 global_task_id=global_task_id))
+
+    trend_task.submit_trend_task.apply_async(kwargs=chain_job_info)
 
     return restful.response("ok")
 
@@ -127,7 +129,7 @@ def get_stock_trend():
 @rest.route("/celery/stock/feature", methods=['post'])
 def get_stock_feature():
     """
-    手动跑批个股特征
+    个股特征跑批
     :return:
     """
     body = request.json

@@ -10,12 +10,23 @@ import json
 import logging as log
 import requests
 
+def finish_task(task_id):
+    """
+    直接更新
+    :param task_id:
+    :param task_name:
+    :return:
+    """
+    job_json_info = job_config.load_job_config(task_id)
+    job_info = json.loads(job_json_info)
+    if job_info is not None and job_info['job_type'] == task_constant.TASK_TYPE_TASK_FLOW:
+        notify(job_info)
 
-def create_task(task_id, task_name, size, chain=None):
+def create_task(task_id, task_name, size, job_info=None):
     now = datetime.now()
     sync_record = db['sync_record']
 
-    data = dict(create_time=now, size=size, task_name=task_name, job_info=chain)
+    data = dict(create_time=now, size=size, task_name=task_name, job_info=job_info)
 
     sync_record.update_one({"task_id": task_id, "task_name": task_name}, {"$set": data}, upsert=True)
     my_redis.set(task_id, size)
@@ -42,7 +53,7 @@ def update_task(task_id, size, task_name=None):
                 log.info("module {} m {}".format(p, m))
                 method = getattr(importlib.import_module(p),
                                  m, None)
-                next_kwargs = job_info['kwargs']
+                next_kwargs = job_info.get('params',None)
 
                 next_kwargs = next_kwargs if next_kwargs is not None else dict(global_task_id=task_id)
                 method.apply_async(kwargs=next_kwargs)
@@ -58,14 +69,18 @@ def notify(job_info):
     global_id = job_info['global_task_id']
     callback_url = job_info['callback_url']
     task_name = job_info['task_name']
-    resp = requests.post(callback_url, json=dict(globalId=global_id,taskName=task_name))
+
+    log.info("任务完成回调:global_id:{},任务信息:{}".format(global_id,json.dumps(job_info)))
+
+    if callback_url is not None:
+        resp = requests.post(callback_url, json=dict(globalId=global_id,taskName=task_name))
 
     is_finished = 0
     if resp.status_code == 200 and resp.json()['success'] is True:
         is_finished = 1
     sync_record = db['sync_record']
     sync_record.update_one({"task_id": global_id, "task_name": task_name},
-                           {"$set": {"update_time": datetime.now(), "job_info": job_info, "is_finished": is_finished}})
+                           {"$set": {"update_time": datetime.now(), "job_info": job_info, "is_finished": is_finished}},upsert=True)
 
 
 if __name__ == "__main__":
