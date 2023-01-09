@@ -130,7 +130,7 @@ class Infinity(Config):
     MONGO_URL = "mongodb://root:whosyourdaddy$879@0.0.0.0:20017/"
 
     SERVER_HOST = "10.8.0.2"
-    SERVER_PORT = 20060
+    SERVER_PORT = 20500
     NACOS_SERVICE_NAME = "infinity"
     NACOS_CLUSTER_NAME = "DEFAULT"
 
