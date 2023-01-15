@@ -114,7 +114,7 @@ def plot_peaks(industry, start=None, end=None, show_plot=True):
         return merged_result
 
 
-def cal_maximum_rollback(start, end, k_line_data_list):
+def cal_maximum_rollback(board,name,start, end, k_line_data_list):
     """
         统计最大回撤
         :return:
@@ -138,14 +138,14 @@ def cal_maximum_rollback(start, end, k_line_data_list):
                 maximum_rollback = rate
                 maximum_rollback_start = cursor
                 maximum_rollback_end = sub_cursor
-    log.info("{},{},最大回撤:{}".format(maximum_rollback_start, maximum_rollback_end,
+    log.info("{},{},{},{},最大回撤:{}".format(board,name,maximum_rollback_start, maximum_rollback_end,
                                         maximum_rollback))
     return dict(maximum_rollback=maximum_rollback,
                 maximum_rollback_start=maximum_rollback_start,
                 maximum_rollback_end=maximum_rollback_end)
 
 
-def cal_maximum_up(start, end, k_line_data_list):
+def cal_maximum_up(board,name,start, end, k_line_data_list):
     """
         统计最大涨幅
         :return:
@@ -158,6 +158,9 @@ def cal_maximum_up(start, end, k_line_data_list):
     k_line_data_dict = {k_line_data['date']: k_line_data for k_line_data in k_line_data_list}
 
     for cursor in WorkDayIterator(start, end):
+        k_line_data = k_line_data_dict.get(cursor)
+        if k_line_data is None: continue
+        cost = k_line_data['close']
         for sub_cursor in WorkDayIterator(cursor, end):
             k_line_data = k_line_data_dict.get(sub_cursor, None)
             if k_line_data is None: continue
@@ -169,7 +172,7 @@ def cal_maximum_up(start, end, k_line_data_list):
                 maximum_up = rate
                 maximum_up_start = cursor
                 maximum_up_end = sub_cursor
-    log.info("{},{},最大涨幅:{}".format(maximum_up_start, maximum_up_end,
+    log.info("{},{},{},{},最大涨幅:{}".format(board,name,maximum_up_start, maximum_up_end,
                                         maximum_up))
     return dict(maximum_up=maximum_up, maximum_up_start=maximum_up_start, maximum_up_end=maximum_up_end)
 
@@ -198,13 +201,20 @@ def find_stocks(board, start=None, end=None):
             df = pd.DataFrame(k_line_list)
             result_list = []
             for code, group in df.groupby("code"):
+
+                name = stock_dict[code]['name']
+
+                if name == '银泰黄金':
+                    print(133)
+
                 # todo 计算最大回撤
                 records = group.to_dict("records")
-                rollback_dict = cal_maximum_rollback(start_scope, end_scope, records)
-                up_dict = cal_maximum_up(start_scope, end_scope, records)
+                rollback_dict = cal_maximum_rollback(board,name,start_scope, end_scope, records)
+                up_dict = cal_maximum_up(board,name,start_scope, end_scope, records)
 
                 new_dict = dict(code=code,
-                                name=stock_dict[code]['name'],
+                                name=name,
+                                year=date_util.get_years(start_scope,end_scope),
                                 start_date=records[0]['date'],
                                 close=records[0]['close'],
                                 start_scope=start_scope,
@@ -306,7 +316,8 @@ if __name__ == '__main__':
     # find_stocks("光伏设备", datetime(2022, 1, 1), datetime(2022, 12, 1))
     # plot_peaks("光伏设备", datetime(2019, 1, 1), datetime(2019, 12, 1), True)
 
-    find_stocks_by_year("有色金属", 2019)
-    find_stocks_by_year("有色金属", 2020)
-    # find_stocks_by_year("有色金属", 2021)
-    # find_stocks_by_year("有色金属",2022)
+    find_stocks_by_year("贵金属", 2019)
+    find_stocks_by_year("贵金属", 2020)
+    find_stocks_by_year("贵金属", 2021)
+    find_stocks_by_year("贵金属",2022)
+    find_stocks_by_year("贵金属",2023)

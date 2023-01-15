@@ -10,6 +10,8 @@ def create_doc(doc_name):
 
 
 def run():
+    db['rmb_fxrate'].insert_one({'date':None, 'us':None, 'eur':None, 'jp':None})
+
     # 自定义板块,需要定时同步
     db.custom_board_detail.create_index([("board", 1)])
     # 个股训练分析表

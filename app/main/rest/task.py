@@ -31,8 +31,9 @@ def backtrading():
 
 
 @rest.route("/task/async/dispatch", methods=['post', 'get'])
-def dispatch():
+def async_dispatch():
     """
+    异步调用方法
     :return:
     """
     req = request.json
@@ -61,5 +62,24 @@ def dispatch():
 
     method = task_constant.TASK_MAPPING[req['taskName']]
     method.apply_async(kwargs=flow_job_info)
+
+    return restful.response({"status":"ok","method":method})
+
+@rest.route("/task/sync/dispatch", methods=['post', 'get'])
+def sync_dispatch():
+    """
+    :return:
+    """
+    req = request.json
+    global_task_id = req['globalId']
+
+    date_start_str = req['start']
+    date_end_str = req['end']
+
+    date_start = date_util.parse_date_time(date_start_str)
+    date_end = date_util.parse_date_time(date_end_str)
+
+    method = task_constant.TASK_MAPPING[req['taskName']]
+    result = method()
 
     return restful.response({"status":"ok","method":method})

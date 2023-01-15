@@ -4,7 +4,7 @@ from datetime import datetime
 from app.main.utils import date_util
 
 def sync():
-    # 上证,深证,创业板
+    # 上证,深证,创业板k线同步
     id_list = ["sh000001", "zs399001", "zs399006","BDI","zs399106"]
 
     now = datetime.now()

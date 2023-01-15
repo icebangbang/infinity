@@ -8,6 +8,17 @@ from dateutil.relativedelta import relativedelta
 
 from app.main.yi.constant import jqmc
 
+def get_years(start:datetime,end:datetime):
+    """
+    获取时间区间涉及的年份
+    :param start:
+    :param end:
+    :return:
+    """
+    year_start = start.year
+    year_end = end.year
+
+    return [year for year in range(year_start,year_end+1)]
 
 def get_report_day(dt: datetime):
     month = dt.month
@@ -87,7 +98,7 @@ def parse_date_time(dt_str, fmt="%Y-%m-%d %H:%M:%S") -> datetime:
     解析时间
     :return:
     """
-    if dt_str is None: return dt_str
+    if dt_str is None or dt_str == '': return None
     if not isinstance(dt_str, str): return dt_str
 
     time = datetime.strptime(dt_str, fmt)
@@ -293,6 +304,7 @@ def get_jq_list(start, end, ignore_time=True) -> list:
     return jq_list
 
 
+
 class WorkDayIterator(object):
     def __init__(self, start, end):
         self.date = start
@@ -349,5 +361,7 @@ if __name__ == "__main__":
 
     # for value in YearIterator(2010, 2022):
     #     print(value)
-    jq_list = get_jq_list(datetime(2022, 4, 1), datetime(2022, 12, 31))
-    print(jq_list)
+    # jq_list = get_jq_list(datetime(2022, 4, 1), datetime(2022, 12, 31))
+    # print(jq_list)
+
+    print([year for year in range(2012,2014)])
