@@ -1,11 +1,12 @@
+import logging
 from datetime import datetime, timedelta
 
+import pandas
 import pandas as pd
 
+from app.main.db.mongo import db
 from app.main.stock.dao import k_line_dao, board_dao, stock_dao
 from app.main.utils import date_util, cal_util, stock_util
-import logging
-from app.main.db.mongo import db
 from app.main.utils.date_util import WorkDayIterator
 
 
@@ -136,8 +137,33 @@ def collect_trade_money(start, end):
     计算交易金额
     :return:
     """
-    collect_industry_info(start,end)
-    collect_index_info(start,end)
+    collect_industry_info(start, end)
+    collect_index_info(start, end)
+
+
+def collect_industry_info_yearly(year):
+    """
+    计算年级别
+    :param year:
+    :return:
+    """
+    start = datetime(year, 1, 1)
+    end = datetime(year, 12, 31)
+    boards = get_all_board()
+    for board in boards:
+        industry = board['board']
+        codes = board['codes']
+        lines = k_line_dao.get_k_line_data(start, end, codes=codes)
+        df = pandas.DataFrame(lines)
+        trade_stock_size =len(df.groupby("code"))
+        money_sum = df['money'].sum()
+        volume_sum = df['volume'].sum()
+        money = cal_util.divide(money_sum, 100000000, 3)
+        logging.info("同步板块{}的{}年交易量和成交额:{},{}".format(industry, year, money, volume_sum))
+        update_item = dict(industry=industry, date=start,
+                           volume=volume_sum, money=money, level="year",trade_stock=trade_stock_size)
+        db['board_trade_volume'].update_one({"industry": industry, "date": start, "level": "year"},
+                                            {"$set": update_item}, upsert=True)
 
 
 def collect_industry_info(start, end):
@@ -177,12 +203,12 @@ def collect_index_info(start, end):
         belong = stock_util.market_belong(code)
         belong_map[belong].append(code)
     for date in WorkDayIterator(start, end):
-        for belong,codes in belong_map.items():
+        for belong, codes in belong_map.items():
             lines = k_line_dao.get_k_line_data(date, date, codes=codes)
             money_sum = sum([line['money'] for line in lines])
             volume_sum = sum([line['volume'] for line in lines])
             money_sum = cal_util.divide(money_sum, 100000000, 3)
-            logging.info("同步板块{}的交易量和成交额:{},{},{}".format(belong, date, volume_sum,money_sum))
+            logging.info("同步板块{}的交易量和成交额:{},{},{}".format(belong, date, volume_sum, money_sum))
             update_item = dict(industry=belong, date=date,
                                volume=volume_sum, money=money_sum)
             db['board_trade_volume'].update_one({"industry": belong, "date": date},
@@ -190,6 +216,8 @@ def collect_index_info(start, end):
 
 
 if __name__ == "__main__":
-    end = date_util.get_start_of_day(datetime.now())
-    start = end - timedelta(356)
-    collect_trade_money(start,end)
+    # end = date_util.get_start_of_day(datetime.now())
+    # start = end - timedelta(356)
+    # collect_trade_money(start, end)
+
+    collect_industry_info_yearly(2022)
