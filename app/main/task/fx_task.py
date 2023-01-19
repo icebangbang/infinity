@@ -18,3 +18,7 @@ def sync_cny_fx():
     df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
     db['rmb_fxrate'].drop()
     db['rmb_fxrate'].insert_many(df.to_dict(orient="records"))
+
+
+if __name__ == "__main__":
+    sync_cny_fx()

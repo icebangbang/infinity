@@ -97,9 +97,9 @@ def get_trend_data_task(self, **kwargs):
     log.info("趋势数据聚合:{},{}-{}".format(global_task_id, from_date, end_date))
 
     # 板块级别的聚合
-    trend_service.get_trend_size_info(from_date, end_date)
+    trend_service.get_board_trend_size_info(from_date, end_date)
     # 大盘级别的聚合
-    trend_service.get_all_trend_info(from_date, end_date)
+    trend_service.get_index_trend_info(from_date, end_date)
     # 成交量和成交额的聚合
     board_service.collect_trade_money(from_date, end_date)
 

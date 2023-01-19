@@ -4,7 +4,7 @@ from datetime import datetime
 
 from app.main.stock.company import Company
 from app.main.stock.job import job_config
-from app.main.utils import date_util, simple_util
+from app.main.utils import date_util, simple_util, collection_util
 import pymongo
 
 
@@ -72,9 +72,33 @@ def get_stock_detail_map(codes=None, fields=None)->dict:
 
 
 def get_code_name_map():
+    """
+    获取个股代码和名称的映射
+    :return: {"code":"name"}
+    """
     my_set = db['stock_detail']
     data = list(my_set.find({}, dict(code=1, name=1, _id=0)))
     return {d["code"]: d["name"] for d in data}
+
+def get_code_province_map():
+    """
+    获取个股代码和省份的映射
+    :return: {"code":"province"}
+    """
+    my_set = db['stock_detail']
+    data_list = list(my_set.find({}, dict(code=1, board=1, _id=0)))
+    code_province_dict = {}
+    for data in data_list:
+        code = data['code']
+        boards = data['board']
+        if collection_util.is_empty(boards):
+            continue
+        if "板块" not in boards[0]:
+            continue
+        code_province_dict[code] = boards[0].replace("板块","")
+
+    return code_province_dict
+
 
 
 def dump_stock_feature(companies: List[Company], date):
@@ -121,4 +145,5 @@ def get_company_feature(code, date):
 if __name__ == "__main__":
     # get_company_feature("689009", datetime(2021, 11, 1))
     # a = get_stock_detail(['159980'])
+    a = get_code_province_map()
     print()

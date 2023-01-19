@@ -2,29 +2,29 @@
 趋势相关服务
 """
 import logging
+import logging as log
 from collections import OrderedDict
-from retrying import retry
+from datetime import datetime, timedelta
+
+import pandas as pd
 from pymongo.errors import AutoReconnect
+from retrying import retry
 
 from app.main.db.mongo import db
 from app.main.stock import constant
 from app.main.stock.company import Company
-from app.main.stock.const import board_const
 from app.main.stock.dao import stock_dao, board_dao, k_line_dao
-from datetime import datetime, timedelta
-import pandas as pd
-
 from app.main.stock.service import board_service
 from app.main.utils import date_util, cal_util, stock_util
 from app.main.utils.date_util import WorkDayIterator
-import logging as log
 
 normal = 1
 frozen = 2
 temp = 3
 
-def get_trend_data(date,industries):
-    return list(db['trend_data'].find({"date":date,"industry":{"$in":industries}}))
+
+def get_trend_data(date, industries):
+    return list(db['trend_data'].find({"date": date, "industry": {"$in": industries}}))
 
 
 def save_stock_trend_with_features(code, name, features, start_of_day: datetime):
@@ -185,12 +185,13 @@ def save_stock_trend_with_company(company: Company, start_of_day: datetime):
 
     save_stock_trend_with_features(code, name, features, start_of_day)
 
+
 def _retry_if_auto_reconnect_error(exception):
     """Return True if we should retry (in this case when it's an AutoReconnect), False otherwise"""
     return isinstance(exception, AutoReconnect)
 
 
-@retry(retry_on_exception=_retry_if_auto_reconnect_error,stop_max_attempt_number=2,wait_fixed=2000)
+@retry(retry_on_exception=_retry_if_auto_reconnect_error, stop_max_attempt_number=2, wait_fixed=2000)
 def _get_trend_point(date):
     trend_point_set = db['trend_point']
     r = list(trend_point_set.find(
@@ -198,7 +199,48 @@ def _get_trend_point(date):
          "update": {"$gte": date}}))
     return r
 
-def get_all_trend_info(start, end):
+
+def get_province_trend_info(start, end):
+    """
+    获取省份的涨跌趋势
+    :param start:
+    :param end:
+    :return:
+    """
+    code_province_dict = stock_dao.get_code_province_map()
+    for date in WorkDayIterator(start, end):
+
+        r = _get_trend_point(date)
+        if len(r) == 0: continue
+        df = pd.DataFrame(r)
+        df['province'] = df.apply(lambda row: code_province_dict.get(row['code']), axis=1)
+        grouped = df.groupby(['province', 'trend'])
+        series_to_dict = grouped.size().to_dict()
+        series_province = df.groupby(['province']).size()
+        result_list = []
+
+        for province in series_province.to_dict().keys():
+            for trend in ['up', 'down', 'enlarge', 'convergence']:
+                if (province, trend) in series_to_dict.keys():
+                    size = series_to_dict[(province, trend)]
+                    result_list.append(
+                        dict(industry=province, trend=trend, size=size,
+                             rate=cal_util.round(size / int(series_province[province]), 4),
+                             date=date,
+                             total=int(series_province[province]),
+                             update=datetime.now()))
+                else:
+                    result_list.append(
+                        dict(industry=province, trend=trend, size=0, rate=0, total=0, date=date,
+                             update=datetime.now()))
+
+        for result in result_list:
+            print("insert {},{},{}".format(result["industry"], result["trend"], result['date']))
+            db.trend_data.update_one(
+                {"industry": result["industry"], "trend": result["trend"],
+                 "date": result['date']}, {"$set": result}, upsert=True)
+
+def get_index_trend_info(start, end):
     """
     获取大盘的趋势分组数据
     :param start:
@@ -227,7 +269,7 @@ def get_all_trend_info(start, end):
                              update=datetime.now()))
                 else:
                     result_list.append(
-                        dict(industry=market, trend=trend, size=0, rate=0,total=0, date=date,
+                        dict(industry=market, trend=trend, size=0, rate=0, total=0, date=date,
                              update=datetime.now()))
 
         for result in result_list:
@@ -236,7 +278,8 @@ def get_all_trend_info(start, end):
                 {"industry": result["industry"], "trend": result["trend"],
                  "date": result['date']}, {"$set": result}, upsert=True)
 
-def get_trend_info_by_name(board_name,start,end):
+
+def get_trend_info_by_name(board_name, start, end):
     """
     特定板块跑数据
     :param board:
@@ -248,7 +291,7 @@ def get_trend_info_by_name(board_name,start,end):
     result_list = []
 
     for date in WorkDayIterator(start, end):
-        logging.info("完成对{}板块的趋势分析:{}".format(board_name,date))
+        logging.info("完成对{}板块的趋势分析:{}".format(board_name, date))
         trend_point_set = db['trend_point']
         total = board['codes']
         r = list(trend_point_set.find(
@@ -258,7 +301,6 @@ def get_trend_info_by_name(board_name,start,end):
         df = pd.DataFrame(r)
         series = df.groupby(['trend']).size()
         series_to_dict = series.to_dict()
-
 
         for trend in ['up', 'down', 'enlarge', 'convergence']:
             if trend in series_to_dict.keys():
@@ -288,7 +330,7 @@ def get_trend_info_by_name(board_name,start,end):
     _dump_trend_data(result_list)
 
 
-def get_trend_size_info(start, end, only_include=False):
+def get_board_trend_size_info(start, end, only_include=False):
     """
     获取各个板块的趋势分组数据
     :return:
@@ -460,6 +502,8 @@ def get_trend_info(end_date):
 
     return dict(records=df.to_dict("records"),
                 industryInfo=industry_info)
+
+
 def _dump_trend_data(result_list):
     for result in result_list:
         industry = result["industry"]
@@ -509,6 +553,7 @@ def _dump_trend_data(result_list):
         db.trend_data.update_one(
             {"industry": result["industry"], "trend": result["trend"],
              "date": result['date']}, {"$set": result}, upsert=True)
+
 
 def _analysis(up_df, down_df):
     # 最低上行率
@@ -561,12 +606,11 @@ if __name__ == "__main__":
     # get_trend_size_info(datetime(2022, 9, 16), datetime(2022, 9, 16), False)
     # get_all_trend_info(datetime(2022, 4, 1), datetime(2022, 9, 16))
     # print("code","300763")
-    get_trend_info_by_name('中字头',datetime(2019, 1, 1), datetime(2022, 12, 5))
+    # get_trend_info_by_name('中字头',datetime(2019, 1, 1), datetime(2022, 12, 5))
+    get_province_trend_info(datetime(2021, 1, 1), datetime(2023, 1, 19))
+    # get_index_trend_info(datetime(2021, 1, 1), datetime(2022, 12, 5))
     # for date in WorkDayIterator(datetime(2019, 1, 1), datetime(2022, 12, 5)):
     #     # get_trend_size_info(date, date, False)
     #     get_trend_info_by_name("中字头")
     #     get_all_trend_info(date, date)
     #     board_service.collect_trade_money(date, date)
-
-
-
