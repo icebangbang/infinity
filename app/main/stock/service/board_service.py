@@ -214,10 +214,39 @@ def collect_index_info(start, end):
             db['board_trade_volume'].update_one({"industry": belong, "date": date},
                                                 {"$set": update_item}, upsert=True)
 
+def collect_province_info(start, end):
+    """
+    以省份为维度成交额数据
+    :param start:
+    :param end:
+    :return:
+    """
+    code_province_dict = stock_dao.get_code_province_map()
+
+
+    stocks = stock_dao.get_all_stock(dict(code=1, name=1, _id=0, date=1))
+    belong_map = {}
+    for stock in stocks:
+        code = stock['code']
+        province = code_province_dict[code]
+        belongs = belong_map.get(province,[])
+        belongs.append(code)
+        belong_map[province] = belongs
+    for date in WorkDayIterator(start, end):
+        for province, codes in belong_map.items():
+            lines = k_line_dao.get_k_line_data(date, date, codes=codes)
+            money_sum = sum([line['money'] for line in lines])
+            volume_sum = sum([line['volume'] for line in lines])
+            money_sum = cal_util.divide(money_sum, 100000000, 3)
+            logging.info("同步板块{}的交易量和成交额:{},{},{}".format(province, date, volume_sum, money_sum))
+            update_item = dict(industry=province, date=date,
+                               volume=volume_sum, money=money_sum)
+            db['board_trade_volume'].update_one({"industry": province, "date": date},
+                                                {"$set": update_item}, upsert=True)
 
 if __name__ == "__main__":
     # end = date_util.get_start_of_day(datetime.now())
     # start = end - timedelta(356)
     # collect_trade_money(start, end)
-
-    collect_industry_info_yearly(2022)
+    collect_province_info(datetime(2021,1,1),datetime(2022,12,31))
+    # collect_industry_info_yearly(2022)

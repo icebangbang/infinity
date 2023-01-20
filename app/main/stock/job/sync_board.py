@@ -6,19 +6,25 @@ from app.main.db.mongo import db
 from app.main.stock.dao import stock_dao
 import requests
 
+from app.main.utils import collection_util
+
 """
-同步板块
+同步板块以及个股详情
 """
 
 
-def sync():
-    # myclient = pymongo.MongoClient("mongodb://admin:123456@101.37.24.40:20017/")
-    # mydb = myclient["stock"]
+def sync_and_update_stock():
+    """
+    同步板块，并和个股进行联动更新
+    :return:
+    """
     stock_detail = db["stock_detail"]
     board_detail = db["board_detail"]
 
     log.info("开始获取股票列表")
     stock_list = stock_info.get_stock_list()
+    # 2. 行业板块
+    # 3. 概念板块
     type_list = [1, 2, 3]
 
     for stock in stock_list:
@@ -49,21 +55,13 @@ def sync():
                 if code in stock_dict.keys():
                     board_dict["codes"].append(code)
                     stock_dict[code].get('board').append(label)
-                    # try:
-                    #     web = stock_info.get_stock_web(stock_dict[code])
-                    #     if web is not None:
-                    #         stock_dict[code]['web'] = web
-                    #     else:
-                    #         print(code)
-                    # except Exception as e:
-                    #     print(e)
                 else:
                     log.info("{}不在字典内".format(mapping['代码']))
 
     all_stock = stock_dao.get_all_stock()
     template = "提醒:{}新增了新的概念:{}"
     msg = ""
-    if all_stock and len(all_stock) > 0:
+    if collection_util.is_not_empty(all_stock):
         for k, v in stock_dict.items():
             v["name"] = v['name'].replace(" ", "")
             stock = stock_dao.get_one_stock(k)
@@ -99,4 +97,4 @@ def sync():
 
 
 if __name__ == "__main__":
-    sync()
+    sync_and_update_stock()

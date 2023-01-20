@@ -1,4 +1,4 @@
-from app.main.task import trend_task, stock_task, fx_task
+from app.main.task import trend_task, stock_task, fx_task, board_task
 
 TASK_SYNC_STOCK_IND = "SYNC_STOCK_IND"
 
@@ -6,6 +6,7 @@ TASK_TYPE_CELERY = 'TASK_CELERY'
 TASK_TYPE_TASK_FLOW = 'TASK_FLOW'
 
 TASK_MAPPING = {
+    "更新个股的板块信息":board_task.sync_board_stock_detail,
     "个股趋势跑批": trend_task.submit_trend_task,
     "个股特征跑批": stock_task.submit_stock_feature_by_job,
     '板块趋势和成交额聚合': trend_task.get_trend_data_task,

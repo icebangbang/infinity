@@ -86,14 +86,17 @@ def get_code_province_map():
     :return: {"code":"province"}
     """
     my_set = db['stock_detail']
-    data_list = list(my_set.find({}, dict(code=1, board=1, _id=0)))
+    data_list = list(my_set.find({}, dict(code=1,name=1, board=1, _id=0)))
     code_province_dict = {}
     for data in data_list:
+        name = data['name']
         code = data['code']
         boards = data['board']
         if collection_util.is_empty(boards):
             continue
-        if "板块" not in boards[0]:
+
+        if "板块" not in boards[0] and boards[0] not in ['黑龙江','内蒙古']:
+            print(name,code,boards)
             continue
         code_province_dict[code] = boards[0].replace("板块","")
 

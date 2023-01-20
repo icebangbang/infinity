@@ -58,7 +58,7 @@ def sync_board_stock_detail(self):
     :param self:
     :return:
     """
-    sync_board.sync()
+    sync_board.sync_and_update_stock()
 
 
 @celery.task(bind=True, base=MyTask, expires=180)

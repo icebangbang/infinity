@@ -206,7 +206,7 @@ def get_stock_detail():
     手动同步个股详情
     :return:
     """
-    sync_board.sync()
+    sync_board.sync_and_update_stock()
     return restful.response("ok")
 
 

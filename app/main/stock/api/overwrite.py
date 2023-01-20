@@ -7,11 +7,12 @@ import dateutil
 import logging
 from lxml import etree
 from py_mini_racer import py_mini_racer
-
+import jionlp as jio
 
 from akshare.stock.cons import hk_js_decode
 from tqdm import tqdm
 
+from app.main.stock.dao import stock_detail_dao, stock_dao
 
 
 def stock_zh_a_hist(
@@ -608,6 +609,37 @@ def get_stock_web(stock):
         return None
     return "http://{}".format(web.split('/')[0])
 
+def get_stock_register_address(stock):
+    """
+    001267
+    :param stock:
+    :return:
+    """
+    belong = stock['belong']
+    code = stock['code']
+    url = "https://emweb.securities.eastmoney.com/PC_HSF10/CompanySurvey/PageAjax?code={}{}".format(belong, code)
+    r = requests.get(url)
+    json_data = r.json()
+    reg_address = json_data['jbzl'][0]['REG_ADDRESS']
+    web = json_data['jbzl'][0]['ORG_WEB']
+    if reg_address is None:
+        return None
+
+    address_info = jio.parse_location(reg_address)
+
+    if address_info['province'] is None:
+        stock_detail = stock_dao.get_one_stock(code)
+        boards = stock_detail['board']
+        province = boards[0].replace("板块","省")
+        reg_address = province+reg_address
+        address_info = jio.parse_location(reg_address)
+
+    return {"province":address_info["province"],
+            "city":address_info["city"],
+            "county":address_info["county"],
+            "full_location":address_info["full_location"],
+            "web":web}
+
 
 def get_stock_business(stock):
     """
@@ -732,5 +764,6 @@ if __name__ == "__main__":
     # r = get_stock_web(dict(code="300763",belong="sz"))
     # r = get_bellwether()
     # df = ak.fund_etf_hist_sina(symbol="sz169103")
-    df = stock_cash_flow_sheet_by_report_em(symbol="sz300763")
+    # df = stock_cash_flow_sheet_by_report_em(symbol="sz300763")
+    df = get_stock_register_address(dict(belong = 'sz',code="300763"))
     print(123)

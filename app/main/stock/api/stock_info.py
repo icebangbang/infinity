@@ -38,27 +38,30 @@ def get_stock_list():
     return total.to_dict(orient='records')
 
 
-def get_stock_indicator(code, name):
-    log.info("开始获取 {},{} 个股指标".format(code, name))
-    resp = requests.get("https://stock.9fzt.com/index/sz_300763.html?from=BaiduAladdin")
-    body = resp.text
 
 def get_all_stock():
     df = ak.stock_a_lg_indicator(stock="all")
     return df.to_dict(orient='records')
 
-def get_zt_pool():
-    df = ak.stock_em_zt_pool(date='20210910')
-
-    industry = df['所属行业'].value_counts(normalize=False, sort=True).to_frame('count').reset_index()
-    industry['perc'] = industry['count'].div(len(df))
-    industry.columns = ['industry','count','perc']
-
-    return df,industry
 
 
 def get_stock_web(stock):
+    """
+    从东财的个股详情页获取个股的官网，首次开发的需求是为了想从官网获取上市公司的经营范围
+    get_stock_web 自定义编写，伪装为akshare的方法
+    :param stock:
+    :return:
+    """
     return ak.get_stock_web(stock)
+
+def get_stock_register_address(stock:dict):
+    """
+    从东财的详情页获取个股的地址信息，并进行解析
+    :param stock:
+    :return:
+    """
+    return ak.get_stock_register_address(stock)
+
 
 def get_stock_business(stock):
     business = ak.get_stock_business(stock)
