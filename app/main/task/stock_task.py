@@ -87,8 +87,9 @@ def sync_stock_k_line(self, rebuild_data=None):
     task_dao.create_task(global_task_id, "app.main.task.stock_task.sync_stock_k_line", len(codes))
     transform_task.apply_async(args=[codes, global_task_id, 0])
 
+
 @celery.task(bind=True, base=MyTask, expires=180)
-def sync_stock_k_line_by_job(self,**kwargs):
+def sync_stock_k_line_by_job(self, **kwargs):
     """
     schedule驱动
     提交同步股票日k线任务
@@ -103,12 +104,12 @@ def sync_stock_k_line_by_job(self,**kwargs):
     # 获取最近一个交易日
     codes = [stock['code'] for stock in stocks]
 
-    task_dao.create_task(global_task_id, "同步个股日k线", len(codes),kwargs)
-    transform_task.apply_async(args=[codes, global_task_id, 0])
+    task_dao.create_task(global_task_id, "同步个股日k线", len(codes), kwargs)
+    transform_task.apply_async(kwargs=dict(codes=codes, global_task_id=global_task_id, deepth=0))
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
-def transform_task(self, codes, task_id, deepth):
+def transform_task(self, codes, global_task_id, deepth):
     """
     默认worker驱动
     拆分同步股票日k线任务,然后提交
@@ -119,7 +120,7 @@ def transform_task(self, codes, task_id, deepth):
     :return:
     """
     if len(codes) <= 25:
-        sync_stock_data.apply_async(args=[codes, task_id])
+        sync_stock_data.apply_async(kwargs=dict(codes=codes, global_task_id=global_task_id))
         return
 
     step = int(len(codes) / 25)
@@ -127,17 +128,17 @@ def transform_task(self, codes, task_id, deepth):
         group = codes[i:i + step]
         logging.info("拆分个股k线任务,时序{}:{},层次:{}".format(i, i + step, deepth))
 
-        transform_task.apply_async(args=[group, task_id, deepth + 1])
+        transform_task.apply_async(kwargs=dict(codes=group, global_task_id=global_task_id, deepth=deepth + 1))
 
 
 @celery.task(bind=True, base=MyTask, expires=1800)
-def sync_stock_data(self, codes, task_id):
+def sync_stock_data(self, codes, global_task_id):
     """
     day_level worker驱动
     正式从第三方网站抓取数据
     :param self:
     :param codes:
-    :param task_id:
+    :param global_task_id:
     :return:
     """
     # logging.info("开始同步个股,{}".format(len(stocks)))
@@ -147,8 +148,6 @@ def sync_stock_data(self, codes, task_id):
             r = sync_kline_service.sync_day_level(code)
     except Exception as e:
         raise self.retry(exc=e, countdown=3, max_retries=10)
-
-    task_dao.update_task(task_id, len(codes), "同步个股k线")
 
 
 @celery.task(bind=True, base=MyTask, expires=36000)
@@ -197,11 +196,11 @@ def submit_stock_feature_by_job(self, **kwargs):
 
     from_date = date_util.from_timestamp(from_date_ts)
     end_date = date_util.from_timestamp(end_date_ts)
-    days = date_util.get_days_between(end_date,from_date)
+    days = date_util.get_days_between(end_date, from_date)
 
     stocks = stock_dao.get_all_stock(dict(code=1))
     codes = [stock['code'] for stock in stocks]
-    task_dao.create_task(global_task_id, "个股特征跑批", len(codes)*(1+days), kwargs)
+    task_dao.create_task(global_task_id, "个股特征跑批", len(codes) * (1 + days), kwargs)
 
     code_name_map = stock_dao.get_code_name_map()
     for to_date in WorkDayIterator(from_date, end_date):
@@ -209,13 +208,13 @@ def submit_stock_feature_by_job(self, **kwargs):
         base_timestamp = int(time.mktime(to_date.timetuple()))
         offset = "-252"
 
-
         step = int(len(codes) / 630)
 
         for i in range(0, len(codes), step):
             group = codes[i:i + step]
             name_dict = {code: code_name_map[code] for code in group}
             sync_stock_feature.apply_async(args=[base_timestamp, offset, group, name_dict, global_task_id])
+
 
 @celery.task(bind=True, base=MyTask, expires=36000)
 def sync_stock_feature(self, base_date, offset, codes, name_dict, global_task_id):
@@ -240,7 +239,6 @@ def sync_stock_feature(self, base_date, offset, codes, name_dict, global_task_id
         # if not sync_trend_disable:
         #     for company in companies:
         #         trend_service.save_stock_trend_with_company(company, base_date)
-    task_dao.update_task(global_task_id, len(codes), '个股特征跑批', )
 
 
 @celery.task(bind=True, base=MyTask, expire=1800)
@@ -280,7 +278,7 @@ def sync_stock_ind(self, codes, task_id, expect):
 
 
 @celery.task(bind=True, base=MyTask, expire=1800)
-def auto_submit_stock_feature(self,days=1100):
+def auto_submit_stock_feature(self, days=1100):
     """
     全局重跑个股指标
     :param self:
