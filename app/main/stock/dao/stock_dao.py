@@ -1,11 +1,11 @@
-from app.main.db.mongo import db, myclient
-from typing import List
 from datetime import datetime
+from typing import List
 
-from app.main.stock.company import Company
-from app.main.stock.job import job_config
-from app.main.utils import date_util, simple_util, collection_util
 import pymongo
+
+from app.main.db.mongo import db
+from app.main.stock.company import Company
+from app.main.utils import date_util
 
 
 def get_all_stock(fields=None, filter={}):
@@ -66,7 +66,7 @@ def get_stock_detail_list(codes=None, fields=None):
     return data_list
 
 
-def get_stock_detail_map(codes=None, fields=None)->dict:
+def get_stock_detail_map(codes=None, fields=None) -> dict:
     data_list = get_stock_detail_list(codes, fields)
     return {data['code']: data for data in data_list}
 
@@ -80,28 +80,22 @@ def get_code_name_map():
     data = list(my_set.find({}, dict(code=1, name=1, _id=0)))
     return {d["code"]: d["name"] for d in data}
 
+
 def get_code_province_map():
     """
     获取个股代码和省份的映射
     :return: {"code":"province"}
     """
     my_set = db['stock_detail']
-    data_list = list(my_set.find({}, dict(code=1,name=1, board=1, _id=0)))
+    data_list = list(my_set.find({}, dict(code=1, name=1, board=1, _id=0, province=1)))
     code_province_dict = {}
     for data in data_list:
-        name = data['name']
+        province = data['province'] if data['province'] is not None else "海外"
         code = data['code']
-        boards = data['board']
-        if collection_util.is_empty(boards):
-            continue
-
-        if "板块" not in boards[0] and boards[0] not in ['黑龙江','内蒙古']:
-            print(name,code,boards)
-            continue
-        code_province_dict[code] = boards[0].replace("板块","")
+        # 目前已知的，是中芯国际，九号公司等经营芯片，医药的高科技公司
+        code_province_dict[code] = province
 
     return code_province_dict
-
 
 
 def dump_stock_feature(companies: List[Company], date):

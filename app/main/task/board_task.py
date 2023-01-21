@@ -18,36 +18,37 @@ import uuid
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
-def sync_board_k_line(self):
+def sync_board_k_line(self,**kwargs):
     """
     同步板块k线
     :param self:
     :return:
     """
-    now = datetime.now()
-    # 收盘后,不再同步
-    if 16 <= now.hour < 10:
-        return
+    params = kwargs.get("params", {})
 
-    # switch = my_redis.get_bool("sync_after_15")
-    # logging.info("switch is {}".format(switch))
-    # if switch is True:
+    global_task_id = params.get("global_task_id", None)
+
     boards = board_dao.get_all_board(type=[1, 2])
     # 获取最近一个交易日
+    task_dao.create_task(global_task_id, "同步东财板块日k线", len(boards), kwargs)
 
-    step = int(len(boards) / 50)
+    step = int(len(boards) / 10)
     boards_group = [boards[i:i + step] for i in range(0, len(boards), step)]
     for index, boards in enumerate(boards_group):
-        logging.info("提交同步任务,时序{}".format(index))
-        sync_data.apply_async(args=[boards])
+        logging.info("[东财板块日k线同步]global_task_id:{},时序:{}".format(global_task_id,index))
+        sync_data.apply_async(kwargs=dict(boards=boards,global_task_id=global_task_id))
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
-def sync_data(self, boards):
-    logging.info("开始同步,{}".format(len(boards)))
-    for index, board in enumerate(boards):
-        # logging.info("同步{}:{}的日k数据,时序{}".format(board['board'], board["code"], index))
-        r = sync_kline_service.sync_board_k_line(board['board'], board['type'])
+def sync_data(self, boards,global_task_id):
+    name = [board['board'] for board in boards]
+    logging.info("[东财板块日k线]global_task_id:{},板块:{}".format(global_task_id, name))
+    try:
+        for index, board in enumerate(boards):
+            # logging.info("同步{}:{}的日k数据,时序{}".format(board['board'], board["code"], index))
+            r = sync_kline_service.sync_board_k_line(board['board'], board['type'])
+    except Exception as e:
+        raise self.retry(exc=e, countdown=3, max_retries=10)
 
 
 @celery.task(bind=True, base=MyTask, expire=1800)

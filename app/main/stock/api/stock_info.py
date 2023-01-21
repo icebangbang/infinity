@@ -57,6 +57,7 @@ def get_stock_web(stock):
 def get_stock_register_address(stock:dict):
     """
     从东财的详情页获取个股的地址信息，并进行解析
+    详见 app.main.stock.api.overwrite.get_stock_register_address
     :param stock:
     :return:
     """

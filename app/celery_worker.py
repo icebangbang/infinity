@@ -39,6 +39,15 @@ class MyTask(celery.Task):  # celery 基类
     def on_success(self, retval, task_id, args, kwargs):
         # 执行成功的操作
         # logging.info('MyTasks 基类回调，任务执行成功')
+        task_path = self.request.task
+
+        from app.main.stock.dao import task_dao
+        from app.main.task.task_constant import PATH_TASK_MAPPING
+
+        if task_path in PATH_TASK_MAPPING.keys():
+            global_task_id = kwargs['global_task_id']
+            size = self.get_size(kwargs)
+            task_dao.update_task(global_task_id, size, PATH_TASK_MAPPING.get(task_path))
         return super(MyTask, self).on_success(retval, task_id, args, kwargs)
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
@@ -46,3 +55,11 @@ class MyTask(celery.Task):  # celery 基类
         # 任务执行失败，可以调用接口进行失败报警等操作
         logging.info('MyTasks 基类回调，任务执行失败')
         return super(MyTask, self).on_failure(exc, task_id, args, kwargs, einfo)
+
+    def get_size(self,kwargs:dict):
+        keys = kwargs.keys()
+        if "codes" in keys:
+            return len(kwargs["codes"])
+        if "boards" in keys:
+            return len(kwargs["boards"])
+

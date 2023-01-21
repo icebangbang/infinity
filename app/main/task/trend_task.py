@@ -71,11 +71,10 @@ def sync_trend_task(self, from_date_ts, end_date_ts, codes, name_dict, global_ta
                 trend_service.save_stock_trend_with_features(code, name, features, start_of_day)
             except Exception as e:
                 log.error(e, exc_info=1)
-    task_dao.update_task(global_task_id, len(codes),"个股趋势跑批")
 
 
 @celery.task(bind=True, base=MyTask, expires=1800)
-def get_trend_data_task(self, **kwargs):
+def trend_data_task(self, **kwargs):
     """
     将趋势变化数据聚合
     :param self:
@@ -100,7 +99,9 @@ def get_trend_data_task(self, **kwargs):
     trend_service.get_board_trend_size_info(from_date, end_date)
     # 大盘级别的聚合
     trend_service.get_index_trend_info(from_date, end_date)
-    # 成交量和成交额的聚合
+    # 省份级别的聚合
+    trend_service.get_province_trend_info(from_date,end_date)
+    # 板块，大盘，省份的成交量和成交额的聚合
     board_service.collect_trade_money(from_date, end_date)
 
     task_dao.finish_task(global_task_id)

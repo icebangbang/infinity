@@ -134,11 +134,15 @@ def get_trade_info(industry, start, end):
 
 def collect_trade_money(start, end):
     """
-    计算交易金额
+    计算交易金额和成交量
     :return:
     """
+    # 板块
     collect_industry_info(start, end)
+    # 大盘
     collect_index_info(start, end)
+    # 省份
+    collect_province_info(start, end)
 
 
 def collect_industry_info_yearly(year):
