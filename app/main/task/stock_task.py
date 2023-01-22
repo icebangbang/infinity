@@ -21,7 +21,7 @@ from app.main.utils.date_util import WorkDayIterator
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
-def sync_stock_month_data(self, codes):
+def sync_stock_month_data(self, codes,global_task_id):
     """
     worker驱动
     开始同步月线数据
@@ -29,27 +29,30 @@ def sync_stock_month_data(self, codes):
     :param codes:
     :return:
     """
-    now = datetime.now()
-    if 16 <= now.hour < 10:
-        return
-    for index, code in enumerate(codes):
-        r = sync_kline_service.sync_month_level(code)
+
+    try:
+        for index, code in enumerate(codes):
+            r = sync_kline_service.sync_month_level(code)
+    except Exception as e:
+        raise self.retry(exc=e, countdown=3, max_retries=10)
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
-def submit_stock_month_task(self):
+def submit_stock_month_task(self,**kwargs):
     """
     schedule驱动
     提交同步月线数据任务
     :param self:
     :return:
     """
+    global_task_id = kwargs['global_task_id']
+
     stocks = stock_dao.get_all_stock(dict(code=1))
     codes = [stock['code'] for stock in stocks]
     step = int(len(codes) / 25)
     for i in range(0, len(codes), step):
         group = codes[i:i + step]
-        sync_stock_month_data.apply_async(args=[group])
+        sync_stock_month_data.apply_async(kwargs=dict(codes=group,global_task_id=global_task_id))
 
 
 @celery.task(bind=True, base=MyTask, expires=180)

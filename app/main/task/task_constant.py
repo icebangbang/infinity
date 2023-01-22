@@ -14,6 +14,7 @@ TASK_MAPPING = {
     "个股特征跑批": stock_task.submit_stock_feature_by_job,
     '板块趋势和成交额聚合': trend_task.trend_data_task,
     '同步个股日k线': stock_task.sync_stock_k_line_by_job,
+    '同步个股月k线': stock_task.submit_stock_month_task,
     '同步东财板块日k线': board_task.sync_board_k_line,
     "同步人民币对外币汇率": fx_task.sync_cny_fx # 同步任务
 }
@@ -22,6 +23,7 @@ PATH_TASK_MAPPING = {
     "app.main.task.stock_task.sync_stock_data":"同步个股日k线",
     "app.main.task.trend_task.sync_trend_task":"个股趋势跑批",
     "app.main.task.stock_task.sync_stock_feature":"个股特征跑批",
-    "app.main.task.board_task.sync_data":"同步东财板块日k线"
+    "app.main.task.board_task.sync_data":"同步东财板块日k线",
+    "app.main.task.stock_task.sync_stock_month_data":"同步个股月k线"
 
 }

@@ -8,7 +8,8 @@ from dateutil.relativedelta import relativedelta
 
 from app.main.yi.constant import jqmc
 
-def get_years(start:datetime,end:datetime):
+
+def get_years(start: datetime, end: datetime):
     """
     获取时间区间涉及的年份
     :param start:
@@ -18,7 +19,8 @@ def get_years(start:datetime,end:datetime):
     year_start = start.year
     year_end = end.year
 
-    return [year for year in range(year_start,year_end+1)]
+    return [year for year in range(year_start, year_end + 1)]
+
 
 def get_report_day(dt: datetime):
     month = dt.month
@@ -126,6 +128,15 @@ def get_start_of_day(dt: datetime) -> datetime:
 
 def get_end_of_day(dt: datetime) -> datetime:
     return datetime.combine(dt, time.max)
+
+
+def get_start_of_month(dt: datetime) -> datetime:
+    month_start = datetime(dt.year, dt.month, 1)
+    return month_start
+
+def get_end_of_month(dt: datetime) -> datetime:
+    month_end = datetime(dt.year, dt.month+1, 1)-timedelta(days=1)
+    return month_end
 
 
 def day_incr(dt: datetime, days):
@@ -304,7 +315,6 @@ def get_jq_list(start, end, ignore_time=True) -> list:
     return jq_list
 
 
-
 class WorkDayIterator(object):
     def __init__(self, start, end):
         self.date = start
@@ -364,4 +374,4 @@ if __name__ == "__main__":
     # jq_list = get_jq_list(datetime(2022, 4, 1), datetime(2022, 12, 31))
     # print(jq_list)
 
-    print([year for year in range(2012,2014)])
+    print([year for year in range(2012, 2014)])

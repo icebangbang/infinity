@@ -62,6 +62,7 @@ def stock_zh_a_hist(
             logging.error(e, exc_info=1)
     data_json = r.json()
     data = data_json["data"]
+    if data is None: return None
     prev_k_price = data['preKPrice']
     temp_df = pd.DataFrame([item.split(",") for item in data_json["data"]["klines"]])
     if temp_df.empty: return None

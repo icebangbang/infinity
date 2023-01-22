@@ -1,3 +1,5 @@
+import dateutil
+
 from app.main.stock.dao import k_line_dao
 from datetime import datetime, timedelta
 from app.main.utils import date_util
@@ -47,30 +49,26 @@ def sync_month_level(code, base_time=None, time_window=6000):
     :return:
     """
     point = k_line_dao.get_oldest_k_line(code,level="month")
-
+    now = datetime.now()
+    end_of_current_month = date_util.get_end_of_month(now)
     if base_time is None:
-        now = datetime.now()
+        end_of_current_month = date_util.get_end_of_month(now)
 
     if len(point) == 0:
-        before = now - timedelta(days=time_window)
+        before = end_of_current_month - timedelta(days=time_window)
     else:
-        before = point[0]['date'] + timedelta(days=1)
+        before = point[0]['date'] + dateutil.relativedelta.relativedelta(months=1)
 
-    if date_util.get_days_between(now, before) <= 0:
-        before = now
+    if date_util.get_days_between(end_of_current_month, before) <= 0:
+        before = date_util.get_start_of_month(now)
 
     df = stock_kline.fetch_kline_data(code,
                                       date_util.dt_to_str(before),
-                                      date_util.dt_to_str(now), 'qfq','103')
+                                      date_util.dt_to_str(end_of_current_month), 'qfq','103')
     if df is None: return None
 
     data = df.to_dict(orient='records')
-
-    if date_util.get_days_between(now, before) == 0:
-        k_line_dao.update_k_line(code, data,level='month')
-    else:
-        k_line_dao.dump_k_line(data,level='month')
-
+    k_line_dao.update_k_line(code, data,level='month')
 
     return data
 
@@ -164,10 +162,10 @@ if __name__ == "__main__":
     # data = df.to_dict(orient='records')
     # k_line_dao.dump_k_line(data)
 
-    df = k_line_dao.get_board_k_line_data('塑料制品',
-                                          "20220601",
-                                          "20220610")
+    # df = k_line_dao.get_board_k_line_data('塑料制品',
+    #                                       "20220601",
+    #                                       "20220610")
 
+
+    sync_month_level("300330")
     pass
-
-    # sync_month_level("300763")
