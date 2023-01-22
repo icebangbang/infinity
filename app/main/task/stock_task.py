@@ -34,7 +34,7 @@ def sync_stock_month_data(self, codes,global_task_id):
         for index, code in enumerate(codes):
             r = sync_kline_service.sync_month_level(code)
     except Exception as e:
-        raise self.retry(exc=e, countdown=3, max_retries=10)
+        raise self.retry(exc=e, countdown=3, max_retries=2)
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
@@ -49,7 +49,9 @@ def submit_stock_month_task(self,**kwargs):
 
     stocks = stock_dao.get_all_stock(dict(code=1))
     codes = [stock['code'] for stock in stocks]
-    step = int(len(codes) / 25)
+    step = int(len(codes) / 400)
+    task_dao.create_task(global_task_id, "同步个股月k线", len(codes), kwargs)
+
     for i in range(0, len(codes), step):
         group = codes[i:i + step]
         sync_stock_month_data.apply_async(kwargs=dict(codes=group,global_task_id=global_task_id))

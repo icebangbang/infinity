@@ -187,11 +187,11 @@ beat_schedule = {
             "task": "app.main.task.stock_task.sync_index_data",  # 任务函数所在位置
             "schedule": 300,  # 定时每300秒执行一次
         },
-    'stock_month_data_sync':
-        {  # 股票月线数据同步
-            "task": "app.main.task.stock_task.submit_stock_month_task",  # 任务函数所在位置
-            "schedule": 600,  # 定时每10分钟执行一次
-        },
+    # 'stock_month_data_sync':
+    #     {  # 股票月线数据同步
+    #         "task": "app.main.task.stock_task.submit_stock_month_task",  # 任务函数所在位置
+    #         "schedule": 600,  # 定时每10分钟执行一次
+    #     },
     # 'board_data_sync': {
     #     "task": "app.main.task.board_task.sync_board_k_line",
     #     "schedule": 60,  # 定时每120秒执行一次

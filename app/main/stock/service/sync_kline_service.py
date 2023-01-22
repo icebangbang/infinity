@@ -1,3 +1,5 @@
+import logging
+
 import dateutil
 
 from app.main.stock.dao import k_line_dao
@@ -48,6 +50,7 @@ def sync_month_level(code, base_time=None, time_window=6000):
     :param code:
     :return:
     """
+    logging.info("[同步个股月k线]开始同步月线数据:{}".format(code))
     point = k_line_dao.get_oldest_k_line(code,level="month")
     now = datetime.now()
     end_of_current_month = date_util.get_end_of_month(now)

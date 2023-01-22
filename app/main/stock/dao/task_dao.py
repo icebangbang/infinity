@@ -30,6 +30,7 @@ def create_task(task_id, task_name, size, job_info=None):
 
     sync_record.update_one({"task_id": task_id, "task_name": task_name}, {"$set": data}, upsert=True)
     my_redis.set(task_id, size)
+    my_redis.expire(task_id,60 * 60)
 
 
 def update_task(task_id, size, task_name=None):
