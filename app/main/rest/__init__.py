@@ -16,4 +16,4 @@ from . import indicator,task,\
     stock,login,\
     other,config,\
     test,overview,\
-    trend,common
+    trend,common,trade

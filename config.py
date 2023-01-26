@@ -162,10 +162,11 @@ class InfinityLocal(Config):
     RESULT_BACKEND = 'redis://:ironBackRedis123@10.8.0.2:30004/1'
     MONGO_URL = "mongodb://root:whosyourdaddy$879@10.8.0.2:20017/"
 
-    SERVER_HOST = "10.8.0.3"
-    SERVER_PORT = 20060
+    SERVER_HOST = "10.8.0.2"
+    SERVER_PORT = 20061
     NACOS_SERVICE_NAME = "infinity"
     NACOS_CLUSTER_NAME = "DEFAULT"
+    NACOS_ENABLE = 1
 
     REGISTERED_SERVER_TO_NACOS = True
     NACOS_SERVER_ADDRESSES = "10.8.0.2:20048"
