@@ -185,11 +185,17 @@ def submit_stock_feature(self, to_date=None, codes=None, global_task_id=None):
         for i in range(0, len(codes), step):
             group = codes[i:i + step]
             name_dict = {code: code_name_map[code] for code in group}
-            sync_stock_feature.apply_async(args=[base_timestamp, offset, group, name_dict, global_task_id])
+            sync_stock_feature.apply_async(kwargs=dict(base_date=base_timestamp,
+                                                       offset=offset,
+                                                       codes=group,
+                                                       name_dict=name_dict, global_task_id=global_task_id))
     else:
         task_dao.create_task(global_task_id, "app.main.task.stock_task.submit_stock_feature", len(codes))
         name_dict = {code: code_name_map[code] for code in codes}
-        sync_stock_feature.apply_async(args=[base_timestamp, offset, codes, name_dict, global_task_id])
+        sync_stock_feature.apply_async(kwargs=dict(base_date=base_timestamp,
+                                                       offset=offset,
+                                                       codes=group,
+                                                       name_dict=name_dict, global_task_id=global_task_id))
 
 
 @celery.task(bind=True, base=MyTask, expires=36000)
@@ -218,7 +224,10 @@ def submit_stock_feature_by_job(self, **kwargs):
         for i in range(0, len(codes), step):
             group = codes[i:i + step]
             name_dict = {code: code_name_map[code] for code in group}
-            sync_stock_feature.apply_async(args=[base_timestamp, offset, group, name_dict, global_task_id])
+            sync_stock_feature.apply_async(kwargs=dict(base_date=base_timestamp,
+                                                       offset=offset,
+                                                       codes=group,
+                                                       name_dict=name_dict, global_task_id=global_task_id))
 
 
 @celery.task(bind=True, base=MyTask, expires=36000)
