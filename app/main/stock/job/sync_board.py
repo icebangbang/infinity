@@ -6,6 +6,7 @@ from app.main.db.mongo import db
 from app.main.stock.dao import stock_dao
 import requests
 
+from app.main.stock.job import sync_stock
 from app.main.utils import collection_util
 
 """
@@ -94,6 +95,8 @@ def sync_and_update_stock():
     for board in board_list:
         board['size'] = len(board['codes'])
     board_detail.insert_many(board_list)
+
+    sync_stock.update_stock_address()
 
 
 if __name__ == "__main__":

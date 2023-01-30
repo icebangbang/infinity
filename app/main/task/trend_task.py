@@ -42,7 +42,11 @@ def submit_trend_task(self,**kwargs):
         name_dict = {code: code_name_map[code] for code in codes_group}
         from_timestamp = int(time.mktime(from_date.timetuple()))
         end_timestamp = int(time.mktime(end_date.timetuple()))
-        sync_trend_task.apply_async(args=[from_timestamp, end_timestamp, codes_group, name_dict, global_task_id])
+        sync_trend_task.apply_async(kwargs=dict(from_date_ts=from_timestamp,
+                                                end_date_ts=end_timestamp,
+                                                codes=codes_group,
+                                                name_dict=name_dict,
+                                                global_task_id=global_task_id))
 
 
 @celery.task(bind=True, base=MyTask, expires=18000)

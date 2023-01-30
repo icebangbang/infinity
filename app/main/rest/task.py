@@ -43,7 +43,7 @@ def async_dispatch():
     method = task_constant.TASK_MAPPING[req['taskName']]
     method.apply_async(kwargs=flow_job_info)
 
-    return restful.response({"status":"ok","method":method})
+    return restful.response({"status":"ok","method":req['taskName']})
 
 @rest.route("/task/sync/dispatch", methods=['post', 'get'])
 def sync_dispatch():

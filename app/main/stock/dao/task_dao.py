@@ -71,7 +71,7 @@ def notify(job_info):
     callback_url = job_info['callback_url']
     task_name = job_info['task_name']
 
-    log.info("任务完成回调:global_id:{},任务信息:{}".format(global_id,json.dumps(job_info)))
+    log.info("任务完成回调:global_id:{},任务信息:{}".format(global_id,json.dumps(job_info,ensure_ascii=False)))
 
     if callback_url is not None:
         resp = requests.post(callback_url, json=dict(globalId=global_id,taskName=task_name))
