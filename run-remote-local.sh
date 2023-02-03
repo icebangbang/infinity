@@ -14,7 +14,10 @@ docker run -d --privileged=true  -e "index=1"  -e "FLASK_ENV=${env}" --name=dao-
 
 docker stop dao
 docker build --network=host --build-arg PIP_MIRROR=${PIP_MIRROR} --build-arg PIP_MIRROR_HOST=${PIP_MIRROR_HOST} -f ./Dockerfile -t dao:latest .
+#docker build --network=host --build-arg PIP_MIRROR=http://127.0.0.1:7104/root/pypi/+simple/ --build-arg PIP_MIRROR_HOST=127.0.0.1:7104 -f ./Dockerfile -t dao:latest .
 docker run -d --privileged=true -v /var/log/dao:/var/log/dao -e "profiles=${env}" --name=dao -e "index=1" -e "port=20500" -v /etc/localtime:/etc/localtime:ro --net=host --rm -it dao:latest
+#docker run -d --privileged=true -v /var/log/dao:/var/log/dao -e "profiles=infinity" --name=dao -e "index=1" -e "port=20500" -v /etc/localtime:/etc/localtime:ro --net=host --rm -it dao:latest
+
 
 
 for ((index1=1; index1<=1; index1++))
