@@ -228,11 +228,13 @@ def get_province_trend_info(start, end):
                              rate=cal_util.round(size / int(series_province[province]), 4),
                              date=date,
                              total=int(series_province[province]),
-                             update=datetime.now()))
+                             update=datetime.now(),
+                             type="province"))
                 else:
                     result_list.append(
                         dict(industry=province, trend=trend, size=0, rate=0, total=0, date=date,
-                             update=datetime.now()))
+                             update=datetime.now(),
+                             type="province"))
 
         for result in result_list:
             print("insert {},{},{}".format(result["industry"], result["trend"], result['date']))
@@ -266,11 +268,13 @@ def get_index_trend_info(start, end):
                              rate=cal_util.round(size / int(series_market[market]), 4),
                              date=date,
                              total=int(series_market[market]),
-                             update=datetime.now()))
+                             update=datetime.now(),
+                             type="market"))
                 else:
                     result_list.append(
                         dict(industry=market, trend=trend, size=0, rate=0, total=0, date=date,
-                             update=datetime.now()))
+                             update=datetime.now(),
+                             type="market"))
 
         for result in result_list:
             print("insert {},{},{}".format(result["industry"], result["trend"], result['date']))
@@ -368,13 +372,15 @@ def get_board_trend_size_info(start, end, only_include=False):
                         dict(industry=board, trend=trend, size=size, rate=cal_util.round(size / len(total), 4),
                              total=len(total),
                              date=date,
-                             update=datetime.now()))
+                             update=datetime.now(),
+                             type="custom"))
                 else:
                     result_list.append(
                         dict(industry=board, trend=trend, size=0, rate=0,
                              total=len(total),
                              date=date,
-                             update=datetime.now()))
+                             update=datetime.now(),
+                             type="custom"))
 
     if not only_include:
         for date in WorkDayIterator(start, end):
@@ -398,13 +404,15 @@ def get_board_trend_size_info(start, end, only_include=False):
                                  rate=cal_util.round(size / board_dict[board], 4),
                                  total=board_dict[board],
                                  date=date,
-                                 update=datetime.now()))
+                                 update=datetime.now(),
+                                 type="industry"))
                     else:
                         result_list.append(
                             dict(industry=board, trend=trend, size=0, rate=0,
                                  total=board_dict[board],
                                  date=date, bot=0, top=0,
-                                 update=datetime.now()))
+                                 update=datetime.now(),
+                                 type="industry"))
 
     for result in result_list:
         industry = result["industry"]

@@ -41,6 +41,13 @@ def sync_board_k_line(self,**kwargs):
 
 @celery.task(bind=True, base=MyTask, expires=180)
 def sync_data(self, boards,global_task_id):
+    """
+    具体的同步板块k线的任务
+    :param self:
+    :param boards:
+    :param global_task_id:
+    :return:
+    """
     name = [board['board'] for board in boards]
     logging.info("[东财板块日k线]global_task_id:{},板块:{}".format(global_task_id, name))
     try:
@@ -98,9 +105,18 @@ def submit_board_feature(self, to_date=None, codes=None):
 
 @celery.task(bind=True, base=MyTask, expires=3600)
 def sync_board_feature(self, base_timestamp, offset, names):
+    """
+    获取板块特征任务
+    :param self:
+    :param base_timestamp:
+    :param offset:
+    :param names:
+    :return:
+    """
     if isinstance(base_timestamp, int):
         # from_date = datetime.fromtimestamp(int(from_date))
         # to_date = datetime.fromtimestamp(int(to_date))
         base_date = datetime.fromtimestamp(int(base_timestamp))
     companies = board_filter.get_board_status(base_date, offset, names)
     board_dao.dump_board_feature(companies, base_date)
+
