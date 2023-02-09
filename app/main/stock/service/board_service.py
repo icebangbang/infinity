@@ -106,6 +106,13 @@ def get_all_board() -> list:
     condition2 = {"type": 2}
     boards_custom = list(set.find(condition1, dict(board=1, _id=0, codes=1)))
     boards = list(set.find(condition2, dict(board=1, _id=0, codes=1)))
+
+    # condition3 = {"type": 1}
+    # board_province_list = list(set.find(condition3, dict(board=1, _id=0, codes=1)))
+    # for board_province in board_province_list:
+    #     province = board_province['board']
+
+
     boards_custom.extend(boards)
     return boards_custom
 

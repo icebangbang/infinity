@@ -1,14 +1,15 @@
+import logging as log
 import time
 import uuid
+from datetime import datetime
 
 from app.celery_worker import celery, MyTask
 from app.main.db.mongo import db
 from app.main.stock.dao import stock_dao, task_dao
-from datetime import datetime
-
-from app.main.stock.service import stock_service, trend_service, board_service
+from app.main.stock.service import trend_service, board_service
+from app.main.task import TaskInput
 from app.main.utils import date_util
-import logging as log
+from app.main.utils.date_util import WorkDayIterator
 
 """
 个股提醒
@@ -16,11 +17,11 @@ import logging as log
 
 
 @celery.task(bind=True, base=MyTask, expires=1800)
-def submit_trend_task(self,**kwargs):
-    params = kwargs.get("params",{})
-    from_date_ts = params.get("from_date_ts",None)
-    end_date_ts = params.get("end_date_ts",None)
-    global_task_id = params.get("global_task_id",None)
+def submit_trend_task(self, **kwargs):
+    params = kwargs.get("params", {})
+    from_date_ts = params.get("from_date_ts", None)
+    end_date_ts = params.get("end_date_ts", None)
+    global_task_id = params.get("global_task_id", None)
 
     stocks = stock_dao.get_all_stock(dict(code=1))
     codes = [stock['code'] for stock in stocks]
@@ -104,8 +105,34 @@ def trend_data_task(self, **kwargs):
     # 大盘级别的聚合
     trend_service.get_index_trend_info(from_date, end_date)
     # 省份级别的聚合
-    trend_service.get_province_trend_info(from_date,end_date)
+    trend_service.get_province_trend_info(from_date, end_date)
     # 板块，大盘，省份的成交量和成交额的聚合
     board_service.collect_trade_money(from_date, end_date)
 
     task_dao.finish_task(global_task_id)
+
+
+@celery.task(bind=True, base=MyTask, expires=1800)
+def dump_trend_info(self, **kwargs):
+    """
+    将趋势列表数据存入数据库中
+    :return:
+    """
+    task_input = TaskInput(kwargs)
+
+    # 趋势信息表
+    trend_info = db['trend_info']
+    # 趋势总结表
+    trend_summarize = db['trend_summarize']
+
+    for date in WorkDayIterator(task_input.from_date, task_input.end_date):
+        result = trend_service.get_trend_info(date)
+        trend_info_list: list = result['records']
+        industry_info = result['industryInfo']
+
+        # 批量更新
+        for trend_info_item in trend_info_list:
+            trend_info_item['date'] = date
+            trend_info.update_one({"date": date}, {"$set": trend_info_item}, upsert=True)
+
+        trend_summarize.update_one({"date": date}, {"$set": industry_info}, update=True)
