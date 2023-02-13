@@ -125,6 +125,7 @@ def dump_trend_info(self, **kwargs):
     # 趋势总结表
     trend_summarize = db['trend_summarize']
 
+    # 按日循环跑批
     for date in WorkDayIterator(task_input.from_date, task_input.end_date):
         result = trend_service.get_trend_info(date)
         trend_info_list: list = result['records']
@@ -133,6 +134,6 @@ def dump_trend_info(self, **kwargs):
         # 批量更新
         for trend_info_item in trend_info_list:
             trend_info_item['date'] = date
-            trend_info.update_one({"date": date}, {"$set": trend_info_item}, upsert=True)
+            trend_info.update_one({"date": date,"name":trend_info_item['name']}, {"$set": trend_info_item}, upsert=True)
 
-        trend_summarize.update_one({"date": date}, {"$set": industry_info}, update=True)
+        trend_summarize.update_one({"date": date}, {"$set": dict(date=date,summary=industry_info)}, upsert=True)

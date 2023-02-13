@@ -2,6 +2,9 @@
 # for i in range(0, 16, 5):
 #     group = codes[i:i + 5]
 #     print(group)
+from app.main.utils import date_util
+from datetime import datetime
+
 
 class TaskInput:
     def __init__(self,kwargs):
@@ -25,8 +28,6 @@ class TaskInput:
 if __name__ == "__main__":
     from app.main.stock.service import trend_service
     from app.main.stock.dao import stock_dao
-    from app.main.utils import date_util
-    from datetime import datetime
 
     stocks = stock_dao.get_all_stock(dict(code=1))
     codes = [stock['code'] for stock in stocks]
