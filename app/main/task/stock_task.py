@@ -194,7 +194,7 @@ def submit_stock_feature(self, to_date=None, codes=None, global_task_id=None):
         name_dict = {code: code_name_map[code] for code in codes}
         sync_stock_feature.apply_async(kwargs=dict(base_date=base_timestamp,
                                                        offset=offset,
-                                                       codes=group,
+                                                       codes=codes,
                                                        name_dict=name_dict, global_task_id=global_task_id))
 
 
