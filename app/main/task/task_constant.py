@@ -1,9 +1,10 @@
-from app.main.task import trend_task, stock_task, fx_task, board_task
+from app.main.task import trend_task, stock_task, fx_task, board_task,history_task
 
 TASK_SYNC_STOCK_IND = "SYNC_STOCK_IND"
 
 TASK_TYPE_CELERY = 'TASK_CELERY'
 TASK_TYPE_TASK_FLOW = 'TASK_FLOW'
+TASK_TYPE_HISTORY_TASK = 'HISTORY_TASK'
 
 # 同步个股日k线
 # 个股特征跑批-个股趋势跑批-板块趋势和成交额聚合-
@@ -13,7 +14,7 @@ TASK_MAPPING = {
     "个股趋势跑批": trend_task.submit_trend_task,
     "个股特征跑批": stock_task.submit_stock_feature_by_job,
     '板块趋势和成交额聚合': trend_task.trend_data_task,
-    "个股历史特征按批次跑批": stock_task.submit_stock_feature_by_job,
+    "个股历史特征按批次跑批": history_task.submit_history_stock_feature_by_job, # 名字不能随便改,改之前全局搜一下
     "个股历史趋势按批次跑批": stock_task.submit_stock_feature_by_job,
     '板块趋势和成交额按批次聚合': trend_task.trend_data_task,
     '同步个股日k线': stock_task.sync_stock_k_line_by_job,

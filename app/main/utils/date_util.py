@@ -112,9 +112,21 @@ def date_time_to_str(dt: datetime, fmt="%Y-%m-%d %H:%M:%S"):
 
 
 def get_days_between(end: datetime, start: datetime) -> int:
-    secokds = (get_start_of_day(end) - get_start_of_day(start)).total_seconds()
+    seconds = (get_start_of_day(end) - get_start_of_day(start)).total_seconds()
 
-    return int(secokds / (24 * 60 * 60))
+    return int(seconds / (24 * 60 * 60))
+
+
+def get_minutes_between(end: datetime, start: datetime) -> int:
+    """
+    获取分钟的时间间隔
+    :param end:
+    :param start:
+    :return:
+    """
+    seconds = (get_start_of_day(end) - get_start_of_day(start)).total_seconds()
+
+    return int(seconds / 60)
 
 
 def get_start_day_of_now():
@@ -134,8 +146,9 @@ def get_start_of_month(dt: datetime) -> datetime:
     month_start = datetime(dt.year, dt.month, 1)
     return month_start
 
+
 def get_end_of_month(dt: datetime) -> datetime:
-    month_end = datetime(dt.year, dt.month+1, 1)-timedelta(days=1)
+    month_end = datetime(dt.year, dt.month + 1, 1) - timedelta(days=1)
     return month_end
 
 
@@ -164,7 +177,7 @@ def to_timestamp(dt: datetime):
     return int(tm.mktime(dt.timetuple()) * 1000.0 + dt.microsecond / 1000.0)
 
 
-def from_timestamp(timestamp):
+def from_timestamp(timestamp) -> datetime:
     timeStamp = float(timestamp) / 1000
     ret_datetime = datetime.fromtimestamp(timeStamp)
     return ret_datetime

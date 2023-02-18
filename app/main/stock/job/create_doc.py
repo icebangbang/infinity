@@ -1,4 +1,62 @@
 from app.main.db.mongo import db
+from datetime import datetime
+
+
+def list_doc():
+    docs = [
+        dict(
+            table_name="history_task",
+            columns=[
+                dict(name="global_id",
+                     type="str",
+                     desc="全局任务id"),
+                dict(name="task_name",
+                     type="str",
+                     desc="任务名"),
+                dict(name="is_finished",
+                     type="int",
+                     desc="是否成功,0未完成1完成"),
+                dict(name="create_time",
+                     type="datetime",
+                     desc="创建时间"),
+                dict(name="update_time",
+                     type="datetime",
+                     desc="更新时间")
+            ],
+            example=dict(global_id=202302181055,
+                         task_name="历史特征跑批",
+                         is_finished=1,
+                         create_time=datetime(2023, 1, 1),
+                         update_time=datetime(2023, 1, 1))
+        ),
+        dict(
+            table_name="history_task_detail",
+            columns=[
+                dict(name="global_id",
+                     type="str",
+                     desc="全局任务id"),
+                dict(name="task_name",
+                     type="str",
+                     desc="任务名称"),
+                dict(name="date",
+                     type="datetime",
+                     desc="任务关联日期"),
+                dict(name="status",
+                     type="int",
+                     desc="状态,0未完成,1处理中,2已完成"),
+                dict(name="create_time",
+                     type="datetime"),
+                dict(name="update_time",
+                     type="datetime")
+            ],
+            example=dict(global_id=202302181055,
+                         task_name="历史特征跑批",
+                         date=datetime(2019, 1, 1),
+                         status=1,
+                         create_time=datetime(2023, 1, 1),
+                         update_time=datetime(2023, 1, 1))
+        )
+    ]
 
 
 def create_doc(doc_name):
@@ -10,7 +68,7 @@ def create_doc(doc_name):
 
 
 def run():
-    db['rmb_fxrate'].insert_one({'date':None, 'us':None, 'eur':None, 'jp':None})
+    db['rmb_fxrate'].insert_one({'date': None, 'us': None, 'eur': None, 'jp': None})
 
     # 自定义板块,需要定时同步
     db.custom_board_detail.create_index([("board", 1)])

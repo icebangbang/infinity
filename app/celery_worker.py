@@ -65,5 +65,5 @@ class MyTask(celery.Task):  # celery 基类
         if task_path in PATH_TASK_MAPPING.keys():
             global_task_id = kwargs['global_task_id']
             size = self.get_size(kwargs)
-            task_dao.update_task(global_task_id, size, PATH_TASK_MAPPING.get(task_path))
+            task_dao.update_task(global_task_id, size, PATH_TASK_MAPPING.get(task_path),kwargs)
 
