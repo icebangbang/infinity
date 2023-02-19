@@ -116,6 +116,7 @@ def trend_data_task(self, **kwargs):
 def dump_trend_info(self, **kwargs):
     """
     将趋势列表数据存入数据库中
+    todo 将收敛和放大的趋势也加入数据库中
     :return:
     """
     task_input = TaskInput(kwargs)
@@ -138,3 +139,10 @@ def dump_trend_info(self, **kwargs):
             trend_info.update_one({"date": date,"name":trend_info_item['name']}, {"$set": trend_info_item}, upsert=True)
 
         trend_summarize.update_one({"date": date}, {"$set": dict(date=date,summary=industry_info)}, upsert=True)
+
+def query_trend_info(date):
+    """
+    按日期查询趋势信息
+    :return:
+    """
+    pass

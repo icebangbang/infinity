@@ -21,7 +21,8 @@ TASK_MAPPING = {
     '同步个股月k线': stock_task.submit_stock_month_task,
     '同步东财板块日k线': board_task.sync_board_k_line,
     '保存趋势信息': trend_task.dump_trend_info, # 异步无回调任务
-    "同步人民币对外币汇率": fx_task.sync_cny_fx # 同步任务
+    "同步人民币对外币汇率": fx_task.sync_cny_fx, # 同步任务
+    '查询趋势信息':trend_task.query_trend_info, # 同步任务
 }
 
 PATH_TASK_MAPPING = {
