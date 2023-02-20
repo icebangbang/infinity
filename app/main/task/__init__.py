@@ -36,7 +36,7 @@ if __name__ == "__main__":
     for code in codes:
         name = code_name_map.get(code)
         print(code)
-        for date in date_util.WorkDayIterator(datetime(2022,4,1),datetime(2022,7,13)):
+        for date in date_util.WorkDayIterator(datetime(2022,4,1),datetime(2023,2,20)):
             print(date)
             start_of_day = date_util.get_start_of_day(date)
             features = stock_dao.get_company_feature(code,date)

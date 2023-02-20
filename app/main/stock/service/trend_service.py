@@ -51,8 +51,8 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
                         and date_util.in_trade_time(datetime.now())
 
         if not in_trade_time:
-            trend_point_set.delete_many({"code": code, "trend_type": temp})
-            trend_point_set.update_many({"code": code, "trend_type": frozen},
+            trend_point_set.delete_many({"code": code, "trend_type": frozen})
+            trend_point_set.update_many({"code": code, "trend_type": temp},
                                         {"$set": {"trend_type": normal, "is_in_use": 1}})
 
         # 当前底分型趋势的斜率
@@ -105,7 +105,7 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
             #     return
 
         # 没有任何变化,更新，只要有变化，就新增一条记录
-        if len(trend_change_scope) == 0 and trend_point is not None:
+        if len(trend_change_scope) == 0 and trend_point:
             trend_point['current_bot_trend_size'] = current_bot_trend_size
             trend_point['current_top_trend_size'] = current_top_trend_size
             trend_point['update'] = start_of_day
@@ -135,7 +135,8 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
         if current_bot_type_slope <= 0 and current_top_type_slope >= 0:
             trend = "enlarge"
 
-        trend_type = normal if not in_trade_time else temp
+        # 在交易时间的，状态设置为临时
+        trend_type = temp if in_trade_time else normal
 
         entity = dict(
             date=start_of_day,

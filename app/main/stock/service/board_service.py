@@ -258,6 +258,6 @@ def collect_province_info(start, end):
 if __name__ == "__main__":
     # end = date_util.get_start_of_day(datetime.now())
     # start = end - timedelta(356)
-    # collect_trade_money(start, end)
-    collect_province_info(datetime(2023,1,3),datetime(2023,1,30))
+    collect_trade_money(datetime(2023,2,14), datetime(2023,2,14))
+    # collect_province_info(datetime(2023,1,3),datetime(2023,1,30))
     # collect_industry_info_yearly(2022)
