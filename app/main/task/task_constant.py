@@ -1,3 +1,4 @@
+from app.main.stock.job import board_association
 from app.main.task import trend_task, stock_task, fx_task, board_task,history_task
 
 TASK_SYNC_STOCK_IND = "SYNC_STOCK_IND"
@@ -23,6 +24,7 @@ TASK_MAPPING = {
     '保存趋势信息': trend_task.dump_trend_info, # 异步无回调任务
     "同步人民币对外币汇率": fx_task.sync_cny_fx, # 同步任务
     '查询趋势信息':trend_task.query_trend_info, # 同步任务
+    '个股关联板块':board_association.associate, # 同步任务
 }
 
 PATH_TASK_MAPPING = {

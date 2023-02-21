@@ -592,6 +592,15 @@ def _analysis(up_df, down_df):
 
 
 if __name__ == "__main__":
+    # r = list(db['trend_point'].find(
+    #     {"industry": "电网设备", "date": {"$lte": datetime(2023,2,15)}, "update": {"$gte": datetime(2023,2,15)}}))
+    #
+    # codes = [i['code'] for i in r]
+    #
+    # codes2 = db['board_detail'].find_one({"board":"电网设备"})['codes']
+    # diff = set(codes2).difference(set(codes))
+    # print(123)
+
     # from_date = date_util.get_start_of_day(date_util.from_timestamp(int(1665331200000)))
     #
     # end_date = date_util.get_start_of_day(date_util.from_timestamp(int(1665331200000)))
@@ -616,10 +625,15 @@ if __name__ == "__main__":
     # get_all_trend_info(datetime(2022, 4, 1), datetime(2022, 9, 16))
     # print("code","300763")
     # get_trend_info_by_name('中字头',datetime(2019, 1, 1), datetime(2022, 12, 5))
-    get_province_trend_info(datetime(2021, 1, 1), datetime(2023, 1, 19))
-    # get_index_trend_info(datetime(2021, 1, 1), datetime(2022, 12, 5))
-    # for date in WorkDayIterator(datetime(2019, 1, 1), datetime(2022, 12, 5)):
-    #     # get_trend_size_info(date, date, False)
-    #     get_trend_info_by_name("中字头")
-    #     get_all_trend_info(date, date)
-    #     board_service.collect_trade_money(date, date)
+
+
+    from_date = datetime(2021, 1, 1)
+    end_date = datetime(2023, 2, 20)
+    # 板块级别的聚合
+    get_board_trend_size_info(from_date, end_date)
+    # 大盘级别的聚合
+    get_index_trend_info(from_date, end_date)
+    # 省份级别的聚合
+    get_province_trend_info(from_date, end_date)
+    # 板块，大盘，省份的成交量和成交额的聚合
+    board_service.collect_trade_money(from_date, end_date)

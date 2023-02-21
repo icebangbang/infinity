@@ -3,6 +3,7 @@
 """
 from app.main.stock.dao import stock_dao
 from app.main.db.mongo import db
+from datetime import datetime
 
 def associate():
     stocks = stock_dao.get_all_stock()
@@ -19,7 +20,7 @@ def associate():
             continue
         board = detail['board']
 
-        stock_detail.update_one({"code":code},{"$set":dict(industry=board)})
+        stock_detail.update_one({"code":code},{"$set":dict(industry=board,update_time = datetime.now())})
         print("{}，{} 属于 {}".format(index,stock['name'],detail['board']))
 
 if __name__ == "__main__":

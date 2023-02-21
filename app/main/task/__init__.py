@@ -2,6 +2,7 @@
 # for i in range(0, 16, 5):
 #     group = codes[i:i + 5]
 #     print(group)
+from app.main.db.mongo import db
 from app.main.utils import date_util
 from datetime import datetime
 
@@ -33,7 +34,17 @@ if __name__ == "__main__":
     codes = [stock['code'] for stock in stocks]
     code_name_map = stock_dao.get_code_name_map()
 
-    for code in codes:
+    data_list = list(db['stock_detail'].find({"code": {"$in": codes}}))
+
+    r = list(db['trend_point'].find(
+        {"date": {"$lte": datetime(2023, 2, 17)}, "update": {"$gte": datetime(2023, 2, 17)}}))
+
+    codes2 = [r['code'] for r in list(db['stock_detail'].find({}))]
+    codes = [i['code'] for i in r]
+
+    diff = set(codes2).difference(set(codes))
+
+    for code in diff:
         name = code_name_map.get(code)
         print(code)
         for date in date_util.WorkDayIterator(datetime(2022,4,1),datetime(2023,2,20)):
