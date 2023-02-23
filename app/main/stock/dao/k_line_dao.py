@@ -5,9 +5,31 @@ import akshare as ak
 import pandas as pd
 
 from app.main.db.mongo import db
+from app.main.utils import collection_util
 
+
+def get_earliest_k_line(code="000001",level='day'):
+    """
+    获取最早的k线数据点
+    :param code:
+    :param level:
+    :return:
+    """
+    db_name = "k_line_" + level
+    my_set = db[db_name]
+
+    points = list(my_set.find({"code": code}).sort("date", 1).limit(1))
+    if collection_util.is_not_empty(points):
+        return points[0]
+    return None
 
 def get_oldest_k_line(code, level='day'):
+    """
+    获取最近的k线
+    :param code:
+    :param level:
+    :return:
+    """
     db_name = "k_line_" + level
     my_set = db[db_name]
 

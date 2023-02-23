@@ -15,5 +15,5 @@ from . import indicator,task,\
     board,celery,\
     stock,login,\
     other,config,\
-    test,overview,\
+    test,report,\
     trend,common,trade

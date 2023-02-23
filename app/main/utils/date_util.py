@@ -384,7 +384,8 @@ if __name__ == "__main__":
 
     # for value in YearIterator(2010, 2022):
     #     print(value)
-    # jq_list = get_jq_list(datetime(2022, 4, 1), datetime(2022, 12, 31))
-    # print(jq_list)
 
-    print([year for year in range(2012, 2014)])
+    jq_list = get_jq_list(datetime(2023, 2, 23), datetime(2023, 9, 1))
+    print(jq_list)
+
+    # print([year for year in range(2012, 2014)])

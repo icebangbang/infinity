@@ -17,6 +17,23 @@ from app.main.utils import cal_util
 import numpy as np
 
 
+def get_overview():
+    # 目前同步的k线的最早时间
+    point = k_line_dao.get_earliest_k_line()
+    date = date_util.dt_to_str(point['date'], '%Y-%m-%d') if point else ""
+
+    #
+    jq_list = date_util.get_jq_list(datetime.now(), datetime.now() + timedelta(30))
+    current_jq = jq_list[0]
+    next_jq = jq_list[1]
+    day_until_next_jq = date_util.get_days_between(next_jq['time'], datetime.now())
+
+    return dict(earliest_kline_day=date,
+                current_jq=current_jq['jq'],
+                next_jq=next_jq['jq'],
+                day_until_next_jq=day_until_next_jq)
+
+
 def rps_analysis(date=None, offset=-250):
     """
     个股强弱排名
@@ -257,7 +274,7 @@ def market_status_analysis(date=None):
     min = date.minute if date.minute % 5 == 0 else (int(date.minute / 5) + 1) * 5
     if min == 60:
         min = 0
-        hour = hour+1
+        hour = hour + 1
     dt = datetime(date.year, date.month, date.day, hour, min, 0)
 
     result['date'] = dt
@@ -274,4 +291,3 @@ if __name__ == "__main__":
     baotuan_analysis()
 
     print((int(56 / 5) + 1) * 5)
-
