@@ -18,20 +18,24 @@ import numpy as np
 
 
 def get_overview():
+    now = datetime.now()
     # 目前同步的k线的最早时间
     point = k_line_dao.get_earliest_k_line()
     date = date_util.dt_to_str(point['date'], '%Y-%m-%d') if point else ""
 
-    #
-    jq_list = date_util.get_jq_list(datetime.now(), datetime.now() + timedelta(30))
+
+    jq_list = date_util.get_jq_list(now, now + timedelta(30))
     current_jq = jq_list[0]
     next_jq = jq_list[1]
-    day_until_next_jq = date_util.get_days_between(next_jq['time'], datetime.now())
+    day_until_next_jq = date_util.get_days_between(next_jq['time'], now)
+
+    date_gz = date_util.get_date_gz(now)
 
     return dict(earliest_kline_day=date,
                 current_jq=current_jq['jq'],
                 next_jq=next_jq['jq'],
-                day_until_next_jq=day_until_next_jq)
+                day_until_next_jq=day_until_next_jq,
+                date_gz = date_gz)
 
 
 def rps_analysis(date=None, offset=-250):

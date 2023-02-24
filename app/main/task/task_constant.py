@@ -1,9 +1,8 @@
 from app.main.stock.job import board_association,sync_indicator
 from app.main.task import trend_task, stock_task, \
-    fx_task, board_task,history_task,\
+    fx_task, board_task,history_task
 
 TASK_SYNC_STOCK_IND = "SYNC_STOCK_IND"
-
 TASK_TYPE_CELERY = 'TASK_CELERY'
 TASK_TYPE_TASK_FLOW = 'TASK_FLOW'
 TASK_TYPE_HISTORY_TASK = 'HISTORY_TASK'

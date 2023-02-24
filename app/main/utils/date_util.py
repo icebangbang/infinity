@@ -6,8 +6,7 @@ import sxtwl
 from chinese_calendar import is_workday
 from dateutil.relativedelta import relativedelta
 
-from app.main.yi.constant import jqmc
-
+from app.main.yi.constant import jqmc,Gan,Zhi
 
 def get_years(start: datetime, end: datetime):
     """
@@ -285,6 +284,30 @@ def get_week_end(t: datetime, if_work_day: bool = True):
     start = t - timedelta(span)
     return get_end_of_day(start)
 
+def get_date_gz(date:datetime):
+    """
+    获取年月日时干支
+    :return:
+    """
+    day = sxtwl.fromSolar(date.year, date.month, date.day)
+    year_gz_index = day.getYearGZ()
+    year_gz_str = Gan[year_gz_index.tg]+Zhi[year_gz_index.dz]
+    # 月干支
+    month_gz_index = day.getMonthGZ()
+    month_gz_str = Gan[month_gz_index.tg] + Zhi[month_gz_index.dz]
+
+    # 日干支
+    day_gz_index = day.getDayGZ()
+    day_gz_str = Gan[day_gz_index.tg] + Zhi[day_gz_index.dz]
+
+    # 时干支
+    # 第一个参数为该天的天干，第二个参数为小时
+    hour_gz_index = sxtwl.getShiGz(year_gz_index.tg, date.hour)
+    hour_gz_str = Gan[hour_gz_index.tg] + Zhi[hour_gz_index.dz]
+
+    return year_gz_str+'-'+month_gz_str+'-'+day_gz_str+'-'+hour_gz_str
+
+        # print("%d时天干地支:" % (hour), Gan[hTG.tg] + Zhi[hTG.dz])
 
 def get_jq_list(start, end, ignore_time=True) -> list:
     """
@@ -385,7 +408,9 @@ if __name__ == "__main__":
     # for value in YearIterator(2010, 2022):
     #     print(value)
 
-    jq_list = get_jq_list(datetime(2023, 2, 23), datetime(2023, 9, 1))
-    print(jq_list)
+    # jq_list = get_jq_list(datetime(2023, 2, 23), datetime(2023, 9, 1))
+    # print(jq_list)
 
+    r = get_date_gz(datetime.now())
+    pass
     # print([year for year in range(2012, 2014)])
