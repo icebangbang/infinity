@@ -62,4 +62,4 @@ def sync_dispatch():
     method = task_constant.TASK_MAPPING[req['taskName']]
     result = method()
 
-    return restful.response({"status":"ok","method":method})
+    return restful.response({"status":"ok","method":str(method)})

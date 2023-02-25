@@ -12,6 +12,9 @@ def position_query(**kwargs) -> str:
     """
     查询指定holder_id，position_id，task_group_name的持仓情况
     :param kwargs:
+            仓位持有者id，
+            持仓id
+            任务组名称
     :return:
     """
     holder_id = kwargs['holderId']

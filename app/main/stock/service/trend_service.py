@@ -487,11 +487,13 @@ def get_trend_info(end_date):
     for industry in industries:
         up = df[(df['industry'] == industry) & (df['trend'] == 'up')].reset_index(drop=True)
         down = df[(df['industry'] == industry) & (df['trend'] == 'down')].reset_index(drop=True)
+        enlarge = df[(df['industry'] == industry) & (df['trend'] == 'enlarge')].reset_index(drop=True)
+        convergence = df[(df['industry'] == industry) & (df['trend'] == 'convergence')].reset_index(drop=True)
 
         rate_diff = down['rate'] - up['rate']
         up['diff'] = rate_diff
         latest = rate_diff[0]
-        result = _analysis(up, down)
+        result = _analysis(up, down,enlarge,convergence)
         result['name'] = industry
         # total[industry] = round(latest,2)
         total.append(result)
@@ -564,7 +566,7 @@ def _dump_trend_data(result_list):
              "date": result['date']}, {"$set": result}, upsert=True)
 
 
-def _analysis(up_df, down_df):
+def _analysis(up_df, down_df,convergence_df):
     # 最低上行率
     lowest_up = up_df.iloc[[up_df['rate'].idxmin()]]
     # 历史最高上行率
@@ -586,6 +588,7 @@ def _analysis(up_df, down_df):
         currentDownValue=cal_util.round(current_down['rate']),
         up_slop=cal_util.round(current_diff['up_slop']),
         down_slop=cal_util.round(current_diff['down_slop']),
+        convergence_down_slop=cal_util.round(convergence_df['down_slop']),
 
     )
     return result

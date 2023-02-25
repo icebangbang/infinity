@@ -204,9 +204,6 @@ def find_stocks(board, start=None, end=None):
 
                 name = stock_dict[code]['name']
 
-                if name == '银泰黄金':
-                    print(133)
-
                 # todo 计算最大回撤
                 records = group.to_dict("records")
                 rollback_dict = cal_maximum_rollback(board,name,start_scope, end_scope, records)
@@ -316,8 +313,8 @@ if __name__ == '__main__':
     # find_stocks("光伏设备", datetime(2022, 1, 1), datetime(2022, 12, 1))
     # plot_peaks("光伏设备", datetime(2019, 1, 1), datetime(2019, 12, 1), True)
 
-    find_stocks_by_year("贵金属", 2019)
-    find_stocks_by_year("贵金属", 2020)
-    find_stocks_by_year("贵金属", 2021)
-    find_stocks_by_year("贵金属",2022)
-    find_stocks_by_year("贵金属",2023)
+    # find_stocks_by_year("贵金属", 2019)
+    find_stocks_by_year("风电设备", 2020)
+    find_stocks_by_year("风电设备", 2021)
+    find_stocks_by_year("风电设备",2022)
+    find_stocks_by_year("风电设备",2023)
