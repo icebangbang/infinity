@@ -566,7 +566,7 @@ def _dump_trend_data(result_list):
              "date": result['date']}, {"$set": result}, upsert=True)
 
 
-def _analysis(up_df, down_df,convergence_df):
+def _analysis(up_df, down_df,enlarge,convergence_df):
     # 最低上行率
     lowest_up = up_df.iloc[[up_df['rate'].idxmin()]]
     # 历史最高上行率
@@ -576,6 +576,7 @@ def _analysis(up_df, down_df,convergence_df):
     # 当前区间差距
     current_diff = up_df.iloc[[len(up_df) - 1]]
     current_down = down_df.iloc[[len(down_df) - 1]]
+    current_convergence = convergence_df.iloc[len(convergence_df)-1]
     result = dict(
         lowestUpValue=cal_util.round(lowest_up['rate']),
         lowestUpDay=lowest_up.iloc[0]['date'].strftime('%Y-%m-%d'),
@@ -588,7 +589,8 @@ def _analysis(up_df, down_df,convergence_df):
         currentDownValue=cal_util.round(current_down['rate']),
         up_slop=cal_util.round(current_diff['up_slop']),
         down_slop=cal_util.round(current_diff['down_slop']),
-        convergence_down_slop=cal_util.round(convergence_df['down_slop']),
+        convergence_down_slop=cal_util.round(current_convergence['down_slop']),
+        convergence_up_slop=cal_util.round(current_convergence['up_slop']),
 
     )
     return result
@@ -629,14 +631,15 @@ if __name__ == "__main__":
     # print("code","300763")
     # get_trend_info_by_name('中字头',datetime(2019, 1, 1), datetime(2022, 12, 5))
 
+    get_trend_info(datetime(2023, 2, 17))
 
-    from_date = datetime(2021, 1, 1)
-    end_date = datetime(2023, 2, 20)
-    # 板块级别的聚合
-    get_board_trend_size_info(from_date, end_date)
-    # 大盘级别的聚合
-    get_index_trend_info(from_date, end_date)
-    # 省份级别的聚合
-    get_province_trend_info(from_date, end_date)
-    # 板块，大盘，省份的成交量和成交额的聚合
-    board_service.collect_trade_money(from_date, end_date)
+    # from_date = datetime(2021, 1, 1)
+    # end_date = datetime(2023, 2, 20)
+    # # 板块级别的聚合
+    # get_board_trend_size_info(from_date, end_date)
+    # # 大盘级别的聚合
+    # get_index_trend_info(from_date, end_date)
+    # # 省份级别的聚合
+    # get_province_trend_info(from_date, end_date)
+    # # 板块，大盘，省份的成交量和成交额的聚合
+    # board_service.collect_trade_money(from_date, end_date)

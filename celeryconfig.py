@@ -1,5 +1,5 @@
-from kombu import Exchange, Queue
 from celery.schedules import crontab
+from kombu import Exchange, Queue
 
 # 配置时区
 timezone = 'Asia/Shanghai'
@@ -33,6 +33,16 @@ task_routes = (
     {'app.main.task.stock_task.sync_stock_k_line_by_job': {
         'queue': 'day_level',
         'routing_key': 'day_level'
+    }
+    },
+    {'app.main.task.stock_task.clear_k_line_by_job': {
+        'queue': 'default',
+        'routing_key': 'default'
+    }
+    },
+    {'app.main.task.history_task.submit_history_stock_feature_by_job': {
+        'queue': 'default',
+        'routing_key': 'default'
     }
     },
     {'app.main.task.stock_task.transform_task': {

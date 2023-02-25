@@ -17,11 +17,11 @@ def async_dispatch():
     :return:
     """
     req = request.json
-    global_task_id = req['globalId']
-    callback_url = req['callbackUrl']
+    global_task_id = req.get('globalId',None)
+    callback_url = req.get('callbackUrl',None)
 
-    date_start_str = req['start']
-    date_end_str = req['end']
+    date_start_str = req.get('start',None)
+    date_end_str = req.get('end',None)
 
     date_start = date_util.parse_date_time(date_start_str)
     date_end = date_util.parse_date_time(date_end_str)

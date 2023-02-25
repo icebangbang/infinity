@@ -92,6 +92,13 @@ def sync_stock_k_line(self, rebuild_data=None):
     task_dao.create_task(global_task_id, "app.main.task.stock_task.sync_stock_k_line", len(codes))
     transform_task.apply_async(args=[codes, global_task_id, 0])
 
+@celery.task(bind=True, base=MyTask, expires=180)
+def clear_k_line_by_job(self, **kwargs):
+    db['k_line_day'].drop()
+    db.k_line_day.create_index([("code", 1)])
+    db.k_line_day.create_index([("date", 1), ("code", 1)])
+    db.k_line_day.create_index([("date", 1)])
+
 
 @celery.task(bind=True, base=MyTask, expires=180)
 def sync_stock_k_line_by_job(self, **kwargs):

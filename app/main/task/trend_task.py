@@ -136,9 +136,11 @@ def dump_trend_info(self, **kwargs):
         for trend_info_item in trend_info_list:
             trend_info_item['date'] = date
             trend_info_item['update'] = datetime.now()
-            trend_info.update_one({"date": date,"name":trend_info_item['name']}, {"$set": trend_info_item}, upsert=True)
+            trend_info.update_one({"date": date, "name": trend_info_item['name']}, {"$set": trend_info_item},
+                                  upsert=True)
 
-        trend_summarize.update_one({"date": date}, {"$set": dict(date=date,summary=industry_info)}, upsert=True)
+        trend_summarize.update_one({"date": date}, {"$set": dict(date=date, summary=industry_info)}, upsert=True)
+
 
 def query_trend_info(date):
     """
@@ -146,3 +148,4 @@ def query_trend_info(date):
     :return:
     """
     pass
+

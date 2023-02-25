@@ -22,7 +22,7 @@ def get_overview():
     # 目前同步的k线的最早时间
     point = k_line_dao.get_earliest_k_line()
     date = date_util.dt_to_str(point['date'], '%Y-%m-%d') if point else ""
-
+    create_time = date_util.dt_to_str(point['create_time'], '%Y-%m-%d %H:%M:%S') if point else ""
 
     jq_list = date_util.get_jq_list(now, now + timedelta(30))
     current_jq = jq_list[0]
@@ -32,6 +32,7 @@ def get_overview():
     date_gz = date_util.get_date_gz(now)
 
     return dict(earliest_kline_day=date,
+                kline_day_latest_update=create_time,
                 current_jq=current_jq['jq'],
                 next_jq=next_jq['jq'],
                 day_until_next_jq=day_until_next_jq,

@@ -62,9 +62,9 @@ def get_stock_status(base_date, offset, data_list=None, codes=None, code_name_ma
     data_df = pd.DataFrame(input)
     data_df = data_df.set_index("date", drop=False)
 
+    # 移除WilliamsFeature，EarningRateFeature，BollFeature，ShapeFeature
     sub_st = [StockStatusFeature, MarketStatusFeature, PriceMovementFeature,
-              ShortTermFeature, ShapeFeature, BollFeature,
-              EarningRateFeature, BoxType, WilliamsFeature]
+              ShortTermFeature,BoxType]
     # sub_st = [BoxType]
     kwargs = {}
 

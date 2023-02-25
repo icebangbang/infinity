@@ -23,6 +23,7 @@ stock_detail添加industry
 ### 清数据重跑 
 `app.main.local.temp.clear_stock_info`
 
+
 ## 个股趋势相关
 ### /celery/stock/trend
 1. 先分析个股的趋势走向.

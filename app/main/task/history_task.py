@@ -25,7 +25,7 @@ def submit_history_stock_feature_by_job(self, **kwargs):
     history_task_detail = db["history_task_detail"]
     global_id = kwargs['global_task_id']
     task_name = kwargs['task_name']
-    days = 300
+    days = 31
     logging.info("days span is {}".format(days))
     date_start = date_util.get_work_day(datetime.now(), days)
 
@@ -37,7 +37,7 @@ def submit_history_stock_feature_by_job(self, **kwargs):
         details.append(dict(global_task_id=global_id,
                             task_name=task_name,
                             date=date_start,
-                            is_finished=0,
+                            status=0,
                             index = day,
                             total = days,
                             create_time=datetime.now(),
@@ -54,7 +54,7 @@ def submit_history_stock_feature_by_job(self, **kwargs):
 
 
 @celery.task(bind=True, base=MyTask, expire=1800)
-def submit_history_feature_task(self, **kwargs):
+def start_stock_feature_task(self, **kwargs):
     """
     定时轮询表,然后发布任务
     :return:

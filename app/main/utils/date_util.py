@@ -123,7 +123,7 @@ def get_minutes_between(end: datetime, start: datetime) -> int:
     :param start:
     :return:
     """
-    seconds = (get_start_of_day(end) - get_start_of_day(start)).total_seconds()
+    seconds = (end - start).total_seconds()
 
     return int(seconds / 60)
 
@@ -402,6 +402,7 @@ if __name__ == "__main__":
     # print(get_week_start(datetime.now()))
 
     # values = WorkDayIterator(datetime(2022, 6, 1),datetime(2022, 6, 2))
+    days = get_days_between(datetime.now(),datetime(2018, 6, 1))
     # for v in values:
     #     print(v, end=' ')
 

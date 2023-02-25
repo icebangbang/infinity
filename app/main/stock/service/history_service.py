@@ -1,5 +1,6 @@
 from datetime import datetime
 from app.main.db.mongo import db
+from app.main.utils import date_util, collection_util
 
 
 def save_history_event():
@@ -52,6 +53,53 @@ def save_history_event():
     history_event.drop()
     history_event.insert_many(entities)
 
+def run_stock_feature_task():
+    """
+        定时轮询表,然后发布任务
+        :return:
+        """
+    history_task = db["history_task"]
+    history_task_detail = db["history_task_detail"]
+    task_info = history_task.find_one({"is_finished": 0, "task_name": "个股历史特征按批次跑批"})
+
+    if task_info is None:
+        return
+
+    minutes = date_util.get_minutes_between(datetime.now(), task_info['update_time'])
+
+    if minutes <= 5:
+        # 保持间隔,不需要跑的太猛
+        return
+
+    # 这里可能会有重复执行
+    global_task_id = task_info['global_task_id']
+    # 正序排序
+    task_detail_list = list(history_task_detail.find({"global_task_id": global_task_id,
+                                                      "status": {"$in": [0, 1]}}).sort("_id", 1))
+
+    if collection_util.is_not_empty(task_detail_list):
+        task_detail_item = task_detail_list[0]
+        # 最近一个任务还在处理中,不做额外处理
+        if task_detail_item['status'] == 1:
+            return
+
+        date = task_detail_item['date']
+        index = task_detail_item['index']
+
+        flow_job_info = task_info['task_info']
+        flow_job_info['global_task_id'] = global_task_id + "_" + str(index)
+        flow_job_info['callback_service'] = "app.main.task.history_task.update_history_feature"
+        flow_job_info['params'] = dict(
+            from_date_ts=date_util.to_timestamp(date),
+            end_date_ts=date_util.to_timestamp(date),
+            global_task_id=global_task_id
+        )
+
+        # stock_task.submit_stock_feature_by_job.apply_async(kwargs=flow_job_info)
+    else:
+        history_task.update_one({"_id": task_info["_id"]}, {"$set": {"is_finished": 1}})
+        # task_dao.notify(task_info['task_info'])
+
 
 if __name__ == "__main__":
-    save_history_event()
+    run_stock_feature_task()

@@ -18,6 +18,7 @@ TASK_MAPPING = {
     "个股历史特征按批次跑批": history_task.submit_history_stock_feature_by_job, # 名字不能随便改,改之前全局搜一下
     "个股历史趋势按批次跑批": stock_task.submit_stock_feature_by_job,
     '板块趋势和成交额按批次聚合': trend_task.trend_data_task,
+    '清空日k数据': stock_task.clear_k_line_by_job,
     '同步个股日k线': stock_task.sync_stock_k_line_by_job,
     '同步个股月k线': stock_task.submit_stock_month_task,
     '同步东财板块日k线': board_task.sync_board_k_line,
@@ -26,8 +27,10 @@ TASK_MAPPING = {
     "同步pmi": sync_indicator.sync_pmi, # 同步pmi
     '查询趋势信息':trend_task.query_trend_info, # 同步任务
     '个股关联板块':board_association.associate, # 同步任务
+    '扫描个股特征任务':history_task.start_stock_feature_task,
 }
 
+# 需要回调的任务
 PATH_TASK_MAPPING = {
     "app.main.task.stock_task.sync_stock_data":"同步个股日k线",
     "app.main.task.trend_task.sync_trend_task":"个股趋势跑批",
