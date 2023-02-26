@@ -21,7 +21,7 @@ from app.main.utils.date_util import WorkDayIterator
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
-def sync_stock_month_data(self, codes,global_task_id):
+def sync_stock_month_data(self, codes, global_task_id):
     """
     worker驱动
     开始同步月线数据
@@ -38,7 +38,7 @@ def sync_stock_month_data(self, codes,global_task_id):
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
-def submit_stock_month_task(self,**kwargs):
+def submit_stock_month_task(self, **kwargs):
     """
     schedule驱动
     提交同步月线数据任务
@@ -54,7 +54,7 @@ def submit_stock_month_task(self,**kwargs):
 
     for i in range(0, len(codes), step):
         group = codes[i:i + step]
-        sync_stock_month_data.apply_async(kwargs=dict(codes=group,global_task_id=global_task_id))
+        sync_stock_month_data.apply_async(kwargs=dict(codes=group, global_task_id=global_task_id))
 
 
 @celery.task(bind=True, base=MyTask, expires=180)
@@ -91,6 +91,7 @@ def sync_stock_k_line(self, rebuild_data=None):
 
     task_dao.create_task(global_task_id, "app.main.task.stock_task.sync_stock_k_line", len(codes))
     transform_task.apply_async(args=[codes, global_task_id, 0])
+
 
 @celery.task(bind=True, base=MyTask, expires=180)
 def clear_k_line_by_job(self, **kwargs):
@@ -200,9 +201,9 @@ def submit_stock_feature(self, to_date=None, codes=None, global_task_id=None):
         task_dao.create_task(global_task_id, "app.main.task.stock_task.submit_stock_feature", len(codes))
         name_dict = {code: code_name_map[code] for code in codes}
         sync_stock_feature.apply_async(kwargs=dict(base_date=base_timestamp,
-                                                       offset=offset,
-                                                       codes=codes,
-                                                       name_dict=name_dict, global_task_id=global_task_id))
+                                                   offset=offset,
+                                                   codes=codes,
+                                                   name_dict=name_dict, global_task_id=global_task_id))
 
 
 @celery.task(bind=True, base=MyTask, expires=36000)
@@ -211,6 +212,8 @@ def submit_stock_feature_by_job(self, **kwargs):
     from_date_ts = params.get("from_date_ts", None)
     end_date_ts = params.get("end_date_ts", None)
     global_task_id = params.get("global_task_id", None)
+    job_type = params.get("job_type", task_constant.TASK_TYPE_TASK_FLOW)
+    callback_service = params.get("callback_service", None)
 
     from_date = date_util.from_timestamp(from_date_ts)
     end_date = date_util.from_timestamp(end_date_ts)
@@ -234,11 +237,14 @@ def submit_stock_feature_by_job(self, **kwargs):
             sync_stock_feature.apply_async(kwargs=dict(base_date=base_timestamp,
                                                        offset=offset,
                                                        codes=group,
-                                                       name_dict=name_dict, global_task_id=global_task_id))
+                                                       name_dict=name_dict,
+                                                       global_task_id=global_task_id,
+                                                       job_type=job_type,
+                                                       callback_service=callback_service))
 
 
 @celery.task(bind=True, base=MyTask, expires=36000)
-def sync_stock_feature(self, base_date, offset, codes, name_dict, global_task_id):
+def sync_stock_feature(self, base_date, offset, codes, name_dict, global_task_id, **kwargs):
     """
     同步
     :param self:

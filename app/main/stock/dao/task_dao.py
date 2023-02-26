@@ -1,14 +1,15 @@
 import importlib
-
-from app.main.db.mongo import db
+import json
+import logging
+import logging as log
 from datetime import datetime
 
+import requests
+
+from app.main.db.mongo import db
 from app.main.stock.job import job_config
 from app.main.task import task_constant
-from app.main.utils import my_redis, object_util, date_util
-import json
-import logging as log
-import requests
+from app.main.utils import my_redis, object_util
 
 
 def finish_task(task_id):
@@ -73,15 +74,13 @@ def update_task(task_id, size, task_name=None, job_params=None):
 
 
 def service_callback(job_params):
-    global_task_id = job_params['global_task_id']
-    from_date_ts = job_params['from_date_ts']
+    logging.info("[celery异步任务回调]:{}".format(json.dumps(job_params)))
     callback_service = job_params['callback_service']
 
-    date = date_util.from_timestamp(from_date_ts)
     # app.main.task.history_task.update_history_feature
     method = object_util.get_method_by_path(callback_service)
     # service回调
-    method(global_task_id, date)
+    method(job_params)
 
 
 def notify(job_info):
@@ -107,6 +106,3 @@ def notify(job_info):
                            {"$set": {"update_time": datetime.now(), "job_info": job_info, "is_finished": is_finished}},
                            upsert=True)
 
-
-if __name__ == "__main__":
-    create_task("111")

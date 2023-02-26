@@ -45,6 +45,11 @@ task_routes = (
         'routing_key': 'default'
     }
     },
+    {'app.main.task.history_task.start_stock_feature_task': {
+        'queue': 'default',
+        'routing_key': 'default'
+    }
+    },
     {'app.main.task.stock_task.transform_task': {
         'queue': 'day_level',
         'routing_key': 'day_level'
@@ -202,10 +207,10 @@ beat_schedule = {
     #         "task": "app.main.task.stock_task.submit_stock_month_task",  # 任务函数所在位置
     #         "schedule": 600,  # 定时每10分钟执行一次
     #     },
-    # 'board_data_sync': {
-    #     "task": "app.main.task.board_task.sync_board_k_line",
-    #     "schedule": 60,  # 定时每120秒执行一次
-    # },
+    'start_stock_feature_task': {
+        "task": "app.main.task.history_task.start_stock_feature_task",
+        "schedule": 60,  # 定时每120秒执行一次
+    },
     'sync_board_stock_detail': {
         "task": "app.main.task.board_task.sync_board_stock_detail",
         "schedule": crontab(minute='1', hour='15', day_of_week='1-5')  # 工作日的15点以后

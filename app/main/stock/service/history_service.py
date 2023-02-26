@@ -67,7 +67,7 @@ def run_stock_feature_task():
 
     minutes = date_util.get_minutes_between(datetime.now(), task_info['update_time'])
 
-    if minutes <= 5:
+    if minutes <= -1:
         # 保持间隔,不需要跑的太猛
         return
 

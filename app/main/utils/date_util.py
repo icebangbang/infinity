@@ -115,6 +115,15 @@ def get_days_between(end: datetime, start: datetime) -> int:
 
     return int(seconds / (24 * 60 * 60))
 
+def get_workdays_between(end: datetime, start: datetime) -> int:
+    day = 0
+    while True:
+        workday = get_work_day(end,1)
+        day = day+1
+        end = workday
+        if workday < start:
+            return day
+
 
 def get_minutes_between(end: datetime, start: datetime) -> int:
     """
@@ -228,13 +237,14 @@ def add_and_get_work_day(now, offset):
     :return:
     """
     i = 1
+    t = now
     while i <= offset:
-        t = now + timedelta(days=i)
+        t = t + timedelta(days=i)
         if is_workday(t) is False or is_weekend(t):
             offset = offset + 1
         i = i + 1
 
-    return get_start_of_day(now + timedelta(days=offset))
+    return t
 
 
 def if_workday(dt):
@@ -412,6 +422,11 @@ if __name__ == "__main__":
     # jq_list = get_jq_list(datetime(2023, 2, 23), datetime(2023, 9, 1))
     # print(jq_list)
 
-    r = get_date_gz(datetime.now())
-    pass
+    date_start = datetime(2018, 10, 1)
+    days = get_days_between(datetime.now(), date_start)
+
+    for day in range(days):
+        date_start = add_and_get_work_day(date_start, 1)
+
+    print(date_start)
     # print([year for year in range(2012, 2014)])

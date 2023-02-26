@@ -35,5 +35,5 @@ def set_job_config(task_id, chain_job_config):
     my_redis.set("job_config" + str(task_id), json.dumps(chain_job_config, ensure_ascii=False))
 
 
-def load_job_config(task_id):
+def load_job_config(task_id,**kwargs):
     return my_redis.get("job_config" + str(task_id))

@@ -1,4 +1,5 @@
 ## 在目标服务器中执行用
+# sh run-remote-local infinity
 
 PIP_MIRROR=http://127.0.0.1:7104/root/pypi/+simple/
 PIP_MIRROR_HOST=127.0.0.1:7104
