@@ -209,7 +209,7 @@ beat_schedule = {
     #     },
     'start_stock_feature_task': {
         "task": "app.main.task.history_task.start_stock_feature_task",
-        "schedule": 60,  # 定时每120秒执行一次
+        "schedule": 30,  # 定时每120秒执行一次
     },
     'sync_board_stock_detail': {
         "task": "app.main.task.board_task.sync_board_stock_detail",
