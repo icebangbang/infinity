@@ -12,7 +12,7 @@ class RedisDBConfig:
         DBID = app.config['REDIS_DB_ID']
         PASSWORD = app.config['REDIS_PASSWORD']
     else:
-        HOST = '39.105.104.215'
+        HOST = '10.8.0.2'
         PORT = 30004
         DBID = 1
         PASSWORD = 'ironBackRedis123'
@@ -147,8 +147,8 @@ class RedisCache(object):
 
     @operator_status
     def incr(self, key, amount):
-        return self._connection.incr(key, amount) \
- \
+        return self._connection.incr(key, amount)
+
     @operator_status
     def incrby(self, key, amount):
         return self._connection.incrby(key, amount)
@@ -169,6 +169,46 @@ class RedisCache(object):
     def keys(self, pattern=None):
         pattern = "*" if pattern is None else pattern
         return self._connection.keys(pattern)
+
+    @operator_status
+    def acquire_redis_lock(self, key, request_id, ex_time=None) -> bool:
+        """
+        /**
+         * 尝试获取分布式锁
+         * @param key 锁
+         * @param request_id 请求标识
+         * @param ex_time 超期时间, 默认无超时
+         * @return 是否获取成功
+         */
+        """
+        ret = self._connection.set(key, request_id, ex=ex_time, nx=True)
+        if ret:
+            return True
+        return False
+
+    @operator_status
+    def release_redis_lock(self, key, request_id) -> bool:
+        """
+         * 释放分布式锁
+         * @param key 锁
+         * @param request_id 请求标识
+         * @return 是否释放成功
+         */
+        """
+        script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end"
+        # EVAL script numkeys key [key ...] arg [arg ...]
+        ret = self._connection.eval(script, 1, key, request_id)
+        if ret:
+            return True
+        return False
+
+redis_instance = RedisCache()
+
+def acquire_redis_lock(key, request_id, ex_time=None):
+    return redis_instance.acquire_redis_lock(key,request_id,ex_time)
+
+def release_redis_lock(key, request_id):
+    return redis_instance.release_redis_lock(key,request_id)
 
 
 def get(key):
@@ -260,3 +300,9 @@ def expire(key, time):
 
 def keys(pattern=None):
     return RedisCache().keys(pattern)
+
+if __name__ == '__main__':
+    acquire_redis_lock("123","123",100)
+    release_redis_lock("123","123")
+
+
