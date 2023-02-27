@@ -64,6 +64,8 @@ def start_stock_feature_task(self, **kwargs):
     定时轮询表,然后发布任务
     :return:
     """
+    # 任务等待间隔
+    wait_minute = 4
     history_task = db["history_task"]
     history_task_detail = db["history_task_detail"]
     task_info = history_task.find_one({"is_finished": 0, "task_name": "个股历史特征按批次跑批"})
@@ -73,7 +75,7 @@ def start_stock_feature_task(self, **kwargs):
 
     minutes = date_util.get_minutes_between(datetime.now(), task_info['update_time'])
 
-    if minutes <= 4:
+    if minutes <= wait_minute:
         # 保持间隔,不需要跑的太猛
         return
 
@@ -83,7 +85,7 @@ def start_stock_feature_task(self, **kwargs):
         logging.info("[历史特征重跑]获取任务锁失败,global_task_id:{}"
                      .format(global_task_id))
         return
-    # 正序排序
+    # 倒序排序，从最近的日期开始执行
     task_detail_list = list(history_task_detail.find({"global_task_id": global_task_id,
                                                       "status": {"$in": [0, 1]}}).sort("_id", -1))
 
@@ -95,7 +97,7 @@ def start_stock_feature_task(self, **kwargs):
         minutes = date_util.get_minutes_between(datetime.now(), task_detail_item['update_time'])
 
         # 最近一个任务还在处理中,不做额外处理
-        if task_detail_item['status'] == 1 and minutes <= 4:
+        if task_detail_item['status'] == 1 and minutes <= wait_minute:
             logging.info("[历史特征重跑]已有运行中的历史特征任务，执行时间为{},当前index为{},共有{}"
                          .format(date_util.dt_to_str(date), index, len(task_detail_list)))
             return
