@@ -17,6 +17,7 @@ TASK_MAPPING = {
     '板块趋势和成交额聚合': trend_task.trend_data_task,
     "个股历史特征按批次跑批": history_task.submit_history_stock_feature_by_job, # 名字不能随便改,改之前全局搜一下
     "个股历史趋势按批次跑批": stock_task.submit_stock_feature_by_job,
+    "保存趋势信息按批次跑批": history_task.submit_history_stock_feature_by_job,
     '板块趋势和成交额按批次聚合': trend_task.trend_data_task,
     '清空日k数据': stock_task.clear_k_line_by_job,
     '同步个股日k线': stock_task.sync_stock_k_line_by_job,

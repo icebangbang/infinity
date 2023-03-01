@@ -15,7 +15,7 @@ def get_eft_list():
     :return:
     """
     my_set = db['etf']
-    return my_set.find({})
+    return list(my_set.find({}))
 
 
 

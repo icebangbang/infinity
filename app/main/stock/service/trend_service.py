@@ -566,7 +566,7 @@ def _dump_trend_data(result_list):
              "date": result['date']}, {"$set": result}, upsert=True)
 
 
-def _analysis(up_df, down_df,enlarge,convergence_df):
+def _analysis(up_df, down_df,enlarge_df,convergence_df):
     # 最低上行率
     lowest_up = up_df.iloc[[up_df['rate'].idxmin()]]
     # 历史最高上行率
@@ -577,21 +577,25 @@ def _analysis(up_df, down_df,enlarge,convergence_df):
     current_diff = up_df.iloc[[len(up_df) - 1]]
     current_down = down_df.iloc[[len(down_df) - 1]]
     current_convergence = convergence_df.iloc[len(convergence_df)-1]
+    current_enlarge = enlarge_df.iloc[len(enlarge_df)-1]
     result = dict(
+        # lowestUpDay=lowest_up.iloc[0]['date'].strftime('%Y-%m-%d'),
+        # highestUpDay=lowest_up.iloc[0]['date'].strftime('%Y-%m-%d'),
+        # maxDiffDay=lowest_up.iloc[0]['date'].strftime('%Y-%m-%d'),
         lowestUpValue=cal_util.round(lowest_up['rate']),
-        lowestUpDay=lowest_up.iloc[0]['date'].strftime('%Y-%m-%d'),
         highestUp=cal_util.round(highest_up['rate']),
-        highestUpDay=lowest_up.iloc[0]['date'].strftime('%Y-%m-%d'),
         maxDiffValue=cal_util.round(max_diff['diff']),
-        maxDiffDay=lowest_up.iloc[0]['date'].strftime('%Y-%m-%d'),
         currentDiff=cal_util.round(current_diff['diff']),
         currentUpValue=cal_util.round(current_diff['rate']),
         currentDownValue=cal_util.round(current_down['rate']),
+        currentConvergenceValue=cal_util.round(current_convergence['rate']),
+        currentEnlargeValue=cal_util.round(current_enlarge['rate']),
         up_slop=cal_util.round(current_diff['up_slop']),
         down_slop=cal_util.round(current_diff['down_slop']),
         convergence_down_slop=cal_util.round(current_convergence['down_slop']),
         convergence_up_slop=cal_util.round(current_convergence['up_slop']),
-
+        enlarge_down_slop=cal_util.round(current_enlarge['down_slop']),
+        enlarge_up_slop=cal_util.round(current_enlarge['up_slop']),
     )
     return result
 

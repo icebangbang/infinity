@@ -123,7 +123,16 @@ def get_workdays_between(end: datetime, start: datetime) -> int:
         end = workday
         if workday < start:
             return day
+def get_seconds_between(end: datetime, start: datetime) -> int:
+    """
+    获取分钟的时间间隔
+    :param end:
+    :param start:
+    :return:
+    """
+    seconds = (end - start).total_seconds()
 
+    return int(seconds)
 
 def get_minutes_between(end: datetime, start: datetime) -> int:
     """
