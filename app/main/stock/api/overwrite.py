@@ -5,7 +5,6 @@ import json
 from datetime import datetime, timedelta
 import dateutil
 import logging
-from lxml import etree
 from py_mini_racer import py_mini_racer
 import jionlp as jio
 

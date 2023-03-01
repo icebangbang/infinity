@@ -26,9 +26,9 @@ def get_all_etf():
     """
     df = ak.fund_etf_category_sina("ETF基金")
     # 成交量
-    efts = df[df['volume']>=10000000]
-    efts = efts[['symbol','name']]
-    efts = efts.rename(columns={'symbol':"code"})
+    efts = df[df['成交额']>=10000000]
+    efts = efts[['代码','名称']]
+    efts = efts.rename(columns={'代码':"code","名称":"name"})
     return efts.to_dict("records")
 
 

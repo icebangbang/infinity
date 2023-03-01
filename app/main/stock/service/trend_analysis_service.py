@@ -314,7 +314,7 @@ if __name__ == '__main__':
     # plot_peaks("光伏设备", datetime(2019, 1, 1), datetime(2019, 12, 1), True)
 
     # find_stocks_by_year("贵金属", 2019)
-    find_stocks_by_year("风电设备", 2020)
-    find_stocks_by_year("风电设备", 2021)
-    find_stocks_by_year("风电设备",2022)
-    find_stocks_by_year("风电设备",2023)
+    find_stocks_by_year("文化传媒", 2020)
+    find_stocks_by_year("文化传媒", 2021)
+    find_stocks_by_year("文化传媒",2022)
+    find_stocks_by_year("文化传媒",2023)
