@@ -3,6 +3,8 @@
 """
 import akshare as ak
 import pandas as pd
+from app.main.utils import date_util
+
 
 def fetch_kline_data(code):
     """
@@ -26,10 +28,16 @@ def get_all_etf():
     """
     df = ak.fund_etf_category_sina("ETF基金")
     # 成交量
-    efts = df[df['成交额']>=10000000]
-    efts = efts[['代码','名称']]
-    efts = efts.rename(columns={'代码':"code","名称":"name"})
-    return efts.to_dict("records")
+    # efts = df[df['成交额']>=10000000]
+    efts = df[['代码','名称','成交额']]
+    efts = efts.rename(columns={'代码':"code","名称":"name","成交额":"money"})
+
+    etfs = efts.to_dict("records")
+
+    for etf in etfs:
+        code = etf['code'].replace("sz","").replace("sh","")
+        r = ak.fund_etf_basic_info_sina(code)
+        print(r)
 
 
 

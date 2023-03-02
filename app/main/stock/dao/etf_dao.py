@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import List
 
+import akshare
 import pymongo
 
 from app.main.db.mongo import db, myclient
@@ -74,5 +75,5 @@ def dump_etf_feature(companies: List[Company], date):
 
 
 if __name__ == "__main__":
-    # dump_etf()
-    dump_history_kline()
+    dump_etf()
+    # dump_history_kline()

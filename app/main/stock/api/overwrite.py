@@ -1,17 +1,17 @@
+import json
+import logging
+from datetime import datetime
+
+import akshare as ak
+import dateutil
+import jionlp as jio
 import pandas as pd
 import requests
-import akshare as ak
-import json
-from datetime import datetime, timedelta
-import dateutil
-import logging
-from py_mini_racer import py_mini_racer
-import jionlp as jio
-
 from akshare.stock.cons import hk_js_decode
+from py_mini_racer import py_mini_racer
 from tqdm import tqdm
 
-from app.main.stock.dao import stock_detail_dao, stock_dao
+from app.main.stock.dao import stock_dao
 
 
 def stock_zh_a_hist(
@@ -99,7 +99,7 @@ def stock_zh_a_hist(
     temp_df['最近收盘'] = temp_df.loc[temp_df['收盘'].shift(-1) > 0, '收盘']
     temp_df['最近收盘'] = temp_df['最近收盘'].shift()
     # temp_df['最近收盘'][0] = prev_k_price
-    temp_df.loc[0,'最近收盘'] = prev_k_price
+    temp_df.loc[0, '最近收盘'] = prev_k_price
     return temp_df
 
 
@@ -281,7 +281,7 @@ def stock_board_concept_hist_em(symbol: str = "数字货币", adjust: str = "qfq
 
     temp_df['最近收盘'] = temp_df.loc[temp_df['收盘'].shift(-1) > 0, '收盘']
     temp_df['最近收盘'] = temp_df['最近收盘'].shift()
-    temp_df.loc[0,'最近收盘'] = prev_k_price
+    temp_df.loc[0, '最近收盘'] = prev_k_price
     return temp_df
 
 
@@ -363,14 +363,14 @@ def stock_board_concept_name_em(t=None) -> pd.DataFrame:
             "领涨股票-涨跌幅",
         ]
     ]
-    temp_df["最新价"] = pd.to_numeric(temp_df["最新价"],errors="coerce")
-    temp_df["涨跌额"] = pd.to_numeric(temp_df["涨跌额"],errors="coerce")
-    temp_df["涨跌幅"] = pd.to_numeric(temp_df["涨跌幅"],errors="coerce")
-    temp_df["总市值"] = pd.to_numeric(temp_df["总市值"],errors="coerce")
-    temp_df["换手率"] = pd.to_numeric(temp_df["换手率"],errors="coerce")
-    temp_df["上涨家数"] = pd.to_numeric(temp_df["上涨家数"],errors="coerce")
-    temp_df["下跌家数"] = pd.to_numeric(temp_df["下跌家数"],errors="coerce")
-    temp_df["领涨股票-涨跌幅"] = pd.to_numeric(temp_df["领涨股票-涨跌幅"],errors="coerce")
+    temp_df["最新价"] = pd.to_numeric(temp_df["最新价"], errors="coerce")
+    temp_df["涨跌额"] = pd.to_numeric(temp_df["涨跌额"], errors="coerce")
+    temp_df["涨跌幅"] = pd.to_numeric(temp_df["涨跌幅"], errors="coerce")
+    temp_df["总市值"] = pd.to_numeric(temp_df["总市值"], errors="coerce")
+    temp_df["换手率"] = pd.to_numeric(temp_df["换手率"], errors="coerce")
+    temp_df["上涨家数"] = pd.to_numeric(temp_df["上涨家数"], errors="coerce")
+    temp_df["下跌家数"] = pd.to_numeric(temp_df["下跌家数"], errors="coerce")
+    temp_df["领涨股票-涨跌幅"] = pd.to_numeric(temp_df["领涨股票-涨跌幅"], errors="coerce")
     return temp_df
 
 
@@ -609,6 +609,7 @@ def get_stock_web(stock):
         return None
     return "http://{}".format(web.split('/')[0])
 
+
 def get_stock_register_address(stock):
     """
     001267
@@ -630,15 +631,15 @@ def get_stock_register_address(stock):
     if address_info['province'] is None:
         stock_detail = stock_dao.get_one_stock(code)
         boards = stock_detail['board']
-        province = boards[0].replace("板块","省")
-        reg_address = province+reg_address
+        province = boards[0].replace("板块", "省")
+        reg_address = province + reg_address
         address_info = jio.parse_location(reg_address)
 
-    return {"province":address_info["province"],
-            "city":address_info["city"],
-            "county":address_info["county"],
-            "full_location":address_info["full_location"],
-            "web":web}
+    return {"province": address_info["province"],
+            "city": address_info["city"],
+            "county": address_info["county"],
+            "full_location": address_info["full_location"],
+            "web": web}
 
 
 def get_stock_business(stock):
@@ -688,9 +689,30 @@ def get_bellwether():
         industry=data['f14'],
         bellwether=data['f128'],
         bellwether_rate=data['f136'],
-        bellwhther_code = data['f140']
+        bellwhther_code=data['f140']
     ) for data in data_list]
     return data_list
+
+
+def fund_etf_basic_info_sina(symbol: str = "159996") -> dict:
+    """
+    ETF 基金的基本信息，主要目的是为了获取基金规模
+    http://finance.sina.com.cn/fund/quotes/000001/bc.shtml
+    :param symbol:
+    :return:
+    """
+    url = f"https://stock.finance.sina.com.cn/fundInfo/api/openapi.php/FundPageInfoService.tabjjgk?symbol={symbol}"
+    r: dict = requests.get(url).json()
+    body = r['result']['data']
+    return dict(
+        name=body['jjjc'],  # 基金简称
+        code=body['symbol'],
+        start_time=body['clrq'],  # 成立时间
+        body=body['jjgm'],  # 体量
+        company = body['glr'], #管理公司
+        style = body['FinanceStyle'], #管理公司
+    )
+
 
 def fund_etf_hist_sina(symbol: str = "sz159996") -> pd.DataFrame:
     """
@@ -710,8 +732,9 @@ def fund_etf_hist_sina(symbol: str = "sz159996") -> pd.DataFrame:
     temp_df["date"] = pd.to_datetime(temp_df["date"]).dt.date
     return temp_df
 
+
 def stock_cash_flow_sheet_by_report_em(
-    symbol: str = "SH600519",
+        symbol: str = "SH600519",
 ) -> pd.DataFrame:
     """
     东方财富-股票-财务分析-现金流量表-按报告期
@@ -721,7 +744,7 @@ def stock_cash_flow_sheet_by_report_em(
     :return: 现金流量表-按报告期
     :rtype: pandas.DataFrame
     """
-    company_types = [4,3,1,0]
+    company_types = [4, 3, 1, 0]
     true_company_type = -1
     for company_type in company_types:
         url = "https://emweb.securities.eastmoney.com/PC_HSF10/NewFinanceAnalysis/xjllbDateAjaxNew"
@@ -731,15 +754,15 @@ def stock_cash_flow_sheet_by_report_em(
             "code": symbol,
         }
         r = requests.get(url, params=params)
-        data_json:dict = r.json()
+        data_json: dict = r.json()
         true_company_type = company_type
-        if 'data' in data_json.keys() : break
+        if 'data' in data_json.keys(): break
     temp_df = pd.DataFrame(data_json["data"])
     temp_df["REPORT_DATE"] = pd.to_datetime(temp_df["REPORT_DATE"]).dt.date
     temp_df["REPORT_DATE"] = temp_df["REPORT_DATE"].astype(str)
     need_date = temp_df["REPORT_DATE"].tolist()
     sep_list = [
-        ",".join(need_date[i : i + 5]) for i in range(0, len(need_date), 5)
+        ",".join(need_date[i: i + 5]) for i in range(0, len(need_date), 5)
     ]
     big_df = pd.DataFrame()
     for item in tqdm(sep_list, leave=False):
@@ -765,5 +788,5 @@ if __name__ == "__main__":
     # r = get_bellwether()
     # df = ak.fund_etf_hist_sina(symbol="sz169103")
     # df = stock_cash_flow_sheet_by_report_em(symbol="sz300763")
-    df = get_stock_register_address(dict(belong = 'sz',code="300763"))
+    df = get_stock_register_address(dict(belong='sz', code="300763"))
     print(123)
