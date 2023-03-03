@@ -1,5 +1,5 @@
 import json
-import logging
+import logging as log
 from datetime import datetime
 
 import akshare as ak
@@ -9,7 +9,9 @@ import pandas as pd
 import requests
 from akshare.stock.cons import hk_js_decode
 from py_mini_racer import py_mini_racer
+from requests.exceptions import ProxyError
 from tqdm import tqdm
+import time
 
 from app.main.stock.dao import stock_dao
 
@@ -58,7 +60,7 @@ def stock_zh_a_hist(
             r = requests.get(url, params=params)
             break
         except Exception as e:
-            logging.error(e, exc_info=1)
+            log.error(e, exc_info=1)
     data_json = r.json()
     data = data_json["data"]
     if data is None: return None
@@ -701,17 +703,24 @@ def fund_etf_basic_info_sina(symbol: str = "159996") -> dict:
     :param symbol:
     :return:
     """
+    headers = {'Connection': 'close', }
+
     url = f"https://stock.finance.sina.com.cn/fundInfo/api/openapi.php/FundPageInfoService.tabjjgk?symbol={symbol}"
-    r: dict = requests.get(url).json()
-    body = r['result']['data']
-    return dict(
-        name=body['jjjc'],  # 基金简称
-        code=body['symbol'],
-        start_time=body['clrq'],  # 成立时间
-        body=body['jjgm'],  # 体量
-        company = body['glr'], #管理公司
-        style = body['FinanceStyle'], #管理公司
-    )
+    while True:
+        try:
+            r = requests.get(url,headers=headers)
+            body = r.json()['result']['data']
+
+            return dict(
+                name=body['jjjc'],  # 基金简称
+                code=body['symbol'],
+                start_time=body['clrq'],  # 成立时间
+                body=body['jjgm'],  # 体量
+                company = body['glr'], #管理公司
+                style = body['FinanceStyle'], #管理公司
+            )
+        except ProxyError:
+            time.sleep(1)
 
 
 def fund_etf_hist_sina(symbol: str = "sz159996") -> pd.DataFrame:
