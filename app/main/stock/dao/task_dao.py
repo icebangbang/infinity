@@ -8,7 +8,7 @@ import requests
 
 from app.main.db.mongo import db
 from app.main.stock.job import job_config
-from app.main.task import task_constant
+from app.main.constant import task_constant
 from app.main.utils import my_redis, object_util
 
 

@@ -24,13 +24,23 @@ def get_years(start: datetime, end: datetime):
 def get_report_day(dt: datetime):
     month = dt.month
     year = dt.year
+    day = 30
 
-    if 1 <= month <= 3: m = 12
-    if 4 <= month <= 6: m = 3
-    if 7 <= month <= 9: m = 6
-    if 10 <= month <= 12: m = 9
+    if 1 <= month <= 3:
+        year = year - 1
+        m = 12
+        day = 31
+    if 4 <= month <= 6:
+        m = 3
+        day = 31
+    if 7 <= month <= 9:
+        m = 6
+        day = 30
+    if 10 <= month <= 12:
+        m = 9
+        day = 30
 
-    return datetime(year, m, 30)
+    return datetime(year, m, day)
 
 
 def is_same_day(day1: datetime, day2: datetime) -> bool:
@@ -412,6 +422,7 @@ class ReportTimeIterator(object):
 
 
 if __name__ == "__main__":
+    print(get_report_day(datetime.now()))
     # d = parse_date_time("20210823212121", fmt="%Y%m%d%H%M%S")
     # d2 = parse_date_time("20210829121212", fmt="%Y%m%d%H%M%S")
     # print(get_friday_of_week())

@@ -11,7 +11,7 @@ from app.main.stock.job import sync_index_kline, sync_performance
 from app.main.stock.service import sync_kline_service, stock_service, report_service
 from app.main.stock.stock_pick_filter import stock_filter
 from app.main.stock.task_wrapper import TaskWrapper
-from app.main.task import task_constant
+from app.main.constant import task_constant
 from app.main.utils import date_util
 from app.main.utils.date_util import WorkDayIterator
 

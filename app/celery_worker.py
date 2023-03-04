@@ -1,5 +1,4 @@
-from app.application import app,create_app
-import os
+from app.application import app
 from celery import Celery
 import logging
 
@@ -60,7 +59,7 @@ class MyTask(celery.Task):  # celery 基类
         task_path = self.request.task
 
         from app.main.stock.dao import task_dao
-        from app.main.task.task_constant import PATH_TASK_MAPPING
+        from app.main.constant.task_constant import PATH_TASK_MAPPING
 
         if task_path in PATH_TASK_MAPPING.keys():
             global_task_id = kwargs['global_task_id']

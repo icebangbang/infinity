@@ -100,6 +100,24 @@ def dump_etf_feature(companies: List[Company], date):
     my_set.bulk_write(update)
 
 
+def get_etf_by_tag(tag):
+    """
+    tag通过倒排索引,查找etf内容
+    :param tag:
+    :return:
+    """
+    search_keyword_index = db['search_keyword_index']
+    etf = db['etf']
+    result = search_keyword_index.find_one({"keyword": tag, "type": "etf"})
+    if result and result.get("refs", None):
+        items = list(etf.find({"name": {"$in": result['refs']}}).sort("body", -1))
+        return items
+    return []
+
+
 if __name__ == "__main__":
-    dump_etf()
+    # dump_etf()
     # dump_history_kline()
+    etfs = get_etf_by_tag("电池")
+    for etf in etfs:
+        print("{},{},{}".format(etf['name'], etf['body'], etf['code']))

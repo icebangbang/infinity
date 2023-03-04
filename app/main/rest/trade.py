@@ -1,7 +1,6 @@
-from app.main.stock.job import job_config
-from app.main.utils import restful, date_util
+from app.main.utils import restful
 from . import rest
-from app.main.task import fund_task, trade_constant
+from app.main.constant import trade_constant
 from flask import request
 
 

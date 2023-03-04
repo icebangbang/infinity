@@ -723,6 +723,8 @@ def fund_etf_basic_info_sina(symbol: str = "159996") -> dict:
             time.sleep(1)
 
 
+
+
 def fund_etf_hist_sina(symbol: str = "sz159996") -> pd.DataFrame:
     """
     ETF 基金的日行情数据

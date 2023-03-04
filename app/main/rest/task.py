@@ -1,7 +1,8 @@
 from app.main.stock.job import job_config
 from app.main.utils import restful, date_util
 from . import rest
-from app.main.task import fund_task, task_constant
+from app.main.task import fund_task
+from app.main.constant import task_constant
 from flask import request
 
 @rest.route("/task/sync/backtrading", methods=['get'])

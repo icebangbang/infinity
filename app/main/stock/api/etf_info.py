@@ -2,7 +2,7 @@
 同步etf数据
 """
 import os
-
+from datetime import datetime
 import akshare as ak
 import pandas as pd
 from app.main.utils import date_util
@@ -11,7 +11,7 @@ from app.main.modules.jieba import cut_word
 
 
 def test_cut(input):
-    seg_list = cut_word.cut_for_search(input)  # 搜索引擎模式
+    seg_list = cut_word.cut(input)  # 搜索引擎模式
     print(", ".join(seg_list))
 
 
@@ -60,6 +60,7 @@ def get_etf_detail(code)->dict:
     :return:
     """
     etf_basic_info = ak.fund_etf_basic_info_sina(code)
+
     name = etf_basic_info['name']
     name = name.replace("ETF","")
     name_tag: list = cut_word.cut(name)
@@ -67,7 +68,20 @@ def get_etf_detail(code)->dict:
 
     return etf_basic_info
 
+def get_etf_hold(code):
+    """
+    获得基金持仓数据
+    :return:
+    """
+    latest_report_day: datetime = date_util.get_report_day(datetime.now())
+    fund_portfolio_hold_em_df = ak.fund_portfolio_hold_em(symbol=code,
+                                                          date=str(latest_report_day.year))
+    # todo 未完成字段中英文
+    return fund_portfolio_hold_em_df.to_dict("rerecords")
+
+
 
 if __name__ == "__main__":
-    d = get_etf_list()
+    # d = get_etf_list()
+    d = get_etf_detail("510010")
     print(d)

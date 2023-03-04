@@ -2,12 +2,13 @@
 历史数据跑批任务
 """
 import logging
-from datetime import datetime,timedelta
+from datetime import datetime
 
 from app.celery_worker import celery, MyTask
 from app.main.db.mongo import db
 from app.main.stock.dao import task_dao
-from app.main.task import stock_task, task_constant
+from app.main.task import stock_task
+from app.main.constant import task_constant
 from app.main.utils import date_util, collection_util, my_redis
 from app.main.utils.date_util import WorkDayIterator
 

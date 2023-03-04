@@ -6,8 +6,8 @@ from app.main.stock.job import sync_board, job_config
 from app.main.utils import restful
 from . import rest
 from app.main.utils import date_util
-from app.main.task import demo, trend_task, task_constant
-from app.main.task import board_task
+from app.main.task import trend_task
+from app.main.constant import task_constant
 from datetime import datetime, timedelta
 from app.main.task import board_task, stock_task,etf_task
 from flask import request
