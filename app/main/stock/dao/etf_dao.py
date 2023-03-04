@@ -1,10 +1,9 @@
 from datetime import datetime
 from typing import List
 
-import akshare
 import pymongo
 
-from app.main.db.mongo import db, myclient
+from app.main.db.mongo import db
 from app.main.stock.api import etf_info
 from app.main.stock.company import Company
 from app.main.utils import date_util
@@ -20,7 +19,6 @@ def get_eft_list():
     return list(my_set.find({}))
 
 
-
 def get_code_name_map():
     """
     获取code,name映射字典
@@ -33,14 +31,16 @@ def get_code_name_map():
 
 def dump_etf():
     """
-    存储etf的信息
+    存储etf的信息,同时将名字通过分词切割
+    存储关键字和关联信息到search_keyword_index中
+    便于后续板块和对应的etf基金做关联
     :return:
     """
     etf_list = etf_info.get_etf_list()
     my_set = db['etf']
     search_keyword_index = db['search_keyword_index']
 
-    for index,etf in enumerate(etf_list):
+    for index, etf in enumerate(etf_list):
         code = etf['code']
         detail = etf_info.get_etf_detail(code)
         etf.update(detail)
@@ -49,19 +49,22 @@ def dump_etf():
 
         name_tag = detail['name_tag']
         for tag in name_tag:
-            result = search_keyword_index.find_one({"keyword":tag,"type":"etf"})
+            # 查找表中已有的记录
+            result = search_keyword_index.find_one({"keyword": tag, "type": "etf"})
+            # 判空并尝试新建集合
             result = result if result else {}
             result['keyword'] = tag
             result['type'] = "etf"
-            refs = result.get("refs",[])
+            # 获取keyword关联的信息
+            refs = result.get("refs", [])
+            # 新增关联信息,并做去重操作
             refs.append(name)
             result['refs'] = list(set(refs))
-            search_keyword_index.update_one({"keyword":tag,"type":"etf"},{"$set": result}, upsert=True)
-
+            # upsert操作
+            search_keyword_index.update_one({"keyword": tag, "type": "etf"}, {"$set": result}, upsert=True)
 
         my_set.update({"code": etf['code']}, {"$set": etf}, upsert=True)
-        log.info("同步etf基金:{},{}".format(code,name))
-
+        log.info("同步etf基金:{},{}".format(code, name))
 
 
 def dump_history_kline():
@@ -80,6 +83,7 @@ def dump_history_kline():
         print(etf['code'])
         kline_data = etf_info.fetch_kline_data(etf['code'])
         etf_kline_day.insert_many(kline_data)
+
 
 def dump_etf_feature(companies: List[Company], date):
     start_of_day = date_util.get_start_of_day(date)
