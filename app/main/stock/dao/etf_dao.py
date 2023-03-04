@@ -8,6 +8,7 @@ from app.main.db.mongo import db, myclient
 from app.main.stock.api import etf_info
 from app.main.stock.company import Company
 from app.main.utils import date_util
+import logging as log
 
 
 def get_eft_list():
@@ -35,11 +36,32 @@ def dump_etf():
     存储etf的信息
     :return:
     """
-    etf_list = etf_info.get_all_etf()
+    etf_list = etf_info.get_etf_list()
     my_set = db['etf']
+    search_keyword_index = db['search_keyword_index']
 
-    for etf in etf_list:
+    for index,etf in enumerate(etf_list):
+        code = etf['code']
+        detail = etf_info.get_etf_detail(code)
+        etf.update(detail)
+        name = etf['name']
+        etf['update_time'] = datetime.now()
+
+        name_tag = detail['name_tag']
+        for tag in name_tag:
+            result = search_keyword_index.find_one({"keyword":tag,"type":"etf"})
+            result = result if result else {}
+            result['keyword'] = tag
+            result['type'] = "etf"
+            refs = result.get("refs",[])
+            refs.append(name)
+            result['refs'] = list(set(refs))
+            search_keyword_index.update_one({"keyword":tag,"type":"etf"},{"$set": result}, upsert=True)
+
+
         my_set.update({"code": etf['code']}, {"$set": etf}, upsert=True)
+        log.info("同步etf基金:{},{}".format(code,name))
+
 
 
 def dump_history_kline():

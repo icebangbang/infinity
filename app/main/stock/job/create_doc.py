@@ -44,6 +44,12 @@ def list_doc():
                 dict(name="status",
                      type="int",
                      desc="状态,0未完成,1处理中,2已完成"),
+                dict(name="total",
+                     type="int",
+                     desc="任务总数"),
+                dict(name="index",
+                     type="int",
+                     desc="任务下标"),
                 dict(name="create_time",
                      type="datetime"),
                 dict(name="update_time",
@@ -55,7 +61,18 @@ def list_doc():
                          status=1,
                          create_time=datetime(2023, 1, 1),
                          update_time=datetime(2023, 1, 1))
-        )
+        ),
+        dict(table_name="search_keyword_index",
+             columns=[dict(name="keyword",
+                           type="str",
+                           desc="关键字名称"),
+                      dict(name="refs",
+                           type="list",
+                           desc="关联数据"),
+                      dict(name="type",
+                           type="str",
+                           desc="数据类型"),
+                      ]),
     ]
 
 

@@ -13,6 +13,16 @@ from bson import ObjectId
 import logging as log
 import pandas
 
+def get_root_path():
+    """
+    获取项目根路径
+    :return:
+    """
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    root_path = basedir[:basedir.find('app')]
+
+    return root_path
+
 def get_method_by_path(path):
     p, m = path.rsplit('.', 1)
     log.info("module {} m {}".format(p, m))
@@ -353,10 +363,11 @@ def drictToStrStock(nowData,tableName):
 
 if __name__ == "__main__":
     # print(drictToStrStock([dict(name=1,sex=2)],"table"))
-    import pandas as pd
-    p = pd.DataFrame([dict(a=123),dict(a=12),dict(a=321),dict(a=43),dict(a=123),dict(a=123)])
-    p[0:2].reset_index(drop=True).to_excel("./a.xlsx",index=False)
-    p[2:4].reset_index(drop=True).to_excel("./b.xlsx",index=False)
+    # import pandas as pd
+    # p = pd.DataFrame([dict(a=123),dict(a=12),dict(a=321),dict(a=43),dict(a=123),dict(a=123)])
+    # p[0:2].reset_index(drop=True).to_excel("./a.xlsx",index=False)
+    # p[2:4].reset_index(drop=True).to_excel("./b.xlsx",index=False)
+    print(get_root_path())
 
 
 class DatetimeJsonEncoder(simplejson.JSONEncoder):
