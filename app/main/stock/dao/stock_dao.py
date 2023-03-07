@@ -124,7 +124,7 @@ def get_latest_stock_feature():
     :return:
     """
     my_set = db['stock_feature']
-    points = list(my_set.find({}).sort("update_time", -1).limit(1))
+    points = list(my_set.find({}).sort("_id", -1).limit(1))
     if collection_util.is_not_empty(points):
         return points[0]
     return None

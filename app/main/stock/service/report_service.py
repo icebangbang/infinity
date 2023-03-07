@@ -28,7 +28,7 @@ def get_overview():
 
     # 特征跑批时间
     feature_point = stock_dao.get_latest_stock_feature()
-    feature_update_time = date_util.dt_to_str(feature_point['update_time'], '%Y-%m-%d %H:%M:%S') \
+    feature_update_time = date_util.dt_to_str(feature_point['update'], '%Y-%m-%d %H:%M:%S') \
         if feature_point else "暂无数据"
 
     # 获取当前节气数据
