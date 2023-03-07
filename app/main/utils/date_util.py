@@ -6,7 +6,8 @@ import sxtwl
 from chinese_calendar import is_workday
 from dateutil.relativedelta import relativedelta
 
-from app.main.yi.constant import jqmc,Gan,Zhi
+from app.main.yi.constant import jqmc, Gan, Zhi
+
 
 def get_years(start: datetime, end: datetime):
     """
@@ -25,22 +26,31 @@ def get_report_day(dt: datetime):
     month = dt.month
     year = dt.year
     day = 30
+    season = 1
 
+    # 第二年的第一季度披露上一个季度的报告
     if 1 <= month <= 3:
         year = year - 1
         m = 12
         day = 31
+        season = 4
+    # 当年一季度的报告
     if 4 <= month <= 6:
         m = 3
         day = 31
+        season = 1
+    # 当年二季度的报告
     if 7 <= month <= 9:
         m = 6
         day = 30
+        season = 1
+    # 当年年三季度的报告
     if 10 <= month <= 12:
         m = 9
         day = 30
+        season = 3
 
-    return datetime(year, m, day)
+    return datetime(year, m, day), season
 
 
 def is_same_day(day1: datetime, day2: datetime) -> bool:
@@ -125,14 +135,17 @@ def get_days_between(end: datetime, start: datetime) -> int:
 
     return int(seconds / (24 * 60 * 60))
 
+
 def get_workdays_between(end: datetime, start: datetime) -> int:
     day = 0
     while True:
-        workday = get_work_day(end,1)
-        day = day+1
+        workday = get_work_day(end, 1)
+        day = day + 1
         end = workday
         if workday < start:
             return day
+
+
 def get_seconds_between(end: datetime, start: datetime) -> int:
     """
     获取分钟的时间间隔
@@ -143,6 +156,7 @@ def get_seconds_between(end: datetime, start: datetime) -> int:
     seconds = (end - start).total_seconds()
 
     return int(seconds)
+
 
 def get_minutes_between(end: datetime, start: datetime) -> int:
     """
@@ -313,14 +327,15 @@ def get_week_end(t: datetime, if_work_day: bool = True):
     start = t - timedelta(span)
     return get_end_of_day(start)
 
-def get_date_gz(date:datetime):
+
+def get_date_gz(date: datetime):
     """
     获取年月日时干支
     :return:
     """
     day = sxtwl.fromSolar(date.year, date.month, date.day)
     year_gz_index = day.getYearGZ()
-    year_gz_str = Gan[year_gz_index.tg]+Zhi[year_gz_index.dz]
+    year_gz_str = Gan[year_gz_index.tg] + Zhi[year_gz_index.dz]
     # 月干支
     month_gz_index = day.getMonthGZ()
     month_gz_str = Gan[month_gz_index.tg] + Zhi[month_gz_index.dz]
@@ -334,9 +349,10 @@ def get_date_gz(date:datetime):
     hour_gz_index = sxtwl.getShiGz(year_gz_index.tg, date.hour)
     hour_gz_str = Gan[hour_gz_index.tg] + Zhi[hour_gz_index.dz]
 
-    return year_gz_str+'-'+month_gz_str+'-'+day_gz_str+'-'+hour_gz_str
+    return year_gz_str + '-' + month_gz_str + '-' + day_gz_str + '-' + hour_gz_str
 
-        # print("%d时天干地支:" % (hour), Gan[hTG.tg] + Zhi[hTG.dz])
+    # print("%d时天干地支:" % (hour), Gan[hTG.tg] + Zhi[hTG.dz])
+
 
 def get_jq_list(start, end, ignore_time=True) -> list:
     """
@@ -432,7 +448,7 @@ if __name__ == "__main__":
     # print(get_week_start(datetime.now()))
 
     # values = WorkDayIterator(datetime(2022, 6, 1),datetime(2022, 6, 2))
-    days = get_days_between(datetime.now(),datetime(2018, 6, 1))
+    days = get_days_between(datetime.now(), datetime(2018, 6, 1))
     # for v in values:
     #     print(v, end=' ')
 

@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 import akshare as ak
 import pandas as pd
-from app.main.utils import date_util
+from app.main.utils import date_util, simple_util
 import logging as log
 from app.main.modules.jieba import cut_word
 
@@ -73,15 +73,30 @@ def get_etf_hold(code):
     获得基金持仓数据
     :return:
     """
-    latest_report_day: datetime = date_util.get_report_day(datetime.now())
+    latest_report_day,season = date_util.get_report_day(datetime.now())
+    # 重新由overwrite实现fund_portfolio_hold_em
     fund_portfolio_hold_em_df = ak.fund_portfolio_hold_em(symbol=code,
                                                           date=str(latest_report_day.year))
-    # todo 未完成字段中英文
-    return fund_portfolio_hold_em_df.to_dict("rerecords")
+    if fund_portfolio_hold_em_df.empty:
+        return list()
+    key = "{}年{}季度股票投资明细".format(latest_report_day.year,season)
+    df = fund_portfolio_hold_em_df[fund_portfolio_hold_em_df['季度'] == key]
+
+    df = df[['股票代码', '股票名称','占净值比例','持股数','持仓市值']]
+    df = df.rename(columns={'股票代码': "code",
+                            "股票名称": "name",
+                            "占净值比例":"rate",
+                            "持股数":"hold_count",
+                            "持仓市值":"hold_money"})
+    df['update_time'] = datetime.now()
+    df['season'] = season
+    df['year'] = latest_report_day.year
+    df['fund_code'] = code
+    return df.to_dict("records")
 
 
 
 if __name__ == "__main__":
     # d = get_etf_list()
-    d = get_etf_detail("510010")
+    d = get_etf_hold("510010")
     print(d)

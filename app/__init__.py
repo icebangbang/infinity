@@ -12,7 +12,7 @@ from app.main.stock.api.overwrite import stock_zh_a_hist, \
     stock_board_concept_cons_em, \
     chinese_ppi, chinese_cpi, pig_data, chinese_pmi, \
     get_stock_web, get_stock_business, get_bellwether, \
-    get_stock_register_address,fund_etf_hist_sina,fund_etf_basic_info_sina
+    get_stock_register_address,fund_etf_hist_sina,fund_etf_basic_info_sina,fund_portfolio_hold_em
 from app.main.stock.api.three_table_overwrite import stock_cash_flow_sheet_by_report_em, \
     stock_balance_sheet_by_report_em, \
     stock_profit_sheet_by_report_em, \
@@ -44,6 +44,7 @@ akshare.get_stock_business = get_stock_business
 akshare.get_bellwether = get_bellwether
 akshare.fund_etf_hist_sina = fund_etf_hist_sina
 akshare.fund_etf_basic_info_sina = fund_etf_basic_info_sina
+akshare.fund_portfolio_hold_em = fund_portfolio_hold_em
 akshare.stock_cash_flow_sheet_by_report_em = stock_cash_flow_sheet_by_report_em
 akshare.stock_balance_sheet_by_report_em = stock_balance_sheet_by_report_em
 akshare.stock_profit_sheet_by_report_em = stock_profit_sheet_by_report_em

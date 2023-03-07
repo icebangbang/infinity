@@ -1,3 +1,4 @@
+import logging as log
 from datetime import datetime
 from typing import List
 
@@ -7,7 +8,6 @@ from app.main.db.mongo import db
 from app.main.stock.api import etf_info
 from app.main.stock.company import Company
 from app.main.utils import date_util
-import logging as log
 
 
 def get_eft_list():
@@ -27,6 +27,28 @@ def get_code_name_map():
     etfs = get_eft_list()
     code_name_map = {etf['code']: etf['name'] for etf in etfs}
     return code_name_map
+
+
+def dump_etf_hold():
+    """
+    以季度为单位保存基金的个股持仓情况
+    :return:
+    """
+    etf_list = etf_info.get_etf_list()
+    etf_hold = db['etf_hold']
+
+    latest_report_day, season = date_util.get_report_day(datetime.now())
+
+    for index, etf in enumerate(etf_list):
+        fund_code = etf['code']
+        name = etf['name']
+        print("同步etf基金的持仓情况:{},{}".format(fund_code, name))
+        holds = etf_info.get_etf_hold(fund_code)
+
+        for hold in holds:
+            hold_code = hold['code']
+            etf_hold.update_one({"fund_code": fund_code, "season": season, "code": hold_code}, {"$set": hold},
+                                upsert=True)
 
 
 def dump_etf():
@@ -117,7 +139,8 @@ def get_etf_by_tag(tag):
 
 if __name__ == "__main__":
     # dump_etf()
+    dump_etf_hold()
     # dump_history_kline()
-    etfs = get_etf_by_tag("电池")
-    for etf in etfs:
-        print("{},{},{}".format(etf['name'], etf['body'], etf['code']))
+    # etfs = get_etf_by_tag("电池")
+    # for etf in etfs:
+    #     print("{},{},{}".format(etf['name'], etf['body'], etf['code']))
