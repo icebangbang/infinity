@@ -5,7 +5,7 @@ import pymongo
 
 from app.main.db.mongo import db
 from app.main.stock.company import Company
-from app.main.utils import date_util
+from app.main.utils import date_util, collection_util
 
 
 def get_all_stock(fields=None, filter={}):
@@ -99,6 +99,12 @@ def get_code_province_map():
 
 
 def dump_stock_feature(companies: List[Company], date):
+    """
+    保存个股特征
+    :param companies: 公司维度的特征数据
+    :param date:
+    :return:
+    """
     start_of_day = date_util.get_start_of_day(date)
 
     my_set = db['stock_feature']
@@ -111,6 +117,18 @@ def dump_stock_feature(companies: List[Company], date):
             "update": datetime.now()
         }}, True))
     my_set.bulk_write(update)
+
+def get_latest_stock_feature():
+    """
+    获取最近同步的个股特征数据
+    :return:
+    """
+    my_set = db['stock_feature']
+    points = list(my_set.find({}).sort("update_time", -1).limit(1))
+    if collection_util.is_not_empty(points):
+        return points[0]
+    return None
+
 
 
 def delete_stock_feature(date):
