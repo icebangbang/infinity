@@ -137,6 +137,28 @@ def get_etf_by_tag(tag):
     return []
 
 
+def get_etf_by_code(fund_code):
+    """
+    通过基金代码获取基金信息
+    :param fund_code:
+    :return:
+    """
+    etf_set = db['etf']
+    etf = etf_set.find_one({"code": fund_code})
+    return etf
+
+
+def get_related_etf(codes):
+    """
+    通过个股代码查找记录
+    :param codes:
+    :return:
+    """
+    etf_hold = db['etf_hold']
+    holds = list(etf_hold.find({"code": {"$in": codes}}))
+    return holds
+
+
 if __name__ == "__main__":
     # dump_etf()
     dump_etf_hold()

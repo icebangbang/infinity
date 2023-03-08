@@ -1,9 +1,10 @@
-from app.main.stock.dao import stock_dao, k_line_dao, board_dao
-from datetime import datetime, timedelta
-import copy
-from app.main.db.mongo import db
 import logging
+from datetime import datetime
 
+import pandas as pd
+
+from app.main.db.mongo import db
+from app.main.stock.dao import stock_dao, k_line_dao, board_dao, etf_dao
 from app.main.utils import date_util, cal_util
 
 """
@@ -11,12 +12,36 @@ from app.main.utils import date_util, cal_util
 以东方财富大板块概念里的公司市值来界定资金规模
 """
 
-"""
-获取a股整体市值
-"""
+
+def get_fund_by_board(board_name):
+    """
+    通过板块的组成个股，匹配基金的持仓股，匹配最合适的etf基金
+    :return:
+    """
+    board_detail = board_dao.get_board_by_name(board_name)
+    codes = board_detail['codes']
+    holds = etf_dao.get_related_etf(codes)
+    holds_df = pd.DataFrame(holds)
+
+    code_groups = holds_df.groupby("name")
+    for name, group in code_groups:
+        print(name,len(group))
+
+    fund_groups = holds_df.groupby("fund_code")
+    for key, group in fund_groups:
+        etf = etf_dao.get_etf_by_code(key)
+        name = etf['name']
+        print(name)
+
 
 
 def get_by_board(start: datetime, end: datetime):
+    """
+    通过板块个股的市值计算板块的整个市值
+    :param start: 开始时间
+    :param end: 结束时间
+    :return:
+    """
     stock_value = db['stock_value']
 
     # end_time = end
@@ -78,9 +103,11 @@ def get_china_overview(stock_values):
             kcb_fcv = kcb_fcv + fcv
             kcb_mv = kcb_mv + mv
 
-def get_stock_value(code,date):
+
+def get_stock_value(code, date):
     my_set = db['stock_value']
-    return my_set.find_one(dict(code=code,date=date))
+    return my_set.find_one(dict(code=code, date=date))
+
 
 def backtrading_stock_value(stocks, days=1000):
     """
@@ -105,7 +132,7 @@ def backtrading_stock_value(stocks, days=1000):
         update_time = base['update_time']
         code = base['code']
         name = base['name']
-        logging.info("[个股市值回溯]回溯{},{},{}天之内市值".format(code,name,days))
+        logging.info("[个股市值回溯]回溯{},{},{}天之内市值".format(code, name, days))
         # 获取最近的一个工作日
         latest = date_util.get_work_day(base['update_time'], 0)
         start = date_util.get_work_day(base['update_time'], days)
@@ -152,10 +179,9 @@ def backtrading_stock_value(stocks, days=1000):
 
 if __name__ == "__main__":
     # stocks = stock_dao.get_stock_detail_list(['300763'])
-    stocks = stock_dao.get_stock_detail_list()
-    backtrading_stock_value(stocks)
+    # stocks = stock_dao.get_stock_detail_list()
+    # backtrading_stock_value(stocks)
     # end = date_util.get_start_of_day(date_util.get_work_day(datetime.now(),0)[0])
     # start = end - timedelta(days=1)
 
-    # results = get_by_board(start, end)
-    # pass
+    get_fund_by_board("电池")
