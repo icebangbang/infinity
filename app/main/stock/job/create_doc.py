@@ -1,5 +1,6 @@
-from app.main.db.mongo import db
 from datetime import datetime
+
+from app.main.db.mongo import db
 
 
 def list_doc():
@@ -7,21 +8,11 @@ def list_doc():
         dict(
             table_name="history_task",
             columns=[
-                dict(name="global_id",
-                     type="str",
-                     desc="全局任务id"),
-                dict(name="task_name",
-                     type="str",
-                     desc="任务名"),
-                dict(name="is_finished",
-                     type="int",
-                     desc="是否成功,0未完成1完成"),
-                dict(name="create_time",
-                     type="datetime",
-                     desc="创建时间"),
-                dict(name="update_time",
-                     type="datetime",
-                     desc="更新时间")
+                dict(name="global_id", type="str", desc="全局任务id"),
+                dict(name="task_name", type="str", desc="任务名"),
+                dict(name="is_finished", type="int", desc="是否成功,0未完成1完成"),
+                dict(name="create_time", type="datetime", desc="创建时间"),
+                dict(name="update_time", type="datetime", desc="更新时间")
             ],
             example=dict(global_id=202302181055,
                          task_name="历史特征跑批",
@@ -32,28 +23,14 @@ def list_doc():
         dict(
             table_name="history_task_detail",
             columns=[
-                dict(name="global_id",
-                     type="str",
-                     desc="全局任务id"),
-                dict(name="task_name",
-                     type="str",
-                     desc="任务名称"),
-                dict(name="date",
-                     type="datetime",
-                     desc="任务关联日期"),
-                dict(name="status",
-                     type="int",
-                     desc="状态,0未完成,1处理中,2已完成"),
-                dict(name="total",
-                     type="int",
-                     desc="任务总数"),
-                dict(name="index",
-                     type="int",
-                     desc="任务下标"),
-                dict(name="create_time",
-                     type="datetime"),
-                dict(name="update_time",
-                     type="datetime")
+                dict(name="global_id", type="str", desc="全局任务id"),
+                dict(name="task_name", type="str", desc="任务名称"),
+                dict(name="date", type="datetime", desc="任务关联日期"),
+                dict(name="status", type="int", desc="状态,0未完成,1处理中,2已完成"),
+                dict(name="total", type="int", desc="任务总数"),
+                dict(name="index", type="int", desc="任务下标"),
+                dict(name="create_time", type="datetime"),
+                dict(name="update_time", type="datetime")
             ],
             example=dict(global_id=202302181055,
                          task_name="历史特征跑批",
@@ -63,6 +40,7 @@ def list_doc():
                          update_time=datetime(2023, 1, 1))
         ),
         dict(table_name="search_keyword_index",
+             table_comment="关键字索引表",
              columns=[dict(name="keyword",
                            type="str",
                            desc="关键字名称"),
@@ -73,15 +51,57 @@ def list_doc():
                            type="str",
                            desc="数据类型"),
                       ]),
+        dict(table_name="etf_hold",
+             table_comment="etf持仓详情",
+             indexes=dict(code_season_idx=[("code", 1), ("season", 1)]),
+             columns=[dict(name="code",
+                           type="str",
+                           desc="个股代码"),
+                      dict(name="fund_code",
+                           type="str",
+                           desc="基金代码"),
+                      dict(name="hold_count",
+                           type="int",
+                           desc="持股数"),
+                      dict(name="hold_money",
+                           type="int",
+                           desc="持仓市值"),
+                      dict(name="name",
+                           type="int",
+                           desc="个股名称"),
+                      dict(name="rate",
+                           type="float",
+                           desc="持股比例"),
+                      dict(name="season",
+                           type="int",
+                           desc="季度"),
+                      dict(name="update_time",
+                           type="datetime",
+                           desc="更新时间"),
+                      dict(name="year",
+                           type="int",
+                           desc="年份"),
+                      ]),
     ]
+    return docs
 
 
-def create_doc(doc_name):
-    collist = db.list_collection_names()
-    if doc_name not in collist:
-        data_set = db[doc_name]
-        data_set.insert_one({})
-        data_set.remove({})
+def create_doc(doc_name=None):
+    # collist = db.list_collection_names()
+    docs = list_doc()
+
+    for doc in docs:
+        table_name = doc['table_name']
+        columns = doc['columns']
+        indexes:dict = doc.get('indexes',{})
+        table = db[table_name]
+        record = table.find_one({},sort=[('_id', -1)])
+        if record is None:
+            record = {column['name']:None for column in columns}
+            table.insert_one(record)
+            table.remove({})
+        for index in indexes.values():
+            table.create_index(index)
 
 
 def run():
@@ -152,5 +172,5 @@ def add_config_data():
 
 
 if __name__ == "__main__":
-    run()
+    create_doc()
     # add_config_data()
