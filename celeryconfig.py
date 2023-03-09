@@ -240,22 +240,22 @@ beat_schedule = {
         "task": "app.main.task.macrodata_task.baotuan_update",
         "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
     },
-    'sync_balance': {
-        "task": "app.main.task.stock_task.sync_balance",
-        "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
-    },
-    'sync_cash_flow': {
-        "task": "app.main.task.stock_task.sync_cash_flow",
-        "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
-    },
-    'sync_profit': {
-        "task": "app.main.task.stock_task.sync_profit",
-        "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
-    },
-    'sync_analysis_indicator': {
-        "task": "app.main.task.stock_task.sync_analysis_indicator",
-        "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
-    },
+    # 'sync_balance': {
+    #     "task": "app.main.task.stock_task.sync_balance",
+    #     "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
+    # },
+    # 'sync_cash_flow': {
+    #     "task": "app.main.task.stock_task.sync_cash_flow",
+    #     "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
+    # },
+    # 'sync_profit': {
+    #     "task": "app.main.task.stock_task.sync_profit",
+    #     "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
+    # },
+    # 'sync_analysis_indicator': {
+    #     "task": "app.main.task.stock_task.sync_analysis_indicator",
+    #     "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
+    # },
     'market_status_analysis': {
         "task": "app.main.task.macrodata_task.market_status_analysis",
         "schedule": 5
