@@ -80,6 +80,7 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
         trend_point = None
         # 历史记录不为空,就要做更新
         if len(trend_point_list) > 0:
+            # 最近一个点的数据
             trend_point = trend_point_list[0]
             inf_l_point_date_history = trend_point['inf_l_point_date']  # 底分型拐点出现的时间
             inf_h_point_date_history = trend_point['inf_h_point_date']  # 顶分型拐点出现的时间
@@ -104,7 +105,7 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
             #     trend_point_set.update_one({"_id": trend_point["_id"]}, {"$set": {"is_deleted":1}})
             #     return
 
-        # 没有任何变化,更新，只要有变化，就新增一条记录
+        # 没有发生趋势变化,则更新;
         if len(trend_change_scope) == 0 and trend_point:
             trend_point['current_bot_trend_size'] = current_bot_trend_size
             trend_point['current_top_trend_size'] = current_top_trend_size
@@ -131,13 +132,14 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
         # 收敛
         if current_bot_type_slope < 0 and current_top_type_slope < 0:
             trend = "down"
-        # 放大 这个案例应该会比较少
+        # 放大
         if current_bot_type_slope <= 0 and current_top_type_slope >= 0:
             trend = "enlarge"
 
         # 在交易时间的，状态设置为临时
         trend_type = temp if in_trade_time else normal
 
+        # 只要有变化，就新增一条记录
         entity = dict(
             date=start_of_day,
             is_in_use=1,
@@ -242,6 +244,7 @@ def get_province_trend_info(start, end):
             db.trend_data.update_one(
                 {"industry": result["industry"], "trend": result["trend"],
                  "date": result['date']}, {"$set": result}, upsert=True)
+
 
 def get_index_trend_info(start, end):
     """
@@ -493,7 +496,7 @@ def get_trend_info(end_date):
         rate_diff = down['rate'] - up['rate']
         up['diff'] = rate_diff
         latest = rate_diff[0]
-        result = _analysis(up, down,enlarge,convergence)
+        result = _analysis(up, down, enlarge, convergence)
         result['name'] = industry
         # total[industry] = round(latest,2)
         total.append(result)
@@ -566,7 +569,7 @@ def _dump_trend_data(result_list):
              "date": result['date']}, {"$set": result}, upsert=True)
 
 
-def _analysis(up_df, down_df,enlarge_df,convergence_df):
+def _analysis(up_df, down_df, enlarge_df, convergence_df):
     # 最低上行率
     lowest_up = up_df.iloc[[up_df['rate'].idxmin()]]
     # 历史最高上行率
@@ -576,8 +579,8 @@ def _analysis(up_df, down_df,enlarge_df,convergence_df):
     # 当前区间差距
     current_diff = up_df.iloc[[len(up_df) - 1]]
     current_down = down_df.iloc[[len(down_df) - 1]]
-    current_convergence = convergence_df.iloc[len(convergence_df)-1]
-    current_enlarge = enlarge_df.iloc[len(enlarge_df)-1]
+    current_convergence = convergence_df.iloc[len(convergence_df) - 1]
+    current_enlarge = enlarge_df.iloc[len(enlarge_df) - 1]
     result = dict(
         # lowestUpDay=lowest_up.iloc[0]['date'].strftime('%Y-%m-%d'),
         # highestUpDay=lowest_up.iloc[0]['date'].strftime('%Y-%m-%d'),
@@ -625,9 +628,9 @@ if __name__ == "__main__":
     #     name = stock['name']
     #     print(code, name)
     #
-    #     for date in WorkDayIterator(datetime(2022, 10, 26), datetime(2022, 10, 26)):
-    #         features = stock_dao.get_company_feature(code, date)
-    #         save_stock_trend_with_features(code, name, features, date)
+    for date in WorkDayIterator(datetime(2022, 4,1), datetime(2023, 3, 9)):
+        features = stock_dao.get_company_feature("003006", date)
+        save_stock_trend_with_features("003006", "百亚股份", features, date)
 
     # save_stock_trend_with_features("300763", "锦浪科技", features, datetime(2022, 8, 25))
     # get_trend_size_info(datetime(2022, 9, 16), datetime(2022, 9, 16), False)
@@ -635,7 +638,7 @@ if __name__ == "__main__":
     # print("code","300763")
     # get_trend_info_by_name('中字头',datetime(2019, 1, 1), datetime(2022, 12, 5))
 
-    get_trend_info(datetime(2023, 2, 17))
+    # get_trend_info(datetime(2023, 2, 17))
 
     # from_date = datetime(2021, 1, 1)
     # end_date = datetime(2023, 2, 20)
