@@ -18,6 +18,6 @@ def log_test():
     log.warning('this is a WARNING message')
     log.error('this is an ERROR message')
     log.critical('this is a CRITICAL message')
-    return restful.response_obj("")
+    return restful.response(dict(result=1/0))
 
 

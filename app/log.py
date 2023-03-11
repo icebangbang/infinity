@@ -25,7 +25,7 @@ def init_log(app):
             "console": {
                 "class": "logging.StreamHandler",
                 "level": "DEBUG",
-                "formatter": "simple",
+                "formatter": "standard",
                 "stream": "ext://sys.stdout"
             }
         },

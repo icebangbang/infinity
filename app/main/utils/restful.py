@@ -23,9 +23,13 @@ def status_response(status_dic):
 
 
 def response_error(error):
-    error = error.value
-    return response(data=None, message=error.message,
-                    success=False, error_code=error.error_code)
+    if "value" in error.__dict__.keys():
+        error = error.value
+        return response(data=None, message=error,
+                        success=False, error_code=error.error_code)
+
+    return response(data=None, message=str(error),
+                    success=False, error_code=-1)
 
 
 # def responseto(data=None, message=None, success=True,cls=None, **kwargs):
