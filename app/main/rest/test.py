@@ -1,8 +1,9 @@
 from app.main.utils import restful
 from . import rest
-import logging as log
+import logging
 from app.main.stock.service import stock_service
 
+log = logging.getLogger(__name__)
 
 @rest.route("/test/remind", methods=['get'])
 def remind():
@@ -11,7 +12,7 @@ def remind():
 
 
 @rest.route("/test/log", methods=['get'])
-def remind():
+def log_test():
     log.debug('this is a DEBUG message')
     log.info('this is an INFO message')
     log.warning('this is a WARNING message')
