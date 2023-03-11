@@ -7,10 +7,12 @@ def get_logger(name):
     return logging.getLogger(name)
 
 
-def init_log():
+def init_log(app=None):
     logging.getLogger("nacos.client").setLevel(logging.WARNING)
     # env = app.config['FLASK_ENV']
     env = os.environ.get('FLASK_ENV')
+    if "local" not in env.lower():
+        return
 
     LOGGING = {
         "version": 1,

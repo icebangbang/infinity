@@ -1,16 +1,18 @@
-import logging
 from datetime import datetime
 
 import pandas as pd
 
+from app.log import get_logger
 from app.main.db.mongo import db
-from app.main.stock.dao import stock_dao, k_line_dao, board_dao, etf_dao
+from app.main.stock.dao import k_line_dao, board_dao, etf_dao
 from app.main.utils import date_util, cal_util
 
 """
 资金流向分析
 以东方财富大板块概念里的公司市值来界定资金规模
 """
+
+log = get_logger(__name__)
 
 
 def get_fund_by_board(board_name):
@@ -23,18 +25,28 @@ def get_fund_by_board(board_name):
     holds = etf_dao.get_related_etf(codes)
     holds_df = pd.DataFrame(holds)
 
-    code_group_df = holds_df.groupby("name")
-    code_group = pd.DataFrame([dict(key=key,size=group.__len__()) for key,group in code_group_df])
+    '''
+    数据去重
+    DataFrame.drop_duplicates(subset=None, keep=“first”, inplace=False, ignore_index=False)
+    '''
+    fund_list = holds_df.drop_duplicates(subset='fund_code', keep="first", inplace=False, ignore_index=False)\
+        .to_dict(orient="records")
+    fund_map = { fund['fund_code']:fund['fund_name'] for fund in fund_list}
 
-    # cal_util.filter_extreme_MAD(code_group,5,"size")
+    fund_stock_map = dict()
+    for fund_code, group in holds_df.groupby('fund_code'):
+        fund_stock_map[fund_code] = [dict(code=item['code'],
+                                     name=item['name'],
+                                     rate=item['rate'])
+                                for item in group.to_dict(orient="records")]
+
     df_count = holds_df.groupby("fund_code").size().sort_values(ascending=False)
 
-    fund_groups = holds_df.groupby("fund_code")
-    for key, group in fund_groups:
-        etf = etf_dao.get_etf_by_code(key)
-        name = etf['name']
-        print(name,len(group))
-
+    # 选排位前5的etf基金
+    result = [dict(fund_name=fund_map.get(key),
+                   fund_code=key,
+                   relate_stocks=fund_stock_map.get(key)) for key, value in df_count[:5].items()]
+    return result
 
 
 def get_by_board(start: datetime, end: datetime):
