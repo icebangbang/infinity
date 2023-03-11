@@ -23,15 +23,17 @@ def get_fund_by_board(board_name):
     holds = etf_dao.get_related_etf(codes)
     holds_df = pd.DataFrame(holds)
 
-    code_groups = holds_df.groupby("name")
-    for name, group in code_groups:
-        print(name,len(group))
+    code_group_df = holds_df.groupby("name")
+    code_group = pd.DataFrame([dict(key=key,size=group.__len__()) for key,group in code_group_df])
+
+    # cal_util.filter_extreme_MAD(code_group,5,"size")
+    df_count = holds_df.groupby("fund_code").size().sort_values(ascending=False)
 
     fund_groups = holds_df.groupby("fund_code")
     for key, group in fund_groups:
         etf = etf_dao.get_etf_by_code(key)
         name = etf['name']
-        print(name)
+        print(name,len(group))
 
 
 

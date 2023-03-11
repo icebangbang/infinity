@@ -48,7 +48,7 @@ def get_etf_list():
     return etfs
 
 
-def get_etf_detail(code)->dict:
+def get_etf_detail(code) -> dict:
     """
     获取所有的场内etf的细节信息
     name=body['jjjc'],  # 基金简称
@@ -62,38 +62,39 @@ def get_etf_detail(code)->dict:
     etf_basic_info = ak.fund_etf_basic_info_sina(code)
 
     name = etf_basic_info['name']
-    name = name.replace("ETF","")
+    name = name.replace("ETF", "")
     name_tag: list = cut_word.cut(name)
     etf_basic_info['name_tag'] = name_tag
 
     return etf_basic_info
 
-def get_etf_hold(code):
+
+def get_etf_hold(fund_code, fund_name):
     """
     获得基金持仓数据
     :return:
     """
-    latest_report_day,season = date_util.get_report_day(datetime.now())
+    latest_report_day, season = date_util.get_report_day(datetime.now())
     # 重新由overwrite实现fund_portfolio_hold_em
-    fund_portfolio_hold_em_df = ak.fund_portfolio_hold_em(symbol=code,
+    fund_portfolio_hold_em_df = ak.fund_portfolio_hold_em(symbol=fund_code,
                                                           date=str(latest_report_day.year))
     if fund_portfolio_hold_em_df.empty:
         return list()
-    key = "{}年{}季度股票投资明细".format(latest_report_day.year,season)
+    key = "{}年{}季度股票投资明细".format(latest_report_day.year, season)
     df = fund_portfolio_hold_em_df[fund_portfolio_hold_em_df['季度'] == key]
 
-    df = df[['股票代码', '股票名称','占净值比例','持股数','持仓市值']]
+    df = df[['股票代码', '股票名称', '占净值比例', '持股数', '持仓市值']]
     df = df.rename(columns={'股票代码': "code",
                             "股票名称": "name",
-                            "占净值比例":"rate",
-                            "持股数":"hold_count",
-                            "持仓市值":"hold_money"})
+                            "占净值比例": "rate",
+                            "持股数": "hold_count",
+                            "持仓市值": "hold_money"})
     df['update_time'] = datetime.now()
     df['season'] = season
     df['year'] = latest_report_day.year
-    df['fund_code'] = code
+    df['fund_code'] = fund_code
+    df['fund_name'] = fund_name
     return df.to_dict("records")
-
 
 
 if __name__ == "__main__":

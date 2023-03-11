@@ -1,4 +1,4 @@
-import logging as log
+from app.log import get_logger
 from datetime import datetime
 from typing import List
 
@@ -9,6 +9,8 @@ from app.main.stock.api import etf_info
 from app.main.stock.company import Company
 from app.main.utils import date_util
 
+
+log = get_logger(__name__)
 
 def get_eft_list():
     """
@@ -37,13 +39,16 @@ def dump_etf_hold():
     etf_list = etf_info.get_etf_list()
     etf_hold = db['etf_hold']
 
+    # 获取当前最近的报告季，以及季度的index
     latest_report_day, season = date_util.get_report_day(datetime.now())
+
+    log.info("[etf基金]总同步数:{}".format(len(etf_list)))
 
     for index, etf in enumerate(etf_list):
         fund_code = etf['code']
-        name = etf['name']
-        print("同步etf基金的持仓情况:{},{}".format(fund_code, name))
-        holds = etf_info.get_etf_hold(fund_code)
+        fund_name = etf['name']
+        log.info("[etf基金]同步etf基金的持仓情况:{},{},{}".format(fund_code, fund_name, index))
+        holds = etf_info.get_etf_hold(fund_code,fund_name)
 
         for hold in holds:
             hold_code = hold['code']

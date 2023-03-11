@@ -3,7 +3,8 @@ import logging
 
 from flask import Blueprint
 from flask import request
-from app.main.utils import restful,string_util
+
+from app.main.utils import restful, string_util
 
 rest = Blueprint('op', __name__, url_prefix='/api')
 log = logging.getLogger(__name__)
@@ -40,6 +41,7 @@ def after(response):
                  statusCode:{}
         """.format(resp_content, response.status_code))
     return response
+
 
 @rest.errorhandler(Exception)
 def all_exception_handler(error):

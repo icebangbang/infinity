@@ -1,7 +1,23 @@
-import numpy as np
-import pandas as pd
 import math
 from decimal import Decimal
+
+import numpy as np
+import pandas as pd
+
+
+def filter_extreme_MAD(df, n,key):
+    """
+    MAD:中位数去极值
+    :param series:
+    :param n:
+    :return:
+    """
+    series = df[key]
+    median = series.quantile(0.5)
+    new_median = ((series - median).abs()).quantile(0.50)
+    max_range = median + n * new_median
+    min_range = median - n * new_median
+    return np.clip(series, min_range, max_range)
 
 
 def get_rate(a1, a2):
@@ -149,12 +165,12 @@ def get_rate(numerator, denominator, ndigits=2) -> float:
 
 
 def round(v, ndigits=2) -> float:
-    return float(Decimal(float(v)).quantize(Decimal(str(pow(10,-ndigits))), rounding="ROUND_HALF_UP"))
+    return float(Decimal(float(v)).quantize(Decimal(str(pow(10, -ndigits))), rounding="ROUND_HALF_UP"))
 
-def divide(a,b,ndigits=2)->float:
-    v = a/b
-    return round(v,ndigits)
 
+def divide(a, b, ndigits=2) -> float:
+    v = a / b
+    return round(v, ndigits)
 
 
 def get_williams(highest, lowest, close):
@@ -166,6 +182,7 @@ def get_williams(highest, lowest, close):
     :return: 威廉指标
     """
     return (highest - close) / (highest - lowest) * 100
+
 
 def get_reverse_point(points):
     """
@@ -195,60 +212,62 @@ def get_reverse_point(points):
 
     return pos_p, neg_p, total_p, point_index
 
+
 def get_top_type(arrays) -> list:
-        """
-        筛选顶分型
-        :return:
-        """
-        results = []
+    """
+    筛选顶分型
+    :return:
+    """
+    results = []
 
-        for i, item in enumerate(arrays):
-            if i == 0:
-                # results.append(dict(i=i, v=item))
+    for i, item in enumerate(arrays):
+        if i == 0:
+            # results.append(dict(i=i, v=item))
+            results.append(dict(index=i, value=item))
+            continue
+        if i == len(arrays) - 1:
+            pre = results[-1]['value']
+            if item > pre:
                 results.append(dict(index=i, value=item))
-                continue
-            if i == len(arrays) - 1:
-                pre = results[-1]['value']
-                if item > pre:
-                    results.append(dict(index=i, value=item))
-                continue
+            continue
 
-            target = item
-            pre = arrays[i - 1]
-            next = arrays[i + 1]
+        target = item
+        pre = arrays[i - 1]
+        next = arrays[i + 1]
 
-            if target > pre and target > next:
-                # results.append(dict(i=i, v=item))
-                results.append(dict(index=i, value=item))
-        return results
+        if target > pre and target > next:
+            # results.append(dict(i=i, v=item))
+            results.append(dict(index=i, value=item))
+    return results
+
 
 def get_bottom_type(arrays) -> list:
-        """
-        筛选底分型
-        :param arrays:
-        :return:
-        """
-        results = []
+    """
+    筛选底分型
+    :param arrays:
+    :return:
+    """
+    results = []
 
-        for i, item in enumerate(arrays):
-            if i == 0:
-                # results.append(dict(i=i, v=item))
+    for i, item in enumerate(arrays):
+        if i == 0:
+            # results.append(dict(i=i, v=item))
+            results.append(dict(index=i, value=item))
+            continue
+        if i == len(arrays) - 1:
+            pre = results[-1]['value']
+            if item < pre:
                 results.append(dict(index=i, value=item))
-                continue
-            if i == len(arrays) - 1:
-                pre = results[-1]['value']
-                if item < pre:
-                    results.append(dict(index=i, value=item))
-                continue
-            target = item
-            pre = arrays[i - 1]
-            next = arrays[i + 1]
+            continue
+        target = item
+        pre = arrays[i - 1]
+        next = arrays[i + 1]
 
-            if target < pre and target <= next:
-                # results.append(dict(i=i, v=item))
-                results.append(dict(index=i, value=item))
+        if target < pre and target <= next:
+            # results.append(dict(i=i, v=item))
+            results.append(dict(index=i, value=item))
 
-        return results
+    return results
 
 
 if __name__ == "__main__":
@@ -270,5 +289,5 @@ if __name__ == "__main__":
     # x = get_bottom_type(c)
     # a,b,c,d = get_reverse_point(x)
 
-    m, c = get_line([1,2,3,4])
+    m, c = get_line([1, 2, 3, 4])
     print(_trace(math.atan(1)))
