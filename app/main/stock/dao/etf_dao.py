@@ -91,7 +91,7 @@ def dump_etf():
             search_keyword_index.update_one({"keyword": tag, "type": "etf"}, {"$set": result}, upsert=True)
 
         my_set.update({"code": etf['code']}, {"$set": etf}, upsert=True)
-        log.info("同步etf基金:{},{}".format(code, name))
+        log.info("[etf基金]同步etf基金信息:{},{}".format(code, name))
 
 
 def dump_history_kline():
@@ -99,17 +99,16 @@ def dump_history_kline():
     存储历史k线
     :return:
     """
-    db.etf_kline_day.drop()
-    db.etf_kline_day.create_index([("code", 1)])
-    db.etf_kline_day.create_index([("date", -1), ("code", 1)])
-
     etf_set = db['etf']
     etf_kline_day = db['etf_kline_day']
-    etf_list = etf_set.find({})
-    for etf in etf_list:
-        print(etf['code'])
-        kline_data = etf_info.fetch_kline_data(etf['code'])
-        etf_kline_day.insert_many(kline_data)
+    etf_list = list(etf_set.find({}))
+    total_etf = len(etf_list)
+    for index,etf in enumerate(etf_list):
+        log.info("[etf基金]同步eft基金k线信息：{},{},index:{},total:{}".format(etf['code'],etf['name'],index,total_etf))
+        code = etf['code']
+        kline_data_list = etf_info.fetch_kline_data(code,etf['belong'])
+        for kline_data in kline_data_list:
+            etf_kline_day.update_one({"code":code,"date":kline_data['date']},{"$set":kline_data},upsert=True)
 
 
 def dump_etf_feature(companies: List[Company], date):
@@ -166,8 +165,8 @@ def get_related_etf(codes):
 
 if __name__ == "__main__":
     # dump_etf()
-    dump_etf_hold()
-    # dump_history_kline()
+    # dump_etf_hold()
+    dump_history_kline()
     # etfs = get_etf_by_tag("电池")
     # for etf in etfs:
     #     print("{},{},{}".format(etf['name'], etf['body'], etf['code']))

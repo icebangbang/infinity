@@ -10,6 +10,7 @@ from app.main.stock.etf_pick_feature import etf_filter
 from app.main.stock.stock_pick_filter import stock_filter
 from app.main.utils import date_util
 
+@celery.task(bind=True, base=MyTask, expires=180)
 
 @celery.task(bind=True, base=MyTask, expires=180)
 def submit_etf_feature(self, to_date=None, codes=None, global_task_id=None):

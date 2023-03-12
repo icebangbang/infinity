@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 import akshare as ak
 import pandas as pd
-from app.main.utils import date_util, simple_util
+from app.main.utils import date_util, simple_util, cal_util
 import logging as log
 from app.main.modules.jieba import cut_word
 
@@ -15,14 +15,15 @@ def test_cut(input):
     print(", ".join(seg_list))
 
 
-def fetch_kline_data(code):
+def fetch_kline_data(code,belong):
     """
     获取场内etf交易数据
     :param code:
     :return:
     """
-    df = ak.fund_etf_hist_sina(code)
-    df['money'] = df['volume'] * (df['high'] + df['low']) / 2
+    df = ak.fund_etf_hist_sina(belong+code)
+    # 亿级别
+    df['money'] = df['volume'] * (df['high'] + df['low']) / 2 / 10000
     df['prev_close'] = df.loc[df['close'].shift(-1) > 0, 'close']
     df['prev_close'] = df['prev_close'].shift()
     df.fillna(0, inplace=True)
