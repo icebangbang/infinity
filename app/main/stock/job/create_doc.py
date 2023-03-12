@@ -41,47 +41,37 @@ def list_doc():
         ),
         dict(table_name="search_keyword_index",
              table_comment="关键字索引表",
-             columns=[dict(name="keyword",
-                           type="str",
-                           desc="关键字名称"),
-                      dict(name="refs",
-                           type="list",
-                           desc="关联数据"),
-                      dict(name="type",
-                           type="str",
-                           desc="数据类型"),
+             columns=[dict(name="keyword", type="str", desc="关键字名称"),
+                      dict(name="refs", type="list", desc="关联数据"),
+                      dict(name="type", type="str", desc="数据类型"),
                       ]),
         dict(table_name="etf_hold",
              table_comment="etf持仓详情",
              indexes=dict(code_season_idx=[("code", 1), ("season", 1)]),
-             columns=[dict(name="code",
-                           type="str",
-                           desc="个股代码"),
-                      dict(name="fund_code",
-                           type="str",
-                           desc="基金代码"),
-                      dict(name="hold_count",
-                           type="int",
-                           desc="持股数"),
-                      dict(name="hold_money",
-                           type="int",
-                           desc="持仓市值"),
-                      dict(name="name",
-                           type="int",
-                           desc="个股名称"),
-                      dict(name="rate",
-                           type="float",
-                           desc="持股比例"),
-                      dict(name="season",
-                           type="int",
-                           desc="季度"),
-                      dict(name="update_time",
-                           type="datetime",
-                           desc="更新时间"),
-                      dict(name="year",
-                           type="int",
-                           desc="年份"),
+             columns=[dict(name="code", type="str", desc="个股代码"),
+                      dict(name="fund_code", type="str", desc="基金代码"),
+                      dict(name="hold_count", type="int", desc="持股数"),
+                      dict(name="hold_money", type="int", desc="持仓市值"),
+                      dict(name="name", type="int", desc="个股名称"),
+                      dict(name="rate", type="float", desc="持股比例"),
+                      dict(name="season", type="int", desc="季度"),
+                      dict(name="update_time", type="datetime", desc="更新时间"),
+                      dict(name="year", type="int", desc="年份"),
                       ]),
+        dict(table_name="etf_kline_day",
+             table_comment="etf日k数据",
+             indexes=dict(code_idx=[("code", 1)],
+                          code_date_idx=[("date", -1), ("code", 1)]),
+             columns=[
+                 dict(name="code", type="str", desc="etf代码"),
+                 dict(name="close", type="float", desc="收盘价"),
+                 dict(name="date", type="datetime", desc="日期"),
+                 dict(name="high", type="float", desc="最高点"),
+                 dict(name="low", type="float", desc="最低点"),
+                 dict(name="money", type="float", desc="成交额(万)"),
+                 dict(name="open", type="float", desc="开盘价"),
+                 dict(name="prev_close", type="float", desc="前一天收盘价"),
+             ]),
     ]
     return docs
 
@@ -93,11 +83,11 @@ def create_doc(doc_name=None):
     for doc in docs:
         table_name = doc['table_name']
         columns = doc['columns']
-        indexes:dict = doc.get('indexes',{})
+        indexes: dict = doc.get('indexes', {})
         table = db[table_name]
-        record = table.find_one({},sort=[('_id', -1)])
+        record = table.find_one({}, sort=[('_id', -1)])
         if record is None:
-            record = {column['name']:None for column in columns}
+            record = {column['name']: None for column in columns}
             table.insert_one(record)
             table.remove({})
         for index in indexes.values():
