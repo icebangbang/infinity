@@ -21,6 +21,10 @@ class YAxisData(Basic):
     name: str  # 数据集名称
     y: List[float]  # 数值列表
     yAxisIndex: int  # 对应的YAxisDesc对象在整个列表的index位置
+    markArea:any
+    color:str
+    markLine:dict
+
 
 
 class Legend(Basic):

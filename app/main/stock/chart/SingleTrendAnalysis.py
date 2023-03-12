@@ -46,28 +46,28 @@ class SingleTrendAnalysis(Line):
         data_x = []
         fill_x_flag = True
 
-        data_y_array = [dict(name="", y=[], yAxisIndex=0, markLine={}) for i in range(4)]
+        data_y_array = [YAxisData(name="", y=[], yAxisIndex=0, markLine={}) for i in range(4)]
         index = 0
         df = pd.DataFrame(trend_data_list)
         for key, group in df.sort_values("date", ascending=True).groupby('trend'):
-            data_y_array[index]['name'] = key
+            data_y_array[index].name = key
             if key == 'up':
                 # 设置上行线的颜色为红色
-                data_y_array[index]['markArea'] = mark_area
-                data_y_array[index]['color'] = 'red'
+                data_y_array[index].markArea= mark_area
+                data_y_array[index].color = 'red'
             if key == 'down':
                 # 设置下行线的颜色为黑色
-                data_y_array[index]['color'] = '#000000'
+                data_y_array[index].color = '#000000'
 
             for point in group.to_dict("records"):
-                data_y_array[index]['y'].append(point['rate'])
+                data_y_array[index].y.append(point['rate'])
                 if fill_x_flag:
                     data_x.append(point['date'])
                     data_x_format.append(date_util.date_time_to_str(point['date'], "%m-%d"))
             fill_x_flag = False
             if key == 'up' or key == 'down':
-                median = numpy.median(data_y_array[index]['y'])
-                data_y_array[index]['markLine'] = {"data": [{"yAxis": median, "name": "中位数"}]}
+                median = numpy.median(data_y_array[index].y)
+                data_y_array[index].markLine = {"data": [{"yAxis": median, "name": "中位数"}]}
             index = index + 1
 
         trade_info_list = board_service.get_trade_info(industry, start, end)

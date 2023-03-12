@@ -5,7 +5,7 @@ import copy
 import inspect
 from typing import get_origin, get_args, _GenericAlias, List
 
-from app.main.utils import object_util
+from app.main.utils import object_util, collection_util
 
 
 class Basic(dict):
@@ -42,7 +42,7 @@ class Basic(dict):
                         continue
                     values = self.get(key,None)
 
-                    if values is None:
+                    if collection_util.is_empty(values) or isinstance(values[0],Basic):
                         continue
                     new_values = [inner_types[0](**value) for value in values]
                     self[key] = new_values
