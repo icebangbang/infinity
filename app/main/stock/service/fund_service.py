@@ -15,6 +15,25 @@ from app.main.utils import date_util, cal_util
 log = get_logger(__name__)
 
 
+def get_etf_kline_day(code, start, end):
+    """
+    获取场内etf基金的日k线数据
+    :return:
+    """
+    return etf_dao.get_etf_kline_day(code, start, end)
+
+
+def get_etf_kline_day_with_dict(code, start, end):
+    """
+    获取场内etf基金的日k线数据,并把结果转为dict
+    {datetime:data_point}
+    :return:
+    """
+    data_points = get_etf_kline_day(code, start, end)
+    return {data_point['date']: data_point
+            for data_point in data_points}
+
+
 def get_fund_by_board(board_name):
     """
     通过板块的组成个股，匹配基金的持仓股，匹配最合适的etf基金
@@ -24,6 +43,9 @@ def get_fund_by_board(board_name):
     codes = board_detail['codes']
     holds = etf_dao.get_related_etf(codes)
     holds_df = pd.DataFrame(holds)
+
+    if holds_df.empty:
+        return None
 
     '''
     数据去重
@@ -49,7 +71,7 @@ def get_fund_by_board(board_name):
 
     high_rate_result = sorted(result, key=lambda d: sum([stock['rate'] for stock in d['relate_stocks']]), reverse=True)
 
-    return result
+    return high_rate_result
 
 
 def get_by_board(start: datetime, end: datetime):

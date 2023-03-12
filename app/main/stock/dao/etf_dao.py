@@ -1,16 +1,16 @@
-from app.log import get_logger
 from datetime import datetime
 from typing import List
 
 import pymongo
 
+from app.log import get_logger
 from app.main.db.mongo import db
 from app.main.stock.api import etf_info
 from app.main.stock.company import Company
 from app.main.utils import date_util
 
-
 log = get_logger(__name__)
+
 
 def get_eft_list():
     """
@@ -48,7 +48,7 @@ def dump_etf_hold():
         fund_code = etf['code']
         fund_name = etf['name']
         log.info("[etf基金]同步etf基金的持仓情况:{},{},{}".format(fund_code, fund_name, index))
-        holds = etf_info.get_etf_hold(fund_code,fund_name)
+        holds = etf_info.get_etf_hold(fund_code, fund_name)
 
         for hold in holds:
             hold_code = hold['code']
@@ -94,6 +94,19 @@ def dump_etf():
         log.info("[etf基金]同步etf基金信息:{},{}".format(code, name))
 
 
+def get_etf_kline_day(code, start, end):
+    """
+    获取场内etf基金的日k线数据
+    :return:
+    """
+    etf_kline_day = db['etf_kline_day']
+    data_points = list(etf_kline_day.find({"code": code,
+                                           "date": {"$gte": start, "$lte": end}},
+                                          {"close": 1, "open": 1, "high": 1, "low": 1, "date": 1, "money": 1}
+                                          ))
+    return data_points
+
+
 def dump_history_kline():
     """
     存储历史k线
@@ -103,12 +116,13 @@ def dump_history_kline():
     etf_kline_day = db['etf_kline_day']
     etf_list = list(etf_set.find({}))
     total_etf = len(etf_list)
-    for index,etf in enumerate(etf_list):
-        log.info("[etf基金]同步eft基金k线信息：{},{},index:{},total:{}".format(etf['code'],etf['name'],index,total_etf))
+    for index, etf in enumerate(etf_list):
+        log.info(
+            "[etf基金]同步eft基金k线信息：{},{},index:{},total:{}".format(etf['code'], etf['name'], index, total_etf))
         code = etf['code']
-        kline_data_list = etf_info.fetch_kline_data(code,etf['belong'])
+        kline_data_list = etf_info.fetch_kline_data(code, etf['belong'])
         for kline_data in kline_data_list:
-            etf_kline_day.update_one({"code":code,"date":kline_data['date']},{"$set":kline_data},upsert=True)
+            etf_kline_day.update_one({"code": code, "date": kline_data['date']}, {"$set": kline_data}, upsert=True)
 
 
 def dump_etf_feature(companies: List[Company], date):

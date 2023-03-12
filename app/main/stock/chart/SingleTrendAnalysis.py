@@ -1,12 +1,12 @@
-import numpy
+from typing import Tuple
 
-from app.main.stock.chart.Line import Line
-from app.main.db.mongo import db
-from app.main.stock.service import board_service
-from app.main.utils import date_util
-from datetime import datetime
+import numpy
 import pandas as pd
 
+from app.main.db.mongo import db
+from app.main.stock.chart.Line import Line
+from app.main.stock.service import board_service, fund_service
+from app.main.utils import date_util, collection_util
 from app.main.utils.date_util import WorkDayIterator
 
 
@@ -36,7 +36,7 @@ class SingleTrendAnalysis(Line):
         total = trend_data_list[0]['total']
 
         # 构建节气区间
-        mark_area = _build_jq_mark(start,end)
+        mark_area = _build_jq_mark(start, end)
 
         # data_x = [date_util.date_time_to_str(date, "%m-%d") for date in WorkDayIterator(start, end)]
         data_x_format = []
@@ -78,19 +78,72 @@ class SingleTrendAnalysis(Line):
                 "type": 'value'
             },
             {
-                "name": "成交量",
+                "name": "成交额",
                 "type": "value",
                 "position": "right"
             }
         ]
 
-        # time = jq['time']
+        y_item, yAxis_item = _build_etf_info(industry, start, end)
+        if y_item is not None:
+            yAxis_array.append(yAxis_item)
+            data_y_array.append(y_item)
 
         return dict(x=data_x_format, y_array=data_y_array, desc=industry, multiSerie=True,
                     totalStock=total,
                     yAxis_array=yAxis_array, legend=legend,
                     # mark_area=mark_area,
                     )
+
+
+def _build_etf_info(industry, start, end) -> Tuple[None, None]:
+    """
+    推荐etf，并展示k线数据
+    :return:
+    """
+    recommend_etf_list: list = fund_service.get_fund_by_board(industry)
+
+    if collection_util.is_empty(recommend_etf_list):
+        return None, None
+
+    recommend_etf = recommend_etf_list[0]
+    code = recommend_etf['fund_code']
+    name = recommend_etf['fund_name']
+    data_point_dict: dict = fund_service.get_etf_kline_day_with_dict(code, start, end)
+
+    # k线形式的展示
+    y_item = dict(name=name, type="candlestick", yAxisIndex=2)
+    y = []
+    y_item['y'] = y
+
+    h = None
+    l = None
+
+    for date in WorkDayIterator(start, end):
+        data_point = data_point_dict.get(date, None)
+        if data_point is not None:
+            open = data_point['open']
+            close = data_point['close']
+            low = data_point['low']
+            high = data_point['high']
+
+            if h is None or high > h:
+                h = high
+
+            if l is None or low < l:
+                l = low
+
+            y.append([open, close, low, high])
+        else:
+            y.append([])
+
+    yAxis_item = {
+        "scale": False,
+        "max": h,
+        "min": l
+    }
+
+    return y_item, yAxis_item
 
 
 def _build_trade_info(trade_info_list) -> list:
