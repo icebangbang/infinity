@@ -11,4 +11,5 @@ class ResponseBody(Basic):
     multiSeries: bool  # 是否对数据集响应
     totalStock: int  # 包含的个股数
     yAxis_array: List[YAxisDesc]    # y轴描述信息
-    legend: Legend # 图例相关嘻嘻
+    legend: Legend # 图例相关信息
+    recommendEtf: str

@@ -42,6 +42,10 @@ def get_fund_by_board(board_name) -> List[RecommendEtf]:
     :return:
     """
     board_detail = board_dao.get_board_by_name(board_name)
+
+    if board_detail is None:
+        return None
+
     codes = board_detail['codes']
     holds = etf_dao.get_related_etf(codes)
     holds_df = pd.DataFrame(holds)
@@ -72,7 +76,8 @@ def get_fund_by_board(board_name) -> List[RecommendEtf]:
                                                relate_stocks=fund_stock_map.get(key)) for key, value in
                                   df_count[:5].items()]
 
-    high_rate_result:List[RecommendEtf] = sorted(result, key=lambda d: sum([stock.rate for stock in d.relate_stocks]), reverse=True)
+    high_rate_result: List[RecommendEtf] = sorted(result, key=lambda d: sum([stock.rate for stock in d.relate_stocks]),
+                                                  reverse=True)
 
     return high_rate_result
 

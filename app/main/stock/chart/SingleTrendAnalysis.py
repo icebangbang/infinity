@@ -80,16 +80,19 @@ class SingleTrendAnalysis(Line):
             YAxisDesc(name="数据", type="value", position="right"),
         ]
 
+        response_body = ResponseBody(x=data_x_format, y_array=data_y_array, desc=industry, multiSeries=True,
+                            totalStock=total,
+                            yAxis_array=yAxis_array, legend=legend)
+
         recommend_etf: RecommendEtf = _build_etf_info(industry, start, end)
         if recommend_etf is not None:
             yAxis_array.append(recommend_etf.y_axis_desc)
             data_y_array.append(recommend_etf.y_axis_data)
+            response_body.recommendEtfName = recommend_etf.fund_name
+            response_body.relateStocks = recommend_etf.relate_stocks
+            response_body.recommendEtfCode = recommend_etf.fund_code
 
-        return ResponseBody(x=data_x_format, y_array=data_y_array, desc=industry, multiSeries=True,
-                            totalStock=total,
-                            yAxis_array=yAxis_array, legend=legend,
-                            # mark_area=mark_area,
-                            )
+        return response_body
 
 
 def _build_etf_info(industry, start, end) -> RecommendEtf:
@@ -102,9 +105,9 @@ def _build_etf_info(industry, start, end) -> RecommendEtf:
     if collection_util.is_empty(recommend_etf_list):
         return None
 
-    recommend = recommend_etf_list[0]
-    code = recommend['fund_code']
-    name = recommend['fund_name']
+    recommend_etf = recommend_etf_list[0]
+    code = recommend_etf['fund_code']
+    name = recommend_etf['fund_name']
     data_point_dict: dict = fund_service.get_etf_kline_day_with_dict(code, start, end)
 
     # k线形式的展示
@@ -133,7 +136,6 @@ def _build_etf_info(industry, start, end) -> RecommendEtf:
         else:
             y.append([])
 
-    recommend_etf = RecommendEtf(fund_code=code, fund_name=name)
     recommend_etf.y_axis_desc = YAxisDesc(name="etf价格", scale=False, max=h, min=l)
     recommend_etf.y_axis_data = y_axis_data
 

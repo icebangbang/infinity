@@ -17,7 +17,6 @@ class RecommendEtf(Basic):
     y_axis_desc: YAxisDesc
     y_axis_data: YAxisData
     relate_stocks: List[RelateStock]
-    r2:Dict[str,str]
 
 
 if __name__ == '__main__':

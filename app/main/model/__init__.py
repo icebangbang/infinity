@@ -24,6 +24,8 @@ class Basic(dict):
 
     # def __getattribute__(self, *args, **kwargs):  # real signature unknown
     #     return self.get(args[0],None)
+    def __setattr__(self, key, value):
+        self[key] = value
 
     def _reset_attribute(self):
         annotations: dict = self.__annotations__
