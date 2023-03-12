@@ -29,24 +29,26 @@ def get_fund_by_board(board_name):
     数据去重
     DataFrame.drop_duplicates(subset=None, keep=“first”, inplace=False, ignore_index=False)
     '''
-    fund_list = holds_df.drop_duplicates(subset='fund_code', keep="first", inplace=False, ignore_index=False)\
+    fund_list = holds_df.drop_duplicates(subset='fund_code', keep="first", inplace=False, ignore_index=False) \
         .to_dict(orient="records")
-    fund_map = { fund['fund_code']:fund['fund_name'] for fund in fund_list}
+    fund_map = {fund['fund_code']: fund['fund_name'] for fund in fund_list}
 
     fund_stock_map = dict()
     for fund_code, group in holds_df.groupby('fund_code'):
         fund_stock_map[fund_code] = [dict(code=item['code'],
-                                     name=item['name'],
-                                     rate=item['rate'])
-                                for item in group.to_dict(orient="records")]
+                                          name=item['name'],
+                                          rate=item['rate'])
+                                     for item in group.to_dict(orient="records")]
 
     df_count = holds_df.groupby("fund_code").size().sort_values(ascending=False)
 
-    # 选排位前5的etf基金
-    # 还要根据持仓比例进行再排序
+    # 选关联个股前5的etf基金
     result = [dict(fund_name=fund_map.get(key),
                    fund_code=key,
                    relate_stocks=fund_stock_map.get(key)) for key, value in df_count[:5].items()]
+
+    high_rate_result = sorted(result, key=lambda d: sum([stock['rate'] for stock in d['relate_stocks']]), reverse=True)
+
     return result
 
 
