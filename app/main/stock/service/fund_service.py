@@ -43,6 +43,7 @@ def get_fund_by_board(board_name):
     df_count = holds_df.groupby("fund_code").size().sort_values(ascending=False)
 
     # 选排位前5的etf基金
+    # 还要根据持仓比例进行再排序
     result = [dict(fund_name=fund_map.get(key),
                    fund_code=key,
                    relate_stocks=fund_stock_map.get(key)) for key, value in df_count[:5].items()]
@@ -146,7 +147,7 @@ def backtrading_stock_value(stocks, days=1000):
         update_time = base['update_time']
         code = base['code']
         name = base['name']
-        logging.info("[个股市值回溯]回溯{},{},{}天之内市值".format(code, name, days))
+        log.info("[个股市值回溯]回溯{},{},{}天之内市值".format(code, name, days))
         # 获取最近的一个工作日
         latest = date_util.get_work_day(base['update_time'], 0)
         start = date_util.get_work_day(base['update_time'], days)
@@ -183,12 +184,12 @@ def backtrading_stock_value(stocks, days=1000):
             flowCapitalValue = stock_data['flowCapitalValue']
             MarketValue = stock_data['MarketValue']
 
-            logging.info("{}-{}".format(date_util.dt_to_str(date), code))
+            log.info("{}-{}".format(date_util.dt_to_str(date), code))
             my_set.update_one({"date": date, "code": code},
                               {"$set": dict(flowCapitalValue=flowCapitalValue,
                                             MarketValue=MarketValue,
                                             update_time=update_time)}, upsert=True)
-    logging.info("[个股市值回溯]回溯完成")
+    log.info("[个股市值回溯]回溯完成")
 
 
 if __name__ == "__main__":
@@ -198,4 +199,5 @@ if __name__ == "__main__":
     # end = date_util.get_start_of_day(date_util.get_work_day(datetime.now(),0)[0])
     # start = end - timedelta(days=1)
 
-    get_fund_by_board("电池")
+    r = get_fund_by_board("计算机设备")
+    pass
