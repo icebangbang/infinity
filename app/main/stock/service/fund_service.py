@@ -1,9 +1,11 @@
 from datetime import datetime
+from typing import List
 
 import pandas as pd
 
 from app.log import get_logger
 from app.main.db.mongo import db
+from app.main.model.recommend_etf import RecommendEtf
 from app.main.stock.dao import k_line_dao, board_dao, etf_dao
 from app.main.utils import date_util, cal_util
 
@@ -34,7 +36,7 @@ def get_etf_kline_day_with_dict(code, start, end):
             for data_point in data_points}
 
 
-def get_fund_by_board(board_name):
+def get_fund_by_board(board_name) -> List[RecommendEtf]:
     """
     通过板块的组成个股，匹配基金的持仓股，匹配最合适的etf基金
     :return:
@@ -65,11 +67,12 @@ def get_fund_by_board(board_name):
     df_count = holds_df.groupby("fund_code").size().sort_values(ascending=False)
 
     # 选关联个股前5的etf基金
-    result = [dict(fund_name=fund_map.get(key),
-                   fund_code=key,
-                   relate_stocks=fund_stock_map.get(key)) for key, value in df_count[:5].items()]
+    result: List[RecommendEtf] = [RecommendEtf(fund_name=fund_map.get(key),
+                                               fund_code=key,
+                                               relate_stocks=fund_stock_map.get(key)) for key, value in
+                                  df_count[:5].items()]
 
-    high_rate_result = sorted(result, key=lambda d: sum([stock['rate'] for stock in d['relate_stocks']]), reverse=True)
+    high_rate_result:List[RecommendEtf] = sorted(result, key=lambda d: sum([stock.rate for stock in d.relate_stocks]), reverse=True)
 
     return high_rate_result
 
