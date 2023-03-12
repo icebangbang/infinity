@@ -1,9 +1,10 @@
-from typing import Tuple
-
 import numpy
 import pandas as pd
 
 from app.main.db.mongo import db
+from app.main.model.echart import YAxisDesc, YAxisData, Legend
+from app.main.model.recommend_etf import RecommendEtfView
+from app.main.model.single_trend_analysis import ResponseBody
 from app.main.stock.chart.Line import Line
 from app.main.stock.service import board_service, fund_service
 from app.main.utils import date_util, collection_util
@@ -20,7 +21,7 @@ class SingleTrendAnalysis(Line):
         # 半年级别的交易数据
         size = int(kwargs.get("size", 120))
 
-        legend = dict(
+        legend = Legend(
             data=['up', 'down', '成交额', '成交量', 'enlarge', 'convergence'],
             selected={"up": True, "down": True, "成交额": True, "成交量": False, "enlarge": False, "convergence": False}
         )
@@ -73,48 +74,41 @@ class SingleTrendAnalysis(Line):
 
         # y轴组合
         yAxis_array = [
-            {
-                "name": "数据",
-                "type": 'value'
-            },
-            {
-                "name": "成交额",
-                "type": "value",
-                "position": "right"
-            }
+            YAxisDesc(name="数据", type="value"),
+            YAxisDesc(name="数据", type="value", position="right"),
         ]
 
-        y_item, yAxis_item = _build_etf_info(industry, start, end)
-        if y_item is not None:
-            yAxis_array.append(yAxis_item)
-            data_y_array.append(y_item)
+        recommend_etf: RecommendEtfView = _build_etf_info(industry, start, end)
+        if recommend_etf is not None:
+            yAxis_array.append(recommend_etf.y_axis_desc)
+            data_y_array.append(recommend_etf.y_axis_data)
 
-        return dict(x=data_x_format, y_array=data_y_array, desc=industry, multiSerie=True,
-                    totalStock=total,
-                    yAxis_array=yAxis_array, legend=legend,
-                    # mark_area=mark_area,
-                    )
+        return ResponseBody(x=data_x_format, y_array=data_y_array, desc=industry, multiSeries=True,
+                            totalStock=total,
+                            yAxis_array=yAxis_array, legend=legend,
+                            # mark_area=mark_area,
+                            )
 
 
-def _build_etf_info(industry, start, end) -> Tuple[None, None]:
+def _build_etf_info(industry, start, end) -> RecommendEtfView:
     """
-    推荐etf，并展示k线数据
+    根据板块获取所推荐的etf，并展示k线数据
     :return:
     """
     recommend_etf_list: list = fund_service.get_fund_by_board(industry)
 
     if collection_util.is_empty(recommend_etf_list):
-        return None, None
+        return None
 
-    recommend_etf = recommend_etf_list[0]
-    code = recommend_etf['fund_code']
-    name = recommend_etf['fund_name']
+    recommend = recommend_etf_list[0]
+    code = recommend['fund_code']
+    name = recommend['fund_name']
     data_point_dict: dict = fund_service.get_etf_kline_day_with_dict(code, start, end)
 
     # k线形式的展示
-    y_item = dict(name=name, type="candlestick", yAxisIndex=2)
+    y_axis_data = YAxisData(name=name, type="candlestick", yAxisIndex=2)
     y = []
-    y_item['y'] = y
+    y_axis_data.y = y
 
     h = None
     l = None
@@ -143,7 +137,11 @@ def _build_etf_info(industry, start, end) -> Tuple[None, None]:
         "min": l
     }
 
-    return y_item, yAxis_item
+    recommend_etf = RecommendEtfView(fund_code=code, fund_name=name)
+    recommend_etf.y_axis_desc = YAxisDesc(name="etf价格", scale=False, max=h, min=l)
+    recommend_etf.y_axis_data = y_axis_data
+
+    return recommend_etf
 
 
 def _build_trade_info(trade_info_list) -> list:
