@@ -9,6 +9,8 @@ def get_logger(name):
 
 def init_log(app=None):
     logging.getLogger("nacos.client").setLevel(logging.WARNING)
+    logging.getLogger("urllib3.util.retry").setLevel(logging.INFO)
+    logging.getLogger("urllib3.connectionpool").setLevel(logging.INFO)
     # env = app.config['FLASK_ENV']
     env = os.environ.get('FLASK_ENV','local')
     if "local" not in env.lower():
