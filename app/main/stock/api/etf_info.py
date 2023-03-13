@@ -15,6 +15,19 @@ def test_cut(input):
     print(", ".join(seg_list))
 
 
+def fetch_kline_data_real_time():
+    """
+    fetch_kline_data方法无法实时同步交易数据,
+    所以需要依赖该接口获取数据
+    :return:
+    """
+    df = ak.fund_etf_category_sina(symbol="ETF基金")
+    # real_time_result = df.to_dict(orient="records")
+    # real_time_fund_dict = { result['代码']:result for result in real_time_result}
+
+
+
+
 def fetch_kline_data(code,belong):
     """
     获取场内etf交易数据
@@ -22,7 +35,7 @@ def fetch_kline_data(code,belong):
     :return:
     """
     df = ak.fund_etf_hist_sina(belong+code)
-    # 亿级别
+    # 万级别
     df['money'] = df['volume'] * (df['high'] + df['low']) / 2 / 10000
     df['prev_close'] = df.loc[df['close'].shift(-1) > 0, 'close']
     df['prev_close'] = df['prev_close'].shift()
@@ -102,4 +115,4 @@ if __name__ == "__main__":
     # d = get_etf_list()
     # d = get_etf_hold("510010")
     d = fetch_kline_data("510010","sh")
-    print(d)
+    fetch_kline_data_real_time()

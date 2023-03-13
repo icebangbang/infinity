@@ -107,6 +107,33 @@ def get_etf_kline_day(code, start, end):
     return data_points
 
 
+def dump_kline_real_time():
+    """
+    实时获取和更新k线数据
+    :return:
+    """
+    pass
+
+
+def dump_history_kline_specific(codes):
+    """
+    指定基金代码并下载
+    :param codes:
+    :return:
+    """
+    etf_set = db['etf']
+    etf_kline_day = db['etf_kline_day']
+    etf_list = list(etf_set.find({"code": {"$in": codes}}))
+    total_etf = len(etf_list)
+    for index, etf in enumerate(etf_list):
+        log.info(
+            "[etf基金]同步eft基金k线信息：{},{},index:{},total:{}".format(etf['code'], etf['name'], index, total_etf))
+        code = etf['code']
+        kline_data_list = etf_info.fetch_kline_data(code, etf['belong'])
+        for kline_data in kline_data_list:
+            etf_kline_day.update_one({"code": code, "date": kline_data['date']}, {"$set": kline_data}, upsert=True)
+
+
 def dump_history_kline():
     """
     存储历史k线
@@ -180,7 +207,7 @@ def get_related_etf(codes):
 if __name__ == "__main__":
     # dump_etf()
     # dump_etf_hold()
-    dump_history_kline()
+    dump_history_kline_specific(['515220', '561800'])
     # etfs = get_etf_by_tag("电池")
     # for etf in etfs:
     #     print("{},{},{}".format(etf['name'], etf['body'], etf['code']))
