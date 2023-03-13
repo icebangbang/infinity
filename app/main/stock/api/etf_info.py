@@ -100,5 +100,6 @@ def get_etf_hold(fund_code, fund_name):
 
 if __name__ == "__main__":
     # d = get_etf_list()
-    d = get_etf_hold("510010")
+    # d = get_etf_hold("510010")
+    d = fetch_kline_data("510010","sh")
     print(d)
