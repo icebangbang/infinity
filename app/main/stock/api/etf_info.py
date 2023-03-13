@@ -1,13 +1,13 @@
 """
 同步etf数据
 """
-import os
 from datetime import datetime
+
 import akshare as ak
 import pandas as pd
-from app.main.utils import date_util, simple_util, cal_util
-import logging as log
+
 from app.main.modules.jieba import cut_word
+from app.main.utils import date_util
 
 
 def test_cut(input):
@@ -21,22 +21,52 @@ def fetch_kline_data_real_time():
     所以需要依赖该接口获取数据
     :return:
     """
-    df = ak.fund_etf_category_sina(symbol="ETF基金")
-    # real_time_result = df.to_dict(orient="records")
+    df = ak.fund_etf_spot_em()
+
+    df = df[['代码', '最新价', '涨跌额', '涨跌幅', '成交量', '成交额', '开盘价', '最高价', '最低价', '昨收', '换手率']]
+    df = df.rename(columns={
+        '代码': 'code',
+        '开盘价': 'open',
+        '最新价': 'close',
+        '最高价': 'high',
+        '最低价': 'low',
+        '成交量': 'volume',
+        '成交额': 'money',
+        '涨跌幅': 'rate',
+        '涨跌额': 'change_amount',
+        '换手率': 'change_rate',
+        '昨收': 'prev_close'})
+
+    df['date'] = date_util.get_start_of_day(datetime.now())
+    real_time_result = df.to_dict(orient="records")
+    return real_time_result
+    print()
     # real_time_fund_dict = { result['代码']:result for result in real_time_result}
 
 
-
-
-def fetch_kline_data(code,belong):
+def fetch_kline_data(code, belong=None):
     """
     获取场内etf交易数据
     :param code:
     :return:
     """
-    df = ak.fund_etf_hist_sina(belong+code)
+
+    df = ak.fund_etf_hist_em(symbol=code, period='daily')
+
+    if df is None: return []
+
+    df = df.rename(columns={'日期': 'date',
+                            '开盘': 'open',
+                            '收盘': 'close',
+                            '最高': 'high',
+                            '最低': 'low',
+                            '成交量': 'volume',
+                            '成交额': 'money',
+                            '振幅': 'swing',
+                            '涨跌幅': 'rate',
+                            '涨跌额': 'change_amount',
+                            '换手率': 'change_rate'})
     # 万级别
-    df['money'] = df['volume'] * (df['high'] + df['low']) / 2 / 10000
     df['prev_close'] = df.loc[df['close'].shift(-1) > 0, 'close']
     df['prev_close'] = df['prev_close'].shift()
     df.fillna(0, inplace=True)
@@ -114,5 +144,5 @@ def get_etf_hold(fund_code, fund_name):
 if __name__ == "__main__":
     # d = get_etf_list()
     # d = get_etf_hold("510010")
-    d = fetch_kline_data("510010","sh")
+    # d = fetch_kline_data("510010")
     fetch_kline_data_real_time()
