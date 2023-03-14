@@ -67,7 +67,7 @@ def update_task(task_id, size, task_name=None, job_params=None):
         if job_info and job_info['job_type'] == task_constant.TASK_TYPE_TASK_FLOW:
             notify(job_info)
 
-        if job_params and job_params['job_type'] == task_constant.TASK_TYPE_HISTORY_TASK:
+        if job_params and job_params.get('job_type',-99) == task_constant.TASK_TYPE_HISTORY_TASK:
             # 历史数据跑批,执行本地服务回调
             service_callback(job_params)
         job_config.release_job(task_name)
