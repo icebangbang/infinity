@@ -6,6 +6,10 @@ import logging as log
 def copy_obj(obj):
     return copy.copy(obj)
 
+def get_method(obj):
+
+    return {k:v for k,v in obj.__dict__.items() if callable(v)}
+
 
 def get_method_by_path(path):
     p, m = path.rsplit('.', 1)

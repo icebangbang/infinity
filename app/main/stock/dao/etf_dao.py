@@ -129,6 +129,7 @@ def dump_kline_real_time():
             log.warn("暂时没有该基金的k线:{}".format(name))
             continue
         kline_data = real_time_fund_dict.get(code)
+        kline_data['update_time'] = datetime.now()
         etf_kline_day.update_one({"code": code, "date": kline_data['date']}, {"$set": kline_data}, upsert=True)
 
 
@@ -168,6 +169,7 @@ def dump_history_kline():
         code = etf['code']
         kline_data_list = etf_info.fetch_kline_data(code, etf['belong'])
         for kline_data in kline_data_list:
+            kline_data['update_time'] = datetime.now()
             etf_kline_day.update_one({"code": code, "date": kline_data['date']}, {"$set": kline_data}, upsert=True)
 
 

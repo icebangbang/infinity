@@ -28,7 +28,7 @@ def before():
         [http请求]url:{},method:{}
                  路径入参:{}
                  body入参:{}
-        """.format(url, request.method, string_util.to_string(args), json.dumps(body)))
+        """.format(url, request.method, string_util.to_string(args), json.dumps(body,ensure_ascii=False)))
 
 
 @rest.after_request

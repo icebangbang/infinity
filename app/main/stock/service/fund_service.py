@@ -17,6 +17,27 @@ from app.main.utils import date_util, cal_util
 log = get_logger(__name__)
 
 
+def sync_etf_kline():
+    """
+    同步etf基金的k线
+    该方法会一次性etf基金历史时间内所有的k线数据
+    如果调用方法的时候处于交易时间，将不会返回当日的盘中数据
+    需要real_time去同步
+    :return:
+    """
+    etf_dao.dump_history_kline()
+
+
+def sync_etf_kline_real_time():
+    """
+    同步etf基金的k线
+    同步相关etf基金当日的盘中数据
+    如果要保证数据能够完整，需要和sync_etf_kline一起调用
+    :return:
+    """
+    etf_dao.dump_kline_real_time()
+
+
 def get_etf_kline_day(code, start, end):
     """
     获取场内etf基金的日k线数据

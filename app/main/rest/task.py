@@ -1,5 +1,5 @@
 from app.main.stock.job import job_config
-from app.main.utils import restful, date_util
+from app.main.utils import restful, date_util, object_util
 from . import rest
 from app.main.task import fund_task
 from app.main.constant import task_constant
@@ -52,15 +52,12 @@ def sync_dispatch():
     :return:
     """
     req = request.json
-    global_task_id = req['globalId']
-
-    date_start_str = req['start']
-    date_end_str = req['end']
-
-    date_start = date_util.parse_date_time(date_start_str)
-    date_end = date_util.parse_date_time(date_end_str)
 
     method = task_constant.TASK_MAPPING[req['taskName']]
-    result = method()
 
-    return restful.response({"status":"ok","method":str(method)})
+    if req['taskName'] in task_constant.ASYNC_NO_CALLBACK:
+        method.apply_async(kwargs={})
+    else:
+        result = method()
+
+    return restful.response({"status":"ok"})

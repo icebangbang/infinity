@@ -132,15 +132,29 @@ task_routes = (
         'routing_key': 'day_level'
     }
     },
-    {'app.main.task.fund_task.backtrading': {
-        'queue': 'day_level',
-        'routing_key': 'day_level'
-    }
+    {'app.main.task.fund_task.backtrading':
+        {
+            'queue': 'day_level',
+            'routing_key': 'day_level'
+        }
     },
-    {'app.main.task.stock_task.sync_balance': {
-        'queue': 'day_level',
-        'routing_key': 'day_level'
-    }
+    {'app.main.task.fund_task.sync_etf_kline':
+        {
+            'queue': 'day_level',
+            'routing_key': 'day_level'
+        }
+    },
+    {'app.main.task.fund_task.sync_etf_kline_real_time':
+        {
+            'queue': 'day_level',
+            'routing_key': 'day_level'
+        }
+    },
+    {'app.main.task.stock_task.sync_balance':
+        {
+            'queue': 'day_level',
+            'routing_key': 'day_level'
+        }
     },
     {'app.main.task.stock_task.sync_cash_flow': {
         'queue': 'day_level',
