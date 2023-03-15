@@ -5,12 +5,37 @@ import logging
 from datetime import datetime
 
 from app.celery_worker import celery, MyTask
+from app.main.constant import task_constant
 from app.main.db.mongo import db
 from app.main.stock.dao import task_dao
-from app.main.task import stock_task
-from app.main.constant import task_constant
 from app.main.utils import date_util, collection_util, my_redis
 from app.main.utils.date_util import WorkDayIterator
+
+wait_minute_group = {
+    "个股历史特征按批次跑批": 240,
+    "保存趋势信息按批次跑批": 60,
+    "个股历史趋势按批次跑批": 10
+}
+
+@celery.task(bind=True, base=MyTask, expire=1800)
+def submit_agg_stock_trend_by_job(self, **kwargs):
+    """
+    板块趋势和成交额按批次聚合
+    :param self:
+    :param kwargs:
+    :return:
+    """
+    _submit_history_job(kwargs, "板块趋势和成交额聚合")
+
+@celery.task(bind=True, base=MyTask, expire=1800)
+def submit_history_stock_trend_by_job(self, **kwargs):
+    """
+    个股历史趋势跑批
+    :param self:
+    :param kwargs:
+    :return:
+    """
+    _submit_history_job(kwargs, "个股趋势跑批")
 
 
 @celery.task(bind=True, base=MyTask, expire=1800)
@@ -23,29 +48,29 @@ def submit_history_stock_feature_by_job(self, **kwargs):
     5. 读取到tag后,就更新任务为成功,并回调
     :return:
     """
+    _submit_history_job(kwargs, "个股特征跑批")
+
+
+def _submit_history_job(input, sub_task_name):
     history_task = db["history_task"]
     history_task_detail = db["history_task_detail"]
-    global_id = kwargs['global_task_id']
-    task_name = kwargs['task_name']
+    global_id = input['global_task_id']
+    task_name = input['task_name']
 
     date_start = datetime(2018, 10, 1)
-    wait_minute_group = {
-        "个股历史特征按批次跑批":240,
-        "保存趋势信息按批次跑批": 60
-    }
 
     now = datetime.now()
     days = date_util.get_days_between(now, date_start)
     logging.info("days span is {}".format(days))
 
-
     # 添加历史数据跑批任务的详情
     details = []
     index = 0
     for date in WorkDayIterator(date_start, now):
-        index=index+1
+        index = index + 1
         details.append(dict(global_task_id=global_id,
                             task_name=task_name,
+                            sub_task_name=sub_task_name,
                             date=date,
                             status=0,
                             index=index,
@@ -55,14 +80,14 @@ def submit_history_stock_feature_by_job(self, **kwargs):
 
     history_task_detail.insert_many(details)
     # 添加历史数据跑批任务
-    seconds = wait_minute_group.get(task_name,240)
+    seconds = wait_minute_group.get(task_name, 240)
     history_task.insert_one(dict(global_task_id=global_id,
                                  task_name=task_name,
                                  is_finished=0,
                                  create_time=datetime.now(),
                                  update_time=datetime.now(),
                                  wait_seconds=seconds,
-                                 task_info=kwargs))
+                                 task_info=input))
 
 
 @celery.task(bind=True, base=MyTask, expire=1800)
@@ -81,7 +106,7 @@ def start_stock_feature_task(self, **kwargs):
         return
 
     for task_info in task_info_list:
-        wait_seconds = task_info.get("wait_seconds",240)
+        wait_seconds = task_info.get("wait_seconds", 240)
         task_name = task_info['task_name']
         seconds = date_util.get_seconds_between(datetime.now(), task_info['update_time'])
 
@@ -91,9 +116,9 @@ def start_stock_feature_task(self, **kwargs):
 
         # 这里可能会有重复执行
         global_task_id = task_info['global_task_id']
-        if my_redis.acquire_redis_lock(global_task_id,global_task_id,ex_time=20) is False:
+        if my_redis.acquire_redis_lock(global_task_id, global_task_id, ex_time=20) is False:
             logging.info("[{}}]获取任务锁失败,global_task_id:{}"
-                         .format(task_name,global_task_id))
+                         .format(task_name, global_task_id))
             return
         # 倒序排序，从最近的日期开始执行
         task_detail_list = list(history_task_detail.find({"global_task_id": global_task_id,
@@ -104,12 +129,13 @@ def start_stock_feature_task(self, **kwargs):
 
             date = task_detail_item['date']
             index = task_detail_item['index']
+            sub_task_name = task_detail_item['sub_task_name']
             seconds = date_util.get_seconds_between(datetime.now(), task_detail_item['update_time'])
 
             # 最近一个任务还在处理中,不做额外处理
             if task_detail_item['status'] == 1 and seconds <= wait_seconds:
                 logging.info("[{}]已有运行中的历史特征任务，执行时间为{},当前index为{},共有{}"
-                             .format(task_name,date_util.dt_to_str(date), index, len(task_detail_list)))
+                             .format(task_name, date_util.dt_to_str(date), index, len(task_detail_list)))
                 return
 
             flow_job_info = task_info['task_info']
@@ -117,14 +143,16 @@ def start_stock_feature_task(self, **kwargs):
             flow_job_info['params'] = dict(
                 from_date_ts=date_util.to_timestamp(date),
                 end_date_ts=date_util.to_timestamp(date),
-                global_task_id=global_task_id+"_"+str(index),
+                global_task_id=global_task_id + "_" + str(index),
                 job_type=task_constant.TASK_TYPE_HISTORY_TASK,
                 callback_service="app.main.task.history_task.update_history_feature"
             )
 
-            stock_task.submit_stock_feature_by_job.apply_async(kwargs=flow_job_info)
+            # stock_task.submit_stock_feature_by_job.apply_async(kwargs=flow_job_info)
+            task_constant.TASK_MAPPING[sub_task_name].apply_async(kwargs=flow_job_info)
+
             logging.info("[{}]提交一历史特征任务，执行时间为{},当前index为{},共有{}"
-                         .format(task_name,date_util.dt_to_str(date), index, len(task_detail_list)))
+                         .format(task_name, date_util.dt_to_str(date), index, len(task_detail_list)))
             # 将状态更新为处理中
             history_task_detail.update_one({"global_task_id": global_task_id, "index": index,
                                             "date": date}, {"$set": {"status": 1, "update_time": datetime.now()}})
@@ -134,7 +162,7 @@ def start_stock_feature_task(self, **kwargs):
             history_task.update_one({"_id": task_info["_id"]}, {"$set": {"is_finished": 1}})
             task_dao.notify(task_info['task_info'])
 
-        my_redis.release_redis_lock(global_task_id,global_task_id)
+        my_redis.release_redis_lock(global_task_id, global_task_id)
 
 
 def update_history_feature(job_params):
@@ -149,4 +177,4 @@ def update_history_feature(job_params):
                                    {"$set": {"status": 2, "update_time": datetime.now()}})
     history_task = db["history_task"]
     history_task.update_one({"global_task_id": global_task_id},
-                                   {"$set": {"update_time": datetime.now()}})
+                            {"$set": {"update_time": datetime.now()}})
