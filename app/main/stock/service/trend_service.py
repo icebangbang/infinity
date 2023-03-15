@@ -22,6 +22,19 @@ normal = 1
 frozen = 2
 temp = 3
 
+# enlarge -> down
+"""
+UP->ENLARGE->DOWN
+上升->开口放大->下行， 上行到一定程度以后，开始下行，后续的高点一次比一次低，最后低点突破之前的底部，下行达成。
+UP->CONV->DOWN
+上升->收敛->下行，上行到一定程度以后，后续走势形成新的顶峰型，但是没有突破前高，收敛，随后低点突破之前的底部，下行达成
+
+通常是
+"""
+ENLARGE_TO_DOWN = 1
+UP_TO_ENLARGE = 2
+DOWN_ENLARGE = 3
+
 
 def get_trend_data(date, industries):
     return list(db['trend_data'].find({"date": date, "industry": {"$in": industries}}))
@@ -76,7 +89,7 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
         # 获取最近一个趋势状态
         trend_point_list = list(trend_point_set.find({"code": code, "is_deleted": 0,
                                                       "date": {"$lte": start_of_day}},
-                                                     sort=[("date", -1), ("_id", -1)]).limit(2))
+                                                     sort=[("date", -1), ("_id", -1)]).limit(3))
         trend_point = None
         # 历史记录不为空,就要做更新
         if len(trend_point_list) > 0:
@@ -105,20 +118,23 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
             #     trend_point_set.update_one({"_id": trend_point["_id"]}, {"$set": {"is_deleted":1}})
             #     return
 
-        # 没有发生趋势变化,则更新;
+        # 没有发生趋势变化,则更新一些基础数据;
         if len(trend_change_scope) == 0 and trend_point:
             trend_point['current_bot_trend_size'] = current_bot_trend_size
             trend_point['current_top_trend_size'] = current_top_trend_size
             trend_point['update'] = start_of_day
             trend_point['update_time'] = datetime.now()
 
-            # 当天的数据,对趋势进行更新
-            if trend_point['date'] == date_util.get_start_of_day(datetime.now()) and \
-                    trend_point['prev_trend'] is None and len(trend_point_list) > 1:
+            # 当天的数据,前一日趋势为空，且前一日数据不为空，
+            # 那么对当日趋势进行更新
+            if trend_point['date'] == date_util.get_start_of_day(datetime.now()) \
+                    and trend_point['prev_trend'] is None \
+                    and len(trend_point_list) > 1:
                 trend_point['prev_trend'] = trend_point_list[1]['trend']
 
             trend_point_set.update_one({"_id": trend_point["_id"]}, {"$set": trend_point})
             return
+        # 最近的一个点位为空，标志上行下行都要更新
         elif trend_point is None:
             trend_change_scope = [1, 2]
 
@@ -139,6 +155,8 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
         # 在交易时间的，状态设置为临时
         trend_type = temp if in_trade_time else normal
 
+        prev_trend = trend_point_list[1] if len(trend_point_list) >= 2 else None
+
         # 只要有变化，就新增一条记录
         entity = dict(
             date=start_of_day,
@@ -149,8 +167,11 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
             current_bot_type_slope=current_bot_type_slope,
             prev_top_type_slope=prev_top_type_slope,
             prev_bot_type_slope=prev_bot_type_slope,
+            prev_trend_3=prev_trend['prev_trend_1'] if prev_trend else None,
+            prev_trend_2=prev_trend['trend'] if prev_trend else None,
+            prev_trend_1=trend_point['trend'] if trend_point else None,  # 之前总体趋势
             trend=trend,  # 当前总体趋势
-            prev_trend=trend_point['trend'] if trend_point else None,  # 之前总体趋势
+            trend_chain_start = prev_trend['date'] if prev_trend else None,
             inf_l_point_date=inf_l_point_date,  # 底分型趋势成立时间
             inf_h_point_date=inf_h_point_date,  # 顶分型趋势成立时间
             prev_inf_l_point_date=trend_point['inf_l_point_date'] if trend_point else None,
@@ -629,8 +650,8 @@ if __name__ == "__main__":
         code = stock['code']
         name = stock['name']
         print(code, name)
-    #
-        for date in WorkDayIterator(datetime(2022, 4,1), datetime(2023, 3, 9)):
+        #
+        for date in WorkDayIterator(datetime(2019, 4, 1), datetime(2023, 3, 15)):
             features = stock_dao.get_company_feature(code, date)
             save_stock_trend_with_features(code, name, features, date)
 
@@ -642,13 +663,13 @@ if __name__ == "__main__":
 
     # get_trend_info(datetime(2023, 2, 17))
 
-    from_date = datetime(2022, 4, 1)
-    end_date = datetime(2023, 3, 9)
-    # 板块级别的聚合
-    get_board_trend_size_info(from_date, end_date)
-    # 大盘级别的聚合
-    get_index_trend_info(from_date, end_date)
-    # 省份级别的聚合
-    get_province_trend_info(from_date, end_date)
-    # 板块，大盘，省份的成交量和成交额的聚合
-    board_service.collect_trade_money(from_date, end_date)
+    # from_date = datetime(2022, 4, 1)
+    # end_date = datetime(2023, 3, 9)
+    # # 板块级别的聚合
+    # get_board_trend_size_info(from_date, end_date)
+    # # 大盘级别的聚合
+    # get_index_trend_info(from_date, end_date)
+    # # 省份级别的聚合
+    # get_province_trend_info(from_date, end_date)
+    # # 板块，大盘，省份的成交量和成交额的聚合
+    # board_service.collect_trade_money(from_date, end_date)

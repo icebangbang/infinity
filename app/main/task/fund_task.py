@@ -20,6 +20,7 @@ def sync_etf_kline(self):
     """
     fund_service.sync_etf_kline()
 
+
 @celery.task(bind=True, base=MyTask, expires=1800)
 def sync_etf_kline_real_time(self):
     """
@@ -29,6 +30,7 @@ def sync_etf_kline_real_time(self):
     :return:
     """
     fund_service.sync_etf_kline_real_time()
+
 
 @celery.task(bind=True, base=MyTask, expires=1800)
 def backtrading(self):
