@@ -39,6 +39,7 @@ PATH_TASK_MAPPING = {
     "app.main.task.stock_task.sync_stock_data": "同步个股日k线",
     "app.main.task.trend_task.sync_trend_task": "个股趋势跑批",
     "app.main.task.stock_task.sync_stock_feature": "个股特征跑批",
+    "app.main.task.trend_task.trend_data_task": "板块趋势和成交额聚合",
     "app.main.task.board_task.sync_data": "同步东财板块日k线",
     "app.main.task.stock_task.sync_stock_month_data": "同步个股月k线"
 }

@@ -92,7 +92,7 @@ task_routes = (
         'routing_key': 'default',
     }
     },
-    {'app.main.task.trend_task.get_trend_data_task': {
+    {'app.main.task.trend_task.trend_data_task': {
         'queue': 'indicator',
         'routing_key': 'indicator'
     }
@@ -223,7 +223,7 @@ beat_schedule = {
     #     },
     'start_stock_feature_task': {
         "task": "app.main.task.history_task.start_stock_feature_task",
-        "schedule": 30,  # 定时每120秒执行一次
+        "schedule": 5,  # 定时每5秒执行一次
     },
     'sync_board_stock_detail': {
         "task": "app.main.task.board_task.sync_board_stock_detail",
@@ -242,7 +242,7 @@ beat_schedule = {
         "schedule": 600000000  # 每10分钟执行一次
     },
     'get_trend_data': {  # 趋势数据聚合
-        "task": "app.main.task.trend_task.get_trend_data_task",
+        "task": "app.main.task.trend_task.trend_data_task",
         "schedule": 120000000
     },
     'sync_macrodata': {

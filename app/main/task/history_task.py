@@ -8,13 +8,14 @@ from app.celery_worker import celery, MyTask
 from app.main.constant import task_constant
 from app.main.db.mongo import db
 from app.main.stock.dao import task_dao
+from app.main.stock.job import job_config
 from app.main.utils import date_util, collection_util, my_redis
 from app.main.utils.date_util import WorkDayIterator
 
 wait_minute_group = {
     "个股历史特征按批次跑批": 240,
     "保存趋势信息按批次跑批": 60,
-    "个股历史趋势按批次跑批": 10
+    "板块趋势和成交额按批次聚合": 5
 }
 
 @celery.task(bind=True, base=MyTask, expire=1800)
@@ -43,7 +44,7 @@ def submit_history_stock_feature_by_job(self, **kwargs):
     """
     1. 获取任务,设置任务tag
     2. 并拆分任务
-    3. 提交到redis的zset中,用日级别的时间戳正序排序,完成任务的tag放到最后
+    3. 提交到redis的zset中,用日级别的时间戳正序排序,完z成任务的tag放到最后
     4. dao本体订阅redis的zset进行任务的分发,日级别任务的分发必须在前一日所有任务完成后才能执行
     5. 读取到tag后,就更新任务为成功,并回调
     :return:
@@ -116,8 +117,8 @@ def start_stock_feature_task(self, **kwargs):
 
         # 这里可能会有重复执行
         global_task_id = task_info['global_task_id']
-        if my_redis.acquire_redis_lock(global_task_id, global_task_id, ex_time=20) is False:
-            logging.info("[{}}]获取任务锁失败,global_task_id:{}"
+        if my_redis.acquire_redis_lock("HISTORY_TASK_"+global_task_id, global_task_id, ex_time=20) is False:
+            logging.info("[{}]获取任务锁失败,global_task_id:{}"
                          .format(task_name, global_task_id))
             return
         # 倒序排序，从最近的日期开始执行
@@ -139,7 +140,7 @@ def start_stock_feature_task(self, **kwargs):
                 return
 
             flow_job_info = task_info['task_info']
-            flow_job_info['global_task_id'] = global_task_id
+            flow_job_info['global_task_id'] = global_task_id + "_" + str(index)
             flow_job_info['params'] = dict(
                 from_date_ts=date_util.to_timestamp(date),
                 end_date_ts=date_util.to_timestamp(date),
@@ -147,6 +148,8 @@ def start_stock_feature_task(self, **kwargs):
                 job_type=task_constant.TASK_TYPE_HISTORY_TASK,
                 callback_service="app.main.task.history_task.update_history_feature"
             )
+
+            job_config.set_job_config(global_task_id + "_" + str(index), flow_job_info['params'])
 
             # stock_task.submit_stock_feature_by_job.apply_async(kwargs=flow_job_info)
             task_constant.TASK_MAPPING[sub_task_name].apply_async(kwargs=flow_job_info)
@@ -162,7 +165,7 @@ def start_stock_feature_task(self, **kwargs):
             history_task.update_one({"_id": task_info["_id"]}, {"$set": {"is_finished": 1}})
             task_dao.notify(task_info['task_info'])
 
-        my_redis.release_redis_lock(global_task_id, global_task_id)
+        my_redis.release_redis_lock("HISTORY_TASK_"+global_task_id, global_task_id)
 
 
 def update_history_feature(job_params):

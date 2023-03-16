@@ -55,6 +55,8 @@ class MyTask(celery.Task):  # celery 基类
         if "boards" in keys:
             return len(kwargs["boards"])
 
+        return 0
+
     def update_task(self,kwargs):
         task_path = self.request.task
 

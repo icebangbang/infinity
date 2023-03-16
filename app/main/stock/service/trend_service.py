@@ -380,6 +380,7 @@ def get_board_trend_size_info(start, end, only_include=False):
     another_boards = list(board_detail.find({"board": {"$in": another_boards}}))
 
     for date in WorkDayIterator(start, end):
+        print(date)
         for another_board in another_boards:
             trend_point_set = db['trend_point']
             total = another_board['codes']
@@ -639,21 +640,21 @@ if __name__ == "__main__":
     # from_date = date_util.get_start_of_day(date_util.from_timestamp(int(1665331200000)))
     #
     # end_date = date_util.get_start_of_day(date_util.from_timestamp(int(1665331200000)))
-    # log.info("get_trend_data_task {},{}:{}".format("14a3c4d8-48b4-11ed-bb4c-00163e0a10b2", from_date, end_date))
+    # log.info("trend_data_task {},{}:{}".format("14a3c4d8-48b4-11ed-bb4c-00163e0a10b2", from_date, end_date))
     #
     # # 板块级别的聚合
     # get_trend_size_info(from_date, end_date)
     # # 大盘级别的聚合
     # get_all_trend_info(from_date, end_date)
-    stocks = stock_dao.get_all_stock()
-    for stock in stocks:
-        code = stock['code']
-        name = stock['name']
-        print(code, name)
-        #
-        for date in WorkDayIterator(datetime(2019, 4, 1), datetime(2023, 3, 15)):
-            features = stock_dao.get_company_feature(code, date)
-            save_stock_trend_with_features(code, name, features, date)
+    # stocks = stock_dao.get_all_stock()
+    # for stock in stocks:
+    #     code = stock['code']
+    #     name = stock['name']
+    #     print(code, name)
+    #     #
+    #     for date in WorkDayIterator(datetime(2019, 4, 1), datetime(2023, 3, 15)):
+    #         features = stock_dao.get_company_feature(code, date)
+    #         save_stock_trend_with_features(code, name, features, date)
 
     # save_stock_trend_with_features("300763", "锦浪科技", features, datetime(2022, 8, 25))
     # get_trend_size_info(datetime(2022, 9, 16), datetime(2022, 9, 16), False)
@@ -663,13 +664,13 @@ if __name__ == "__main__":
 
     # get_trend_info(datetime(2023, 2, 17))
 
-    # from_date = datetime(2022, 4, 1)
-    # end_date = datetime(2023, 3, 9)
-    # # 板块级别的聚合
+    from_date = datetime(2019, 4, 1)
+    end_date = datetime(2023, 3, 15)
+    # 板块级别的聚合
     # get_board_trend_size_info(from_date, end_date)
-    # # 大盘级别的聚合
+    # 大盘级别的聚合
     # get_index_trend_info(from_date, end_date)
-    # # 省份级别的聚合
-    # get_province_trend_info(from_date, end_date)
-    # # 板块，大盘，省份的成交量和成交额的聚合
-    # board_service.collect_trade_money(from_date, end_date)
+    # 省份级别的聚合
+    get_province_trend_info(from_date, end_date)
+    # 板块，大盘，省份的成交量和成交额的聚合
+    board_service.collect_trade_money(from_date, end_date)

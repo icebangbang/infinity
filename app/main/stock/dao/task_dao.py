@@ -20,6 +20,8 @@ def finish_task(task_id):
     :return:
     """
     job_json_info = job_config.load_job_config(task_id)
+    if job_json_info is None:
+        return
     job_info = json.loads(job_json_info)
     if job_info is not None and job_info['job_type'] == task_constant.TASK_TYPE_TASK_FLOW:
         notify(job_info)
@@ -67,9 +69,16 @@ def update_task(task_id, size, task_name=None, job_params=None):
         if job_info and job_info['job_type'] == task_constant.TASK_TYPE_TASK_FLOW:
             notify(job_info)
 
+        if job_info and job_info['job_type'] == task_constant.TASK_TYPE_HISTORY_TASK:
+            service_callback(job_info)
+
+        # 子任务内参数回调
         if job_params and job_params.get('job_type',-99) == task_constant.TASK_TYPE_HISTORY_TASK:
             # 历史数据跑批,执行本地服务回调
             service_callback(job_params)
+
+
+
         job_config.release_job(task_name)
 
 
@@ -98,11 +107,11 @@ def notify(job_info):
     if callback_url is not None:
         resp = requests.post(callback_url, json=dict(globalId=global_id, taskName=task_name))
 
-    is_finished = 0
-    if resp.status_code == 200 and resp.json()['success'] is True:
-        is_finished = 1
-    sync_record = db['sync_record']
-    sync_record.update_one({"task_id": global_id, "task_name": task_name},
-                           {"$set": {"update_time": datetime.now(), "job_info": job_info, "is_finished": is_finished}},
-                           upsert=True)
+        is_finished = 0
+        if resp.status_code == 200 and resp.json()['success'] is True:
+            is_finished = 1
+        sync_record = db['sync_record']
+        sync_record.update_one({"task_id": global_id, "task_name": task_name},
+                               {"$set": {"update_time": datetime.now(), "job_info": job_info, "is_finished": is_finished}},
+                               upsert=True)
 

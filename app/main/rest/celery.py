@@ -110,7 +110,7 @@ def get_stock_trend():
 
     chain_job_info = dict(
         job_type=task_constant.TASK_TYPE_CELERY,
-        job_chain=['app.main.task.trend_task.get_trend_data_task'],
+        job_chain=['app.main.task.trend_task.trend_data_task'],
         params=dict(from_date_ts=date_util.to_timestamp(date_start),
                     end_date_ts=date_util.to_timestamp(date_end),
                     global_task_id=global_task_id)

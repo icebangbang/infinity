@@ -33,6 +33,7 @@ def release_job(task_path):
 
 def set_job_config(task_id, chain_job_config):
     my_redis.set("job_config" + str(task_id), json.dumps(chain_job_config, ensure_ascii=False))
+    my_redis.expire("job_config" + str(task_id), 60 * 60)
 
 
 def load_job_config(task_id,**kwargs):

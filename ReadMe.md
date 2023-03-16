@@ -32,7 +32,7 @@ stock_detail添加industry
 1. 先分析个股的趋势走向.
 `app.main.task.trend_task.submit_trend_task`
 2. 然后通过个股的趋势走向,归并板块的趋势走势.
-`app.main.task.trend_task.get_trend_data_task`
+`app.main.task.trend_task.trend_data_task`
 
 ## 整体板块趋势相关
 
