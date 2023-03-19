@@ -12,10 +12,10 @@ from dateutil.relativedelta import relativedelta
 from app.main.yi.constant import jqmc, Gan, Zhi
 
 
-def get_months_within_range(start: datetime, end: datetime)->List[datetime]:
+def get_months_within_range(start: datetime, end: datetime) -> List[datetime]:
     temp = set()
-    for d in DayIterator(start,end):
-        first_day_of_month = datetime(d.year,d.month,1)
+    for d in DayIterator(start, end):
+        first_day_of_month = datetime(d.year, d.month, 1)
         temp.add(first_day_of_month)
 
     return list(temp)
@@ -33,9 +33,14 @@ def get_date_with_offset(date_time: datetime, week_offset=3, day_offset=5):
     week_groups = c.monthdatescalendar(date_time.year, date_time.month)
     if week_offset - 1 < 0 or week_offset > len(week_groups):
         raise Exception("周下标越界")
-    target = week_groups[week_offset - 1][day_offset - 1]
+    week_sum = 0
+    for week_group in week_groups:
+        target = week_group[day_offset-1]
+        if target.year == date_time.year and target.month == date_time.month:
+            week_sum += 1
 
-    return datetime.combine(target, datetime.min.time())
+        if week_sum == week_offset:
+            return target
 
 
 def get_current_str(format="%Y-%m-%d") -> str:
@@ -324,12 +329,12 @@ def add_and_get_work_day(now, offset):
     i = 1
     t = now
     while i <= offset:
-        t = t + timedelta(days=i)
-        if is_workday(t) is False or is_weekend(t):
+        y = t + timedelta(days=i)
+        if is_workday(y) is False or is_weekend(y):
             offset = offset + 1
         i = i + 1
 
-    return t
+    return t + timedelta(days=i-1)
 
 
 def if_workday(dt):
@@ -456,7 +461,7 @@ class DayIterator(object):
     def __iter__(self):
         return self
 
-    def __next__(self)->datetime:
+    def __next__(self) -> datetime:
         if self.date <= self.end:
             val = self.date
             self.date = val + timedelta(days=1)
