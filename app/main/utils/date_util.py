@@ -1,12 +1,49 @@
+import calendar
 import time as tm
 from datetime import datetime, timedelta, date
 from datetime import time
+from typing import List
 
+import dateutil
 import sxtwl
 from chinese_calendar import is_workday
 from dateutil.relativedelta import relativedelta
 
 from app.main.yi.constant import jqmc, Gan, Zhi
+
+
+def get_months_within_range(start: datetime, end: datetime)->List[datetime]:
+    temp = set()
+    for d in DayIterator(start,end):
+        first_day_of_month = datetime(d.year,d.month,1)
+        temp.add(first_day_of_month)
+
+    return list(temp)
+
+
+def get_date_with_offset(date_time: datetime, week_offset=3, day_offset=5):
+    """
+
+    :param date_time: 基准日期
+    :param week_offset: 该月的第n周
+    :param day_offset: 该周的第n天
+    :return:
+    """
+    c = calendar.Calendar(firstweekday=calendar.MONDAY)
+    week_groups = c.monthdatescalendar(date_time.year, date_time.month)
+    if week_offset - 1 < 0 or week_offset > len(week_groups):
+        raise Exception("周下标越界")
+    target = week_groups[week_offset - 1][day_offset - 1]
+
+    return datetime.combine(target, datetime.min.time())
+
+
+def get_current_str(format="%Y-%m-%d") -> str:
+    """
+    当前日期的字符串
+    :return:
+    """
+    return dt_to_str(datetime.now(), format)
 
 
 def get_years(start: datetime, end: datetime):
@@ -20,6 +57,16 @@ def get_years(start: datetime, end: datetime):
     year_end = end.year
 
     return [year for year in range(year_start, year_end + 1)]
+
+
+def get_month_with_offset(date_time: datetime, offset):
+    """
+    :param date_time: 当前日期
+    :param offset: 偏移量
+    :return:
+    """
+    one_day = date_time + dateutil.relativedelta.relativedelta(months=offset)
+    return datetime(one_day.year, one_day.month, 1)
 
 
 def get_report_day(dt: datetime):
@@ -54,42 +101,47 @@ def get_report_day(dt: datetime):
 
 
 def is_same_day(day1: datetime, day2: datetime) -> bool:
+    """
+    判断是否是同一天
+    :param day1: a
+    :param day2: b
+    :return:
+    """
     return day1.year == day2.year \
            and day1.month == day2.month \
            and day1.day == day2.day
 
 
-def in_trade_time(time: datetime):
+def in_trade_time(date_time: datetime):
     """
+    判断是否在交易事件内
+    :param date_time:
 
-    :param time:
-    :param early: 提早时间
-    :param delay: 延迟时间
     :return:
     """
-    if is_weekend(time) or is_workday(time) is False:
+    if is_weekend(date_time) or is_workday(date_time) is False:
         return False
 
-    hour = time.hour
-    min = time.minute
-    mixed = hour + min / 60
+    hour = date_time.hour
+    minute = date_time.minute
+    mixed = hour + minute / 60
 
     return 9.5 <= mixed <= 15
 
 
-def in_trade_time_scope(time: datetime, early=0, delay=0):
+def in_trade_time_scope(date_time: datetime, early=0, delay=0):
     """
     设定交易的时间范围
-    :param time:
+    :param date_time:
     :param early: 提早时间
     :param delay: 延迟时间
     :return:
     """
-    if is_weekend(time) or is_workday(time) is False:
+    if is_weekend(date_time) or is_workday(date_time) is False:
         return False
 
-    hour = time.hour
-    min = time.minute
+    hour = date_time.hour
+    min = date_time.minute
     mixed = hour + min / 60
 
     return 9.5 - early <= mixed <= 15 + delay or 11.5 + early <= mixed <= 13.5 - delay
@@ -396,6 +448,24 @@ def get_jq_list(start, end, ignore_time=True) -> list:
     return jq_list
 
 
+class DayIterator(object):
+    def __init__(self, start, end):
+        self.date = start
+        self.end = end
+
+    def __iter__(self):
+        return self
+
+    def __next__(self)->datetime:
+        if self.date <= self.end:
+            val = self.date
+            self.date = val + timedelta(days=1)
+
+            return val
+        else:
+            raise StopIteration
+
+
 class WorkDayIterator(object):
     def __init__(self, start, end):
         self.date = start
@@ -459,10 +529,15 @@ if __name__ == "__main__":
     # print(jq_list)
 
     date_start = datetime(2018, 10, 1)
-    days = get_days_between(datetime.now(), date_start)
+    date_end = datetime(2019, 1, 1)
 
-    for day in range(days):
-        date_start = add_and_get_work_day(date_start, 1)
+    for r in DayIterator(date_start, date_end):
+        print(r)
 
-    print(date_start)
+    # days = get_days_between(datetime.now(), date_start)
+    #
+    # for day in range(days):
+    #     date_start = add_and_get_work_day(date_start, 1)
+
+    # print(date_start)
     # print([year for year in range(2012, 2014)])

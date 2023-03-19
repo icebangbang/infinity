@@ -54,4 +54,4 @@ from . import indicator, task, \
     stock, login, \
     other, config, \
     test, report, \
-    trend, common, trade
+    trend, common, trade, calendar

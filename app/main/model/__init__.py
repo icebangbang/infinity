@@ -29,6 +29,10 @@ class Basic(dict):
 
     def _reset_attribute(self):
         annotations: dict = self.__annotations__
+
+        if annotations is None :
+            return
+
         for key, tp in annotations.items():
             # 判断是否为基础类型
             if object_util.is_basic_type(tp) is True:
