@@ -23,9 +23,12 @@ def event():
     start = date_util.parse_date_time(start_str, "%Y-%m-%d")
     end = date_util.parse_date_time(end_str, "%Y-%m-%d")
 
-    events:List[CalendarEvent] = event_service.get_fix_event(start,end)
+    fix_events:List[CalendarEvent] = event_service.get_fix_event(start,end)
+    db_events:List[CalendarEvent] = event_service.get_from_db(start,end)
 
-    for index, event in enumerate(events):
+    fix_events.extend(db_events)
+
+    for index, event in enumerate(fix_events):
         event.id = index
 
-    return restful.response(events)
+    return restful.response(fix_events)
