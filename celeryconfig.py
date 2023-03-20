@@ -250,10 +250,10 @@ beat_schedule = {
         "schedule": 400
     },
     # 股市资金抱团分析
-    'sync_baotuan': {
-        "task": "app.main.task.macrodata_task.baotuan_update",
-        "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
-    },
+    # 'sync_baotuan': {
+    #     "task": "app.main.task.macrodata_task.baotuan_update",
+    #     "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
+    # },
     # 'sync_balance': {
     #     "task": "app.main.task.stock_task.sync_balance",
     #     "schedule": crontab(minute='1', hour='16', day_of_week='1-5')
