@@ -115,7 +115,7 @@ def baotuan_analysis():
     包团分析
     :return:
     """
-    start_time = datetime(2019, 1, 1)
+    start_time = datetime(2018, 1, 1)
     end_time = date_util.get_start_of_day(datetime.now())
     storage = []
     while (start_time < end_time):
