@@ -318,6 +318,21 @@ def get_latest_work_day(base=None):
             break
     return d
 
+def stop_until_work_day(now):
+    """
+    推到工作日才会停止并返回
+    :param now:
+    :param offset:
+    :return:
+    """
+    while True:
+        if is_workday(now) is False:
+            now = now+timedelta(days=1)
+            continue
+        return now
+
+
+
 
 def add_and_get_work_day(now, offset):
     """

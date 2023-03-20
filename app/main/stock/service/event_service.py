@@ -8,7 +8,7 @@ from app.main.utils import date_util, simple_util
 
 def get_from_db(start: datetime, end: datetime) -> List[CalendarEvent]:
     calendar_event = db['calendar_event']
-    events = list(calendar_event.find({"start": {"$gte": start, "$lte": end}},{"_id": 0}))
+    events = list(calendar_event.find({"start": {"$gte": start, "$lte": end}}, {"_id": 0}))
     # for event in events:
     #     event['start'] = date_util.dt_to_str(event['start'],"%Y-%m-%d")
     events = [CalendarEvent(**event) for event in events]
@@ -32,11 +32,25 @@ def get_fix_event(start: datetime, end: datetime) -> List[CalendarEvent]:
     """
     stock_events: List[CalendarEvent] = [_get_delivery_date_of_stock_event(month) for month in months]
     option_events: List[CalendarEvent] = [_get_delivery_date_of_option_event(month) for month in months]
+    lpr_events: List[CalendarEvent] = [_get_lpr_push_event(month) for month in months]
 
     event_results.extend(stock_events)
     event_results.extend(option_events)
+    event_results.extend(lpr_events)
 
     return event_results
+
+
+def _get_lpr_push_event(date_time: datetime) -> CalendarEvent:
+    """
+    lpr公布时间，每个月20号
+    :return:
+    """
+    year = date_time.year
+    month = date_time.month
+    lpr_date = datetime(year, month, 20, 9, 15, 0)
+    lpr_date = date_util.stop_until_work_day(lpr_date)
+    return CalendarEvent(title="LPR公布日", start=date_util.dt_to_str(lpr_date, "%Y-%m-%d %H:%M:%S"))
 
 
 def _get_delivery_date_of_stock_event(date_time: datetime) -> CalendarEvent:
