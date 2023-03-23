@@ -32,6 +32,7 @@ for k, item in trend_chain_group.items():
         {"date": {"$lte": date},
          "update": {"$gte": date},
          "industry": "电池",
+         "is_in_use":1,
          "trend_type": {"$in": [normal, temp]},
          "trend": chain[2],
          "prev_trend_1": chain[1],
