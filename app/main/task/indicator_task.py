@@ -1,11 +1,14 @@
 """
 汇率相关任务
 """
-import pandas as pd
-import akshare as ak
-from app.main.db.mongo import db
-from datetime import datetime
 import logging as log
+from datetime import datetime
+
+import akshare as ak
+import pandas as pd
+
+from app.main.db.mongo import db
+
 
 def sync_cny_fx():
     """
@@ -23,5 +26,17 @@ def sync_cny_fx():
     db['rmb_fxrate'].insert_many(df.to_dict(orient="records"))
 
 
+def sync_comex_gold():
+    """
+    同步comex黄金期货日级别数据
+    :return:
+    """
+    df = ak.futures_foreign_hist("GC")
+    result_dict = df.to_dict(orient="records")
+    db['k_line_day_comex_gold'].drop()
+    db['k_line_day_comex_gold'].insert_many(result_dict)
+
+
 if __name__ == "__main__":
-    sync_cny_fx()
+    sync_comex_gold()
+    pass

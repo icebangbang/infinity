@@ -1,6 +1,6 @@
 from app.main.stock.job import board_association, sync_indicator
 from app.main.task import trend_task, stock_task, \
-    fx_task, board_task, history_task, fund_task, macrodata_task
+    indicator_task, board_task, history_task, fund_task, macrodata_task
 
 TASK_SYNC_STOCK_IND = "SYNC_STOCK_IND"
 TASK_TYPE_CELERY = 'TASK_CELERY'
@@ -25,13 +25,14 @@ TASK_MAPPING = {
     '同步个股月k线': stock_task.submit_stock_month_task,
     '同步东财板块日k线': board_task.sync_board_k_line,
     '保存趋势信息': trend_task.dump_trend_info,  # 异步无回调任务
-    "同步人民币对外币汇率": fx_task.sync_cny_fx,  # 同步任务
+    "同步人民币对外币汇率": indicator_task.sync_cny_fx,  # 同步任务
     "同步pmi": sync_indicator.sync_pmi,  # 同步pmi
     '查询趋势信息': trend_task.query_trend_info,  # 同步任务
     '个股关联板块': board_association.associate,  # 同步任务
     '扫描个股特征任务': history_task.start_stock_feature_task,
     '同步etf基金历史k线': fund_task.sync_etf_kline,  # 异步无回调任务
     '同步etf基金盘中k线': fund_task.sync_etf_kline_real_time,  # 异步无回调任务
+    "同步comex黄金期货":indicator_task.sync_comex_gold(),
 
     '股市资金抱团分析':macrodata_task.baotuan_update
 }
@@ -46,4 +47,4 @@ PATH_TASK_MAPPING = {
     "app.main.task.stock_task.sync_stock_month_data": "同步个股月k线"
 }
 
-ASYNC_NO_CALLBACK = ['同步etf基金历史k线','同步etf基金盘中k线','保存趋势信息','股市资金抱团分析']
+ASYNC_NO_CALLBACK = ['同步etf基金历史k线','同步etf基金盘中k线','保存趋势信息','股市资金抱团分析','同步comex黄金期货']
