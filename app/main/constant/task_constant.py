@@ -32,9 +32,10 @@ TASK_MAPPING = {
     '扫描个股特征任务': history_task.start_stock_feature_task,
     '同步etf基金历史k线': fund_task.sync_etf_kline,  # 异步无回调任务
     '同步etf基金盘中k线': fund_task.sync_etf_kline_real_time,  # 异步无回调任务
-    "同步comex黄金期货":indicator_task.sync_comex_gold(),
+    "同步comex黄金期货": indicator_task.sync_comex_gold(),  # 异步无回调任务
+    '美联储利率决议报告': indicator_task.sync_fed_interest_rate(),  # 异步无回调任务
 
-    '股市资金抱团分析':macrodata_task.baotuan_update
+    '股市资金抱团分析': macrodata_task.baotuan_update
 }
 
 # 需要回调的任务
@@ -47,4 +48,5 @@ PATH_TASK_MAPPING = {
     "app.main.task.stock_task.sync_stock_month_data": "同步个股月k线"
 }
 
-ASYNC_NO_CALLBACK = ['同步etf基金历史k线','同步etf基金盘中k线','保存趋势信息','股市资金抱团分析','同步comex黄金期货']
+ASYNC_NO_CALLBACK = ['同步etf基金历史k线', '同步etf基金盘中k线', '保存趋势信息', '股市资金抱团分析',
+                     '同步comex黄金期货','美联储利率决议报告']

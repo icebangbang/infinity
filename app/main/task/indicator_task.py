@@ -37,6 +37,27 @@ def sync_comex_gold():
     db['k_line_day_comex_gold'].insert_many(result_dict)
 
 
+def sync_fed_interest_rate():
+    """
+    同步美联储利率决议报告
+    :return:
+    """
+    macro_bank_usa_interest_rate_df = ak.macro_bank_usa_interest_rate()
+    df = macro_bank_usa_interest_rate_df[['日期', '今值', '预测值', '前值']]
+
+    df = df.rename(columns={
+        '日期': 'date',
+        '今值': 'current',
+        '预测值': 'predict',
+        '前值': 'prev'
+    })
+    df["date"] = pd.to_datetime(df["date"])
+    result_dict = df.to_dict(orient="records")
+
+    db['fed_interest_rate'].drop()
+    db['fed_interest_rate'].insert_many(result_dict)
+
+
 if __name__ == "__main__":
-    sync_comex_gold()
+    sync_fed_interest_rate()
     pass
