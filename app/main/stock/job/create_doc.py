@@ -72,6 +72,13 @@ def list_doc():
                  dict(name="open", type="float", desc="开盘价"),
                  dict(name="prev_close", type="float", desc="前一天收盘价"),
              ]),
+        dict(table_name="calendar_event",
+             table_comment="事件日历",
+             columns=[
+                 dict(name="id", type="str", desc="event有序id"),
+                 dict(name="title", type="str", desc="收盘价"),
+                 dict(name="start", type="datetime", desc="日期"),
+             ]),
     ]
     return docs
 
