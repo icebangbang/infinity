@@ -52,10 +52,17 @@ def sync_fed_interest_rate():
         '前值': 'prev'
     })
     df["date"] = pd.to_datetime(df["date"])
-    result_dict = df.to_dict(orient="records")
+    result_dict_list = df.to_dict(orient="records")
 
     db['fed_interest_rate'].drop()
-    db['fed_interest_rate'].insert_many(result_dict)
+    db['fed_interest_rate'].insert_many(result_dict_list)
+
+    for result_dict in result_dict_list:
+
+        db['calendar_event'].update_one({"title": "美联储利率决议",
+                                         "start": result_dict['date']},
+                                        {"$set": dict(source="美联储",start=result_dict['date'],title="美联储利率决议")},
+                                        upsert=True)
 
 
 if __name__ == "__main__":

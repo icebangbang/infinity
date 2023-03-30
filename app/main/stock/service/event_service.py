@@ -9,8 +9,10 @@ from app.main.utils import date_util, simple_util
 def get_from_db(start: datetime, end: datetime) -> List[CalendarEvent]:
     calendar_event = db['calendar_event']
     events = list(calendar_event.find({"start": {"$gte": start, "$lte": end}}, {"_id": 0}))
-    # for event in events:
-    #     event['start'] = date_util.dt_to_str(event['start'],"%Y-%m-%d")
+    for event in events:
+        # 0时就以当天的时间算
+        if event['start'].hour == 0:
+            event['start'] = date_util.dt_to_str(event['start'],"%Y-%m-%d")
     events = [CalendarEvent(**event) for event in events]
     return events
 
