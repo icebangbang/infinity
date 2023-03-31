@@ -171,7 +171,7 @@ def save_stock_trend_with_features(code, name, features, start_of_day: datetime)
             prev_trend_2=prev_trend['trend'] if prev_trend else None,
             prev_trend_1=trend_point['trend'] if trend_point else None,  # 之前总体趋势
             trend=trend,  # 当前总体趋势
-            trend_chain_start = prev_trend['date'] if prev_trend else None,
+            trend_chain_start=prev_trend['date'] if prev_trend else None,
             inf_l_point_date=inf_l_point_date,  # 底分型趋势成立时间
             inf_h_point_date=inf_h_point_date,  # 顶分型趋势成立时间
             prev_inf_l_point_date=trend_point['inf_l_point_date'] if trend_point else None,
@@ -239,6 +239,7 @@ def get_province_trend_info(start, end):
         r = _get_trend_point(date)
         if len(r) == 0: continue
         df = pd.DataFrame(r)
+        df = df.sort_values("update", ascending=False).drop_duplicates(subset=['code'], keep='first')
         df['province'] = df.apply(lambda row: code_province_dict.get(row['code']), axis=1)
         grouped = df.groupby(['province', 'trend'])
         series_to_dict = grouped.size().to_dict()
@@ -280,6 +281,7 @@ def get_index_trend_info(start, end):
         r = _get_trend_point(date)
         if len(r) == 0: continue
         df = pd.DataFrame(r)
+        df = df.sort_values("update", ascending=False).drop_duplicates(subset=['code'], keep='first')
         df['market'] = df.apply(lambda row: stock_util.market_belong(row['code']), axis=1)
         series = df.groupby(['market', 'trend']).size()
         series_to_dict = series.to_dict()
@@ -367,6 +369,7 @@ def get_board_trend_size_info(start, end, only_include=False):
     :return:
     """
     board_detail = db['board_detail']
+    # 2为行业板块
     boards = list(board_detail.find({"type": 2}))
     board_dict = {board['board']: board['size'] for board in boards}
 
@@ -389,6 +392,7 @@ def get_board_trend_size_info(start, end, only_include=False):
                  "update": {"$gte": date}, "code": {"$in": total}, "trend_type": {"$in": [normal, temp]}}))
             if len(r) == 0: continue
             df = pd.DataFrame(r)
+            df = df.sort_values("update", ascending=False).drop_duplicates(subset=['code'], keep='first')
             series = df.groupby(['trend']).size()
             series_to_dict = series.to_dict()
 
@@ -419,6 +423,7 @@ def get_board_trend_size_info(start, end, only_include=False):
                  "update": {"$gte": date}}))
             if len(r) == 0: continue
             df = pd.DataFrame(r)
+            df = df.sort_values("update", ascending=False).drop_duplicates(subset=['code'], keep='first')
             series = df.groupby(['industry', 'trend']).size()
             series_to_dict = series.to_dict()
 
@@ -646,15 +651,16 @@ if __name__ == "__main__":
     # get_trend_size_info(from_date, end_date)
     # # 大盘级别的聚合
     # get_all_trend_info(from_date, end_date)
+
     stocks = stock_dao.get_all_stock()
-    for index,stock in enumerate(stocks):
+    for index, stock in enumerate(stocks):
         code = stock['code']
         name = stock['name']
-        print(code, name,index)
+        print(code, name, index,len(stocks))
         #
-        for date in WorkDayIterator(datetime(2023, 1, 1), datetime(2023, 3, 15)):
-            features = stock_dao.get_company_feature(code, date)
-            save_stock_trend_with_features(code, name, features, date)
+        # for date in WorkDayIterator(datetime(2023, 1, 1), datetime(2023, 3, 31)):
+        #     features = stock_dao.get_company_feature(code, date)
+        #     save_stock_trend_with_features(code, name, features, date)
 
     # save_stock_trend_with_features("300763", "锦浪科技", features, datetime(2022, 8, 25))
     # get_trend_size_info(datetime(2022, 9, 16), datetime(2022, 9, 16), False)
@@ -665,7 +671,7 @@ if __name__ == "__main__":
     # get_trend_info(datetime(2023, 2, 17))
 
     from_date = datetime(2023, 1, 1)
-    end_date = datetime(2023, 3, 15)
+    end_date = datetime(2023, 3, 31)
     # 板块级别的聚合
     get_board_trend_size_info(from_date, end_date)
     # 大盘级别的聚合
