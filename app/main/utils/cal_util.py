@@ -159,8 +159,13 @@ def get_reverse_point(points):
 def get_rate(numerator, denominator, ndigits=2) -> float:
     """
     计算涨幅
+    numerator: 分子
+    denominator： 分母
     :return:
     """
+    if denominator == 0:
+        return 0
+
     return float(Decimal(numerator / denominator * 100).quantize(Decimal("0.01"), rounding="ROUND_HALF_UP"))
 
 

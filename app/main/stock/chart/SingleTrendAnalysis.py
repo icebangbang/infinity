@@ -9,7 +9,7 @@ from app.main.model.recommend_etf import RecommendEtf
 from app.main.model.single_trend_analysis import ResponseBody
 from app.main.stock.chart.Line import Line
 from app.main.stock.service import board_service, fund_service
-from app.main.utils import date_util, collection_util
+from app.main.utils import date_util, collection_util, cal_util
 from app.main.utils.date_util import WorkDayIterator
 
 
@@ -105,9 +105,12 @@ def _build_etf_info(industry, start, end) -> RecommendEtf:
     if collection_util.is_empty(recommend_etf_list):
         return None
 
+    # 获取最靠前的etf
     recommend_etf = recommend_etf_list[0]
+    # 基金代号和基金名称
     code = recommend_etf['fund_code']
     name = recommend_etf['fund_name']
+    # 获取k线，并转化为dict形式
     data_point_dict: dict = fund_service.get_etf_kline_day_with_dict(code, start, end)
 
     # k线形式的展示
@@ -115,6 +118,7 @@ def _build_etf_info(industry, start, end) -> RecommendEtf:
     y = []
     y_axis_data.y = y
 
+    # 获取k线的最高点和最低点，便于前端展示
     h = None
     l = None
 
@@ -125,6 +129,9 @@ def _build_etf_info(industry, start, end) -> RecommendEtf:
             close = data_point['close']
             low = data_point['low']
             high = data_point['high']
+            prev_close = data_point['prev_close']
+
+            rate = '' if prev_close is None else cal_util.get_rate(close-prev_close,prev_close)
 
             if h is None or high > h:
                 h = high
@@ -132,7 +139,7 @@ def _build_etf_info(industry, start, end) -> RecommendEtf:
             if l is None or low < l:
                 l = low
 
-            y.append([open, close, low, high])
+            y.append([open, close, low, high,rate])
         else:
             y.append([])
 

@@ -8,6 +8,7 @@ from app.main.utils import date_util, cal_util
 class FXRateAnalysis(Line):
     """
     生成线性图表
+    美元对人民币汇率图表
     """
 
     def generate(self, **kwargs):

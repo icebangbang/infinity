@@ -102,7 +102,7 @@ def get_etf_kline_day(code, start, end):
     etf_kline_day = db['etf_kline_day']
     data_points = list(etf_kline_day.find({"code": code,
                                            "date": {"$gte": start, "$lte": end}},
-                                          {"close": 1, "open": 1, "high": 1, "low": 1, "date": 1, "money": 1}
+                                          {"close": 1, "open": 1, "high": 1, "low": 1, "date": 1, "money": 1,"prev_close":1}
                                           ))
     return data_points
 
