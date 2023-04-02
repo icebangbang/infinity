@@ -22,6 +22,7 @@ TASK_MAPPING = {
 
     '清空日k数据': stock_task.clear_k_line_by_job,
     '同步个股日k线': stock_task.sync_stock_k_line_by_job,
+    '同步个股日k线不复权': stock_task.sync_stock_k_line_bfq_by_job,
     '同步个股月k线': stock_task.submit_stock_month_task,
     '同步东财板块日k线': board_task.sync_board_k_line,
     '保存趋势信息': trend_task.dump_trend_info,  # 异步无回调任务

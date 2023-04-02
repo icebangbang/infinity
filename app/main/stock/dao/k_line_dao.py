@@ -8,7 +8,7 @@ from app.main.db.mongo import db
 from app.main.utils import collection_util
 
 
-def get_earliest_k_line(code="000001",level='day'):
+def get_earliest_k_line(code="000001", level='day'):
     """
     获取最早的k线数据点
     :param code:
@@ -23,7 +23,8 @@ def get_earliest_k_line(code="000001",level='day'):
         return points[0]
     return None
 
-def get_oldest_k_line(code, level='day'):
+
+def get_oldest_k_line(code, level='day', adjust='qfq'):
     """
     获取最近的k线
     :param code:
@@ -31,6 +32,10 @@ def get_oldest_k_line(code, level='day'):
     :return:
     """
     db_name = "k_line_" + level
+
+    if adjust == '':
+        db_name = "k_line_" + level + "_bfq"
+
     my_set = db[db_name]
 
     return list(my_set.find({"code": code}).sort("date", -1).limit(1))
@@ -43,7 +48,7 @@ def get_concept_oldest_k_line(name):
     return list(my_set.find({"name": name}).sort("_id", -1).limit(1))
 
 
-def dump_k_line(data, level='day'):
+def dump_k_line(data, level='day', adjust='qfq'):
     """
     存储个股日k
     :param data:
@@ -51,6 +56,10 @@ def dump_k_line(data, level='day'):
     :return:
     """
     db_name = "k_line_" + level
+
+    if adjust == '':  # 不复权
+        db_name = "k_line_" + level + "_bfq"
+
     my_set = db[db_name]
 
     if len(data) == 0:
@@ -59,8 +68,12 @@ def dump_k_line(data, level='day'):
     return my_set.insert(data)
 
 
-def update_k_line(code, data, level="day"):
+def update_k_line(code, data, level="day", adjust='qfq'):
     db_name = "k_line_" + level
+
+    if adjust == '':  # 不复权
+        db_name = "k_line_" + level + "_bfq"
+
     my_set = db[db_name]
 
     for d in data:

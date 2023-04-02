@@ -1,22 +1,21 @@
 import logging
+from datetime import datetime, timedelta
 
 import dateutil
 
-from app.main.stock.dao import k_line_dao
-from datetime import datetime, timedelta
-from app.main.utils import date_util
-from app.main.stock.api import stock_kline
 from app.application import app
+from app.main.stock.api import stock_kline
+from app.main.stock.dao import k_line_dao
+from app.main.utils import date_util
 
 
-
-def sync_day_level(code, base_time=None):
+def sync_day_level(code, base_time=None, adjust='qfq'):
     """
     同步KLINE_TIME_WINDOW天内的数据
     :param code:
     :return:
     """
-    point = k_line_dao.get_oldest_k_line(code)
+    point = k_line_dao.get_oldest_k_line(code,adjust=adjust)
     # default 1095
     time_window = app.config["KLINE_TIME_WINDOW"]
 
@@ -33,15 +32,15 @@ def sync_day_level(code, base_time=None):
 
     df = stock_kline.fetch_kline_data(code,
                                       date_util.dt_to_str(before),
-                                      date_util.dt_to_str(now), 'qfq')
+                                      date_util.dt_to_str(now), adjust)
     if df is None: return None
 
     data = df.to_dict(orient='records')
 
     if date_util.get_days_between(now, before) == 0:
-        k_line_dao.update_k_line(code, data)
+        k_line_dao.update_k_line(code, data, adjust=adjust)
     else:
-        k_line_dao.dump_k_line(data)
+        k_line_dao.dump_k_line(data, adjust=adjust)
 
 
 def sync_month_level(code, base_time=None, time_window=6000):
@@ -51,7 +50,7 @@ def sync_month_level(code, base_time=None, time_window=6000):
     :return:
     """
     logging.info("[同步个股月k线]开始同步月线数据:{}".format(code))
-    point = k_line_dao.get_oldest_k_line(code,level="month")
+    point = k_line_dao.get_oldest_k_line(code, level="month")
     now = datetime.now()
     end_of_current_month = date_util.get_end_of_month(now)
     if base_time is None:
@@ -67,11 +66,11 @@ def sync_month_level(code, base_time=None, time_window=6000):
 
     df = stock_kline.fetch_kline_data(code,
                                       date_util.dt_to_str(before),
-                                      date_util.dt_to_str(end_of_current_month), 'qfq','103')
+                                      date_util.dt_to_str(end_of_current_month), 'qfq', '103')
     if df is None: return None
 
     data = df.to_dict(orient='records')
-    k_line_dao.update_k_line(code, data,level='month')
+    k_line_dao.update_k_line(code, data, level='month')
 
     return data
 
@@ -128,7 +127,7 @@ def sync_board_k_line(name, type, base_time=None, time_window=1095):
         now = datetime.now()
 
     if len(point) == 0:
-       before = now - timedelta(days=time_window)
+        before = now - timedelta(days=time_window)
     else:
         before = point[0]['date'] + timedelta(days=1)
     if date_util.get_days_between(now, before) <= 0:
@@ -143,7 +142,6 @@ def sync_board_k_line(name, type, base_time=None, time_window=1095):
     if df is None: return None
 
     df['type'] = type
-
 
     # if (before.hour >= 15):
     #     start = before + timedelta(days=1)
@@ -168,7 +166,6 @@ if __name__ == "__main__":
     # df = k_line_dao.get_board_k_line_data('塑料制品',
     #                                       "20220601",
     #                                       "20220610")
-
 
     sync_month_level("300330")
     pass

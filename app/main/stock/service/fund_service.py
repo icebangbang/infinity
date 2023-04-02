@@ -6,7 +6,7 @@ import pandas as pd
 from app.log import get_logger
 from app.main.db.mongo import db
 from app.main.model.recommend_etf import RecommendEtf
-from app.main.stock.dao import k_line_dao, board_dao, etf_dao
+from app.main.stock.dao import k_line_dao, board_dao, etf_dao, stock_dao
 from app.main.utils import date_util, cal_util
 
 """
@@ -195,6 +195,7 @@ def backtrading_stock_value(stocks, days=1000):
     # stocks_map = {stock['code']: dict(flowCapitalValue=stock['flowCapitalValue'],
     #                                   MarketValue=stock['MarketValue'])
     #               for stock in stocks}
+    my_set = db['stock_value']
 
     for base in stocks:
         update_time = base['update_time']
@@ -215,20 +216,23 @@ def backtrading_stock_value(stocks, days=1000):
         base_close = 0
 
         for data in data_list:
-            date = data['date']
+            date:datetime = data['date']
+            print(date)
+
             # 说明是最近一天的市值,直接更新
             if len(stock_data_list) == 0:
                 stock_data_list.append(dict(date=date, code=code, flowCapitalValue=base_fcv, MarketValue=base_mv))
                 base_close = data['close']
             else:
                 current_close = data['close']
+                if date.month == 4 and date.day == 15 and date.year==2020:
+                    print()
                 change_rate = 1 + (current_close - base_close) / base_close
                 base_fcv = base_fcv * change_rate
                 base_mv = base_mv * change_rate
                 stock_data_list.append(dict(date=date, code=code, flowCapitalValue=cal_util.round(base_fcv, 4),
                                             MarketValue=cal_util.round(base_mv, 4)))
                 base_close = current_close
-        my_set = db['stock_value']
 
         for stock_data in stock_data_list:
             update_time = datetime.now()
@@ -246,11 +250,11 @@ def backtrading_stock_value(stocks, days=1000):
 
 
 if __name__ == "__main__":
-    # stocks = stock_dao.get_stock_detail_list(['300763'])
+    stocks = stock_dao.get_stock_detail_list(['601919'])
     # stocks = stock_dao.get_stock_detail_list()
-    # backtrading_stock_value(stocks)
+    backtrading_stock_value(stocks)
     # end = date_util.get_start_of_day(date_util.get_work_day(datetime.now(),0)[0])
     # start = end - timedelta(days=1)
 
-    r = get_fund_by_board("计算机设备")
-    pass
+    # r = get_fund_by_board("计算机设备")
+    # pass

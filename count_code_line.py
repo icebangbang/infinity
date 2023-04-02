@@ -59,7 +59,7 @@ if __name__ == '__main__':
     dest_statistic = infinity + "/app/static/code_statistic.csv"
     total, comment, empty = do_sum(infinity)
 
-    df = pd.read_csv(dest_statistic)
+    df = pd.read_csv(dest_statistic,dtype={'project': str})
 
     rows = df.to_dict(orient="records")
 

@@ -3,7 +3,7 @@ from datetime import datetime
 from app.main.db.mongo import db
 
 
-def list_doc():
+def list_doc(table_name: list):
     docs = [
         dict(
             table_name="history_task",
@@ -79,13 +79,49 @@ def list_doc():
                  dict(name="title", type="str", desc="收盘价"),
                  dict(name="start", type="datetime", desc="日期"),
              ]),
+
+        dict(table_name="stock_share_change",
+             table_comment="个股股本结构变更",
+             indexes=dict(code_date_idx=[("code", 1), ("change_date", 1)]),
+             columns=[
+                 dict(name="change_reason", type="str", desc="变动原因"),
+                 dict(name="change_date", type="datetime", desc="变动日期"),
+                 dict(name="report_date", type="datetime", desc="公告日期"),
+                 dict(name="total_capital_stock", type="float", desc="公告日期"),
+                 dict(name="frozen_capital_stock", type="float", desc="流通受限股份"),
+                 dict(name="flow_capital_stock", type="float", desc="已流通股份"),
+                 dict(name="change_reason_code", type="float", desc="变动原因编码"),
+             ]),
+        dict(table_name="k_line_day_bfq",
+             table_comment="个股日k线不复权",
+             indexes=dict(date_code_idx=[("date", -1), ("code", 1)],
+                          code_idx=[("code",1)],
+                          date_idx=[("date",-1)]),
+             columns=[
+                 dict(name="code", type="str", desc="代码"),
+                 dict(name="close", type="float", desc="收盘价"),
+                 dict(name="create_time", type="datetime", desc="创建时间"),
+                 dict(name="date", type="datetime", desc="日期"),
+                 dict(name="high", type="float", desc="最高点"),
+                 dict(name="klt", type="str", desc="k线类型，101为日线"),
+                 dict(name="low", type="float", desc="最低价"),
+                 dict(name="money", type="float", desc="成交额"),
+                 dict(name="open", type="float", desc="开盘价"),
+                 dict(name="prev_close", type="float", desc="前一个交易日股价"),
+                 dict(name="volume", type="float", desc="成交量"),
+             ]),
     ]
+
+    if table_name is not None:
+        docs = [doc for doc in docs if doc['table_name'] in table_name]
+        return docs
+
     return docs
 
 
-def create_doc(doc_name=None):
+def create_doc(table_name:list):
     # collist = db.list_collection_names()
-    docs = list_doc()
+    docs = list_doc(table_name)
 
     for doc in docs:
         table_name = doc['table_name']
@@ -169,5 +205,5 @@ def add_config_data():
 
 
 if __name__ == "__main__":
-    create_doc()
+    create_doc(['k_line_day_bfq'])
     # add_config_data()
