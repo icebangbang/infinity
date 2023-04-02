@@ -278,10 +278,10 @@ beat_schedule = {
         "task": "app.main.task.house_task.sync_hangzhou_house",
         "schedule": 30
     },
-    'sync_fund_flow': {
-        "task": "app.main.task.fund_task.backtrading",
-        "schedule": 1800
-    },
+    # 'sync_fund_flow': {
+    #     "task": "app.main.task.fund_task.backtrading",
+    #     "schedule": 1800
+    # },
     'send_remind_msg': {
         "task": "app.main.task.remind_task.stock_remind",
         "schedule": 20
