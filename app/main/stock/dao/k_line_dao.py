@@ -158,7 +158,7 @@ def get_board_k_line_by_name(name: List,
 def get_k_line_data(
         start_day: datetime,
         end_day: datetime,
-        level='day', codes=None, sort=1) -> List:
+        level='day', codes=None, sort=1, adjust="qfq") -> List:
     """
     获取特定时间的股票走势
     :param start_day:
@@ -167,6 +167,10 @@ def get_k_line_data(
     :return:
     """
     db_name = "k_line_" + level
+
+    if adjust == '':
+        db_name = "k_line_" + level + "_bfq"
+
     my_set = db[db_name]
     query_set = {"date": {"$gte": start_day, "$lte": end_day}}
     if codes is not None:

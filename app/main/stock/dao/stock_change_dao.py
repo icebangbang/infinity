@@ -6,10 +6,35 @@ from pandas import DataFrame
 
 from app.main.db.mongo import db
 from app.main.utils import date_util
+from interval3 import Interval
 
 
-def get_stock_changes():
-    pass
+def get_stock_share_change(code,change_reason_code=None):
+    """
+    通过change_reason_code 找到个股的总股本，流通股本
+    :param code:
+    :param reason_code:
+    :return:
+    """
+    statement = {"code": code}
+    if change_reason_code:
+        statement['change_reason_code'] = change_reason_code
+
+    results = list(db['stock_share_change'].find(statement).sort("change_date",-1))
+
+    upper = datetime.now()
+    interval_dict = {}
+    for result in results:
+        lower = result['change_date']
+        i = Interval(lower_bound=lower, upper_bound=upper,
+                     lower_closed=True,
+                     upper_closed=False)
+        interval_dict[i] = result
+        upper = lower
+
+    return interval_dict
+
+    # "code": {'$regex': '^00'}
 
 
 def dump_stock_share_change(code, start: datetime, end: datetime):
@@ -51,4 +76,5 @@ def dump_stock_share_change(code, start: datetime, end: datetime):
 
 
 if __name__ == "__main__":
-    dump_stock_share_change("300763", datetime(2019, 1, 1), datetime(2024, 1, 1))
+    # dump_stock_share_change("300763", datetime(2019, 1, 1), datetime(2024, 1, 1))
+    get_stock_share_change("300763", "015011")

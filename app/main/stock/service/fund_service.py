@@ -6,7 +6,7 @@ import pandas as pd
 from app.log import get_logger
 from app.main.db.mongo import db
 from app.main.model.recommend_etf import RecommendEtf
-from app.main.stock.dao import k_line_dao, board_dao, etf_dao, stock_dao
+from app.main.stock.dao import k_line_dao, board_dao, etf_dao, stock_dao, stock_change_dao
 from app.main.utils import date_util, cal_util
 
 """
@@ -183,56 +183,48 @@ def backtrading_stock_value(stocks, days=1000):
     :return:
     """
 
-    # data_list = k_line_dao.get_k_line_data(start, now, sort=-1)
-    # k_line_map = {}
-    # for data in data_list:
-    #     code = data['code']
-    #     k_line_list = k_line_map.get(code, [])
-    #     k_line_list.append(data)
-    #     k_line_map[code] = k_line_list
-
-    # stocks_copy = copy.deepcopy(stocks)
-    # stocks_map = {stock['code']: dict(flowCapitalValue=stock['flowCapitalValue'],
-    #                                   MarketValue=stock['MarketValue'])
-    #               for stock in stocks}
     my_set = db['stock_value']
 
     for base in stocks:
-        update_time = base['update_time']
         code = base['code']
         name = base['name']
         log.info("[个股市值回溯]回溯{},{},{}天之内市值".format(code, name, days))
+        # 上市时间
+        market_value = base['MarketValue']
+
+        if market_value  == 0:
+            log.info("个股已经退市:{}".format(name))
+
         # 获取最近的一个工作日
         latest = date_util.get_work_day(base['update_time'], 0)
         start = date_util.get_work_day(base['update_time'], days)
 
-        data_list = k_line_dao.get_k_line_data(start, latest, codes=[base['code']], sort=-1)
+        # 查询不复权k线
+        data_list = k_line_dao.get_k_line_data(start, latest, codes=[base['code']], sort=-1, adjust='')
+
+        interval_dict = stock_change_dao.get_stock_share_change(code)
 
         stock_data_list = []
-        # 根据时间生成
-        code = base['code']
-        base_fcv = base['flowCapitalValue']
-        base_mv = base['MarketValue']
-        base_close = 0
 
         for data in data_list:
-            date:datetime = data['date']
-            print(date)
+            trade_date = data['date']
+            close = data['close']
+            for inter in interval_dict.keys():
+                if trade_date not in inter:
+                    continue
+                result = interval_dict[inter]
+                flow_capital_stock = result['flow_capital_stock']
+                # frozen_capital_stock = result['frozen_capital_stock']
+                total_capital_stock = result['total_capital_stock']
 
-            # 说明是最近一天的市值,直接更新
-            if len(stock_data_list) == 0:
-                stock_data_list.append(dict(date=date, code=code, flowCapitalValue=base_fcv, MarketValue=base_mv))
-                base_close = data['close']
-            else:
-                current_close = data['close']
-                if date.month == 4 and date.day == 15 and date.year==2020:
-                    print()
-                change_rate = 1 + (current_close - base_close) / base_close
-                base_fcv = base_fcv * change_rate
-                base_mv = base_mv * change_rate
-                stock_data_list.append(dict(date=date, code=code, flowCapitalValue=cal_util.round(base_fcv, 4),
-                                            MarketValue=cal_util.round(base_mv, 4)))
-                base_close = current_close
+                flowCapitalValue = flow_capital_stock * 10000 * close
+                MarketValue = total_capital_stock * 10000 * close
+
+                stock_data_list.append(dict(date=trade_date, code=code, flowCapitalValue=flowCapitalValue,
+                                            MarketValue=MarketValue))
+                break
+
+
 
         for stock_data in stock_data_list:
             update_time = datetime.now()
@@ -241,7 +233,6 @@ def backtrading_stock_value(stocks, days=1000):
             flowCapitalValue = stock_data['flowCapitalValue']
             MarketValue = stock_data['MarketValue']
 
-            log.info("{}-{}".format(date_util.dt_to_str(date), code))
             my_set.update_one({"date": date, "code": code},
                               {"$set": dict(flowCapitalValue=flowCapitalValue,
                                             MarketValue=MarketValue,
@@ -250,8 +241,8 @@ def backtrading_stock_value(stocks, days=1000):
 
 
 if __name__ == "__main__":
-    stocks = stock_dao.get_stock_detail_list(['601919'])
-    # stocks = stock_dao.get_stock_detail_list()
+    # stocks = stock_dao.get_stock_detail_list(['300763'])
+    stocks = stock_dao.get_stock_detail_list()
     backtrading_stock_value(stocks)
     # end = date_util.get_start_of_day(date_util.get_work_day(datetime.now(),0)[0])
     # start = end - timedelta(days=1)
