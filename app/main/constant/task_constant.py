@@ -15,10 +15,12 @@ TASK_MAPPING = {
     "个股趋势跑批": trend_task.submit_trend_task,
     "个股特征跑批": stock_task.submit_stock_feature_by_job,
     '板块趋势和成交额聚合': trend_task.trend_data_task,
+    '同步个股历史市值': fund_task.stock_value_backtrading, # 异步无回调任务
 
     "个股历史特征按批次跑批": history_task.submit_history_stock_feature_by_job,  # 名字不能随便改,改之前全局搜一下
     "个股历史趋势按批次跑批": history_task.submit_history_stock_trend_by_job,
     '板块趋势和成交额按批次聚合': history_task.submit_agg_stock_trend_by_job,
+    '同步个股股本结构变更记录': stock_task.sync_stock_share_change,  # 异步无回调任务
 
     '清空日k数据': stock_task.clear_k_line_by_job,
     '同步个股日k线': stock_task.sync_stock_k_line_by_job,
@@ -50,4 +52,4 @@ PATH_TASK_MAPPING = {
 }
 
 ASYNC_NO_CALLBACK = ['同步etf基金历史k线', '同步etf基金盘中k线', '保存趋势信息', '股市资金抱团分析',
-                     '同步comex黄金期货','美联储利率决议报告']
+                     '同步comex黄金期货', '美联储利率决议报告', '同步个股股本结构变更记录','同步个股历史市值']

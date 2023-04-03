@@ -33,6 +33,6 @@ def sync_etf_kline_real_time(self):
 
 
 @celery.task(bind=True, base=MyTask, expires=1800)
-def backtrading(self):
+def stock_value_backtrading(self):
     stocks = stock_dao.get_stock_detail_list()
     fund_service.backtrading_stock_value(stocks, 4)

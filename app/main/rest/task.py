@@ -4,12 +4,9 @@ from . import rest
 from app.main.task import fund_task
 from app.main.constant import task_constant
 from flask import request
+import logging
 
-@rest.route("/task/sync/backtrading", methods=['get'])
-def backtrading():
-    fund_task.backtrading()
-    return restful.response("ok")
-
+log = logging.getLogger(__name__)
 
 @rest.route("/task/async/dispatch", methods=['post', 'get'])
 def async_dispatch():
@@ -54,6 +51,8 @@ def sync_dispatch():
     req = request.json
 
     method = task_constant.TASK_MAPPING[req['taskName']]
+
+    log.info("同步任务执行,任务名称:{}",req['taskName'])
 
     if req['taskName'] in task_constant.ASYNC_NO_CALLBACK:
         method.apply_async(kwargs={})

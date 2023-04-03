@@ -7,7 +7,7 @@ from app.log import get_logger
 from app.main.db.mongo import db
 from app.main.model.recommend_etf import RecommendEtf
 from app.main.stock.dao import k_line_dao, board_dao, etf_dao, stock_dao, stock_change_dao
-from app.main.utils import date_util, cal_util
+from app.main.utils import date_util
 
 """
 资金流向分析
@@ -185,14 +185,15 @@ def backtrading_stock_value(stocks, days=1000):
 
     my_set = db['stock_value']
 
-    for base in stocks:
+    for index, base in enumerate(stocks):
+
         code = base['code']
         name = base['name']
-        log.info("[个股市值回溯]回溯{},{},{}天之内市值".format(code, name, days))
+        log.info("[个股市值回溯]{}:回溯{},{},{}天之内市值".format(index,code, name, days))
         # 上市时间
         market_value = base['MarketValue']
 
-        if market_value  == 0:
+        if market_value == 0:
             log.info("个股已经退市:{}".format(name))
 
         # 获取最近的一个工作日
@@ -223,8 +224,6 @@ def backtrading_stock_value(stocks, days=1000):
                 stock_data_list.append(dict(date=trade_date, code=code, flowCapitalValue=flowCapitalValue,
                                             MarketValue=MarketValue))
                 break
-
-
 
         for stock_data in stock_data_list:
             update_time = datetime.now()

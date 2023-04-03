@@ -1,5 +1,4 @@
 from app.main.stock.dao import stock_dao
-from app.main.stock.service import fund_service
 from app.main.task.wrapper.sub_task import cpu_task
 from app.main.utils import simple_util
 
@@ -28,7 +27,7 @@ class StockValueTask:
     def invoke(self,codes):
         codes = codes.split(",")
         stocks = stock_dao.get_stock_detail_list(codes)
-        fund_service.backtrading_stock_value(stocks)
+        # fund_service.backtrading_stock_value(stocks)
 
 
     def get_clz_path(self):

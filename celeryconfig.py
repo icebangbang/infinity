@@ -132,10 +132,10 @@ task_routes = (
         'routing_key': 'day_level'
     }
     },
-    {'app.main.task.fund_task.backtrading':
+    {'app.main.task.fund_task.stock_value_backtrading':
         {
-            'queue': 'day_level',
-            'routing_key': 'day_level'
+            'queue': 'indicator',
+            'routing_key': 'indicator'
         }
     },
     {'app.main.task.fund_task.sync_etf_kline':

@@ -9,7 +9,7 @@ from app.main.db.mongo import db
 from app.main.stock.dao import stock_dao, task_dao
 from app.main.stock.job import job_config
 from app.main.stock.job import sync_index_kline, sync_performance
-from app.main.stock.service import sync_kline_service, stock_service, report_service
+from app.main.stock.service import sync_kline_service, stock_service, report_service, stock_change_service, fund_service
 from app.main.stock.stock_pick_filter import stock_filter
 from app.main.stock.task_wrapper import TaskWrapper
 from app.main.utils import date_util
@@ -415,4 +415,21 @@ def sync_analysis_indicator(self):
     :param self:
     :return:
     """
-    sync_performance.sync_analysis_indicator()
+    sync_performance.sync_analysis_indicator()\
+
+@celery.task(bind=True, base=MyTask, expire=18000)
+def sync_stock_share_change(self):
+    """
+    个股股本结构同步任务
+    :param self:
+    :return:
+    """
+    stock_change_service.add_stock_share_change()
+
+
+@celery.task(bind=True, base=MyTask, expires=1800)
+def stock_value_backtrading(self):
+    stocks = stock_dao.get_stock_detail_list()
+    fund_service.backtrading_stock_value(stocks, 4)
+
+

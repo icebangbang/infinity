@@ -71,6 +71,8 @@ def dump_stock_share_change(code, start: datetime, end: datetime):
         code = result['code']
         change_date = result['change_date']
 
+        result['update_time'] = datetime.now()
+
         db['stock_share_change'].update({"code": code, "change_date": change_date},
                                         {"$set": result}, upsert=True)
 
