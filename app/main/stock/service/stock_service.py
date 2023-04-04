@@ -96,7 +96,7 @@ def get_concepts(stock_map, code):
 
 def sync_stock_ind(codes, task_wrapper: TaskWrapper = None):
     stock_detail_set = db["stock_detail"]
-    stock_value_set = db["stock_value"]
+    # stock_value_set = db["stock_value"]
     print("code size {}".format(len(codes)))
     for code in codes:
         now = datetime.now()
@@ -109,12 +109,12 @@ def sync_stock_ind(codes, task_wrapper: TaskWrapper = None):
         ind_dict['update_time'] = now
         stock_detail_set.update_one({"code": code}, {"$set": ind_dict})
 
-        stock_value_set.update_one({"code": code, "date": k_line_data_list[0]['date']},
-                                   {"$set": dict(
-                                       MarketValue=ind_dict['MarketValue'],
-                                       flowCapitalValue=ind_dict['flowCapitalValue'],
-                                       update_time=now),
-                                   }, upsert=True)
+        # stock_value_set.update_one({"code": code, "date": k_line_data_list[0]['date']},
+        #                            {"$set": dict(
+        #                                MarketValue=ind_dict['MarketValue'],
+        #                                flowCapitalValue=ind_dict['flowCapitalValue'],
+        #                                update_time=now),
+        #                            }, upsert=True)
 
         # if task_wrapper is not None:
         #     task_wrapper.trigger_count()
