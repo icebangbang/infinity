@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from datetime import datetime
 from typing import List
 
@@ -103,7 +104,7 @@ def get_fund_by_board(board_name) -> List[RecommendEtf]:
     return high_rate_result
 
 
-def get_by_board(start: datetime, end: datetime):
+def get_stock_value_by_board(date: datetime):
     """
     通过板块个股的市值计算板块的整个市值
     :param start: 开始时间
@@ -115,13 +116,9 @@ def get_by_board(start: datetime, end: datetime):
     # end_time = end
     # start_time = start-timedelta(days=2)
 
-    query_set = {"date": start}
+    query_set = {"date": date}
     stock_value_earliest = list(stock_value.find(query_set))
-    stock_value_earliest = {stock_value['code']: stock_value for stock_value in stock_value_earliest}
-
-    query_set = {"date": end}
-    stock_value_latest = list(stock_value.find(query_set))
-    stock_value_latest = {stock_value['code']: stock_value for stock_value in stock_value_latest}
+    stock_value_dict = {stock_value['code']: stock_value for stock_value in stock_value_earliest}
 
     result = {}
     boards = board_dao.get_all_board(type=[2])
@@ -129,11 +126,12 @@ def get_by_board(start: datetime, end: datetime):
         codes = board["codes"]
         fcv_sum = 0
         for code in codes:
-            if code in stock_value_latest.keys() and code in stock_value_earliest.keys():
-                fcv_latest = stock_value_latest[code]['flowCapitalValue']
-                fcv_earliest = stock_value_earliest[code]['flowCapitalValue']
-                fcv_sum = fcv_sum + fcv_latest - fcv_earliest
-        result[board['board']] = fcv_sum
+            if code in stock_value_dict.keys():
+                fcv = stock_value_dict[code]['flowCapitalValue']
+                fcv_sum = fcv_sum + fcv
+        result[board['board']] = fcv_sum / 100000000
+
+    result = OrderedDict(sorted(result.items(), key=lambda item: item[1], reverse=True))
     return result
 
 
@@ -189,7 +187,7 @@ def backtrading_stock_value(stocks, days=1000):
 
         code = base['code']
         name = base['name']
-        log.info("[个股市值回溯]{}:回溯{},{},{}天之内市值".format(index,code, name, days))
+        log.info("[个股市值回溯]{}:回溯{},{},{}天之内市值".format(index, code, name, days))
         # 上市时间
         market_value = base['MarketValue']
 
@@ -241,10 +239,12 @@ def backtrading_stock_value(stocks, days=1000):
 
 if __name__ == "__main__":
     # stocks = stock_dao.get_stock_detail_list(['300763'])
-    stocks = stock_dao.get_stock_detail_list()
-    backtrading_stock_value(stocks,4)
+    # stocks = stock_dao.get_stock_detail_list()
+    # backtrading_stock_value(stocks, 4)
     # end = date_util.get_start_of_day(date_util.get_work_day(datetime.now(),0)[0])
     # start = end - timedelta(days=1)
 
     # r = get_fund_by_board("计算机设备")
     # pass
+
+    get_stock_value_by_board(date_util.get_start_of_day(datetime.now()))

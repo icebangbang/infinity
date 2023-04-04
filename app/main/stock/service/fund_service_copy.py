@@ -44,7 +44,7 @@ def get_by_board(start: datetime, end: datetime):
     return result
 
 
-def get_china_overview(stock_values):
+def c(stock_values):
     # stocks = stock_dao.get_stock_detail_list()
     # 流动市值 flowCapitalValue
     total_fcv = 0

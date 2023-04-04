@@ -466,7 +466,7 @@ if __name__ == "__main__":
     # publish(3, 100)
     stock_remind_v2()
     # detail = get_full_stock_detail("300763")
-    pass
+
     # sync_bellwether()
     # stock_remind()
     # cal_stock_offset("000722",10)
