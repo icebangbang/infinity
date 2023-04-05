@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 
 import pandas as pd
@@ -7,7 +7,7 @@ import pandas as pd
 from app.log import get_logger
 from app.main.db.mongo import db
 from app.main.model.recommend_etf import RecommendEtf
-from app.main.stock.dao import k_line_dao, board_dao, etf_dao, stock_dao, stock_change_dao
+from app.main.stock.dao import k_line_dao, board_dao, etf_dao, stock_change_dao
 from app.main.utils import date_util
 
 """
@@ -104,17 +104,13 @@ def get_fund_by_board(board_name) -> List[RecommendEtf]:
     return high_rate_result
 
 
-def get_stock_value_by_board(date: datetime):
+def get_stock_value_by_board(date: datetime) -> dict:
     """
-    通过板块个股的市值计算板块的整个市值
-    :param start: 开始时间
-    :param end: 结束时间
+    通过板块个股的市值计算素有板块的整个市值
+    :param date: 开始时间
     :return:
     """
     stock_value = db['stock_value']
-
-    # end_time = end
-    # start_time = start-timedelta(days=2)
 
     query_set = {"date": date}
     stock_value_earliest = list(stock_value.find(query_set))
@@ -246,5 +242,24 @@ if __name__ == "__main__":
 
     # r = get_fund_by_board("计算机设备")
     # pass
+    # for cursor in WorkDayIterator(datetime(2023,1,1), datetime(2023,4,1)):
 
-    get_stock_value_by_board(date_util.get_start_of_day(datetime.now()))
+    # results_0 = get_stock_value_by_board(date_util.get_start_of_day(cursor))
+    # print(cursor,results_0['电子化学品'])
+
+    results_0 = get_stock_value_by_board(date_util.get_start_of_day(datetime.now()))
+    results_5 = get_stock_value_by_board(date_util.get_start_of_day(datetime.now()) - timedelta(days=5))
+
+    df0 = pd.DataFrame([results_0])
+    df5 = pd.DataFrame([results_5])
+
+    # 两个df相减
+    diff = df0 - df5
+    diff_lists = diff.to_dict(orient="records")
+    in_board = {k: v for k, v in diff_lists[0].items() if v >= 0}
+    out_board = {k: v for k, v in diff_lists[0].items() if v < 0}
+    print()
+    #
+    #
+    # print(dict(Counter(results_0) -Counter(results_5)))
+    # print()

@@ -1,15 +1,15 @@
+import collections
+from datetime import datetime
+
+import pandas as pd
+from flask import request
+
+from app.main.db.mongo import db
+from app.main.stock.chart import chart_instance_dict
 from app.main.stock.dao import stock_dao
 from app.main.utils import date_util
-from . import rest
 from app.main.utils import restful
-from app.main.utils import simple_util
-import collections
-
-from flask import request
-from app.main.db.mongo import db
-from datetime import datetime
-from app.main.stock.chart import chart_instance_dict
-import pandas as pd
+from . import rest
 
 
 @rest.route("/indicator/ppi", methods=['get'])
@@ -66,8 +66,8 @@ def get_pmi():
 
     for i, p in enumerate(ppi_list):
         date.append(date_util.date_time_to_str(p['date'], fmt='%Y-%m'))
-        zzy.append(float(p['zzy_value']))
-        fzzy.append(float(p['fzzy_value']))
+        zzy.append(p.get('zzy_value', None))
+        fzzy.append(p.get('fzzy_value', None))
 
     return restful.response(data=dict(date=date, zzy=zzy, fzzy=fzzy))
 
@@ -185,7 +185,8 @@ def upLimit_back_detail():
     stock_map = stock_dao.get_stock_detail(codes)
 
     df = pd.DataFrame(stocks)
-    df['cut'] = pd.cut(df.continuous_up_limit_count_before, bins=[0, 1, 2, 3, 4, 5, 100], labels=["1", "2", "3", "4", "5", ">=6"],
+    df['cut'] = pd.cut(df.continuous_up_limit_count_before, bins=[0, 1, 2, 3, 4, 5, 100],
+                       labels=["1", "2", "3", "4", "5", ">=6"],
                        include_lowest=False)
 
     group_result = []
