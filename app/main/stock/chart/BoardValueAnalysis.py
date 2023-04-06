@@ -1,9 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pandas as pd
 
+from app.main.model.board_value import BoardValue
 from app.main.stock.chart.Line import Line
-from app.main.stock.dao import stock_dao
+from app.main.stock.service import fund_service
+from app.main.utils import date_util
 
 
 class BoardValueAnalysis(Line):
@@ -12,30 +14,34 @@ class BoardValueAnalysis(Line):
     """
 
     def generate(self, **kwargs):
-        stocks = stock_dao.get_all_stock(dict(code=1, name=1, _id=0, date=1),
-                                         filter={"date": {"$gte": datetime(2008, 1, 1)}})
-        # 获取所有数据点位
-        df = pd.DataFrame(stocks)
-        df.index = pd.to_datetime(df.date)
+        day = kwargs.get("spanDay", 1)
 
-        r = {"{}-{}".format(dt[0], dt[1]): len(group) for dt, group in df.groupby([df.index.year, df.index.month])}
+        board_value_0: BoardValue = fund_service.get_stock_value_by_board(datetime.now())
+        board_value_x: BoardValue = fund_service.get_stock_value_by_board(date_util.get_work_day(board_value_0.date,day))
 
-        yAxis_array = [
-            {
-                "name": "每月上市数",
-                "type": 'value'
-            }
-        ]
+        board_value_0 = board_value_0.value
+        board_value_x = board_value_x.value
 
-        data_x = list(r.keys())
-        y = list(r.values())
-        data_y_array = [dict(name="每月上市数", y=y,
-                             color="#FD0100",
-                             markPoint={"data": [{"type": 'max', "name": "max"}]},
-                             markLine={"data": [{"type": 'average', "name": "average"}]})]
+        # 重排序
+        board_value_x = {k: board_value_x.get(k) for k, v in board_value_0.items()}
 
-        return dict(x=data_x,
-                    y_array=data_y_array,
-                    yAxis_array=yAxis_array,
-                    desc="A股公司上市概览",
-                    )
+        df0 = pd.DataFrame([board_value_0])
+        df5 = pd.DataFrame([board_value_x])
+
+        # 两个df相减
+        diff = df0 - df5
+        diff_lists = diff.to_dict(orient="records")
+        in_board = {k: v for k, v in diff_lists[0].items() if v >= 0}
+        out_board = {k: v for k, v in diff_lists[0].items() if v < 0}
+
+        r = {}
+
+        yAxisData = list(diff_lists[0].keys())
+        xAxisData = []
+        for k,v in diff_lists[0].items():
+
+            xAxisData.append(dict(value=v,lable='right' if v<0 else None))
+
+
+
+        return dict(yAxisData=yAxisData,xAxisData=xAxisData)

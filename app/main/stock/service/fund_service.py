@@ -6,9 +6,10 @@ import pandas as pd
 
 from app.log import get_logger
 from app.main.db.mongo import db
+from app.main.model.board_value import BoardValue
 from app.main.model.recommend_etf import RecommendEtf
 from app.main.stock.dao import k_line_dao, board_dao, etf_dao, stock_change_dao
-from app.main.utils import date_util
+from app.main.utils import date_util, collection_util
 
 """
 资金流向分析
@@ -104,7 +105,7 @@ def get_fund_by_board(board_name) -> List[RecommendEtf]:
     return high_rate_result
 
 
-def get_stock_value_by_board(date: datetime) -> dict:
+def get_stock_value_by_board(date: datetime) -> BoardValue:
     """
     通过板块个股的市值计算素有板块的整个市值
     :param date: 开始时间
@@ -113,8 +114,16 @@ def get_stock_value_by_board(date: datetime) -> dict:
     stock_value = db['stock_value']
 
     query_set = {"date": date}
-    stock_value_earliest = list(stock_value.find(query_set))
-    stock_value_dict = {stock_value['code']: stock_value for stock_value in stock_value_earliest}
+    stock_value_list = list(stock_value.find(query_set))
+
+    if collection_util.is_empty(stock_value_list):
+        # 日期为空，那么查找最近的一个时间点
+        latest = list(stock_value.find({}, sort=[("date", -1)]).limit(1))
+        date = latest[0]['date']
+        query_set = {"date": date}
+        stock_value_list = list(stock_value.find(query_set))
+
+    stock_value_dict = {stock_value['code']: stock_value for stock_value in stock_value_list}
 
     result = {}
     boards = board_dao.get_all_board(type=[2])
@@ -127,8 +136,10 @@ def get_stock_value_by_board(date: datetime) -> dict:
                 fcv_sum = fcv_sum + fcv
         result[board['board']] = fcv_sum / 100000000
 
-    result = OrderedDict(sorted(result.items(), key=lambda item: item[1], reverse=True))
-    return result
+    result = OrderedDict(sorted(result.items(), key=lambda item: item[1], reverse=False))
+
+    board_value = BoardValue(value=result,date=date)
+    return board_value
 
 
 def get_china_overview(stock_values):
@@ -247,11 +258,11 @@ if __name__ == "__main__":
     # results_0 = get_stock_value_by_board(date_util.get_start_of_day(cursor))
     # print(cursor,results_0['电子化学品'])
 
-    results_0 = get_stock_value_by_board(date_util.get_start_of_day(datetime.now()))
+    results_0 = get_stock_value_by_board(date_util.get_start_of_day(datetime.now())+ timedelta(days=5))
     results_5 = get_stock_value_by_board(date_util.get_start_of_day(datetime.now()) - timedelta(days=5))
 
-    df0 = pd.DataFrame([results_0])
-    df5 = pd.DataFrame([results_5])
+    df0 = pd.DataFrame([results_0.values])
+    df5 = pd.DataFrame([results_5.values])
 
     # 两个df相减
     diff = df0 - df5
