@@ -30,24 +30,26 @@ if __name__ == "__main__":
     from app.main.stock.service import trend_service
     from app.main.stock.dao import stock_dao
 
-    stocks = stock_dao.get_all_stock(dict(code=1))
-    codes = [stock['code'] for stock in stocks]
+    # stocks = stock_dao.get_all_stock(dict(code=1))
+    # codes = [stock['code'] for stock in stocks]
     code_name_map = stock_dao.get_code_name_map()
+    #
+    # data_list = list(db['stock_detail'].find({"code": {"$in": codes}}))
+    #
+    # r = list(db['trend_point'].find(
+    #     {"date": {"$lte": datetime(2023, 2, 17)}, "update": {"$gte": datetime(2023, 2, 17)}}))
+    #
+    # codes2 = [r['code'] for r in list(db['stock_detail'].find({}))]
+    # codes = [i['code'] for i in r]
+    #
+    # diff = set(codes2).difference(set(codes))
 
-    data_list = list(db['stock_detail'].find({"code": {"$in": codes}}))
+    db['trend_point'].delete_many({"industry":"电池","name":"先导智能"})
 
-    r = list(db['trend_point'].find(
-        {"date": {"$lte": datetime(2023, 2, 17)}, "update": {"$gte": datetime(2023, 2, 17)}}))
-
-    codes2 = [r['code'] for r in list(db['stock_detail'].find({}))]
-    codes = [i['code'] for i in r]
-
-    diff = set(codes2).difference(set(codes))
-
-    for code in diff:
+    for code in ['300450']:
         name = code_name_map.get(code)
         print(code)
-        for date in date_util.WorkDayIterator(datetime(2022,4,1),datetime(2023,2,20)):
+        for date in date_util.WorkDayIterator(datetime(2022,1,1),datetime(2023,4,7)):
             print(date)
             start_of_day = date_util.get_start_of_day(date)
             features = stock_dao.get_company_feature(code,date)
