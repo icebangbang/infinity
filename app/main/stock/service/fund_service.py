@@ -9,7 +9,7 @@ from app.main.db.mongo import db
 from app.main.model.board_value import BoardValue
 from app.main.model.recommend_etf import RecommendEtf
 from app.main.stock.dao import k_line_dao, board_dao, etf_dao, stock_change_dao
-from app.main.utils import date_util, collection_util
+from app.main.utils import date_util, collection_util, cal_util
 
 """
 资金流向分析
@@ -105,6 +105,27 @@ def get_fund_by_board(board_name) -> List[RecommendEtf]:
     return high_rate_result
 
 
+def get_board_value(board_name: str, start: datetime, end: datetime):
+    stock_value = db['stock_value']
+    board_detail = board_dao.get_board_by_name(board_name)
+    codes = board_detail['codes']
+    stock_value_list = list(stock_value.find({"code": {"$in": codes},
+                                              "date": {"$gte": start, "$lte": end}}))
+    stock_value_df = pd.DataFrame(stock_value_list)
+    groups = stock_value_df.groupby(['date'])
+    board_value_list:List[BoardValue] = []
+    for key, items in groups:
+        fcv_sum = 0
+        stock_value_list = items.to_dict(orient="records")
+        for stock_value in stock_value_list:
+            fcv = stock_value['flowCapitalValue']
+            fcv_sum = fcv_sum + fcv
+        board_value = BoardValue(value=cal_util.round(fcv_sum / 100000000,2), date=key)
+        board_value_list.append(board_value)
+    return board_value_list
+
+
+
 def get_stock_value_by_board(date: datetime) -> BoardValue:
     """
     通过板块个股的市值计算素有板块的整个市值
@@ -134,11 +155,11 @@ def get_stock_value_by_board(date: datetime) -> BoardValue:
             if code in stock_value_dict.keys():
                 fcv = stock_value_dict[code]['flowCapitalValue']
                 fcv_sum = fcv_sum + fcv
-        result[board['board']] = fcv_sum / 100000000
+        result[board['board']] = cal_util.round(fcv_sum / 100000000,2)
 
     result = OrderedDict(sorted(result.items(), key=lambda item: item[1], reverse=False))
 
-    board_value = BoardValue(value=result,date=date)
+    board_value = BoardValue(value=result, date=date)
     return board_value
 
 
@@ -258,7 +279,9 @@ if __name__ == "__main__":
     # results_0 = get_stock_value_by_board(date_util.get_start_of_day(cursor))
     # print(cursor,results_0['电子化学品'])
 
-    results_0 = get_stock_value_by_board(date_util.get_start_of_day(datetime.now())+ timedelta(days=5))
+    board_values = get_board_value("半导体",datetime(2023,1,1),datetime(2023,4,7))
+
+    results_0 = get_stock_value_by_board(date_util.get_start_of_day(datetime.now()) + timedelta(days=5))
     results_5 = get_stock_value_by_board(date_util.get_start_of_day(datetime.now()) - timedelta(days=5))
 
     df0 = pd.DataFrame([results_0.values])

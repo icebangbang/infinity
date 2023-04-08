@@ -1,9 +1,11 @@
+from datetime import datetime
 from typing import List
 
 import numpy
 import pandas as pd
 
 from app.main.db.mongo import db
+from app.main.model.board_value import BoardValue, BoardValueEchart
 from app.main.model.echart import YAxisDesc, YAxisData, Legend
 from app.main.model.recommend_etf import RecommendEtf
 from app.main.model.single_trend_analysis import ResponseBody
@@ -53,7 +55,7 @@ class SingleTrendAnalysis(Line):
             data_y_array[index].name = key
             if key == 'up':
                 # 设置上行线的颜色为红色
-                data_y_array[index].markArea= mark_area
+                data_y_array[index].markArea = mark_area
                 data_y_array[index].color = 'red'
             if key == 'down':
                 # 设置下行线的颜色为黑色
@@ -81,18 +83,43 @@ class SingleTrendAnalysis(Line):
         ]
 
         response_body = ResponseBody(x=data_x_format, y_array=data_y_array, desc=industry, multiSeries=True,
-                            totalStock=total,
-                            yAxis_array=yAxis_array, legend=legend)
+                                     totalStock=total,
+                                     yAxis_array=yAxis_array, legend=legend)
+
+        board_value_echart = _build_board_value(industry, start, end)
+        yAxis_array.append(board_value_echart.y_axis_desc)
+        data_y_array.append(board_value_echart.y_axis_data)
+        board_value_echart.y_axis_data.yAxisIndex = len(yAxis_array) - 1
 
         recommend_etf: RecommendEtf = _build_etf_info(industry, start, end)
         if recommend_etf is not None:
             yAxis_array.append(recommend_etf.y_axis_desc)
             data_y_array.append(recommend_etf.y_axis_data)
+            recommend_etf.y_axis_data.yAxisIndex = len(yAxis_array)-1
             response_body.recommendEtfName = recommend_etf.fund_name
             response_body.relateStocks = recommend_etf.relate_stocks
             response_body.recommendEtfCode = recommend_etf.fund_code
 
         return response_body
+
+
+def _build_board_value(board_name, start: datetime, end: datetime)->BoardValueEchart:
+    """"""
+    board_value_list: List[BoardValue] = fund_service.get_board_value(board_name, start, end)
+
+    board_value_echart = BoardValueEchart()
+    y_axis_data = YAxisData(name="{}市值".format(board_name), type="line", yAxisIndex=3)
+
+    value_y = []
+    y_axis_data.y = value_y
+    for board_value in board_value_list:
+        value_y.append(board_value.value)
+
+    board_value_echart.y_axis_data = y_axis_data
+    board_value_echart.y_axis_desc = YAxisDesc(name="板块市值", type="value", max=max(value_y), min=min(value_y),
+                                               show=False)
+
+    return board_value_echart
 
 
 def _build_etf_info(industry, start, end) -> RecommendEtf:
@@ -131,7 +158,7 @@ def _build_etf_info(industry, start, end) -> RecommendEtf:
             high = data_point['high']
             prev_close = data_point['prev_close']
 
-            rate = '' if prev_close is None else cal_util.get_rate(close-prev_close,prev_close)
+            rate = '' if prev_close is None else cal_util.get_rate(close - prev_close, prev_close)
 
             if h is None or high > h:
                 h = high
@@ -139,11 +166,11 @@ def _build_etf_info(industry, start, end) -> RecommendEtf:
             if l is None or low < l:
                 l = low
 
-            y.append([open, close, low, high,rate])
+            y.append([open, close, low, high, rate])
         else:
             y.append([])
 
-    recommend_etf.y_axis_desc = YAxisDesc(name="etf价格", scale=False, max=h, min=l)
+    recommend_etf.y_axis_desc = YAxisDesc(name="etf价格", scale=False, max=h, min=l, show=False)
     recommend_etf.y_axis_data = y_axis_data
 
     return recommend_etf
