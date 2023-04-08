@@ -6,6 +6,7 @@ from datetime import datetime
 from app.celery_worker import celery, MyTask
 from app.main.db.mongo import db
 from app.main.stock.dao import stock_dao, task_dao
+from app.main.stock.job import create_doc
 from app.main.stock.service import trend_service, board_service
 from app.main.task import TaskInput
 from app.main.utils import date_util
@@ -15,6 +16,18 @@ from app.main.utils.date_util import WorkDayIterator
 个股提醒
 """
 
+
+@celery.task(bind=True, base=MyTask, expires=1800)
+def clear_trend_point(self, **kwargs):
+    """
+    trend_point删除
+    :param self:
+    :param kwargs:
+    :return:
+    """
+    trend_point_set = db['trend_point']
+    trend_point_set.drop()
+    create_doc.create_doc(['trend_point'])
 
 @celery.task(bind=True, base=MyTask, expires=1800)
 def submit_trend_task(self, **kwargs):
@@ -148,4 +161,3 @@ def query_trend_info(date):
     :return:
     """
     pass
-

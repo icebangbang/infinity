@@ -95,8 +95,8 @@ def list_doc(table_name: list):
         dict(table_name="k_line_day_bfq",
              table_comment="个股日k线不复权",
              indexes=dict(date_code_idx=[("date", -1), ("code", 1)],
-                          code_idx=[("code",1)],
-                          date_idx=[("date",-1)]),
+                          code_idx=[("code", 1)],
+                          date_idx=[("date", -1)]),
              columns=[
                  dict(name="code", type="str", desc="代码"),
                  dict(name="close", type="float", desc="收盘价"),
@@ -110,6 +110,40 @@ def list_doc(table_name: list):
                  dict(name="prev_close", type="float", desc="前一个交易日股价"),
                  dict(name="volume", type="float", desc="成交量"),
              ]),
+        dict(table_name="trend_point",
+             table_comment="个股趋势详情",
+             indexes=dict(date_code_idx=[("date", -1), ("code", 1)],
+                          code_idx=[("code", 1)]),
+             columns=[
+                 dict(name="date", type="datetime", desc="趋势变化时间点"),
+                 dict(name="is_in_use", type="int", desc="当前是否在使用"),
+                 dict(name="current_bot_trend_size", type="int", desc="底部趋势长度"),
+                 dict(name="current_top_trend_size", type="int", desc="顶部趋势长度"),
+                 dict(name="current_top_type_slope", type="int", desc="顶部趋势斜率"),
+                 dict(name="current_bot_type_slope", type="int", desc="底部趋势斜率"),
+                 dict(name="prev_top_type_slope", type="float", desc="上个拐点顶分型斜率"),
+                 dict(name="prev_bot_type_slope", type="float", desc="上个拐点底分型斜率"),
+                 dict(name="prev_trend_3", type="str", desc="趋势-3个点之前"),
+                 dict(name="prev_trend_2", type="str", desc="趋势-2个点之前"),
+                 dict(name="prev_trend_1", type="str", desc="趋势-1个点之前"),
+                 dict(name="trend", type="str", desc="当前趋势"),
+                 dict(name="trend_chain_start", type="datetime", desc="prev_trend_3点的开始时间"),
+                 dict(name="inf_l_point_date", type="datetime", desc="底部反转发生时间"),
+                 dict(name="inf_h_point_date", type="datetime", desc="顶部反转发生时间"),
+                 dict(name="prev_inf_l_point_date", type="datetime", desc="上个底分型反转发生时间"),
+                 dict(name="prev_inf_h_point_date", type="datetime", desc="上个顶峰型反转发生时间"),
+                 dict(name="trend_change_scope", type="array", desc="顶底分型变化集合"),
+                 dict(name="industry", type="str", desc="板块"),
+                 dict(name="name", type="str", desc="个股名称"),
+                 dict(name="code", type="str", desc="个股代号"),
+                 dict(name="update", type="datetime", desc="更新时间，精确到天"),
+                 dict(name="update_time", type="datetime", desc="更新时间，精确到秒"),
+                 dict(name="inf_l_point_value", type="float", desc="顶部股价值"),
+                 dict(name="inf_h_point_value", type="float", desc="底部股价值"),
+                 dict(name="is_deleted", type="int", desc="是否被删除"),
+                 dict(name="trend_type", type="int", desc="趋势类型")
+             ]
+             )
     ]
 
     if table_name is not None:
@@ -119,7 +153,7 @@ def list_doc(table_name: list):
     return docs
 
 
-def create_doc(table_name:list):
+def create_doc(table_name: list):
     # collist = db.list_collection_names()
     docs = list_doc(table_name)
 

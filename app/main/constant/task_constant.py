@@ -13,6 +13,7 @@ TASK_TYPE_HISTORY_TASK = 'HISTORY_TASK'
 TASK_MAPPING = {
     "更新个股的板块信息": board_task.sync_board_stock_detail,
     "个股趋势跑批": trend_task.submit_trend_task,
+    "清空个股趋势数据":trend_task.clear_trend_point,
     "个股特征跑批": stock_task.submit_stock_feature_by_job,
     '板块趋势和成交额聚合': trend_task.trend_data_task,
     '同步个股历史市值': fund_task.stock_value_backtrading, # 异步无回调任务
