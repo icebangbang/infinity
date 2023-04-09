@@ -12,7 +12,28 @@ from dateutil.relativedelta import relativedelta
 from app.main.yi.constant import jqmc, Gan, Zhi
 
 
+def parse_from_dict(kwargs: dict, key, default=None):
+    value = kwargs.get(key, None)
+
+    fmts = ['%Y-%m-%d', '%Y-%m-%d %H:%M:%S', '%Y%m%d']
+    if value is not None:
+        for fmt in fmts:
+            try:
+                dt = parse_date_time(value, fmt)
+                return dt
+            except Exception:
+                pass
+
+    return default;
+
+
 def get_months_within_range(start: datetime, end: datetime) -> List[datetime]:
+    """
+    在指定时间段内获取月份时间节点
+    :param start:
+    :param end:
+    :return:
+    """
     temp = set()
     for d in DayIterator(start, end):
         first_day_of_month = datetime(d.year, d.month, 1)
@@ -35,7 +56,7 @@ def get_date_with_offset(date_time: datetime, week_offset=3, day_offset=5):
         raise Exception("周下标越界")
     week_sum = 0
     for week_group in week_groups:
-        target = week_group[day_offset-1]
+        target = week_group[day_offset - 1]
         if target.year == date_time.year and target.month == date_time.month:
             week_sum += 1
 
@@ -318,6 +339,7 @@ def get_latest_work_day(base=None):
             break
     return d
 
+
 def stop_until_work_day(now):
     """
     推到工作日才会停止并返回
@@ -327,11 +349,9 @@ def stop_until_work_day(now):
     """
     while True:
         if is_workday(now) is False:
-            now = now+timedelta(days=1)
+            now = now + timedelta(days=1)
             continue
         return now
-
-
 
 
 def add_and_get_work_day(now, offset):
@@ -349,7 +369,7 @@ def add_and_get_work_day(now, offset):
             offset = offset + 1
         i = i + 1
 
-    return t + timedelta(days=i-1)
+    return t + timedelta(days=i - 1)
 
 
 def if_workday(dt):
@@ -528,7 +548,9 @@ class ReportTimeIterator(object):
 
 
 if __name__ == "__main__":
-    print(get_report_day(datetime.now()))
+    # print(get_report_day(datetime.now()))
+    print(get_latest_work_day(datetime(2023, 4, 10)))
+    print()
     # d = parse_date_time("20210823212121", fmt="%Y%m%d%H%M%S")
     # d2 = parse_date_time("20210829121212", fmt="%Y%m%d%H%M%S")
     # print(get_friday_of_week())

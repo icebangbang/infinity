@@ -106,6 +106,13 @@ def get_fund_by_board(board_name) -> List[RecommendEtf]:
 
 
 def get_board_value(board_name: str, start: datetime, end: datetime):
+    """
+    查找某个版块指定区间内的板块市值
+    :param board_name:
+    :param start:
+    :param end:
+    :return:
+    """
     stock_value = db['stock_value']
     board_detail = board_dao.get_board_by_name(board_name)
     codes = board_detail['codes']
@@ -128,7 +135,7 @@ def get_board_value(board_name: str, start: datetime, end: datetime):
 
 def get_stock_value_by_board(date: datetime) -> BoardValue:
     """
-    通过板块个股的市值计算素有板块的整个市值
+    通过板块个股的市值计算所有板块的整个市值
     :param date: 开始时间
     :return:
     """
