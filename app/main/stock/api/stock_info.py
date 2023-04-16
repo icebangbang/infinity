@@ -18,12 +18,12 @@ from app.main.stock.dao import  stock_dao
 
 def get_stock_list():
     log.info("开始获取上证 {} 股票".format("主板A股"))
-    stock_info_sh_df = ak.stock_info_sh_name_code(indicator="主板A股")
+    stock_info_sh_df = ak.stock_info_sh_name_code(symbol="主板A股")
     sh_custom_df = pd.DataFrame(stock_info_sh_df[['证券代码', '证券简称', '上市日期']])
     sh_custom_df.columns = ['code', 'name', 'date']
     sh_custom_df['belong'] = "sh"
 
-    stock_kc_info_sh_df = ak.stock_info_sh_name_code(indicator="科创板")
+    stock_kc_info_sh_df = ak.stock_info_sh_name_code(symbol="科创板")
     sh_kc_custom_df = pd.DataFrame(stock_kc_info_sh_df[['证券代码', '证券简称', '上市日期']])
     sh_kc_custom_df.columns = ['code', 'name', 'date']
     sh_kc_custom_df['belong'] = "sh"
