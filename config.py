@@ -127,7 +127,7 @@ class Infinity(Config):
 
     BROKER_URL = 'redis://:ironBackRedis123@0.0.0.0:30004/1'
     RESULT_BACKEND = 'redis://:ironBackRedis123@0.0.0.0:30004/1'
-    MONGO_URL = "mongodb://root:whosyourdaddy$879@0.0.0.0:20017/"
+    MONGO_URL = "mongodb://root:whosyourdaddy$879@10.8.0.2:20017/"
 
     SERVER_HOST = "10.8.0.2"
     SERVER_PORT = 20500

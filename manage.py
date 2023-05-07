@@ -3,7 +3,7 @@ import os
 
 # 获取环境变量,
 # pycharm启动可以在 RUN/DEBUG Configuration-Environment variables中添加FLASK_ENV
-# PYTHONUNBUFFERED=1;FALSK_ENV=infinityLocal;SERVER_PORT=20058
+# PYTHONUNBUFFERED=1;FLASK_ENV=infinityLocal;SERVER_PORT=20058
 #
 env = os.environ.get('FLASK_ENV') or 'infinity'
 app = application.create_app(env,NACOS_ENABLE = os.environ.get('NACOS_ENABLE'))  # from .main.rest import rest as main_blueprint

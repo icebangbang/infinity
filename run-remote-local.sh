@@ -11,7 +11,7 @@ docker rm  dao-celery-schedule-1
 docker build --network=host --build-arg PIP_MIRROR=${PIP_MIRROR} --build-arg PIP_MIRROR_HOST=${PIP_MIRROR_HOST} -f ./CerelyScheduleDockerfile -t dao-celery-schedule:latest .
 
 docker run -d --privileged=true  -e "index=1"  -e "FLASK_ENV=${env}" --name=dao-celery-schedule-1  --net=host --rm -it dao-celery-schedule:latest
-#docker run --privileged=true  -e "index=1"  -e "FLASK_ENV=offline" --name=dao-celery-schedule-1  --net=host --rm -it dao-celery-schedule:latest
+#docker run --privileged=true  -e "index=1"  -e "FLASK_ENV=infinity" --name=dao-celery-schedule-1  --net=host --rm -it dao-celery-schedule:latest
 
 
 docker stop dao
