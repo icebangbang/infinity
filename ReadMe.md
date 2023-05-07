@@ -3,7 +3,7 @@
 辛丑年 丙申月 庚戌日 癸未时
 
 ## 安装pip依赖
-pip3 install -i http://127.0.0.1:7104/root/pypi/+simple/
+pip3 install -i http://127.0.0.1:7104/root/pypi/+simple/ -r requirements.txt
 
 
 ## 定时任务

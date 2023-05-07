@@ -22,6 +22,7 @@ COPY ./requirements.txt /
 
 
 #RUN pip3 install --user -i  https://mirrors.aliyun.com/pypi/simple  -r requirements.txt
+#RUN pip3 install --user -i  https://mirrors.aliyun.com/pypi/simple  -r requirements.txt
 RUN pip3 install --trusted-host ${PIP_MIRROR_HOST} -i ${PIP_MIRROR} --no-cache-dir -r requirements.txt
 
 

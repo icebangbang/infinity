@@ -175,11 +175,44 @@ class InfinityLocal(Config):
     NACOS_WEIGHT = 1
     NACOS_HEARTBEAT_INTERVAL = 6
 
+class InfinityWsl(Config):
+    """
+    线下服务的配置
+    """
+
+    # REDIS_HOST = '10.10.10.200'
+    # REDIS_PORT = 16379
+    # REDIS_DB_ID = 10
+    # REDIS_PASSWORD = '123'
+    # MACHINE_ID = 0
+    # 'sqlite:///' + os.path.join(basedir, 'data-test.sqlite')
+    REDIS_HOST = '127.0.0.1'
+    REDIS_PORT = 30004
+    REDIS_DB_ID = 1
+    REDIS_PASSWORD = 'ironBackRedis123'
+
+    BROKER_URL = 'redis://:ironBackRedis123@0.0.0.0:30004/1'
+    RESULT_BACKEND = 'redis://:ironBackRedis123@0.0.0.0:30004/1'
+    MONGO_URL = "mongodb://root:whosyourdaddy$879@0.0.0.0:20017/"
+
+    SERVER_HOST = "127.0.0.1"
+    SERVER_PORT = 20500
+    NACOS_SERVICE_NAME = "infinity"
+    NACOS_CLUSTER_NAME = "DEFAULT"
+
+    REGISTERED_SERVER_TO_NACOS = True
+    NACOS_SERVER_ADDRESSES = "127.0.0.1:20048"
+    NACOS_NAMESPACE = "public"
+    IS_AUTH_MODE = False
+    NACOS_WEIGHT = 1
+    NACOS_HEARTBEAT_INTERVAL = 6
+
 
 config = {
     'development': DevelopmentConfig,
     'test': TestConfig,
     'offline': Offline,
     'infinity': Infinity,
-    'infinityLocal': InfinityLocal
+    'infinityLocal': InfinityLocal,
+    'infinityWsl':InfinityWsl
 }
