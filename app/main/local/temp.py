@@ -75,7 +75,7 @@ if __name__ == "__main__":
     from app import application
 
     application.create_app("infinity")
-    # clear_stock_info()
+    clear_stock_info()
     # trend_data_task()
     # test()
     # rps_test()
