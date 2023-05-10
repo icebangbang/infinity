@@ -120,7 +120,7 @@ class Infinity(Config):
     # REDIS_PASSWORD = '123'
     # MACHINE_ID = 0
     # 'sqlite:///' + os.path.join(basedir, 'data-test.sqlite')
-    REDIS_HOST = '127.0.0.1'
+    REDIS_HOST = '10.8.0.2'
     REDIS_PORT = 30004
     REDIS_DB_ID = 1
     REDIS_PASSWORD = 'ironBackRedis123'
@@ -186,7 +186,7 @@ class InfinityWsl(Config):
     # REDIS_PASSWORD = '123'
     # MACHINE_ID = 0
     # 'sqlite:///' + os.path.join(basedir, 'data-test.sqlite')
-    REDIS_HOST = '127.0.0.1'
+    REDIS_HOST = '10.8.0.2'
     REDIS_PORT = 30004
     REDIS_DB_ID = 1
     REDIS_PASSWORD = 'ironBackRedis123'
