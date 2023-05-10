@@ -46,12 +46,11 @@ def update_task(task_id, size, task_name=None, job_params=None):
         sync_record = db['sync_record']
 
         job_json_info = job_config.load_job_config(task_id)
-
         job_info = None
         if job_json_info is not None:
             job_info = json.loads(job_json_info)
-            log.info(job_json_info)
-        log.info("chain_" + task_id)
+        else:
+            log.info("[任务更新]:任务配置信息为空")
         if job_info and job_info['job_type'] == task_constant.TASK_TYPE_CELERY:
             job_chain: list = job_info['job_chain']
             for job_path in job_chain:
