@@ -36,12 +36,12 @@ def release_job(task_path):
 
 def set_job_config(task_id, chain_job_config):
     config_json = json.dumps(chain_job_config, ensure_ascii=False)
-    log.info("向缓存中写入配置:{},task_id:{}",config_json,task_id)
+    log.info("向缓存中写入配置:{},task_id:{}".format(config_json,task_id))
     my_redis.set("job_config" + str(task_id), config_json)
     my_redis.expire("job_config" + str(task_id), 60 * 60)
 
 
 def load_job_config(task_id,**kwargs):
     config_json = my_redis.get("job_config" + str(task_id))
-    log.info("从缓存中读取配置内容:{},task_id:{}", config_json, task_id)
+    log.info("从缓存中读取配置内容:{},task_id:{}".format(config_json, task_id))
     return config_json
