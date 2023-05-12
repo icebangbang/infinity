@@ -113,14 +113,20 @@ def get_board_value(board_name: str, start: datetime, end: datetime):
     :param end:
     :return:
     """
+    board_value_list: List[BoardValue] = []
     stock_value = db['stock_value']
     board_detail = board_dao.get_board_by_name(board_name)
+
+    # 某些板块直接返回
+    if board_detail is None:
+        return board_detail
+
     codes = board_detail['codes']
     stock_value_list = list(stock_value.find({"code": {"$in": codes},
                                               "date": {"$gte": start, "$lte": end}}))
     stock_value_df = pd.DataFrame(stock_value_list)
     groups = stock_value_df.groupby(['date'])
-    board_value_list:List[BoardValue] = []
+
     for key, items in groups:
         fcv_sum = 0
         stock_value_list = items.to_dict(orient="records")
