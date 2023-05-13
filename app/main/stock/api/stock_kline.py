@@ -26,6 +26,7 @@ def fetch_kline_data(code, start_date, end_date, adjust, klt='101'):
 
 
 if __name__ == '__main__':
-    a = fetch_kline_data('601866', '20210301', '20210909', 'qfq',klt="103")
+    # a = fetch_kline_data('601866', '20230512', '20230512', 'qfq',klt="103")
+    a = fetch_kline_data('601866', '20230512', '20230512', 'qfq')
     # boll.get_boll(a)
     print(a)
