@@ -19,6 +19,8 @@ from app.main.utils.date_util import WorkDayIterator
 个股数据同步
 """
 
+log = logging.getLogger(__name__)
+
 
 @celery.task(bind=True, base=MyTask, expires=180)
 def sync_stock_month_data(self, codes, global_task_id):
@@ -120,6 +122,7 @@ def sync_stock_k_line_by_job(self, **kwargs):
     task_dao.create_task(global_task_id, "同步个股日k线", len(codes), kwargs)
     transform_task.apply_async(kwargs=dict(codes=codes, global_task_id=global_task_id, deepth=0, adjust='qfq'))
 
+
 @celery.task(bind=True, base=MyTask, expires=180)
 def sync_stock_k_line_bfq_by_job(self, **kwargs):
     """
@@ -181,6 +184,7 @@ def sync_stock_data(self, codes, global_task_id, adjust):
             # logging.info("同步{}:{}的日k数据,时序{}".format(board['board'], board["code"], index))
             r = sync_kline_service.sync_day_level(code, adjust=adjust)
     except Exception as e:
+        log.error(e, exc_info=1)
         raise self.retry(exc=e, countdown=3, max_retries=10)
 
 
@@ -415,8 +419,9 @@ def sync_analysis_indicator(self):
     :param self:
     :return:
     """
-    sync_performance.sync_analysis_indicator()\
-
+    sync_performance.sync_analysis_indicator() \
+ \
+ \
 @celery.task(bind=True, base=MyTask, expire=18000)
 def sync_stock_share_change(self):
     """
@@ -431,5 +436,3 @@ def sync_stock_share_change(self):
 def stock_value_backtrading(self):
     stocks = stock_dao.get_stock_detail_list()
     fund_service.backtrading_stock_value(stocks, 4)
-
-
