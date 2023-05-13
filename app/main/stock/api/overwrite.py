@@ -70,7 +70,7 @@ def stock_zh_a_hist(
         data_json = r.json()
     except Exception as e:
         log.error(e, exc_info=1)
-        log.info(r.text)
+        log.info("入参:{},响应:{}".format(json.dumps(params),r.text))
     data = data_json["data"]
     if data is None: return None
     prev_k_price = data['preKPrice']
