@@ -119,7 +119,7 @@ def get_board_value(board_name: str, start: datetime, end: datetime):
 
     # 某些板块直接返回
     if board_detail is None:
-        return board_detail
+        return board_value_list
 
     codes = board_detail['codes']
     stock_value_list = list(stock_value.find({"code": {"$in": codes},

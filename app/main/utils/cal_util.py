@@ -4,6 +4,21 @@ from decimal import Decimal
 import numpy as np
 import pandas as pd
 
+from app.main.utils import collection_util
+
+
+def get_max(arrays):
+    if collection_util.is_empty(arrays):
+        return None
+
+    return max(arrays)
+
+
+def get_min(arrays):
+    if collection_util.is_empty(arrays):
+        return None
+
+    return min(arrays)
 
 def filter_extreme_MAD(df, n,key):
     """
