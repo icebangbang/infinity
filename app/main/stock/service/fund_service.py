@@ -8,7 +8,7 @@ from app.log import get_logger
 from app.main.db.mongo import db
 from app.main.model.board_value import BoardValue
 from app.main.model.recommend_etf import RecommendEtf
-from app.main.stock.dao import k_line_dao, board_dao, etf_dao, stock_change_dao
+from app.main.stock.dao import k_line_dao, board_dao, etf_dao, stock_change_dao, stock_dao
 from app.main.utils import date_util, collection_util, cal_util
 
 """
@@ -280,8 +280,8 @@ def backtrading_stock_value(stocks, days=1000):
 
 if __name__ == "__main__":
     # stocks = stock_dao.get_stock_detail_list(['300763'])
-    # stocks = stock_dao.get_stock_detail_list()
-    # backtrading_stock_value(stocks, 4)
+    stocks = stock_dao.get_stock_detail_list()
+    backtrading_stock_value(stocks, 1000)
     # end = date_util.get_start_of_day(date_util.get_work_day(datetime.now(),0)[0])
     # start = end - timedelta(days=1)
 
@@ -292,20 +292,20 @@ if __name__ == "__main__":
     # results_0 = get_stock_value_by_board(date_util.get_start_of_day(cursor))
     # print(cursor,results_0['电子化学品'])
 
-    board_values = get_board_value("半导体",datetime(2023,1,1),datetime(2023,4,7))
-
-    results_0 = get_stock_value_by_board(date_util.get_start_of_day(datetime.now()) + timedelta(days=5))
-    results_5 = get_stock_value_by_board(date_util.get_start_of_day(datetime.now()) - timedelta(days=5))
-
-    df0 = pd.DataFrame([results_0.values])
-    df5 = pd.DataFrame([results_5.values])
-
-    # 两个df相减
-    diff = df0 - df5
-    diff_lists = diff.to_dict(orient="records")
-    in_board = {k: v for k, v in diff_lists[0].items() if v >= 0}
-    out_board = {k: v for k, v in diff_lists[0].items() if v < 0}
-    print()
+    # board_values = get_board_value("半导体",datetime(2023,1,1),datetime(2023,4,7))
+    #
+    # results_0 = get_stock_value_by_board(date_util.get_start_of_day(datetime.now()) + timedelta(days=5))
+    # results_5 = get_stock_value_by_board(date_util.get_start_of_day(datetime.now()) - timedelta(days=5))
+    #
+    # df0 = pd.DataFrame([results_0.values])
+    # df5 = pd.DataFrame([results_5.values])
+    #
+    # # 两个df相减
+    # diff = df0 - df5
+    # diff_lists = diff.to_dict(orient="records")
+    # in_board = {k: v for k, v in diff_lists[0].items() if v >= 0}
+    # out_board = {k: v for k, v in diff_lists[0].items() if v < 0}
+    # print()
     #
     #
     # print(dict(Counter(results_0) -Counter(results_5)))

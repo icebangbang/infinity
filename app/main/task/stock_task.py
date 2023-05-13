@@ -419,9 +419,9 @@ def sync_analysis_indicator(self):
     :param self:
     :return:
     """
-    sync_performance.sync_analysis_indicator() \
- \
- \
+    sync_performance.sync_analysis_indicator()
+
+
 @celery.task(bind=True, base=MyTask, expire=18000)
 def sync_stock_share_change(self):
     """
