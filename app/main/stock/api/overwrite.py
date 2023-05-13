@@ -63,11 +63,14 @@ def stock_zh_a_hist(
     while True:
         try:
             r = requests.get(url, params=params)
-            log.info(r.text)
             break
         except Exception as e:
             log.error(e, exc_info=1)
-    data_json = r.json()
+    try:
+        data_json = r.json()
+    except Exception as e:
+        log.error(e, exc_info=1)
+        log.info(r.text)
     data = data_json["data"]
     if data is None: return None
     prev_k_price = data['preKPrice']

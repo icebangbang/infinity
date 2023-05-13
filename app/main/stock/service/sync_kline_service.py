@@ -17,7 +17,7 @@ def sync_day_level(code, base_time=None, adjust='qfq'):
     """
     point = k_line_dao.get_oldest_k_line(code,adjust=adjust)
     # default 1095
-    time_window = app.config["KLINE_TIME_WINDOW"]
+    time_window =1095 if app is None else app.config["KLINE_TIME_WINDOW"]
 
     if base_time is None:
         now = datetime.now()
@@ -166,6 +166,8 @@ if __name__ == "__main__":
     # df = k_line_dao.get_board_k_line_data('塑料制品',
     #                                       "20220601",
     #                                       "20220610")
+
+    sync_day_level("600098")
 
     sync_month_level("300330")
     pass
