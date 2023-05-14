@@ -195,6 +195,8 @@ def utc_now():
 def parse_date_time(dt_str, fmt="%Y-%m-%d %H:%M:%S") -> datetime:
     """
     解析时间
+    %Y-%m-%d %H:%M:%S
+    %Y%m%d
     :return:
     """
     if dt_str is None or dt_str == '': return None

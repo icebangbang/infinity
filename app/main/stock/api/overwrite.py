@@ -17,7 +17,7 @@ from tqdm import tqdm
 import time
 
 from app.main.stock.dao import stock_dao
-from app.main.utils import simple_util
+from app.main.utils import simple_util, date_util
 
 log = get_logger(__name__)
 
@@ -976,6 +976,83 @@ def fund_etf_hist_em(
     temp_df["换手率"] = pd.to_numeric(temp_df["换手率"])
     return temp_df
 
+def stock_share_change_sina(symbol,start:datetime,end:datetime):
+    """
+    symbol:300763
+    从新浪财经获取股本变化情况
+    :return:
+    """
+    url = "https://vip.stock.finance.sina.com.cn/corp/go.php/vCI_StockStructure/stockid/{}.phtml".format(symbol)
+    r = requests.get(url)
+    soup = BeautifulSoup(r.text, "lxml")
+
+    tables = soup.find(attrs={"id": "con02-1"}).find_all("table")
+    total = []
+    for table in tables:
+
+        # 每个表格的每一行数据
+        rows = table.find_all("tbody")[0].find_all("tr")
+        change_date_rows = rows[0]
+        sub_list = []
+        for index,sub_row in enumerate(change_date_rows):
+            # 第一列为描述跳过，变动日期
+            if index == 0:
+                continue
+            sub_list.append(dict(change_date=date_util.parse_date_time(sub_row.text,"%Y%m%d")))
+
+        report_date_rows = rows[1]
+        for index, sub_row in enumerate(report_date_rows):
+            # 第一列为描述跳过，公告日期
+            if index == 0:
+                continue
+            sub_list[index-1]['report_date']=date_util.parse_date_time(sub_row.text, "%Y%m%d")
+
+        change_reason_rows = rows[3]
+        for index, sub_row in enumerate(change_reason_rows):
+            # 第一列为描述跳过，变动原因
+            if index == 0:
+                continue
+            sub_list[index - 1]['change_reason'] = sub_row.text
+
+        total_capital_stock_rows = rows[4]
+        for index, sub_row in enumerate(total_capital_stock_rows):
+            # 第一列为描述跳过，变动原因
+            if index == 0:
+                continue
+            sub_list[index - 1]['total_capital_stock'] = int(float(sub_row.text.replace("万股","").strip()) * 10000)
+
+        total_capital_stock_rows = rows[6]
+        for index, sub_row in enumerate(total_capital_stock_rows):
+            # 第一列为描述跳过，变动原因
+            if index == 0:
+                continue
+            if sub_row.text == '--':
+                sub_list[index - 1]['flow_capital_stock'] = 0
+            else:
+                sub_list[index - 1]['flow_capital_stock'] = int(float(sub_row.text.replace("万股", "").strip()) * 10000)
+
+        total_capital_stock_rows = rows[7]
+        for index, sub_row in enumerate(total_capital_stock_rows):
+            # 第一列为描述跳过，变动原因
+            if index == 0:
+                continue
+            if sub_row.text == '--':
+                sub_list[index - 1]['manager_capital_stock'] = 0
+            else:
+                sub_list[index - 1]['manager_capital_stock'] = int(float(sub_row.text.replace("万股", "").strip()) * 10000)
+
+        total_capital_stock_rows = rows[8]
+        for index, sub_row in enumerate(total_capital_stock_rows):
+            # 第一列为描述跳过，变动原因
+            if index == 0:
+                continue
+            sub_list[index - 1]['frozen_capital_stock'] = int(float(sub_row.text.replace("万股", "").strip()) * 10000)
+
+        total.extend(sub_list)
+
+    filtered = [item for item in total if item['change_date'] >= start and item['change_date']<=end]
+    return filtered
+
 
 if __name__ == "__main__":
     # results = stock_board_concept_name_em()
@@ -984,5 +1061,5 @@ if __name__ == "__main__":
     # r = get_bellwether()
     # df = ak.fund_etf_hist_sina(symbol="sz169103")
     # df = stock_cash_flow_sheet_by_report_em(symbol="sz300763")
-    df = get_stock_register_address(dict(belong='sz', code="300763"))
-    print(123)
+    # df = get_stock_register_address(dict(belong='sz', code="300763"))
+    df = stock_share_change_sina()

@@ -31,6 +31,5 @@ def add_stock_share_change():
         stock_change_dao.dump_stock_share_change(code, start, end)
 
 
-
 if __name__ == "__main__":
     add_stock_share_change()
