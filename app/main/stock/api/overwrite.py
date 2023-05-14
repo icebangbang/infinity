@@ -992,7 +992,7 @@ def stock_share_change_sina(symbol,start:datetime,end:datetime):
         time.sleep(4)
         if r.status_code == 200:
             break
-        log.warn("[股本变动同步]同步新浪数据失败，当前响应码为:{}，第{}次重试",r.status_code,index)
+        log.warn("[股本变动同步]同步新浪数据失败，当前响应码为:{}，第{}次重试".format(r.status_code,index))
         index = index+1
     soup = BeautifulSoup(r.text, "lxml")
 
