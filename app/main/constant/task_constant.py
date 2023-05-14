@@ -21,7 +21,7 @@ TASK_MAPPING = {
     "个股历史特征按批次跑批": history_task.submit_history_stock_feature_by_job,  # 名字不能随便改,改之前全局搜一下
     "个股历史趋势按批次跑批": history_task.submit_history_stock_trend_by_job,
     '板块趋势和成交额按批次聚合': history_task.submit_agg_stock_trend_by_job,
-    '同步个股股本结构变更记录': stock_task.sync_stock_share_change,  # 异步无回调任务
+    '同步个股股本结构变更记录': stock_task.sync_stock_share_change,  # 异步无回调任务,该任务要控制频率，太快会被ban ip
 
     '清空日k数据': stock_task.clear_k_line_by_job,
     '同步个股日k线': stock_task.sync_stock_k_line_by_job,
