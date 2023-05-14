@@ -52,7 +52,7 @@ def sync_dispatch():
 
     method = task_constant.TASK_MAPPING[req['taskName']]
 
-    log.info("同步任务执行,任务名称:{}",req['taskName'])
+    log.info("同步任务执行,任务名称:{}".format(req['taskName']))
 
     if req['taskName'] in task_constant.ASYNC_NO_CALLBACK:
         method.apply_async(kwargs={})
