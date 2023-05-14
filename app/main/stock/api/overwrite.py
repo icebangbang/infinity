@@ -987,13 +987,16 @@ def stock_share_change_sina(symbol,start:datetime,end:datetime):
 
     index = 1
     while True:
-        url = "https://vip.stock.finance.sina.com.cn/corp/go.php/vCI_StockStructure/stockid/{}.phtml".format(symbol)
-        r = requests.get(url)
-        time.sleep(4)
-        if r.status_code == 200:
-            break
-        log.warn("[股本变动同步]同步新浪数据失败，当前响应码为:{}，第{}次重试".format(r.status_code,index))
-        index = index+1
+        try:
+            url = "https://vip.stock.finance.sina.com.cn/corp/go.php/vCI_StockStructure/stockid/{}.phtml".format(symbol)
+            r = requests.get(url)
+            time.sleep(4)
+            if r.status_code == 200:
+                break
+            log.warn("[股本变动同步]同步新浪数据失败，当前响应码为:{}，第{}次重试".format(r.status_code,index))
+            index = index+1
+        except Exception as e:
+            log.error(e,exc_info=1)
     soup = BeautifulSoup(r.text, "lxml")
 
     tables = soup.find(attrs={"id": "con02-1"}).find_all("table")
