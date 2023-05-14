@@ -982,8 +982,18 @@ def stock_share_change_sina(symbol,start:datetime,end:datetime):
     从新浪财经获取股本变化情况
     :return:
     """
-    url = "https://vip.stock.finance.sina.com.cn/corp/go.php/vCI_StockStructure/stockid/{}.phtml".format(symbol)
-    r = requests.get(url)
+    start = date_util.parse_date_time(start,"%Y%m%d")
+    end = date_util.parse_date_time(end,"%Y%m%d")
+
+    index = 1
+    while True:
+        url = "https://vip.stock.finance.sina.com.cn/corp/go.php/vCI_StockStructure/stockid/{}.phtml".format(symbol)
+        r = requests.get(url)
+        time.sleep(4)
+        if r.status_code == 200:
+            break
+        log.warn("[股本变动同步]同步新浪数据失败，当前响应码为:{}，第{}次重试",r.status_code,index)
+        index = index+1
     soup = BeautifulSoup(r.text, "lxml")
 
     tables = soup.find(attrs={"id": "con02-1"}).find_all("table")
@@ -998,28 +1008,28 @@ def stock_share_change_sina(symbol,start:datetime,end:datetime):
             # 第一列为描述跳过，变动日期
             if index == 0:
                 continue
-            sub_list.append(dict(change_date=date_util.parse_date_time(sub_row.text,"%Y%m%d")))
+            sub_list.append({"变动日期":date_util.parse_date_time(sub_row.text,"%Y%m%d")})
 
         report_date_rows = rows[1]
         for index, sub_row in enumerate(report_date_rows):
             # 第一列为描述跳过，公告日期
             if index == 0:
                 continue
-            sub_list[index-1]['report_date']=date_util.parse_date_time(sub_row.text, "%Y%m%d")
+            sub_list[index-1]['公告日期']=date_util.parse_date_time(sub_row.text, "%Y%m%d")
 
         change_reason_rows = rows[3]
         for index, sub_row in enumerate(change_reason_rows):
             # 第一列为描述跳过，变动原因
             if index == 0:
                 continue
-            sub_list[index - 1]['change_reason'] = sub_row.text
+            sub_list[index - 1]['变动原因'] = sub_row.text
 
         total_capital_stock_rows = rows[4]
         for index, sub_row in enumerate(total_capital_stock_rows):
             # 第一列为描述跳过，变动原因
             if index == 0:
                 continue
-            sub_list[index - 1]['total_capital_stock'] = int(float(sub_row.text.replace("万股","").strip()) * 10000)
+            sub_list[index - 1]['总股本'] = int(float(sub_row.text.replace("万股","").strip()) * 10000)
 
         total_capital_stock_rows = rows[6]
         for index, sub_row in enumerate(total_capital_stock_rows):
@@ -1027,9 +1037,9 @@ def stock_share_change_sina(symbol,start:datetime,end:datetime):
             if index == 0:
                 continue
             if sub_row.text == '--':
-                sub_list[index - 1]['flow_capital_stock'] = 0
+                sub_list[index - 1]['已流通股份'] = 0
             else:
-                sub_list[index - 1]['flow_capital_stock'] = int(float(sub_row.text.replace("万股", "").strip()) * 10000)
+                sub_list[index - 1]['已流通股份'] = int(float(sub_row.text.replace("万股", "").strip()) * 10000)
 
         total_capital_stock_rows = rows[7]
         for index, sub_row in enumerate(total_capital_stock_rows):
@@ -1037,21 +1047,24 @@ def stock_share_change_sina(symbol,start:datetime,end:datetime):
             if index == 0:
                 continue
             if sub_row.text == '--':
-                sub_list[index - 1]['manager_capital_stock'] = 0
+                sub_list[index - 1]['高管持有股'] = 0
             else:
-                sub_list[index - 1]['manager_capital_stock'] = int(float(sub_row.text.replace("万股", "").strip()) * 10000)
+                sub_list[index - 1]['高管持有股'] = int(float(sub_row.text.replace("万股", "").strip()) * 10000)
 
         total_capital_stock_rows = rows[8]
         for index, sub_row in enumerate(total_capital_stock_rows):
             # 第一列为描述跳过，变动原因
             if index == 0:
                 continue
-            sub_list[index - 1]['frozen_capital_stock'] = int(float(sub_row.text.replace("万股", "").strip()) * 10000)
+            if sub_row.text == '--':
+                sub_list[index - 1]['流通受限股份'] = 0
+            else:
+                sub_list[index - 1]['流通受限股份'] = int(float(sub_row.text.replace("万股", "").strip()) * 10000)
 
         total.extend(sub_list)
 
-    filtered = [item for item in total if item['change_date'] >= start and item['change_date']<=end]
-    return filtered
+    filtered = [item for item in total if item['变动日期'] >= start and item['变动日期']<=end]
+    return pd.DataFrame(filtered)
 
 
 if __name__ == "__main__":
