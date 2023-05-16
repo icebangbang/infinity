@@ -45,7 +45,7 @@ def dump_stock_share_change(code, start: datetime, end: datetime):
     start: str = date_util.dt_to_str(start)
     end: str = date_util.dt_to_str(end)
     # r = ak.stock_share_change_cninfo("300763","20190101","20240101")
-    result_df: DataFrame = ak.stock_share_change_sina(code, start, end)
+    result_df: DataFrame = ak.stock_share_change_cninfo(code, start, end)
     # 选取需要的列
     result_df = result_df[['变动原因', '公告日期', '变动日期', '总股本', '流通受限股份', '已流通股份']]
     # 列重命名
