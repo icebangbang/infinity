@@ -75,7 +75,7 @@ def stock_zh_a_hist(
         log.error(e, exc_info=1)
         log.info("入参:{},响应:{}".format(json.dumps(params),r.text))
     if retry_index > 1:
-        log.error("第{}次抓取数据成功", retry_index)
+        log.error("第{}次抓取数据成功".format(retry_index))
     data = data_json["data"]
     if data is None: return None
     prev_k_price = data['preKPrice']

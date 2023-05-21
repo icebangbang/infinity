@@ -7,6 +7,9 @@ from pandas import DataFrame
 from app.main.db.mongo import db
 from app.main.utils import date_util
 from interval3 import Interval
+import logging
+
+log = logging.getLogger(__name__)
 
 
 def get_stock_share_change(code,change_reason_code=None):
@@ -45,7 +48,12 @@ def dump_stock_share_change(code, start: datetime, end: datetime):
     start: str = date_util.dt_to_str(start)
     end: str = date_util.dt_to_str(end)
     # r = ak.stock_share_change_cninfo("300763","20190101","20240101")
-    result_df: DataFrame = ak.stock_share_change_cninfo(code, start, end)
+    while True:
+        try:
+            result_df: DataFrame = ak.stock_share_change_cninfo(code, start, end)
+            break
+        except Exception as e:
+            log.error("接口调用超时,重试：{}".format(code))
     # 选取需要的列
     result_df = result_df[['变动原因', '公告日期', '变动日期', '总股本', '流通受限股份', '已流通股份']]
     # 列重命名
