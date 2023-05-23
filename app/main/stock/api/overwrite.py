@@ -66,7 +66,7 @@ def stock_zh_a_hist(
             r = requests.get(url, params=params)
             break
         except Exception as e:
-            log.error("尝试第{}次抓取数据",retry_index)
+            log.error("尝试第{}次抓取数据".format(retry_index))
             log.error(e, exc_info=1)
             retry_index = retry_index +1
     try:

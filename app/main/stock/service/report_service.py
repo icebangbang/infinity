@@ -20,11 +20,12 @@ import numpy as np
 def get_overview():
     now = datetime.now()
     # 目前同步的k线的最早时间
-    point = k_line_dao.get_earliest_k_line()
+    earliest_point = k_line_dao.get_earliest_k_line()
+    oldest_point = k_line_dao.get_oldest_k_line()
     # 库内最早k线日期字段判空
-    date = date_util.dt_to_str(point['date'], '%Y-%m-%d') if point else "暂无数据"
-    # k线数据创建时间字段判空
-    create_time = date_util.dt_to_str(point['create_time'], '%Y-%m-%d %H:%M:%S') if point else "暂无数据"
+    date = date_util.dt_to_str(earliest_point['date'], '%Y-%m-%d') if earliest_point else "暂无数据"
+    # k线数据更新时间字段判空
+    oldest_point_date = date_util.dt_to_str(oldest_point['date'], '%Y-%m-%d %H:%M:%S') if oldest_point else "暂无数据"
 
     # 特征跑批时间
     feature_point = stock_dao.get_latest_stock_feature()
@@ -42,7 +43,7 @@ def get_overview():
     date_gz = date_util.get_date_gz(now)
 
     return dict(earliest_kline_day=date,
-                kline_day_latest_update=create_time,
+                kline_day_latest_update=oldest_point_date,
                 feature_latest_update=feature_update_time,
                 current_jq=current_jq['jq'],
                 next_jq=next_jq['jq'],
