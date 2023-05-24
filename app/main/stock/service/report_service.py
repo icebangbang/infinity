@@ -25,7 +25,7 @@ def get_overview():
     # 库内最早k线日期字段判空
     date = date_util.dt_to_str(earliest_point['date'], '%Y-%m-%d') if earliest_point else "暂无数据"
     # k线数据更新时间字段判空
-    oldest_point_date = date_util.dt_to_str(oldest_point['date'], '%Y-%m-%d %H:%M:%S') if oldest_point else "暂无数据"
+    oldest_point_date = date_util.dt_to_str(oldest_point['date'], '%Y-%m-%d') if oldest_point else "暂无数据"
 
     # 特征跑批时间
     feature_point = stock_dao.get_latest_stock_feature()
