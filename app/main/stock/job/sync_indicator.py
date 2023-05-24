@@ -3,6 +3,7 @@ import datetime
 import akshare as ak
 from app.main.db.mongo import db
 from app.main.utils import date_util
+from datetime import datetime, time
 
 
 def sync_ppi():
@@ -25,9 +26,9 @@ def sync_ppi():
 
 
 def sync_pmi():
-    from datetime import datetime,time
     data_list = ak.index_pmi_man_cx()
     set = db['pmi']
+    indicator_sync_record = db['indicator_sync_record']
     for data in data_list.to_dict(orient="records"):
         date = datetime.combine(data['日期'],time())
         zzy_value = data['制造业PMI']
@@ -40,9 +41,11 @@ def sync_pmi():
         date = datetime.combine(data['日期'],time())
         fzzy_value = data['服务业PMI']
         fzzy_tb = data['变化值']
-        v = dict(date=date, fzzy_value=fzzy_value, fzzy_tb=fzzy_tb)
+        v = dict(date=date, fzzy_value=fzzy_value, fzzy_tb=fzzy_tb,update_time = datetime.now())
         set.update_one({"date": date},
                        {"$set": v}, upsert=True)
+
+    indicator_sync_record.update_one({"name":"pmi"},{"$set":{"update_time":datetime.now()}},upsert=True)
 
 
 def sync_cpi():
