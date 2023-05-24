@@ -24,7 +24,7 @@ def get_earliest_k_line(code="000001", level='day'):
     return None
 
 
-def get_oldest_k_line(code, level='day', adjust='qfq'):
+def get_oldest_k_line(code="000001", level='day', adjust='qfq'):
     """
     获取最近的k线
     :param code:
@@ -288,6 +288,5 @@ def get_board_k_line_data(
 
 
 if __name__ == "__main__":
-    r = get_k_line_data_by_offset(datetime(2009, 3, 4),
-                                  offset=-251, codes=['600556'])
-    print(r)
+    r = get_oldest_k_line(code="000001")
+    print()
