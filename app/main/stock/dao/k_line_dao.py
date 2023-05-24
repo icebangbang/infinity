@@ -38,7 +38,11 @@ def get_oldest_k_line(code="000001", level='day', adjust='qfq'):
 
     my_set = db[db_name]
 
-    return list(my_set.find({"code": code}).sort("date", -1).limit(1))
+    points = list(my_set.find({"code": code}).sort("date", -1).limit(1))
+
+    if collection_util.is_not_empty(points):
+        return points[0]
+    return None
 
 
 def get_concept_oldest_k_line(name):
