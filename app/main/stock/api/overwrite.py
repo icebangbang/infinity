@@ -524,6 +524,8 @@ def chinese_cpi():
     重要性非常高：
     工业品出厂价格指数是衡量工业企业产品出厂价格变动趋势和变动程度的指数，
     是反映某一时期生产领域价格变动情况的重要经济指标，也是制定有关经济政策和国民经济核算的重要依据。
+    https://data.eastmoney.com/cjsj/cpi.html
+    https://datacenter-web.eastmoney.com/api/data/v1/get?callback=datatable621416&columns=REPORT_DATE%2CTIME%2CNATIONAL_SAME%2CNATIONAL_BASE%2CNATIONAL_SEQUENTIAL%2CNATIONAL_ACCUMULATE%2CCITY_SAME%2CCITY_BASE%2CCITY_SEQUENTIAL%2CCITY_ACCUMULATE%2CRURAL_SAME%2CRURAL_BASE%2CRURAL_SEQUENTIAL%2CRURAL_ACCUMULATE&pageNumber=1&pageSize=20&sortColumns=REPORT_DATE&sortTypes=-1&source=WEB&client=WEB&reportName=RPT_ECONOMY_CPI&_=1684949245170
     :return:
     """
     url = "https://datainterface.eastmoney.com/EM_DataCenter/JS.aspx"

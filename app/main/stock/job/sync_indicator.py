@@ -50,7 +50,7 @@ def sync_pmi():
 
 def sync_cpi():
     data_list = ak.chinese_cpi()
-
+    indicator_sync_record = db['indicator_sync_record']
     data_format = []
 
     for data in data_list:
@@ -86,6 +86,8 @@ def sync_cpi():
     set.drop()
     set.insert_many(data_format)
 
+    indicator_sync_record.update_one({"name": "pmi"}, {"$set": {"update_time": datetime.now()}}, upsert=True)
+
 
 def sync_pig_data():
     pig_data = ak.pig_data()
@@ -95,7 +97,7 @@ def sync_pig_data():
 
 
 if __name__ == "__main__":
-    sync_pmi()
+    # sync_pmi()
     # sync_ppi()
     # sync_pig_data()
-    # sync_cpi()
+    sync_cpi()

@@ -170,7 +170,7 @@ def _build_etf_info(industry, start, end) -> RecommendEtf:
         else:
             y.append([])
 
-    recommend_etf.y_axis_desc = YAxisDesc(name="etf价格", scale=False, max=h, min=l, show=False)
+    recommend_etf.y_axis_desc = YAxisDesc(name="etf价格", scale=False, max=h, min=0, show=False)
     recommend_etf.y_axis_data = y_axis_data
 
     return recommend_etf
