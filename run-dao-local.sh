@@ -1,6 +1,7 @@
 ## 在目标服务器中执行用
 # bash run-dao-local.sh infinity
 
+git pull
 PIP_MIRROR=http://127.0.0.1:7104/root/pypi/+simple/
 PIP_MIRROR_HOST=127.0.0.1:7104
 
