@@ -116,7 +116,7 @@ def _build_board_value(board_name, start: datetime, end: datetime)->BoardValueEc
         value_y.append(board_value.value)
 
     board_value_echart.y_axis_data = y_axis_data
-    board_value_echart.y_axis_desc = YAxisDesc(name="板块市值", type="value", max=cal_util.get_max(value_y), min=cal_util.get_min(value_y),
+    board_value_echart.y_axis_desc = YAxisDesc(name="板块市值", type="value", max=cal_util.get_max(value_y), min=0,
                                                show=False)
 
     return board_value_echart
