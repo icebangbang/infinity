@@ -2,6 +2,8 @@ import logging
 import time
 from datetime import datetime
 
+import dateutil
+
 from app.main.stock.dao import stock_change_dao, stock_dao
 from app.main.utils import date_util
 
@@ -20,7 +22,10 @@ def add_stock_share_change():
         code = stock['code']
         # 股票上市时间
         start = stock['date']
+        start = start - dateutil.relativedelta.relativedelta(months=3)
         market_value = stock['MarketValue']
+        if index <814:
+            continue
 
         log.info("同步个股的股本结构信息:{},{}".format(index, name))
 

@@ -17,9 +17,10 @@ from tqdm import tqdm
 import time
 
 from app.main.stock.dao import stock_dao
-from app.main.utils import simple_util, date_util
+from app.main.utils import simple_util, date_util, stock_util
 
 log = get_logger(__name__)
+
 
 def stock_zh_a_hist(
         symbol: str = "600070",
@@ -68,12 +69,12 @@ def stock_zh_a_hist(
         except Exception as e:
             log.error("尝试第{}次抓取数据".format(retry_index))
             log.error(e, exc_info=1)
-            retry_index = retry_index +1
+            retry_index = retry_index + 1
     try:
         data_json = r.json()
     except Exception as e:
         log.error(e, exc_info=1)
-        log.info("入参:{},响应:{}".format(json.dumps(params),r.text))
+        log.info("入参:{},响应:{}".format(json.dumps(params), r.text))
     if retry_index > 1:
         log.error("第{}次抓取数据成功".format(retry_index))
     data = data_json["data"]
@@ -724,7 +725,7 @@ def fund_etf_basic_info_sina(symbol: str = "159996") -> dict:
     url = f"https://stock.finance.sina.com.cn/fundInfo/api/openapi.php/FundPageInfoService.tabjjgk?symbol={symbol}"
     while True:
         try:
-            r = requests.get(url,headers=headers)
+            r = requests.get(url, headers=headers)
             body = r.json()['result']['data']
 
             return dict(
@@ -732,14 +733,15 @@ def fund_etf_basic_info_sina(symbol: str = "159996") -> dict:
                 code=body['symbol'],
                 start_time=body['clrq'],  # 成立时间
                 body=body['jjgm'],  # 体量
-                company = body['glr'], #管理公司
-                style = body['FinanceStyle'], #管理公司
+                company=body['glr'],  # 管理公司
+                style=body['FinanceStyle'],  # 管理公司
             )
         except ProxyError:
             time.sleep(1)
 
+
 def fund_portfolio_hold_em(
-    symbol: str = "162411", date: str = "2020"
+        symbol: str = "162411", date: str = "2020"
 ) -> pd.DataFrame:
     """
     天天基金网-基金档案-投资组合-基金持仓
@@ -762,7 +764,7 @@ def fund_portfolio_hold_em(
     }
     r = requests.get(url, params=params)
     data_text = r.text
-    data_json = demjson.decode(data_text[data_text.find("{") : -1])
+    data_json = demjson.decode(data_text[data_text.find("{"): -1])
 
     if simple_util.is_empty(data_json["content"]):
         return pd.DataFrame()
@@ -805,8 +807,6 @@ def fund_portfolio_hold_em(
     big_df["持仓市值"] = pd.to_numeric(big_df["持仓市值"], errors="coerce")
     big_df["序号"] = range(1, len(big_df) + 1)
     return big_df
-
-
 
 
 def fund_etf_hist_sina(symbol: str = "sz159996") -> pd.DataFrame:
@@ -875,6 +875,7 @@ def stock_cash_flow_sheet_by_report_em(
         big_df = pd.concat([big_df, temp_df], ignore_index=True)
     return big_df
 
+
 @lru_cache()
 def _fund_etf_code_id_map_em() -> dict:
     """
@@ -904,12 +905,13 @@ def _fund_etf_code_id_map_em() -> dict:
     temp_dict = dict(zip(temp_df["f12"], temp_df["f13"]))
     return temp_dict
 
+
 def fund_etf_hist_em(
-    symbol: str = "159707",
-    period: str = "daily",
-    start_date: str = "19700101",
-    end_date: str = "20500101",
-    adjust: str = "",
+        symbol: str = "159707",
+        period: str = "daily",
+        start_date: str = "19700101",
+        end_date: str = "20500101",
+        adjust: str = "",
 ) -> pd.DataFrame:
     """
     东方财富-ETF 行情
@@ -978,14 +980,15 @@ def fund_etf_hist_em(
     temp_df["换手率"] = pd.to_numeric(temp_df["换手率"])
     return temp_df
 
-def stock_share_change_sina(symbol,start:datetime,end:datetime):
+
+def stock_share_change_sina(symbol, start: datetime, end: datetime):
     """
     symbol:300763
     从新浪财经获取股本变化情况
     :return:
     """
-    start = date_util.parse_date_time(start,"%Y%m%d")
-    end = date_util.parse_date_time(end,"%Y%m%d")
+    start = date_util.parse_date_time(start, "%Y%m%d")
+    end = date_util.parse_date_time(end, "%Y%m%d")
 
     index = 1
     while True:
@@ -995,10 +998,10 @@ def stock_share_change_sina(symbol,start:datetime,end:datetime):
             time.sleep(4)
             if r.status_code == 200:
                 break
-            log.warn("[股本变动同步]同步新浪数据失败，当前响应码为:{}，第{}次重试".format(r.status_code,index))
-            index = index+1
+            log.warn("[股本变动同步]同步新浪数据失败，当前响应码为:{}，第{}次重试".format(r.status_code, index))
+            index = index + 1
         except Exception as e:
-            log.error(e,exc_info=1)
+            log.error(e, exc_info=1)
     soup = BeautifulSoup(r.text, "lxml")
 
     tables = soup.find(attrs={"id": "con02-1"}).find_all("table")
@@ -1009,18 +1012,18 @@ def stock_share_change_sina(symbol,start:datetime,end:datetime):
         rows = table.find_all("tbody")[0].find_all("tr")
         change_date_rows = rows[0]
         sub_list = []
-        for index,sub_row in enumerate(change_date_rows):
+        for index, sub_row in enumerate(change_date_rows):
             # 第一列为描述跳过，变动日期
             if index == 0:
                 continue
-            sub_list.append({"变动日期":date_util.parse_date_time(sub_row.text,"%Y%m%d")})
+            sub_list.append({"变动日期": date_util.parse_date_time(sub_row.text, "%Y%m%d")})
 
         report_date_rows = rows[1]
         for index, sub_row in enumerate(report_date_rows):
             # 第一列为描述跳过，公告日期
             if index == 0:
                 continue
-            sub_list[index-1]['公告日期']=date_util.parse_date_time(sub_row.text, "%Y%m%d")
+            sub_list[index - 1]['公告日期'] = date_util.parse_date_time(sub_row.text, "%Y%m%d")
 
         change_reason_rows = rows[3]
         for index, sub_row in enumerate(change_reason_rows):
@@ -1034,7 +1037,7 @@ def stock_share_change_sina(symbol,start:datetime,end:datetime):
             # 第一列为描述跳过，变动原因
             if index == 0:
                 continue
-            sub_list[index - 1]['总股本'] = int(float(sub_row.text.replace("万股","").strip()) * 10000)
+            sub_list[index - 1]['总股本'] = int(float(sub_row.text.replace("万股", "").strip()) * 10000)
 
         total_capital_stock_rows = rows[6]
         for index, sub_row in enumerate(total_capital_stock_rows):
@@ -1068,7 +1071,54 @@ def stock_share_change_sina(symbol,start:datetime,end:datetime):
 
         total.extend(sub_list)
 
-    filtered = [item for item in total if item['变动日期'] >= start and item['变动日期']<=end]
+    filtered = [item for item in total if item['变动日期'] >= start and item['变动日期'] <= end]
+    return pd.DataFrame(filtered)
+
+
+def stock_share_change_eastmoney(symbol, start: datetime, end: datetime):
+    """
+    symbol:300763
+    从新浪财经获取股本变化情况
+    :return:
+    """
+    start = date_util.parse_date_time(start, "%Y%m%d")
+    end = date_util.parse_date_time(end, "%Y%m%d")
+    belong = stock_util.basic_belong(symbol)
+    symbol = belong + symbol
+
+    index = 1
+    while True:
+        try:
+            url = "https://emweb.securities.eastmoney.com/PC_HSF10/CapitalStockStructure/PageAjax?code={}".format(
+                symbol)
+            r = requests.get(url)
+            if r.status_code == 200:
+                break
+            log.warn("[股本变动同步]同步新浪数据失败，当前响应码为:{}，第{}次重试".format(r.status_code, index))
+            index = index + 1
+        except Exception as e:
+            log.error(e, exc_info=1)
+            time.sleep(4)
+    json_map = r.json()
+    # 历年股本变动
+    lngbbd_list = json_map['lngbbd']
+
+    total = []
+    for lngbbd in lngbbd_list:
+        content = {}
+        content['变动日期'] = date_util.parse_date_time(lngbbd['END_DATE'], "%Y-%m-%d %H:%M:%S")
+        content['公告日期'] = None
+        content['变动原因'] = lngbbd['CHANGE_REASON']
+        content['总股本'] = 0 if lngbbd['TOTAL_SHARES'] is None else lngbbd['TOTAL_SHARES'] / 10000
+        content['已流通股份'] = 0 if lngbbd['FREE_SHARES'] is None else lngbbd['FREE_SHARES'] / 10000
+        content['流通受限股份'] = 0 if lngbbd['LIMITED_A_SHARES'] is None else lngbbd['LIMITED_A_SHARES'] / 10000
+
+        # 每个表格的每一行数据
+        total.append(content)
+
+    filtered = total
+    if start is not None and end is not None:
+        filtered = [item for item in total if item['变动日期'] >= start and item['变动日期'] <= end]
     return pd.DataFrame(filtered)
 
 
@@ -1080,4 +1130,8 @@ if __name__ == "__main__":
     # df = ak.fund_etf_hist_sina(symbol="sz169103")
     # df = stock_cash_flow_sheet_by_report_em(symbol="sz300763")
     # df = get_stock_register_address(dict(belong='sz', code="300763"))
-    df = stock_share_change_sina()
+    # df = stock_share_change_sina("300492","20151201","20240101")
+
+    # df = ak.stock_share_change_cninfo("300492", "20151201","20240101")
+    df = stock_share_change_eastmoney("300492", "20151201", "20240101")
+    print()

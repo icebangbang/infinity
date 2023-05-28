@@ -12,18 +12,17 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def get_stock_share_change(code,change_reason_code=None):
+def get_stock_share_change(code):
     """
     通过change_reason_code 找到个股的总股本，流通股本
     :param code:
     :param reason_code:
     :return:
     """
-    statement = {"code": code}
-    if change_reason_code:
-        statement['change_reason_code'] = change_reason_code
+    statement = {"code": code,
+                 "change_reason": {'$nin': ['债转股', '增发']}}
 
-    results = list(db['stock_share_change'].find(statement).sort("change_date",-1))
+    results = list(db['stock_share_change'].find(statement).sort("change_date", -1))
 
     upper = datetime.now()
     interval_dict = {}
@@ -50,10 +49,10 @@ def dump_stock_share_change(code, start: datetime, end: datetime):
     # r = ak.stock_share_change_cninfo("300763","20190101","20240101")
     while True:
         try:
-            result_df: DataFrame = ak.stock_share_change_cninfo(code, start, end)
+            result_df: DataFrame = ak.stock_share_change_eastmoney(code, start, end)
             break
         except Exception as e:
-            log.error("接口调用超时,重试：{}".format(code))
+            log.error("接口调用超时,重试：{}".format(code), e, exc_info=1)
     # 选取需要的列
     result_df = result_df[['变动原因', '公告日期', '变动日期', '总股本', '流通受限股份', '已流通股份']]
     # 列重命名
@@ -87,5 +86,5 @@ def dump_stock_share_change(code, start: datetime, end: datetime):
 
 
 if __name__ == "__main__":
-    # dump_stock_share_change("300763", datetime(2019, 1, 1), datetime(2024, 1, 1))
-    get_stock_share_change("300763", "015011")
+    dump_stock_share_change("300763", datetime(2019, 1, 1), datetime(2024, 1, 1))
+    # get_stock_share_change("300763", "015011")

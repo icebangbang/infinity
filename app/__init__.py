@@ -12,10 +12,11 @@ from app.main.stock.api.overwrite import stock_zh_a_hist, \
     stock_board_concept_cons_em, \
     chinese_ppi, chinese_cpi, pig_data, chinese_pmi, \
     get_stock_web, get_stock_business, get_bellwether, \
-    get_stock_register_address,fund_etf_hist_sina,fund_etf_basic_info_sina,\
-    fund_portfolio_hold_em,\
-    fund_etf_hist_em,\
-    stock_share_change_sina # 股本结构变化查询
+    get_stock_register_address, fund_etf_hist_sina, fund_etf_basic_info_sina, \
+    fund_portfolio_hold_em, \
+    fund_etf_hist_em, \
+    stock_share_change_sina, \
+    stock_share_change_eastmoney
 from app.main.stock.api.three_table_overwrite import stock_cash_flow_sheet_by_report_em, \
     stock_balance_sheet_by_report_em, \
     stock_profit_sheet_by_report_em, \
@@ -23,6 +24,7 @@ from app.main.stock.api.three_table_overwrite import stock_cash_flow_sheet_by_re
 from app.main.stock.api import stock_gdfx
 
 import logging as log
+
 log.basicConfig(
     level=log.INFO,
     format="[%(asctime)s] %(name)s:%(levelname)s: %(message)s"
@@ -55,3 +57,4 @@ akshare.stock_financial_analysis_indicator = stock_financial_analysis_indicator
 akshare.stock_gdfx_free_top_10_em = stock_gdfx.stock_gdfx_free_top_10_em
 akshare.fund_etf_hist_em = fund_etf_hist_em
 akshare.stock_share_change_sina = stock_share_change_sina
+akshare.stock_share_change_eastmoney = stock_share_change_eastmoney

@@ -281,7 +281,7 @@ def backtrading_stock_value(stocks, days=1000):
 if __name__ == "__main__":
     # stocks = stock_dao.get_stock_detail_list(['300763'])
     stocks = stock_dao.get_stock_detail_list()
-    backtrading_stock_value(stocks, 300)
+    backtrading_stock_value(stocks, 150)
     # end = date_util.get_start_of_day(date_util.get_work_day(datetime.now(),0)[0])
     # start = end - timedelta(days=1)
 
@@ -292,7 +292,8 @@ if __name__ == "__main__":
     # results_0 = get_stock_value_by_board(date_util.get_start_of_day(cursor))
     # print(cursor,results_0['电子化学品'])
 
-    # board_values = get_board_value("半导体",datetime(2023,1,1),datetime(2023,4,7))
+    # board_values = get_board_value("公用事业",datetime(2023,4,17),datetime(2023,4,18))
+    print()
     #
     # results_0 = get_stock_value_by_board(date_util.get_start_of_day(datetime.now()) + timedelta(days=5))
     # results_5 = get_stock_value_by_board(date_util.get_start_of_day(datetime.now()) - timedelta(days=5))
