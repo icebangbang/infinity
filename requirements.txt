@@ -1,5 +1,5 @@
 jionlp==1.4.33
-akshare==1.9.97
+akshare==1.9.92
 amqp==5.0.6
 backtrader==1.9.76.123
 bcrypt==3.2.0
