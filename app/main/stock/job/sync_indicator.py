@@ -23,6 +23,8 @@ def sync_ppi():
     set = db['ppi']
     set.drop()
     set.insert_many(data_format)
+    db['indicator_sync_record'].update_one({"name": "ppi"}, {"$set": {"update_time": datetime.now()}},
+                                           upsert=True)
 
 
 def sync_pmi():
@@ -54,22 +56,21 @@ def sync_cpi():
     data_format = []
 
     for data in data_list:
-        array = data.split(",")
-        date = date_util.parse_date_time(array[0], "%Y-%m-%d")
-        country_current = array[1]  # 当前
-        country_grace_tb = array[2]  #
-        country_grace_hb = array[3]  #
-        country_accum = array[4]
+        date = date_util.parse_date_time(data['REPORT_DATE'], "%Y-%m-%d %H:%M:%S")
+        country_current = data['NATIONAL_BASE']  # 当前
+        country_grace_tb = data['NATIONAL_SAME']
+        country_grace_hb = data['NATIONAL_SEQUENTIAL']
+        country_accum = data['NATIONAL_ACCUMULATE']
 
-        city_current = array[5]  # 当前
-        city_grace_tb = array[6]  #
-        city_grace_hb = array[7]  #
-        city_accum = array[8]
+        city_current = data['CITY_BASE']  # 当前
+        city_grace_tb = data['CITY_SAME']
+        city_grace_hb = data['CITY_SEQUENTIAL']
+        city_accum = data['CITY_ACCUMULATE']
 
-        village_current = array[9]  # 当前
-        village_grace_tb = array[10]  #
-        village_grace_hb = array[11]  #
-        village_accum = array[12]
+        village_current = data['RURAL_BASE']
+        village_grace_tb = data['RURAL_SAME']
+        village_grace_hb = data['RURAL_SEQUENTIAL']
+        village_accum = data['RURAL_ACCUMULATE']
 
         data_format.append(dict(date=date,
                                 country_current=country_current, country_grace_tb=country_grace_tb,
@@ -79,14 +80,15 @@ def sync_cpi():
                                 village_current=village_current,
                                 village_grace_tb=village_grace_tb,
                                 village_grace_hb=village_grace_hb,
-                                village_accum=village_accum
+                                village_accum=village_accum,
+                                update_time=datetime.now()
                                 ))
 
     set = db['cpi']
     set.drop()
     set.insert_many(data_format)
 
-    indicator_sync_record.update_one({"name": "pmi"}, {"$set": {"update_time": datetime.now()}}, upsert=True)
+    indicator_sync_record.update_one({"name": "cpi"}, {"$set": {"update_time": datetime.now()}}, upsert=True)
 
 
 def sync_pig_data():

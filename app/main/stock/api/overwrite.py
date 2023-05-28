@@ -526,20 +526,31 @@ def chinese_cpi():
     工业品出厂价格指数是衡量工业企业产品出厂价格变动趋势和变动程度的指数，
     是反映某一时期生产领域价格变动情况的重要经济指标，也是制定有关经济政策和国民经济核算的重要依据。
     https://data.eastmoney.com/cjsj/cpi.html
-    https://datacenter-web.eastmoney.com/api/data/v1/get?callback=datatable621416&columns=REPORT_DATE%2CTIME%2CNATIONAL_SAME%2CNATIONAL_BASE%2CNATIONAL_SEQUENTIAL%2CNATIONAL_ACCUMULATE%2CCITY_SAME%2CCITY_BASE%2CCITY_SEQUENTIAL%2CCITY_ACCUMULATE%2CRURAL_SAME%2CRURAL_BASE%2CRURAL_SEQUENTIAL%2CRURAL_ACCUMULATE&pageNumber=1&pageSize=20&sortColumns=REPORT_DATE&sortTypes=-1&source=WEB&client=WEB&reportName=RPT_ECONOMY_CPI&_=1684949245170
+    https://datacenter-web.eastmoney.com/api/data/v1/get?columns=REPORT_DATE%2CTIME%2CNATIONAL_SAME%2CNATIONAL_BASE%2CNATIONAL_SEQUENTIAL%2CNATIONAL_ACCUMULATE%2CCITY_SAME%2CCITY_BASE%2CCITY_SEQUENTIAL%2CCITY_ACCUMULATE%2CRURAL_SAME%2CRURAL_BASE%2CRURAL_SEQUENTIAL%2CRURAL_ACCUMULATE&pageNumber=1&pageSize=20&sortColumns=REPORT_DATE&sortTypes=-1&source=WEB&client=WEB&reportName=RPT_ECONOMY_CPI&_=1684949245170
     :return:
     """
-    url = "https://datainterface.eastmoney.com/EM_DataCenter/JS.aspx"
+    # url = "https://datainterface.eastmoney.com/EM_DataCenter/JS.aspx"
+    url = "https://datacenter-web.eastmoney.com/api/data/v1/get"
     params = {
-        "type": "GJZB",
-        "sty": "ZGZB",
-        "ps": 200,
-        "mkt": 19
+        "columns": "REPORT_DATE,TIME,NATIONAL_SAME,NATIONAL_BASE,NATIONAL_SEQUENTIAL,NATIONAL_ACCUMULATE,CITY_SAME,CITY_BASE,CITY_SEQUENTIAL,CITY_ACCUMULATE,RURAL_SAME,RURAL_BASE,RURAL_SEQUENTIAL,RURAL_ACCUMULATE",
+        "pageNumber": "1",
+        "pageSize": 100000,
+        "sortColumns": "REPORT_DATE",
+        "sortTypes": -1,
+        "source": "WEB",
+        "client": "WEB",
+        "reportName": "RPT_ECONOMY_CPI",
+        "p": 1,
+        "pageNo": 1,
+        "pageNum": 1
     }
-    r = requests.get(url, params=params)
-    content = r.text
-    content = content.replace("(", "").replace(")", "")
-    return json.loads(content)
+    resp =  requests.get(url,params=params).json()
+    content = resp['result']['data']
+
+    return content
+    # content = r.text
+    # content = content.replace("(", "").replace(")", "")
+    # return json.loads(content)
 
 
 def chinese_pmi():
@@ -1124,7 +1135,7 @@ def stock_share_change_eastmoney(symbol, start: datetime, end: datetime):
 
 if __name__ == "__main__":
     # results = stock_board_concept_name_em()
-    # r = chinese_cpi()
+    r = chinese_cpi()
     # r = get_stock_web(dict(code="300763",belong="sz"))
     # r = get_bellwether()
     # df = ak.fund_etf_hist_sina(symbol="sz169103")

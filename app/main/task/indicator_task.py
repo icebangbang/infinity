@@ -35,6 +35,7 @@ def sync_comex_gold():
     result_dict = df.to_dict(orient="records")
     db['k_line_day_comex_gold'].drop()
     db['k_line_day_comex_gold'].insert_many(result_dict)
+    db['indicator_sync_record'].update_one({"name": "comex_gold"}, {"$set": {"update_time": datetime.now()}}, upsert=True)
 
 
 def sync_fed_interest_rate():
@@ -66,5 +67,5 @@ def sync_fed_interest_rate():
 
 
 if __name__ == "__main__":
-    sync_fed_interest_rate()
+    sync_comex_gold()
     pass

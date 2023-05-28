@@ -27,7 +27,7 @@ def get_overview():
     date = date_util.dt_to_str(earliest_point['date'], '%Y-%m-%d') if earliest_point else "暂无数据"
     # k线数据更新时间字段判空
     oldest_point_date = date_util.dt_to_str(oldest_point['date'], '%Y-%m-%d') if oldest_point else "暂无数据"
-    pmi_update_time = indicator_service.get_latest_update_time("pmi")
+    indicators_update_time = indicator_service.get_latest_update_items()
 
     # 特征跑批时间
     feature_point = stock_dao.get_latest_stock_feature()
@@ -44,14 +44,16 @@ def get_overview():
     # 获取年月日时干支
     date_gz = date_util.get_date_gz(now)
 
-    return dict(earliest_kline_day=date,
+    resp = dict(earliest_kline_day=date,
                 kline_day_latest_update=oldest_point_date,
                 feature_latest_update=feature_update_time,
-                pmi_update_time=pmi_update_time,
                 current_jq=current_jq['jq'],
                 next_jq=next_jq['jq'],
                 day_until_next_jq=day_until_next_jq,
                 date_gz=date_gz)
+    resp.update(indicators_update_time)
+
+    return resp
 
 
 def rps_analysis(date=None, offset=-250):
