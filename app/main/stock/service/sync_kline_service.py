@@ -22,10 +22,10 @@ def sync_day_level(code, base_time=None, adjust='qfq'):
     if base_time is None:
         now = datetime.now()
 
-    if len(point) == 0:
+    if point is None:
         before = now - timedelta(days=time_window)
     else:
-        before = point[0]['date'] + timedelta(days=1)
+        before = point['date'] + timedelta(days=1)
 
     if date_util.get_days_between(now, before) <= 0:
         before = now
@@ -56,10 +56,10 @@ def sync_month_level(code, base_time=None, time_window=6000):
     if base_time is None:
         end_of_current_month = date_util.get_end_of_month(now)
 
-    if len(point) == 0:
+    if point is None:
         before = end_of_current_month - timedelta(days=time_window)
     else:
-        before = point[0]['date'] + dateutil.relativedelta.relativedelta(months=1)
+        before = point['date'] + dateutil.relativedelta.relativedelta(months=1)
 
     if date_util.get_days_between(end_of_current_month, before) <= 0:
         before = date_util.get_start_of_month(now)

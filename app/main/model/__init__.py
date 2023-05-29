@@ -14,8 +14,6 @@ class Basic(dict):
 
         dict.__init__(self, **kwargs)
         self._reset_attribute()
-
-        pass
         # self.__dict__ = copy.deepcopy({k: v for k, v in kwargs.items() if not k.startswith('__')})
 
     def __getattr__(self, *args, **kwargs):  # real signature unknown

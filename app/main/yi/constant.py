@@ -84,6 +84,11 @@ ke_mapping = {"甲": yin, 0: yin,  # 甲寄寅宮
               "壬": hai, 8: hai,  # 壬寄亥宮
               "癸": chou, 9: chou,  # 癸寄丑宮
               }
+# 天干五合
+GAN_WU_HE = {}
+
+# 地支六合
+ZHI_LIU_HE = {}
 
 
 def get_sheng(element, get_word=True):
