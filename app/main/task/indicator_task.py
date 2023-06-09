@@ -22,8 +22,14 @@ def sync_cny_fx():
 
     df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
     df['update'] = datetime.now()
-    db['rmb_fxrate'].drop()
-    db['rmb_fxrate'].insert_many(df.to_dict(orient="records"))
+    records = df.to_dict(orient="records")
+
+    for record in records:
+        db['rmb_fxrate'].update_one({"date":record['date']},{"$set":record},upsert=True)
+
+    db['indicator_sync_record'].update_one({"name": "rmb_fxrate"}, {"$set": {"update_time": datetime.now()}},
+                                           upsert=True)
+    log.info("开始同步人民币对外币汇率同步完成,同步条数:{}".format(len(records)))
 
 
 def sync_comex_gold():
@@ -67,5 +73,5 @@ def sync_fed_interest_rate():
 
 
 if __name__ == "__main__":
-    sync_comex_gold()
+    sync_cny_fx()
     pass
