@@ -39,8 +39,10 @@ def sync_comex_gold():
     """
     df = ak.futures_foreign_hist("GC")
     result_dict = df.to_dict(orient="records")
-    db['k_line_day_comex_gold'].drop()
-    db['k_line_day_comex_gold'].insert_many(result_dict)
+
+    for result in result_dict:
+        db['k_line_day_comex_gold'].update_one({"date":result['date']},{"$set":result},upsert=True)
+    # db['k_line_day_comex_gold'].insert_many(result_dict)
     db['indicator_sync_record'].update_one({"name": "comex_gold"}, {"$set": {"update_time": datetime.now()}}, upsert=True)
 
 
@@ -73,5 +75,6 @@ def sync_fed_interest_rate():
 
 
 if __name__ == "__main__":
-    sync_cny_fx()
+    sync_comex_gold()
+    # sync_cny_fx()
     pass

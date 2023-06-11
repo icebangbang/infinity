@@ -143,7 +143,19 @@ def list_doc(table_name: list):
                  dict(name="is_deleted", type="int", desc="是否被删除"),
                  dict(name="trend_type", type="int", desc="趋势类型")
              ]
-             )
+             ),
+        dict(table_name="k_line_day_comex_gold",
+             table_comment="comex黄金日线",
+             indexes=dict(code_date_idx=[("date", 1)]),
+             columns=[
+                 dict(name="date", type="datetime", desc="日期"),
+                 dict(name="open", type="float", desc="开盘价"),
+                 dict(name="high", type="float", desc="最高价"),
+                 dict(name="low", type="float", desc="最低价"),
+                 dict(name="close", type="float", desc="收盘价"),
+                 dict(name="volume", type="float", desc="成交量"),
+                 dict(name="position", type="float", desc="成交额"),
+             ]),
     ]
 
     if table_name is not None:
@@ -239,5 +251,5 @@ def add_config_data():
 
 
 if __name__ == "__main__":
-    create_doc(['k_line_day_bfq'])
+    create_doc(['k_line_day_comex_gold'])
     # add_config_data()

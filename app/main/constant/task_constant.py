@@ -37,7 +37,7 @@ TASK_MAPPING = {
     '同步etf基金历史k线': fund_task.sync_etf_kline,  # 异步无回调任务
     '同步etf基金盘中k线': fund_task.sync_etf_kline_real_time,  # 异步无回调任务
     "同步comex黄金期货": indicator_task.sync_comex_gold,  # 异步无回调任务
-    '美联储利率决议报告': indicator_task.sync_fed_interest_rate(),  # 异步无回调任务
+    '美联储利率决议报告': indicator_task.sync_fed_interest_rate,  # 异步无回调任务
 
     '股市资金抱团分析': macrodata_task.baotuan_update
 }
