@@ -9,7 +9,8 @@ import jionlp as jio
 import pandas as pd
 import requests
 from akshare.stock.cons import hk_js_decode
-from akshare.utils import demjson
+# from akshare.utils import demjson
+import demjson3
 from bs4 import BeautifulSoup
 from py_mini_racer import py_mini_racer
 from requests.exceptions import ProxyError
@@ -771,7 +772,7 @@ def fund_portfolio_hold_em(
     }
     r = requests.get(url, params=params)
     data_text = r.text
-    data_json = demjson.decode(data_text[data_text.find("{"): -1])
+    data_json = demjson3.decode(data_text[data_text.find("{"): -1])
 
     if simple_util.is_empty(data_json["content"]):
         return pd.DataFrame()
