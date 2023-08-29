@@ -1,3 +1,5 @@
+import time
+
 from app.main.utils import restful
 from . import rest
 from app.log import get_logger
@@ -7,7 +9,8 @@ log = get_logger(__name__)
 
 @rest.route("/test/remind", methods=['get'])
 def remind():
-    stock_service.stock_remind()
+    # stock_service.stock_remind()
+    time.sleep(30)
     return restful.response_obj("")
 
 

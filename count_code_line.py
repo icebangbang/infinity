@@ -29,13 +29,16 @@ def countLine(fname):
     tatal_count = 0
     empty_row = 0
     comment_row = 0
-    for file_line in open(fname).readlines():
-        if file_line == '' or file_line == '\n':  # 过滤掉空行
-            empty_row += 1
-        if "#" in file_line:
-            comment_row += 1
-        tatal_count += 1
-    print(fname + '----', tatal_count)
+    try:
+        for file_line in open(fname,encoding='utf-8').readlines():
+            if file_line == '' or file_line == '\n':  # 过滤掉空行
+                empty_row += 1
+            if "#" in file_line:
+                comment_row += 1
+            tatal_count += 1
+        print(fname + '----', tatal_count)
+    except Exception as e:
+        print(e)
     return tatal_count, comment_row, empty_row
 
 
@@ -54,9 +57,10 @@ def do_sum(basedir):
 
 if __name__ == '__main__':
     startTime = time.perf_counter()
-    root_dir = '/home/lifeng/WORK/code'
-    infinity = root_dir + '/python/infinity/'
-    dest_statistic = infinity + "/app/static/code_statistic.csv"
+    # root_dir = '/home/lifeng/WORK/code'
+    root_dir = 'C:/Work'
+    infinity = root_dir + '/python/infinity/app'
+    dest_statistic = infinity + "/static/code_statistic.csv"
     total, comment, empty = do_sum(infinity)
 
     df = pd.read_csv(dest_statistic,dtype={'project': str})

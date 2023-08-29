@@ -61,23 +61,19 @@ def stock_zh_a_hist(
         "end": end_date,
         "_": "1623766962675",
     }
-    retry_index = 1
+    retry_index = 0
     while True:
         try:
             r = requests.get(url, params=params)
+            data_json = r.json()
+            data = data_json["data"]
             break
         except Exception as e:
-            log.error("尝试第{}次抓取数据".format(retry_index))
             log.error(e, exc_info=1)
             retry_index = retry_index + 1
-    try:
-        data_json = r.json()
-    except Exception as e:
-        log.error(e, exc_info=1)
-        log.info("入参:{},响应:{}".format(json.dumps(params), r.text))
-    if retry_index > 1:
-        log.error("第{}次抓取数据成功".format(retry_index))
-    data = data_json["data"]
+            log.error("尝试第{}次重新抓取数据".format(retry_index))
+    if retry_index > 0:
+        log.error("重复{}次后抓取数据成功".format(retry_index))
     if data is None: return None
     prev_k_price = data['preKPrice']
     temp_df = pd.DataFrame([item.split(",") for item in data_json["data"]["klines"]])
@@ -1144,5 +1140,13 @@ if __name__ == "__main__":
     # df = stock_share_change_sina("300492","20151201","20240101")
 
     # df = ak.stock_share_change_cninfo("300492", "20151201","20240101")
-    df = stock_share_change_eastmoney("300492", "20151201", "20240101")
-    print()
+    # df = stock_share_change_eastmoney("300492", "20151201", "20240101")
+    df = stock_zh_a_hist("600070",
+        "20230829",
+        "20230829",
+        "",
+        "101",
+       )
+    url = "http://push2his.eastmoney.com/api/qt/stock/kline/get"
+    r = requests.get(url,{"fields1": "f1,f2,f3,f4,f5,f6", "fields2": "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61", "ut": "7eea3edcaed734bea9cbfc24409ed989", "klt": "101", "fqt": "1", "secid": "1.603917", "beg": "20230829", "end": "20230829", "_": "1623766962675"})
+    print(r.text)
