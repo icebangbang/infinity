@@ -114,58 +114,58 @@ class test_two_ma_strategy(bt.Strategy):
 
     # 初始化cerebro,获得一个实例
 
+if __name__ == "__main__":
+    cerebro = bt.Cerebro()
+    # cerebro.broker = bt.brokers.BackBroker(shortcash=True)  # 0.5%
+    # params = dict(
+    #
+    #     fromdate=datetime.datetime(2005, 1, 4),
+    #     todate=datetime.datetime(2020, 7, 31),
+    #     timeframe=bt.TimeFrame.Days,
+    #     dtformat=("%Y-%m-%d"),
+    #     compression=1,
+    #     datetime=0,
+    #     open=1,
+    #     high=2,
+    #     low=3,
+    #     close=4,
+    #     volume=5,
+    #     openinterest=-1)
 
-cerebro = bt.Cerebro()
-# cerebro.broker = bt.brokers.BackBroker(shortcash=True)  # 0.5%
-# params = dict(
-#
-#     fromdate=datetime.datetime(2005, 1, 4),
-#     todate=datetime.datetime(2020, 7, 31),
-#     timeframe=bt.TimeFrame.Days,
-#     dtformat=("%Y-%m-%d"),
-#     compression=1,
-#     datetime=0,
-#     open=1,
-#     high=2,
-#     low=3,
-#     close=4,
-#     volume=5,
-#     openinterest=-1)
+    data_list = k_line_dao.get_k_line_data(datetime.datetime(2005, 1, 4),
+                                           datetime.datetime(2021, 9, 7), codes=['300763'])
+    code_name_map = stock_dao.get_code_name_map()
+    data_df = pd.DataFrame(data_list)
 
-data_list = k_line_dao.get_k_line_data(datetime.datetime(2005, 1, 4),
-                                       datetime.datetime(2021, 9, 7), codes=['300763'])
-code_name_map = stock_dao.get_code_name_map()
-data_df = pd.DataFrame(data_list)
+    for code, group in data_df.groupby("code"):
+        name = code_name_map[code]
 
-for code, group in data_df.groupby("code"):
-    name = code_name_map[code]
+        original = pd.DataFrame(group)
+        df = original[['date', 'open', 'high', 'low', 'close', 'volume', 'prev_close']]
+        df = df.set_index("date", drop=True)
+        data_feed = PandasDataMore(dataname=df, timeframe=bt.TimeFrame.Days,dtformat=("%Y-%m-%d"))
+    # 添加数据到cerebro
+        cerebro.adddata(data_feed, name=name)
 
-    original = pd.DataFrame(group)
-    df = original[['date', 'open', 'high', 'low', 'close', 'volume', 'prev_close']]
-    df = df.set_index("date", drop=True)
-    data_feed = PandasDataMore(dataname=df, timeframe=bt.TimeFrame.Days,dtformat=("%Y-%m-%d"))
-# 添加数据到cerebro
-    cerebro.adddata(data_feed, name=name)
+    print("加载数据完毕")
+    # 添加手续费，按照万分之二收取
+    cerebro.broker.setcommission(commission=0.0002, stocklike=True)
+    # 设置初始资金为50w
+    cerebro.broker.setcash(50000)
+    # 添加策略
+    cerebro.addstrategy(test_two_ma_strategy)
+    # cerebro.addanalyzer(bt.analyzers.TotalValue, _name='_TotalValue')
+    cerebro.addanalyzer(bt.analyzers.PyFolio,_name='PyFolio')
+    # 运行回测
+    results = cerebro.run()
+    # 打印相关信息
+    portfolio_stats = results[0].analyzers.getbyname('PyFolio')
+    returns, positions, transactions, gross_lev = portfolio_stats.get_pf_items()
+    returns.index = returns.index.tz_convert(None)
 
-print("加载数据完毕")
-# 添加手续费，按照万分之二收取
-cerebro.broker.setcommission(commission=0.0002, stocklike=True)
-# 设置初始资金为50w
-cerebro.broker.setcash(50000)
-# 添加策略
-cerebro.addstrategy(test_two_ma_strategy)
-# cerebro.addanalyzer(bt.analyzers.TotalValue, _name='_TotalValue')
-cerebro.addanalyzer(bt.analyzers.PyFolio,_name='PyFolio')
-# 运行回测
-results = cerebro.run()
-# 打印相关信息
-portfolio_stats = results[0].analyzers.getbyname('PyFolio')
-returns, positions, transactions, gross_lev = portfolio_stats.get_pf_items()
-returns.index = returns.index.tz_convert(None)
-
-import quantstats
-# benchmark 指定为沪指,该数据从雅虎上拉取
-quantstats.reports.html(returns, benchmark='000001.SS', output='stats.html', title='锦浪科技')
-# quantstats.reports.plots(returns)
+    import quantstats
+    # benchmark 指定为沪指,该数据从雅虎上拉取
+    quantstats.reports.html(returns, benchmark='000001.SS', output='stats.html', title='锦浪科技')
+    # quantstats.reports.plots(returns)
 
 

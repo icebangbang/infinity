@@ -4,7 +4,8 @@ from app.main.yi.constant import *
 import json
 import os
 
-# lunar = sxtwl.Lunar()
+# lunar = sxtwl.fromLunar()
+lunar = None
 
 Zhi = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
 

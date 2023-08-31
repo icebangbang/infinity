@@ -1,4 +1,4 @@
-from app.celery_worker import celery, MyTask
+from app.celery_application import celery, MyTask
 from app.main.house.service import hangzhou
 from app.main.stock.dao import stock_dao
 from app.main.stock.service import fund_service

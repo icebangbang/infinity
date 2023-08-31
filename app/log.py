@@ -13,8 +13,8 @@ def init_log(app=None):
     logging.getLogger("urllib3.connectionpool").setLevel(logging.INFO)
     # env = app.config['FLASK_ENV']
     env = os.environ.get('FLASK_ENV','local')
-    if "local" not in env.lower():
-        return
+    # if "local" in env.lower():
+    #     return
 
     LOGGING = {
         "version": 1,
@@ -54,4 +54,4 @@ def init_log(app=None):
     logging.config.dictConfig(LOGGING)
 
 
-init_log()
+# init_log()

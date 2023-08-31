@@ -3,7 +3,7 @@ import time
 import uuid
 from datetime import datetime
 
-from app.celery_worker import celery, MyTask
+from app.celery_application import celery, MyTask
 from app.main.db.mongo import db
 from app.main.stock.dao import stock_dao, task_dao
 from app.main.stock.job import create_doc

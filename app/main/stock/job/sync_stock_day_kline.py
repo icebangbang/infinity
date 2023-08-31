@@ -5,16 +5,16 @@ import logging
 """
 同步日k数据
 """
+if __name__ == "__main__":
+    stocks = stock_dao.get_all_stock()
+    # 获取最近一个交易日
 
-stocks = stock_dao.get_all_stock()
-# 获取最近一个交易日
-
-for index,stock in enumerate(stocks):
-    logging.info("同步{}:{}的月k数据,时序{}".format(stock['name'],stock["code"],index))
-    r = sync_kline_service.sync_month_level(stock["code"], )
-    if r is not None:
-        # time.sleep(0.1)
-        pass
-    else:
-        logging.info("已经处理过")
+    for index,stock in enumerate(stocks):
+        logging.info("同步{}:{}的月k数据,时序{}".format(stock['name'],stock["code"],index))
+        r = sync_kline_service.sync_month_level(stock["code"], )
+        if r is not None:
+            # time.sleep(0.1)
+            pass
+        else:
+            logging.info("已经处理过")
 

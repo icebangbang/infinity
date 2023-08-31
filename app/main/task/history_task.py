@@ -4,7 +4,7 @@
 import logging
 from datetime import datetime
 
-from app.celery_worker import celery, MyTask
+from app.celery_application import celery, MyTask
 from app.main.constant import task_constant
 from app.main.db.mongo import db
 from app.main.stock.dao import task_dao

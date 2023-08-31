@@ -46,5 +46,6 @@ def sync_stock_gdfx():
                                   {"$set": record},
                                   upsert=True)
 
-sync_stock_gdfx()
+if __name__ == "__main__":
+    sync_stock_gdfx()
 

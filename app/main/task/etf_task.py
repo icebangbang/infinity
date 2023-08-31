@@ -1,7 +1,7 @@
 import time
 import uuid
 
-from app.celery_worker import celery, MyTask
+from app.celery_application import celery, MyTask
 from datetime import datetime
 import logging
 

@@ -1,4 +1,4 @@
-from app.celery_worker import celery, MyTask
+from app.celery_application import celery, MyTask
 from app.main.utils import simple_util
 
 

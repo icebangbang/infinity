@@ -15,6 +15,6 @@ for etf in etf_list:
         if key_word in name:
             is_ok = False
 
-    if is_ok:
-         print(name,code)
-         print(etf['money'])
+    # if is_ok:
+    #      print(name,code)
+    #      print(etf['money'])

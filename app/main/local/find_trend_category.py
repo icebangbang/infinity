@@ -50,8 +50,7 @@ results = list(trend_point_set.find(
 )
 
 # names = [result['name'] for result in results]
-import pandas as pd
 
-groups = pd.DataFrame(results).groupby(['prev_trend_2', 'prev_trend_1', 'trend'])
-for key, group_items in groups:
-    print(key, ",".join([item['name'] for item in group_items.to_dict(orient="records")]))
+# groups = pd.DataFrame(results).groupby(['prev_trend_2', 'prev_trend_1', 'trend'])
+# for key, group_items in groups:
+#     print(key, ",".join([item['name'] for item in group_items.to_dict(orient="records")]))

@@ -9,14 +9,16 @@ class Config:
     CELERY_CONFIG = "celeryconfig"
     KLINE_TIME_WINDOW = 2190
 
-    @staticmethod
-    def init_app(app):
-        """
-        自定义回调方法
-        :param app:
-        :return:
-        """
-        pass
+    RESULT_BACKEND = 'redis://:ironBackRedis123@10.8.0.2:30004/1'
+
+    # @staticmethod
+    # def init_app(app):
+    #     """
+    #     自定义回调方法
+    #     :param app:
+    #     :return:
+    #     """
+    #     pass
 
 
 class DevelopmentConfig(Config):
