@@ -13,5 +13,5 @@ from app.celery_application import celery
 
 
 if __name__ == '__main__':
-    port = os.environ.get('SERVER_PORT') or 20060
+    port = os.environ.get('SERVER_PORT') or 20600
     app.flask.run(host='0.0.0.0', port=port, debug=True, use_reloader=False, threaded=True)
